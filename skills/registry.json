@@ -1,0 +1,460 @@
+{
+  "version": 1,
+  "generated": "2026-07-03",
+  "count": 35,
+  "skills": [
+    {
+      "name": "auis-edit-bridge-solve",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Materializes Auis Live Edit Mode overlays into real code. The page editor stores non-destructive edit \"ops\" (text, style token, variant/size, icon, icon optical axes, token-value edits, custom/off-palette colors, hide/re"
+    },
+    {
+      "name": "auis-flow-bridge",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "[OBSOLETE] The styleguide UX flow editor went serverless — suggestions now go to a same-origin route (/api/flow-suggestions) that writes to flow-bridge/data/suggestions.json, with no separate server, no token, and no env"
+    },
+    {
+      "name": "auis-flow-bridge-solve",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Reads and applies UX flow edit suggestions stored in the flow-bridge (`/auis/styleguide/ux-flows/<flow>`). Pulls from the bridge using a filter chosen by the user (all of them, only one flow, only open ones, a specific I"
+    },
+    {
+      "name": "auis-review-bridge",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": true,
+      "description": "Explains that the Auis Review Mode bridge is now serverless and embedded in the Next app at `/api/review-bridge/*` — `npm run dev` already brings everything up, there is no separate process to start, no token, no env. Us"
+    },
+    {
+      "name": "auis-review-bridge-dispatch",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "The /loop dispatcher for the Auis Review Bridge — the \"motor\" that turns comments into live agent commands. One pass = read the dispatch queue (`/api/review-bridge/dispatch-queue`): OPEN, user-authored comments that @men"
+    },
+    {
+      "name": "auis-review-bridge-germano-audit",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": true,
+      "description": "You are GERMANO FACCIO — an extremely critical UI/UX designer with a taste for premium/minimalist interfaces (Vercel, ElevenLabs, OpenAI, Langdock, StackAI, Cursor, Linear, Raycast, Apple). Instead of RESOLVING the Auis "
+    },
+    {
+      "name": "auis-review-bridge-germano-explore",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": true,
+      "description": "You are GERMANO FACCIO on PROACTIVE PATROL — an extremely critical UI/UX designer with a taste for premium/minimalist interfaces (Vercel, ElevenLabs, OpenAI, Langdock, StackAI, Cursor, Linear, Raycast, Apple). the user h"
+    },
+    {
+      "name": "auis-review-bridge-solve",
+      "capability": "bridges",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": true,
+      "description": "Resolves Auis Review Mode comments in bulk. Reads from the local review-bridge using a filter chosen by the user (all of them, only today's, only open ones, a specific page, explicit IDs, etc.), makes ONE PLAN BEFORE tou"
+    },
+    {
+      "name": "auis-handoff",
+      "capability": "build",
+      "origin": "cowork",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Converts a Claude Design (or Cloud Design) handoff into production code by remapping the generated output onto Auis/styleguide components first and shadcn/ui primitives second, instead of copying the generated component "
+    },
+    {
+      "name": "auis-project-build-solve",
+      "capability": "build",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": true,
+      "description": "Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the \"Atualizar pro design system\" button (kind `restyle`) and the \"Construir no repo\" button (kind `build`) write requests to `/api/"
+    },
+    {
+      "name": "auis-ux-writing",
+      "capability": "content",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": true,
+      "description": "Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits each one against the Auis PRODUCT voice (it solves, it doesn't sell),"
+    },
+    {
+      "name": "auis-audit",
+      "capability": "design-system",
+      "origin": "cowork",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app components, shadcn/ui primitives, wrapped components, and page-local compone"
+    },
+    {
+      "name": "auis-component",
+      "capability": "design-system",
+      "origin": "cowork",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always checks the shadcn registry first via MCP, prefers extending existing primit"
+    },
+    {
+      "name": "auis-design-system-audit",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Audit the Auis Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage."
+    },
+    {
+      "name": "auis-design-system-foundation",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Bootstrap or update the Auis design system foundation from a visual reference. This is the only skill allowed to create or change tokens."
+    },
+    {
+      "name": "auis-foundation",
+      "capability": "design-system",
+      "origin": "cowork",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Behance post, Mobbin capture, or any other design inspiration. Extracts "
+    },
+    {
+      "name": "auis-foundation-update",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "INCREMENTALLY updates the foundation tokens of the Auis design system in app/globals.css (color, typography, spacing, radius, shadow, motion) — additive, reviewed, WITHOUT rebootstrapping and WITHOUT rewriting the file. "
+    },
+    {
+      "name": "auis-new-component",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Add or update an Auis Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation."
+    },
+    {
+      "name": "auis-new-page",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Build or rework a product page in this Next.js app using the Auis design system, existing components, existing tokens, and desktop-only constraints."
+    },
+    {
+      "name": "auis-page",
+      "capability": "design-system",
+      "origin": "cowork",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Builds a full page in a Auis design system project (Next.js + shadcn/ui) from a screenshot, Figma URL, wireframe, or written description. Maps every visual element to existing Auis components first, falls back to shadcn/"
+    },
+    {
+      "name": "commit",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Maps the pending changes and creates local atomic commits — one commit per file/area when it makes sense, without rewriting content inside a file just to slice it further. Does NOT push and does NOT open a PR unless the "
+    },
+    {
+      "name": "design-system-new-component",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": true,
+      "divergent": true,
+      "description": "[INACTIVE in this repo — do not trigger.] Generic, Au-blind version of \"new component\", kept only as a record of the Auis initial setup. To add or edit a design-system component use auis-new-component, which enforces the"
+    },
+    {
+      "name": "design-system-new-page",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": true,
+      "divergent": true,
+      "description": "'[INACTIVE in this repo — do not trigger.] Generic, Au-blind version"
+    },
+    {
+      "name": "figma-code-library-import",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Use when implementing or updating product UI from Figma in code through Claude or Cursor, especially when the project has its own component library and the implementation must reuse those components instead of creating o"
+    },
+    {
+      "name": "setup-design-system-from-cla-design",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": true,
+      "divergent": true,
+      "description": "[INACTIVE in this repo — do not trigger.] Initial design-system bootstrap from a Claude Design handoff. This repo is already set up — do not re-bootstrap. To change tokens or foundation use auis-design-system-foundation."
+    },
+    {
+      "name": "setup-design-system-from-reference",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": true,
+      "divergent": true,
+      "description": "[INACTIVE in this repo — do not trigger.] Initial design-system bootstrap from a reference image. This repo is already set up — do not re-bootstrap. To change tokens or foundation use auis-design-system-foundation. Kept "
+    },
+    {
+      "name": "shadcn",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Support skill for consulting the shadcn/ui registry, docs, and CLI when adding or wrapping primitives. Use when looking up a shadcn component, its API, variants, or install command before building an Au* wrapper. This sk"
+    },
+    {
+      "name": "ux-page-rework",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Audits a product page (and its subpages) and delivers TWO different improvement directions — one refinement (keeps the structure, polishes components and UX writing) and one restructuring (reorganizes the information hie"
+    },
+    {
+      "name": "auis-create-ux-flow",
+      "capability": "ux-flows",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Builds a UX flow diagram page in the Auis styleguide (/auis/styleguide/ux-flows/[name]) from a flow description, a list of steps, or any written brief. Maps every screen, decision point, branch, and convergence into a Re"
+    },
+    {
+      "name": "auis-create-ux-flow-golden-eye",
+      "capability": "ux-flows",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Builds a COMPILED, multi-scenario \"golden eye\" UX flow page in the Auis styleguide (/auis/styleguide/ux-flows/[slug]) — several product journeys merged into ONE deduped ReactFlow graph with per-scenario focus lenses. Sha"
+    },
+    {
+      "name": "auis-flow",
+      "capability": "ux-flows",
+      "origin": "cowork",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Designs a feature's user flow as a FigJam board using the Auis convention: every screen becomes a card with name + route + file path + status; every transition becomes a labeled connector; every branch becomes a diamond;"
+    },
+    {
+      "name": "auis-import-figma-flow",
+      "capability": "ux-flows",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": true,
+      "description": "Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as a screenshot (.webp in /public), generates the typed manifest in `app/"
+    },
+    {
+      "name": "auis-pg-create-flow",
+      "capability": "ux-flows",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": true,
+      "description": "Creates a NEW UX flow in the styleguide (`/auis/styleguide/ux-flows/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the file (local path or pasted content), parses it via `parseAuFlowFile"
+    },
+    {
+      "name": "auis-pg-merge-flow",
+      "capability": "ux-flows",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists at `/auis/styleguide/ux-flows/[slug]`. Reads the file, compares it against the page's current `NODES`/`EDGES`, generates a readable diff"
+    },
+    {
+      "name": "auis-update-ux-flow",
+      "capability": "ux-flows",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": true,
+      "description": "Registers a structural update to an existing UX flow page in the Auis styleguide (`/auis/styleguide/ux-flows/[slug]`). Applies the requested change to the ReactFlow diagram (new screen, new branch, removed node, rework) "
+    }
+  ]
+}

@@ -1,0 +1,5550 @@
+/* Auis — NEUTRAL token baseline.
+ * Brand-free starting point: the brand accent is grayscale
+ * (--accent-brand → slate), semantics are conventional (emerald/red/amber),
+ * type is Geist. To re-theme for a specific product, DO NOT hand-edit tokens —
+ * run the `auis-foundation` skill (the only token authority) from a visual
+ * reference; it rewrites this block keeping @theme + :root + dark in sync.
+ *
+ * One typographic voice: Geist. Geist Mono reserved strictly for code, tokens, IDs.
+ * Material Symbols Rounded is the Auis icon system (12/16/20/24/28/32 px).
+ * Weight range: 200–700. Default weight: 200 (thin/light).
+ * Font loading happens via <link> tags in app/layout.tsx — Next.js/Turbopack
+ * strips CSS @import statements, so keeping them here silently breaks fonts. */
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* v4 auto-detecta sources no projeto inteiro (a v3 só varria pages/components/app).
+ * .claude/ tem exemplos de className em markdown que virariam utilitários-lixo
+ * (ex.: var(--content/contentPrimary), que quebra o parser). Fora do scan. */
+@source not "../.claude";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * COLOR — canal UTILITY. Os --color-au-* aqui no @theme fazem o Tailwind v4
+ * gerar as classes utilitárias (bg-au-gray-100, text-au-emerald-700, …) —
+ * ~337 usos no app. Os MESMOS valores também existem como --au-* no :root
+ * abaixo, pro canal var() (bg-(--au-gray-100), var(--au-blue-700), …) — ~810
+ * usos. NÃO é duplicação acidental: são dois caminhos de consumo do v4, um por
+ * classe e outro por var(). Mantenha os dois em sincronia; remover um quebra
+ * centenas de chamadas. Fonte de verdade do VALOR: este bloco.
+ * ────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-au-gray-25: #fefefe;
+  --color-au-gray-50: #fdfdfd;
+  --color-au-gray-100: #fbfbfb;
+  --color-au-gray-150: #f9f9f9;
+  --color-au-gray-200: #f2f2f2;
+  --color-au-gray-300: #e5e5e5;
+  --color-au-gray-400: #d1d1d1;
+  --color-au-gray-500: #b8b8b8;
+  --color-au-gray-600: #999999;
+  --color-au-gray-700: #7a7a7a;
+  --color-au-gray-800: #5e5e5e;
+  --color-au-gray-900: #454545;
+  --color-au-gray-1000: #2f2f2f;
+  --color-au-gray-1100: #1a1a1a;
+  --color-au-gray-1200: #0d0d0d;
+
+  --color-au-blue-100: #f2f7ff;
+  --color-au-blue-150: #e8f0ff;
+  --color-au-blue-200: #ddebff;
+  --color-au-blue-300: #b8d4ff;
+  --color-au-blue-400: #8fb8ff;
+  --color-au-blue-500: #478aff;
+  --color-au-blue-600: #2f76e6;
+  --color-au-blue-700: #1a5ec8;
+  --color-au-blue-800: #1346a2;
+  --color-au-blue-900: #0d317a;
+  --color-au-blue-1000: #09225a;
+  --color-au-blue-1100: #06163d;
+  --color-au-blue-1200: #030d25;
+
+  --color-au-emerald-100: #f2fbf5;
+  --color-au-emerald-150: #e8f9ed;
+  --color-au-emerald-200: #ddf7e5;
+  --color-au-emerald-300: #bff2d0;
+  --color-au-emerald-400: #99ebb8;
+  --color-au-emerald-500: #5bdf9e;
+  --color-au-emerald-600: #40c987;
+  --color-au-emerald-700: #22a871;
+  --color-au-emerald-800: #17825a;
+  --color-au-emerald-900: #105e45;
+  --color-au-emerald-1000: #0a4230;
+  --color-au-emerald-1100: #062b1f;
+  --color-au-emerald-1200: #041912;
+
+  --color-au-red-100: #fff2f2;
+  --color-au-red-150: #fde6e6;
+  --color-au-red-200: #fddddd;
+  --color-au-red-300: #fbbfbf;
+  --color-au-red-400: #f29999;
+  --color-au-red-500: #df5b5b;
+  --color-au-red-600: #c94040;
+  --color-au-red-700: #a82222;
+  --color-au-red-800: #821718;
+  --color-au-red-900: #5e1010;
+  --color-au-red-1000: #420a0a;
+  --color-au-red-1100: #2b0606;
+  --color-au-red-1200: #190404;
+
+  --color-au-purple-100: #f7f2fc;
+  --color-au-purple-150: #f0e7fa;
+  --color-au-purple-200: #eaddf8;
+  --color-au-purple-300: #dbbff2;
+  --color-au-purple-400: #c499eb;
+  --color-au-purple-500: #9e5bdf;
+  --color-au-purple-600: #8740c9;
+  --color-au-purple-700: #7122a8;
+  --color-au-purple-800: #5a1782;
+  --color-au-purple-900: #45105e;
+  --color-au-purple-1000: #300a42;
+
+  --color-au-teal-100: #dff7f6;
+  --color-au-teal-200: #a1e6e6;
+  --color-au-teal-400: #64d4d7;
+  --color-au-teal-500: #45cccf;
+  --color-au-teal-600: #26c3c7;
+  --color-au-teal-700: #20b2b4;
+  --color-au-teal-900: #16908f;
+
+  --color-au-amber-100: #fff7ed;
+  --color-au-amber-150: #fdefd9;
+  --color-au-amber-200: #fde6cc;
+  --color-au-amber-300: #fcd4a3;
+  --color-au-amber-400: #f2a95b;
+  --color-au-amber-500: #e6762f;
+  --color-au-amber-600: #cc5f1e;
+  --color-au-amber-700: #b05315;
+  --color-au-amber-800: #8c4112;
+  --color-au-amber-900: #7a3a10;
+  --color-au-amber-1000: #54270a;
+  --color-au-amber-1100: #331806;
+  --color-au-amber-1200: #1f0e03;
+
+  --color-au-pink-100: #fdf2f8;
+  --color-au-pink-200: #fce3ee;
+  --color-au-pink-300: #f9c4db;
+  --color-au-pink-400: #f490b5;
+  --color-au-pink-500: #e85c91;
+  --color-au-pink-600: #d13f76;
+  --color-au-pink-700: #a82a5c;
+  --color-au-pink-800: #801f46;
+  --color-au-pink-900: #5a1530;
+  --color-au-pink-1000: #3b0d20;
+  --color-au-pink-1200: #1a0610;
+
+  --color-au-lime-100: #f4fbe5;
+  --color-au-lime-200: #e4f5be;
+  --color-au-lime-400: #bde862;
+  --color-au-lime-500: #a1d136;
+  --color-au-lime-600: #7fab25;
+  --color-au-lime-700: #5f8018;
+  --color-au-lime-900: #354811;
+  --color-au-lime-1200: #111706;
+
+  --color-au-slate-100: #f4f6f8;
+  --color-au-slate-200: #e4e8ee;
+  --color-au-slate-300: #c9d0da;
+  --color-au-slate-400: #9fa9ba;
+  --color-au-slate-500: #7886a0;
+  --color-au-slate-600: #5d6a82;
+  --color-au-slate-700: #465267;
+  --color-au-slate-800: #333d4d;
+  --color-au-slate-900: #222a36;
+  --color-au-slate-1000: #141922;
+  --color-au-slate-1200: #080a0e;
+
+  --color-bg-canvas: var(--bg-canvas);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-raised: var(--bg-raised);
+  --color-bg-muted: var(--bg-muted);
+  --color-bg-hover: var(--bg-hover);
+  --color-bg-selected: var(--bg-selected);
+  --color-bg-pressed: var(--bg-pressed);
+  --color-bg-inverse: var(--bg-inverse);
+
+  --color-fg-primary: var(--fg-primary);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-fg-tertiary: var(--fg-tertiary);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-on-inverse: var(--fg-on-inverse);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-inverse: var(--border-inverse);
+
+  --color-brand: var(--accent-brand);
+  --color-brand-hover: var(--accent-brand-hover);
+  --color-brand-pressed: var(--accent-brand-pressed);
+
+  --color-danger: var(--accent-danger);
+  --color-danger-hover: var(--accent-danger-hover);
+  --color-danger-pressed: var(--accent-danger-pressed);
+
+  --color-gray-1200: #0d0d0d;
+
+  --color-text-primary: var(--fg-primary);
+  --color-text-secondary: var(--fg-secondary);
+
+  --color-input-bg: #f5f5f5;
+  --color-input-border: #e5e5e5;
+
+  --font-sans:
+    Geist, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-heading: Geist, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: Geist, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: Geist Mono, ui-monospace, SF Mono, Menlo, monospace;
+
+  /* TYPE — degraus finos que faltavam na rampa pequena. O produto usa muito
+   * 10/11px em labels densos, mas a escala parava em text-xs (12px) do Tailwind,
+   * então o código caía em text-[10px]/[11px]. Estes tokens preenchem o buraco;
+   * os demais tamanhos (12..30) já existem como text-xs..3xl. Mantidos pela skill
+   * auis-foundation-update. */
+  --text-2xs: 11px;
+  --text-3xs: 10px;
+
+  /* TRACKING — letter-spacing nomeado. Tokeniza os tracking-[...] arbitrários
+   * recorrentes do produto (eyebrows uppercase, títulos apertados) com os
+   * MESMOS valores, então trocar arbitrário por token é zero mudança visual.
+   * Nomes próprios de propósito: coexistem com a escala default do Tailwind
+   * (tracking-tight/normal/wide/wider/widest, usada em alguns lugares) sem
+   * sobrescrevê-la. Canal utility só — letter-spacing não varia por tema nem
+   * tem consumidor via var(). Mantidos pela skill auis-foundation-update. */
+  --tracking-heading-tighter: -0.02em;
+  --tracking-heading-tight: -0.015em;
+  --tracking-heading: -0.01em;
+  --tracking-body: -0.005em;
+  --tracking-label: 0.06em;
+  --tracking-label-lg: 0.08em;
+
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.18);
+
+  /* Motion — UTILITY channel (Tailwind v4 generates classes from @theme).
+   *  These exist so motion can be applied straight in className:
+   *  `ease-au-out` (57× `duration-au-fast`, + `ease-fluid`, `duration-au-base`…).
+   *  Same curves/durations are also published as plain `var()` tokens in :root
+   *  (`--ease-out`, `--dur-*`) for inline styles & raw CSS — keep both in sync.
+   *  Two NAMES, one source of truth; neither block is redundant. */
+  --ease-au-out: cubic-bezier(0.22, 0.61, 0.36, 1); /* mirror of --ease-out */
+  --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --transition-duration-au-fast: 120ms; /* mirror of --dur-fast */
+  --transition-duration-au-base: 180ms; /* mirror of --dur-base */
+  --transition-duration-au-slow: 280ms; /* mirror of --dur-slow */
+
+  --animate-spin-slow: spin 8s linear infinite;
+  --animate-fadeInUp: fadeInUp 0.35s cubic-bezier(0.22, 0.8, 0.3, 1);
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility display-xxl {
+  /* Display — voz cinemática. Peso fino (300/Light) carrega a presença,
+   * tamanho carrega a hierarquia. Tracking aperta forte porque caracteres
+   * gigantes deixam espaço visual demais por padrão. */
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fg-primary);
+  font-size: var(--display-xxl-size);
+}
+
+@utility display-xl {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fg-primary);
+  font-size: var(--display-xl-size);
+}
+
+@utility display-lg {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fg-primary);
+  font-size: var(--display-lg-size);
+}
+
+@utility display-md {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fg-primary);
+  font-size: var(--display-md-size);
+}
+
+@utility display-sm {
+  font-family: var(--font-display);
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: var(--fg-primary);
+  font-size: var(--display-sm-size);
+}
+
+@utility body-xl {
+  /* Body — Geist Regular (400). Cada degrau define a sua altura de linha:
+   * leituras compactas (xs/sm) ficam mais apertadas, leitura corrida
+   * (md/lg) respira. */
+  font-family: var(--font-body);
+  font-size: var(--body-xl-size);
+  line-height: 1.45;
+  letter-spacing: -0.005em;
+  font-weight: 400;
+}
+
+@utility body-lg {
+  font-family: var(--font-body);
+  font-size: var(--body-lg-size);
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  font-weight: 400;
+}
+
+@utility body-md {
+  font-family: var(--font-body);
+  font-size: var(--body-md-size);
+  line-height: 1.55;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+@utility body-sm {
+  font-family: var(--font-body);
+  font-size: var(--body-sm-size);
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+@utility body-xs {
+  font-family: var(--font-body);
+  font-size: var(--body-xs-size);
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  font-weight: 400;
+}
+
+@utility au-eyebrow {
+  /* Eyebrow — the small uppercase tracked label used above titles, inside
+   * card metadata, on spec rows, etc. Named `.au-eyebrow` on purpose:
+   * Tailwind ships a `.overline` utility (text-decoration: overline) that
+   * would otherwise add a stroke above the text. */
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  text-decoration: none;
+}
+
+@utility caption {
+  font-family: var(--font-body);
+  font-size: var(--body-xs-size);
+  color: var(--fg-tertiary);
+  line-height: 1.4;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility login-bg-animate {
+  animation: loginBgFloat 18s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+@layer utilities {
+  /* ============================================================
+ * Auis Design System tokens
+ * Geometric minimalism: grayscale primitives + blue-origin AI gradient.
+ * ============================================================ */
+  :root {
+    /* COLOR — canal VAR. Os --au-* abaixo espelham os --color-au-* do @theme
+     * (topo do arquivo) e existem pro consumo por var(): bg-(--au-gray-100),
+     * var(--au-blue-700), etc. (~810 usos). O @theme cobre o consumo por
+     * classe utilitária (bg-au-*, ~337 usos). Dois canais, um valor —
+     * mantenha em sincronia com o @theme; este bloco também ancora os tokens
+     * semânticos (--bg-*, --fg-*, --accent-*) que referenciam estes primitivos. */
+
+    /* Neutral anchors */
+    --au-black: #000000;
+    --au-white: #ffffff;
+
+    /* Gray scale — the "structure" / hardware of the system */
+    --au-gray-25: #fefefe;
+    --au-gray-50: #fdfdfd;
+    --au-gray-100: #fbfbfb;
+    --au-gray-150: #f9f9f9;
+    --au-gray-200: #f2f2f2;
+    --au-gray-300: #e5e5e5;
+    --au-gray-400: #d1d1d1;
+    --au-gray-500: #b8b8b8;
+    --au-gray-600: #999999;
+    --au-gray-700: #7a7a7a;
+    --au-gray-800: #5e5e5e;
+    --au-gray-900: #454545;
+    --au-gray-1000: #2f2f2f;
+    --au-gray-1100: #1a1a1a;
+    --au-gray-1200: #0d0d0d;
+
+    /* Blue — origin point of the AI gradient spectrum */
+    --au-blue-100: #f2f7ff;
+    --au-blue-150: #e8f0ff;
+    --au-blue-200: #ddebff;
+    --au-blue-300: #b8d4ff;
+    --au-blue-400: #8fb8ff;
+    --au-blue-500: #478aff;
+    --au-blue-600: #2f76e6;
+    --au-blue-700: #1a5ec8;
+    --au-blue-800: #1346a2;
+    --au-blue-900: #0d317a;
+    --au-blue-1000: #09225a;
+    --au-blue-1100: #06163d;
+    --au-blue-1200: #030d25;
+
+    /* Emerald — success semantic scale */
+    --au-emerald-100: #f2fbf5;
+    --au-emerald-150: #e8f9ed;
+    --au-emerald-200: #ddf7e5;
+    --au-emerald-300: #bff2d0;
+    --au-emerald-400: #99ebb8;
+    --au-emerald-500: #5bdf9e;
+    --au-emerald-600: #40c987;
+    --au-emerald-700: #22a871;
+    --au-emerald-800: #17825a;
+    --au-emerald-900: #105e45;
+    --au-emerald-1000: #0a4230;
+    --au-emerald-1100: #062b1f;
+    --au-emerald-1200: #041912;
+
+    /* Red — destructive / error */
+    --au-red-100: #fff2f2;
+    --au-red-150: #fde6e6;
+    --au-red-200: #fddddd;
+    --au-red-300: #fbbfbf;
+    --au-red-400: #f29999;
+    --au-red-500: #df5b5b;
+    --au-red-600: #c94040;
+    --au-red-700: #a82222;
+    --au-red-800: #821718;
+    --au-red-900: #5e1010;
+    --au-red-1000: #420a0a;
+    --au-red-1100: #2b0606;
+    --au-red-1200: #190404;
+
+    /* Purple — decorative / "thinking" accent */
+    --au-purple-100: #f7f2fc;
+    --au-purple-150: #f0e7fa;
+    --au-purple-200: #eaddf8;
+    --au-purple-300: #dbbff2;
+    --au-purple-400: #c499eb;
+    --au-purple-500: #9e5bdf;
+    --au-purple-600: #8740c9;
+    --au-purple-700: #7122a8;
+    --au-purple-800: #5a1782;
+    --au-purple-900: #45105e;
+    --au-purple-1000: #300a42;
+
+    /* Teal — informational / data-viz */
+    --au-teal-100: #dff7f6;
+    --au-teal-200: #a1e6e6;
+    --au-teal-400: #64d4d7;
+    --au-teal-500: #45cccf;
+    --au-teal-600: #26c3c7;
+    --au-teal-700: #20b2b4;
+    --au-teal-900: #16908f;
+
+    /* Amber — alert / pending review */
+    --au-amber-100: #fff7ed;
+    --au-amber-150: #fdefd9;
+    --au-amber-200: #fde6cc;
+    --au-amber-300: #fcd4a3;
+    --au-amber-400: #f2a95b;
+    --au-amber-500: #e6762f;
+    --au-amber-600: #cc5f1e;
+    --au-amber-700: #b05315;
+    --au-amber-800: #8c4112;
+    --au-amber-900: #7a3a10;
+    --au-amber-1000: #54270a;
+    --au-amber-1100: #331806;
+    --au-amber-1200: #1f0e03;
+
+    /* Pink — highlight / marketing accent (used sparingly) */
+    --au-pink-100: #fdf2f8;
+    --au-pink-200: #fce3ee;
+    --au-pink-300: #f9c4db;
+    --au-pink-400: #f490b5;
+    --au-pink-500: #e85c91;
+    --au-pink-600: #d13f76;
+    --au-pink-700: #a82a5c;
+    --au-pink-800: #801f46;
+    --au-pink-900: #5a1530;
+    --au-pink-1000: #3b0d20;
+    --au-pink-1200: #1a0610;
+
+    /* Lime — growth / positive delta accent */
+    --au-lime-100: #f4fbe5;
+    --au-lime-200: #e4f5be;
+    --au-lime-400: #bde862;
+    --au-lime-500: #a1d136;
+    --au-lime-600: #7fab25;
+    --au-lime-700: #5f8018;
+    --au-lime-900: #354811;
+    --au-lime-1200: #111706;
+
+    /* Slate — cool neutral alt (data-viz, subdued chrome) */
+    --au-slate-100: #f4f6f8;
+    --au-slate-200: #e4e8ee;
+    --au-slate-300: #c9d0da;
+    --au-slate-400: #9fa9ba;
+    --au-slate-500: #7886a0;
+    --au-slate-600: #5d6a82;
+    --au-slate-700: #465267;
+    --au-slate-800: #333d4d;
+    --au-slate-900: #222a36;
+    --au-slate-1000: #141922;
+    --au-slate-1200: #080a0e;
+
+    /* Semantic tokens — light mode */
+    --bg-canvas: var(--au-white);
+    --bg-surface: var(--au-gray-150);
+    --bg-raised: var(--au-white);
+    --bg-muted: var(--au-gray-200);
+    --bg-inverse: var(--au-gray-1200);
+    /* Hover/focus fill for interactive surfaces (rows, dropdown items,
+   * pickers). Aliased to --bg-surface so it stays in sync with the
+   * neutral chrome of the system; split from --bg-surface so callers
+   * can style "this is a hover state" semantically. Used to be tinted
+   * brand-blue and was migrated to neutral gray for calm. */
+    --bg-hover: var(--au-gray-150);
+    /* Persistent fill for the currently-selected interactive item in a
+   * list/grid. One step darker than --bg-hover so a hovered-but-not-
+   * selected row remains distinguishable from the active selection.
+   * Pair with `border-color: transparent` — the fill carries the
+   * selection signal, no extra stroke needed. */
+    --bg-selected: var(--au-gray-200);
+    /* Active/pressed fill for ghost/subtle buttons, menu items, list rows.
+   * One step darker than --bg-selected — reads as "being clicked right now". */
+    --bg-pressed: var(--au-gray-300);
+
+    --fg-primary: var(--au-gray-1200);
+    --fg-secondary: var(--au-gray-800);
+    --fg-tertiary: var(--au-gray-600);
+    --fg-muted: var(--au-gray-500);
+    --fg-on-inverse: var(--au-white);
+
+    --border-subtle: var(--au-gray-200);
+    --border-default: var(--au-gray-300);
+    --border-strong: var(--au-gray-500);
+    --border-inverse: var(--au-gray-1000);
+    --ring-focus: var(--au-slate-600);
+
+    --accent-brand: var(--au-slate-900);
+    --accent-brand-hover: var(--au-slate-1000);
+    /* Active/pressed of brand — maximum-contrast extreme (pure black on light,
+   * pure white on dark). Use for primary button :active, link :active, etc.
+   * Sits beyond --accent-brand-hover on the intensity ramp. */
+    --accent-brand-pressed: var(--au-black);
+    --accent-success: var(--au-emerald-700);
+    --accent-danger: var(--au-red-700);
+    --accent-danger-hover: var(--au-red-600);
+    --accent-danger-pressed: var(--au-red-800);
+    --accent-warning: var(--au-amber-500);
+
+    /* Dark chrome surfaces (product sidebar + shell) */
+    --dark-bg: var(--au-gray-1200);
+    --dark-bg-raised: var(--au-gray-1100);
+    --dark-bg-hover: var(--au-gray-1000);
+    --dark-fg-primary: var(--au-white);
+    --dark-fg-secondary: var(--au-gray-500);
+    --dark-fg-tertiary: var(--au-gray-700);
+    --dark-border: var(--au-gray-1000);
+
+    /* Radii */
+    --radius-xs: 6px;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    /* Spacing — 4px base */
+    --space-0: 0px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --space-18: 72px;
+
+    /* Layout — content container intents.
+   * A page picks ONE intent based on what it holds, not on viewport size.
+   * Above the max, the canvas centers — it does not stretch. */
+    --content-narrow: 720px; /* single-column reading: forms, perfil, onboarding */
+    --content-default: 1200px; /* mixed content: docs, catalog, billing overview */
+    --content-wide: 1440px; /* data dense: dashboard, agent studio, big tables */
+    --content-px: 40px; /* horizontal padding inside the container */
+    --content-gutter: 24px; /* default gap between cards / blocks (gap-6) */
+
+    /* Shadows — restrained */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.04);
+    --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.18);
+
+    /* Motion — VAR channel (consumed as var(--…) in inline styles & raw CSS).
+     *  Mirrors the utility-class tokens in @theme above (--ease-au-out,
+     *  --transition-duration-au-*). Same values, different consumption path —
+     *  use these for `style={{ transition }}`, the @theme ones for className. */
+    --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast: 120ms;
+    --dur-base: 180ms;
+    --dur-slow: 280ms;
+
+    /* Type families — single voice.
+   *  · Geist → body, UI text, headings and display.
+   *  · Geist Mono → code only. Never used for timestamps, IDs, metadata
+   *    or any product data that's not literal source code. */
+    --font-sans:
+      'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-body: var(--font-sans);
+    --font-heading: var(--font-sans);
+    --font-display: var(--font-sans);
+    --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    /* Type scale */
+    --display-xxl-size: 128px;
+    --display-xl-size: 96px;
+    --display-lg-size: 80px;
+    --display-md-size: 64px;
+    --display-sm-size: 48px;
+    --h1-size: 40px;
+    --h2-size: 32px;
+    --h3-size: 28px;
+    --h4-size: 24px;
+    --h5-size: 20px;
+    --h6-size: 18px;
+    --body-xl-size: 20px;
+    --body-lg-size: 18px;
+    --body-md-size: 16px;
+    --body-sm-size: 14px;
+    --body-xs-size: 12px;
+    --mono-md-size: 14px;
+    --mono-sm-size: 12px;
+  }
+
+  /* ============================================================
+ * Dark mode — inverts the semantic layer.
+ * Primitives never change; only the semantic tokens reassign.
+ * Activate with `<html class="dark">` or on any subtree.
+ * ============================================================ */
+  .dark {
+    --bg-canvas: var(--au-gray-1200);
+    --bg-surface: var(--au-gray-1100);
+    --bg-raised: var(--au-gray-1100);
+    --bg-muted: var(--au-gray-1000);
+    --bg-inverse: var(--au-white);
+    --bg-hover: var(--au-gray-1000);
+    --bg-selected: var(--au-gray-900);
+    --bg-pressed: var(--au-gray-800);
+
+    --fg-primary: var(--au-white);
+    --fg-secondary: var(--au-gray-500);
+    --fg-tertiary: var(--au-gray-700);
+    --fg-muted: var(--au-gray-800);
+    --fg-on-inverse: var(--au-gray-1200);
+
+    --border-subtle: var(--au-gray-1100);
+    --border-default: var(--au-gray-1000);
+    --border-strong: var(--au-gray-900);
+    --border-inverse: var(--au-gray-300);
+    --ring-focus: var(--au-slate-200);
+
+    --accent-brand: var(--au-slate-200);
+    --accent-brand-hover: var(--au-slate-100);
+    --accent-brand-pressed: var(--au-white);
+    --accent-success: var(--au-emerald-500);
+    --accent-danger: var(--au-red-500);
+    --accent-danger-hover: var(--au-red-400);
+    --accent-danger-pressed: var(--au-red-300);
+    --accent-warning: var(--au-amber-400);
+  }
+}
+
+@layer base {
+  body {
+    @apply font-sans text-text-primary antialiased;
+    font-family: var(--font-body);
+    background: var(--bg-canvas);
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--fg-primary);
+  }
+
+  h1 { font-size: var(--h1-size); letter-spacing: -0.02em; }
+  h2 { font-size: var(--h2-size); letter-spacing: -0.015em; }
+  h3 { font-size: var(--h3-size); }
+  h4 { font-size: var(--h4-size); line-height: 1.25; }
+  h5 { font-size: var(--h5-size); line-height: 1.3; }
+  h6 { font-size: var(--h6-size); line-height: 1.35; }
+
+  code, pre, kbd, samp, .mono {
+    font-family: var(--font-mono);
+    font-feature-settings: "liga" 0, "calt" 0;
+  }
+
+  ::selection {
+    background: var(--au-blue-200);
+    color: var(--au-gray-1200);
+  }
+}
+
+@keyframes loginBgFloat {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.06) translate3d(-2%, -1%, 0);
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-bg-animate {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* Copilot orb animation */
+.copilot-orb {
+  animation: orb-float 4s ease-in-out infinite;
+}
+
+.copilot-orb .orb-inner {
+  box-shadow: 0 10px 30px rgba(31, 182, 255, 0.25);
+  animation: orb-pulse 2.5s ease-in-out infinite;
+}
+
+.copilot-orb .orb-shine {
+  animation: orb-shine 3s ease-in-out infinite;
+}
+
+@keyframes orb-float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.02);
+  }
+}
+
+@keyframes orb-pulse {
+  0%, 100% {
+    box-shadow: 0 10px 30px rgba(31, 182, 255, 0.25);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 12px 36px rgba(31, 182, 255, 0.4);
+    opacity: 0.98;
+  }
+}
+
+@keyframes orb-shine {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copilot-orb,
+  .copilot-orb .orb-inner,
+  .copilot-orb .orb-shine {
+    animation: none;
+  }
+}
+
+/* AuDotTunnel – radial dot tunnel with zoom + per-dot pulse */
+.au-dot-tunnel {
+  position: relative;
+  flex-shrink: 0;
+  animation: au-dot-tunnel-zoom 8s ease-in-out infinite;
+}
+
+.au-dot-tunnel__dot {
+  animation: au-dot-tunnel-pulse 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes au-dot-tunnel-zoom {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes au-dot-tunnel-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-dot-tunnel,
+  .au-dot-tunnel__dot {
+    animation: none;
+  }
+}
+
+/* Integration icon – feixe em gradiente PERCORRENDO a borda (como sangue nas veias), sem rotação */
+@property --integration-beam-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes integration-beam-travel {
+  to {
+    --integration-beam-angle: 360deg;
+  }
+}
+
+.integration-icon-gradient-border {
+  background: conic-gradient(
+    from var(--integration-beam-angle),
+    transparent 0deg,
+    transparent 10deg,
+    #5616f9 250deg,
+    #ec4899 270deg,
+    #8b5cf6 290deg,
+    #06b6d4 310deg,
+    transparent 330deg,
+    transparent 360deg
+  );
+  animation: integration-beam-travel 5.5s linear infinite;
+  box-shadow: 0 0 30px rgba(236, 72, 153, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .integration-icon-gradient-border {
+    animation: none;
+  }
+}
+
+/* Memory Base Onboarding Animations */
+
+/* Welcome icon: fade-in de entrada */
+@keyframes memory-base-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Wizard do Agent Studio: entrada suave de cada etapa (fade + slide up).
+ * Aplicada num wrapper com key={currentStep} pra tocar a cada troca de tela. */
+@keyframes au-wizard-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.au-wizard-step {
+  animation: au-wizard-step-in var(--dur-base) var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-wizard-step {
+    animation: none;
+  }
+}
+
+/* Pop de confirmação — usado nos checks de sucesso (modais confirmatórios).
+ * Escala com um leve overshoot pra dar vida ao "deu certo". */
+@keyframes au-success-pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.au-success-pop {
+  animation: au-success-pop 360ms var(--ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-success-pop {
+    animation: none;
+  }
+}
+
+/* Cada dot: pulsação suave (opacidade + escala) – efeito partículas */
+@keyframes memory-base-dot-pulse {
+  0%, 100% {
+    opacity: 0.65;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.memory-base-welcome-icon {
+  opacity: 0;
+  animation: memory-base-fade-in 0.7s ease-out forwards;
+}
+
+.memory-base-welcome-icon path {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: memory-base-dot-pulse 2.6s ease-in-out infinite;
+}
+
+/* Stagger nos dots para efeito de onda/partículas (4 grupos de fase) */
+.memory-base-welcome-icon path:nth-child(4n + 1) { animation-delay: 0s; }
+.memory-base-welcome-icon path:nth-child(4n + 2) { animation-delay: 0.32s; }
+.memory-base-welcome-icon path:nth-child(4n + 3) { animation-delay: 0.65s; }
+.memory-base-welcome-icon path:nth-child(4n + 4) { animation-delay: 0.98s; }
+
+/* ── Fluxo de criação da Memory Base (/memory-base/new) ───────────────────── */
+
+/* Glyphs decorativos do passo "envio" (Padrão = estrela, Catálogo = funil).
+ * Giro lento e contínuo só pra dar vida — puramente ornamental. */
+@keyframes mb-glyph-spin {
+  to { transform: rotate(360deg); }
+}
+.mb-glyph-spin {
+  transform-origin: center;
+  animation: mb-glyph-spin 30s linear infinite;
+}
+.mb-glyph-spin-rev {
+  transform-origin: center;
+  animation: mb-glyph-spin 44s linear infinite reverse;
+}
+
+/* Botão "Configurar" da tela de base criada: surge em fade depois da celebração. */
+@keyframes mb-reveal-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mb-reveal-up {
+  opacity: 0;
+  animation: mb-reveal-up 0.5s var(--ease-out) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-glyph-spin,
+  .mb-glyph-spin-rev,
+  .mb-reveal-up { animation: none; }
+  .mb-reveal-up { opacity: 1; }
+}
+
+/* Pulse animation for the Memory Base icon container */
+@keyframes onboarding-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(13, 13, 13, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(13, 13, 13, 0.05);
+  }
+}
+
+.animate-onboarding-pulse {
+  animation: onboarding-pulse 2s ease-in-out infinite;
+}
+
+/* Draw animation for branching lines */
+@keyframes onboarding-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Fade in from right */
+@keyframes onboarding-fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Fade in from bottom */
+@keyframes onboarding-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Entry animation for primeiro-acesso step transitions.
+   Wraps `app/primeiro-acesso/template.tsx`; re-fires on every navigation
+   inside the segment. Uses the project ease-out token. */
+.au-step-transition {
+  animation: onboarding-fadeInUp 0.42s var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-step-transition {
+    animation: none;
+  }
+}
+
+/* Light fade-in for newly inserted rows / list items (e.g. dynamic email
+   fields under onboarding). Uses the same ease as step transitions but
+   shorter and gentler so it doesn't compete with the parent animation. */
+.au-fade-in {
+  animation: onboarding-fadeInUp 220ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-fade-in {
+    animation: none;
+  }
+}
+
+/* Simple fade in */
+@keyframes onboarding-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Center drop animation for step 3 */
+@keyframes onboarding-centerDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(10px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Step 4 – Timeline com ramificações (eixo principal + ramos + nós) */
+.step4-timeline-spine {
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: step4-draw-path 0.9s ease-out 0.2s forwards;
+}
+.step4-timeline-branch {
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: step4-draw-path 0.6s ease-out 0.7s forwards;
+}
+.step4-timeline-ramif {
+  stroke-dasharray: 150;
+  stroke-dashoffset: 150;
+  animation: step4-draw-path 0.4s ease-out forwards;
+}
+.step4-ramif-1 { animation-delay: 0.5s; }
+.step4-ramif-2 { animation-delay: 0.6s; }
+.step4-ramif-3 { animation-delay: 0.85s; }
+@keyframes step4-draw-path {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.step4-node-dot {
+  opacity: 0;
+  animation: step4-node-in 0.35s ease-out forwards;
+}
+.step4-node-dot:nth-child(1) { animation-delay: 0.45s; }
+.step4-node-dot:nth-child(2) { animation-delay: 0.6s; }
+.step4-node-dot:nth-child(3) { animation-delay: 0.75s; }
+.step4-node-junction {
+  opacity: 0;
+  transform: scale(0.5);
+  animation: step4-junction-in 0.4s ease-out 0.75s forwards;
+}
+.step4-node-end {
+  opacity: 0;
+  animation: step4-node-in 0.4s ease-out 1s forwards;
+}
+@keyframes step4-node-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes step4-junction-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.step4-dotted-node {
+  animation: step4-dotted-pulse 3s ease-in-out infinite;
+}
+.step4-cube-dot {
+  animation: step4-cube-pulse 2.5s ease-in-out infinite;
+}
+.step4-cube-dot:nth-child(odd) {
+  animation-delay: 0.3s;
+}
+@keyframes step4-dotted-pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+@keyframes step4-cube-pulse {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+@keyframes step4-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .memory-base-welcome-icon,
+  .animate-onboarding-pulse,
+  .step4-timeline-spine,
+  .step4-timeline-branch,
+  .step4-timeline-ramif,
+  .step4-node-dot,
+  .step4-node-junction,
+  .step4-node-end,
+  .step4-dotted-node,
+  .step4-cube-dot {
+    animation: none;
+  }
+  .memory-base-welcome-icon {
+    opacity: 1;
+  }
+  .memory-base-welcome-icon path {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .step4-timeline-spine,
+  .step4-timeline-branch,
+  .step4-timeline-ramif {
+    stroke-dashoffset: 0;
+  }
+  .step4-node-dot,
+  .step4-node-junction,
+  .step4-node-end,
+  .step4-cube-dot {
+    opacity: 1;
+  }
+  .step4-node-junction {
+    transform: scale(1);
+  }
+  [style*="onboarding-"],
+  [style*="step4-content-in"] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Agent Studio: variable chips - dark bg, light text, no border, rounded */
+.variable-chip-at {
+  background-color: #1e3a5f;
+  color: #e0f2fe;
+}
+
+.variable-chip-mustache {
+  background-color: #14532d;
+  color: #dcfce7;
+}
+
+/* Material Symbols Rounded — Auis icon system.
+ * Locks defaults so glyphs never render as ligature text while loading. */
+.material-symbols-rounded.au-icon {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  vertical-align: -0.15em;
+}
+
+/* Agent glyph — the animated "gesture" mark that represents an Agent in icon
+ * form (the brand alternative to a robot). Rendered by <Icon name="agent" />.
+ * One continuous stroke that draws itself in an endless loop. Inherits
+ * currentColor + size like any glyph; stroke-width tracks the weight axis
+ * (set inline by the component). Sanctioned raw-SVG agent visual — see AGENTS.md. */
+.au-agent-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex: none;
+}
+.au-agent-glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.au-agent-glyph path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 1;
+}
+/* Gradient variant — <Icon name="agent" gradient />. Brand iridescent stroke
+ * (azul → lavanda → pêssego) instead of currentColor. The <linearGradient>
+ * ships inside the glyph SVG; this overrides the currentColor rule above. */
+.au-agent-glyph.is-gradient path {
+  stroke: url(#au-agent-gradient);
+}
+.au-agent-glyph.is-animated path {
+  animation: au-agent-draw 2.6s var(--ease-in-out) infinite;
+}
+@keyframes au-agent-draw {
+  0% { stroke-dashoffset: 1; }      /* hidden — pen lifted */
+  55%, 70% { stroke-dashoffset: 0; } /* drawn, brief hold */
+  100% { stroke-dashoffset: -1; }   /* sweeps off, ready to redraw */
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-agent-glyph.is-animated path {
+    animation: none;
+    stroke-dashoffset: 0; /* stays fully drawn */
+  }
+}
+
+/* "Gasto total no período" (settings/consumo-e-custos) — hover de série.
+ * As linhas não-focadas somem suavemente (transição em stroke/fill-opacity)
+ * e a linha em foco mantém a própria cor. O brilho vem de uma segunda Area
+ * por cima: um gradiente neutro (#strokeGastoComet), transparente nas pontas,
+ * que varre a curva e só clareia a série base via mix-blend-mode. */
+.au-gasto-total-chart .recharts-area path {
+  transition:
+    stroke-opacity var(--transition-duration-au-base) var(--ease-out),
+    fill-opacity var(--transition-duration-au-base) var(--ease-out);
+}
+.au-gasto-total-overlay .recharts-area-curve {
+  stroke-linecap: round;
+  mix-blend-mode: screen;
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-gasto-total-overlay .recharts-area-curve {
+    stroke: transparent;
+  }
+}
+
+/* ============================================================
+ * Motion default — interactive elements get a smooth paint
+ * transition for free. This is the "persistent transition": you
+ * never have to opt a hover into `transition-colors` by hand.
+ *
+ * Lives in @layer base so it's the FLOOR — component classes
+ * (.au-btn, .au-card…, all unlayered) and Tailwind transition
+ * utilities (transition-transform, duration-…, in @layer
+ * utilities) both win over it. So a custom motion still overrides;
+ * a plain element just inherits a calm fade.
+ *
+ * Only PAINT properties animate (color/background/border/shadow/
+ * outline/decoration/fill/stroke) — never transform/opacity, which
+ * are reserved for enter animations and would jank if blanket-set.
+ * ============================================================ */
+@layer base {
+  a,
+  button,
+  summary,
+  label,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"] {
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
+      outline-color var(--dur-fast) var(--ease-out),
+      text-decoration-color var(--dur-fast) var(--ease-out),
+      fill var(--dur-fast) var(--ease-out),
+      stroke var(--dur-fast) var(--ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button,
+    summary,
+    label,
+    input,
+    select,
+    textarea,
+    [role="button"],
+    [role="tab"],
+    [role="menuitem"],
+    [role="option"],
+    [role="switch"],
+    [role="checkbox"],
+    [role="radio"] {
+      transition-duration: 0.01ms;
+    }
+  }
+}
+
+/* ============================================================
+ * AuButton — mirrors Auis Design System (zip) spec exactly.
+ * 5 variants · 3 sizes · iconLeft/iconRight · loading.
+ * ============================================================ */
+.au-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    filter var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+  user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+/* Tactile press — a hair of downward travel on click. Subtle enough to
+   feel physical without reading as a bounce. */
+.au-btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+.au-btn:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(13, 16, 19, 0.14);
+}
+.dark .au-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+.au-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Sizes — heights 30 / 38 / 46. Slightly more generous horizontal padding
+   for a calmer, roomier feel (OpenAI-ish breathing room). */
+.au-btn--sm { height: 30px; padding: 0 14px; font-size: 13px; }
+.au-btn--md { height: 38px; padding: 0 18px; font-size: 14px; }
+.au-btn--lg { height: 46px; padding: 0 24px; font-size: 15px; }
+
+/* Full-width variant */
+.au-btn--block { width: 100%; justify-content: center; }
+
+/* Icon-only — square, symmetrical padding */
+.au-btn--icon.au-btn--sm { width: 30px; padding: 0; justify-content: center; }
+.au-btn--icon.au-btn--md { width: 38px; padding: 0; justify-content: center; }
+.au-btn--icon.au-btn--lg { width: 46px; padding: 0; justify-content: center; }
+
+/* Primary — high-contrast (near-black on light, inverts on dark) */
+.au-btn--primary {
+  background: var(--fg-primary);
+  color: var(--bg-canvas);
+  border-color: var(--fg-primary);
+}
+.au-btn--primary:hover:not(:disabled) {
+  background: var(--au-gray-1000);
+  border-color: var(--au-gray-1000);
+}
+.au-btn--primary:active:not(:disabled) {
+  background: var(--au-black);
+  border-color: var(--au-black);
+}
+
+/* Secondary — outline, neutral */
+.au-btn--secondary {
+  background: transparent;
+  color: var(--fg-primary);
+  border-color: var(--border-default);
+}
+.au-btn--secondary:hover:not(:disabled) {
+  border-color: var(--fg-primary);
+  background: var(--bg-surface);
+}
+
+/* Ghost — soft fill at rest, darker on hover. (The "transparent at rest"
+   role is now covered by au-btn--subtle's lighter cousin or by leaving the
+   variant off entirely.) */
+.au-btn--ghost {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  border-color: transparent;
+}
+.au-btn--ghost:hover:not(:disabled) {
+  background: var(--bg-muted);
+}
+
+/* Subtle — tonal fill, sits between ghost (invisible at rest) and
+   secondary (bordered). Designed for icon-only row actions in tables
+   and other dense surfaces where the trigger needs a real touch target
+   without competing with the row's primary CTA. */
+.au-btn--subtle {
+  background: var(--bg-muted);
+  color: var(--fg-primary);
+  border-color: transparent;
+}
+.au-btn--subtle:hover:not(:disabled) {
+  background: var(--au-gray-300);
+}
+.dark .au-btn--subtle:hover:not(:disabled) {
+  background: var(--au-gray-900);
+}
+
+/* Row actions — subtle + iconOnly: square rounded tile, transparent at
+ * rest, soft gray fill on hover. Pill shape competes with the table's
+ * grid, so the row trigger goes square; the gray only appears on
+ * intent so the column doesn't drown in muted pills. */
+.au-btn--subtle.au-btn--icon {
+  background: transparent;
+  border-radius: var(--radius-md);
+}
+.au-btn--subtle.au-btn--icon:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+.dark .au-btn--subtle.au-btn--icon:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+/* Danger — destructive actions */
+.au-btn--danger {
+  background: var(--au-red-700);
+  color: #fff;
+  border-color: var(--au-red-700);
+}
+.au-btn--danger:hover:not(:disabled) {
+  background: var(--au-red-800);
+  border-color: var(--au-red-800);
+}
+
+/* AI — reserved for actions that invoke the agent.
+ * Holographic gradient: saturated azure base with a warm peach core
+ * bleeding across the middle, hinting at the "thinking aurora" of
+ * the moodboard. Edges keep the blue saturated so the pill silhouette
+ * reads even on busy surfaces; the central highlight + inner stroke
+ * give it the iridescent foil feel. Text sits in deep navy so the
+ * gradient carries the luminosity, not the type.
+ */
+/* Animated shiny — adapted from eldoraui/animated-shiny-button.
+ * Pill (radius-full) preserved. Monochrome surface via bg-canvas/bg-surface,
+ * cyan-ish highlight uses au-blue-400/700 (closest in the Auis ramp).
+ * Three layered effects:
+ *   1. Conic-gradient border that rotates around the pill
+ *   2. Dot pattern overlay masked to a moving arc
+ *   3. Inner shimmer + breathing inner glow on hover
+ */
+@property --au-btn-ai-gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --au-btn-ai-gradient-angle-offset {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --au-btn-ai-gradient-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+@property --au-btn-ai-gradient-shine {
+  syntax: "<color>";
+  initial-value: #ffffff;
+  inherits: false;
+}
+
+.au-btn--ai {
+  --au-btn-ai-bg: var(--bg-canvas);
+  --au-btn-ai-bg-subtle: var(--bg-surface);
+  --au-btn-ai-highlight: var(--au-blue-400);
+  --au-btn-ai-highlight-subtle: var(--au-blue-700);
+  --au-btn-ai-duration: 3s;
+  --au-btn-ai-shadow-size: 2px;
+  --au-btn-ai-easing: cubic-bezier(0.25, 1, 0.5, 1);
+
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  color: var(--fg-primary);
+  border-color: transparent;
+  background:
+    linear-gradient(var(--au-btn-ai-bg), var(--au-btn-ai-bg)) padding-box,
+    conic-gradient(
+      from calc(var(--au-btn-ai-gradient-angle) - var(--au-btn-ai-gradient-angle-offset)),
+      transparent,
+      var(--au-btn-ai-highlight) var(--au-btn-ai-gradient-percent),
+      var(--au-btn-ai-gradient-shine) calc(var(--au-btn-ai-gradient-percent) * 2),
+      var(--au-btn-ai-highlight) calc(var(--au-btn-ai-gradient-percent) * 3),
+      transparent calc(var(--au-btn-ai-gradient-percent) * 4)
+    ) border-box;
+  box-shadow: inset 0 0 0 1px var(--au-btn-ai-bg-subtle);
+  transition-property: --au-btn-ai-gradient-angle-offset, --au-btn-ai-gradient-percent, --au-btn-ai-gradient-shine;
+  transition-duration: 800ms;
+  transition-timing-function: var(--au-btn-ai-easing);
+  animation:
+    au-btn-ai-angle linear var(--au-btn-ai-duration) infinite,
+    au-btn-ai-angle linear calc(var(--au-btn-ai-duration) / 0.4) reverse infinite paused;
+  animation-composition: add;
+}
+
+.au-btn--ai::before,
+.au-btn--ai::after,
+.au-btn--ai .au-btn__label::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+}
+
+/* Dots pattern */
+.au-btn--ai::before {
+  --size: calc(100% - var(--au-btn-ai-shadow-size) * 3);
+  --position: 2px;
+  --space: calc(var(--position) * 2);
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(
+      circle at var(--position) var(--position),
+      currentColor calc(var(--position) / 4),
+      transparent 0
+    ) padding-box;
+  background-size: var(--space) var(--space);
+  background-repeat: space;
+  mask-image: conic-gradient(
+    from calc(var(--au-btn-ai-gradient-angle) + 45deg),
+    black, transparent 10% 90%, black
+  );
+  border-radius: var(--radius-full);
+  opacity: 0.32;
+  animation:
+    au-btn-ai-angle linear var(--au-btn-ai-duration) infinite,
+    au-btn-ai-angle linear calc(var(--au-btn-ai-duration) / 0.4) reverse infinite paused;
+  animation-composition: add;
+}
+
+/* Inner shimmer */
+.au-btn--ai::after {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    -50deg,
+    transparent,
+    var(--au-btn-ai-highlight),
+    transparent
+  );
+  mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+  opacity: 0.55;
+  animation:
+    au-btn-ai-shimmer linear var(--au-btn-ai-duration) infinite,
+    au-btn-ai-shimmer linear calc(var(--au-btn-ai-duration) / 0.4) reverse infinite paused;
+  animation-composition: add;
+}
+
+/* Breathing inner glow on hover — anchored to the BUTTON, not the label,
+ * so the glow spans the full button width instead of clamping to text
+ * width (which produced a small disproportionate "blob" on wide buttons).
+ * Label keeps z-index via flex-item stacking; no `position` needed. */
+.au-btn--ai .au-btn__label {
+  z-index: 1;
+}
+.au-btn--ai .au-btn__label::before {
+  width: calc(100% + 1rem);
+  height: calc(100% + 1rem);
+  box-shadow: inset 0 -1ex 2rem 4px var(--au-btn-ai-highlight);
+  opacity: 0;
+  border-radius: var(--radius-full);
+  transition: opacity 800ms var(--au-btn-ai-easing);
+  animation: au-btn-ai-breathe linear calc(var(--au-btn-ai-duration) * 1.5) infinite;
+}
+
+.au-btn--ai:hover:not(:disabled),
+.au-btn--ai:focus-visible:not(:disabled) {
+  --au-btn-ai-gradient-percent: 20%;
+  --au-btn-ai-gradient-angle-offset: 95deg;
+  --au-btn-ai-gradient-shine: var(--au-btn-ai-highlight-subtle);
+}
+.au-btn--ai:hover:not(:disabled),
+.au-btn--ai:hover:not(:disabled)::before,
+.au-btn--ai:hover:not(:disabled)::after,
+.au-btn--ai:focus-visible:not(:disabled),
+.au-btn--ai:focus-visible:not(:disabled)::before,
+.au-btn--ai:focus-visible:not(:disabled)::after {
+  animation-play-state: running;
+}
+.au-btn--ai:hover:not(:disabled) .au-btn__label::before,
+.au-btn--ai:focus-visible:not(:disabled) .au-btn__label::before {
+  opacity: 1;
+}
+.au-btn--ai:active:not(:disabled) {
+  translate: 0 1px;
+}
+
+@keyframes au-btn-ai-angle {
+  to { --au-btn-ai-gradient-angle: 360deg; }
+}
+@keyframes au-btn-ai-shimmer {
+  to { rotate: 360deg; }
+}
+@keyframes au-btn-ai-breathe {
+  from, to { scale: 1; }
+  50% { scale: 1.06; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-btn--ai,
+  .au-btn--ai::before,
+  .au-btn--ai::after,
+  .au-btn--ai .au-btn__label::before {
+    animation: none;
+  }
+}
+
+.dark .au-btn--ai {
+  --au-btn-ai-highlight: var(--au-blue-300);
+  --au-btn-ai-highlight-subtle: var(--au-blue-500);
+}
+
+/* -----------------------------------------------------------------
+ * AI Spectrum — multi-color cousin of `ai` (blue → purple → amber).
+ * Keeps the dots / shimmer / breathing-glow choreography, just swaps
+ * the monochromatic highlight for a tri-color ring that rotates.
+ * ----------------------------------------------------------------- */
+.au-btn--ai-spectrum {
+  --au-btn-ai-bg: var(--bg-canvas);
+  --au-btn-ai-bg-subtle: var(--bg-surface);
+  --au-btn-ai-c1: var(--au-blue-400);
+  --au-btn-ai-c2: var(--au-purple-400);
+  --au-btn-ai-c3: var(--au-amber-400);
+  --au-btn-ai-duration: 5s;
+  --au-btn-ai-shadow-size: 2px;
+  --au-btn-ai-easing: cubic-bezier(0.25, 1, 0.5, 1);
+
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  color: var(--fg-primary);
+  border-color: transparent;
+  background:
+    linear-gradient(var(--au-btn-ai-bg), var(--au-btn-ai-bg)) padding-box,
+    conic-gradient(
+      from var(--au-btn-ai-gradient-angle),
+      var(--au-btn-ai-c1),
+      var(--au-btn-ai-c2),
+      var(--au-btn-ai-c3),
+      var(--au-btn-ai-c1)
+    ) border-box;
+  box-shadow: inset 0 0 0 1px var(--au-btn-ai-bg-subtle);
+  animation: au-btn-ai-angle linear var(--au-btn-ai-duration) infinite;
+}
+
+/* Dots pattern — softened, masked by the rotating angle */
+.au-btn--ai-spectrum::before,
+.au-btn--ai-spectrum::after,
+.au-btn--ai-spectrum .au-btn__label::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+}
+
+.au-btn--ai-spectrum::before {
+  --size: calc(100% - var(--au-btn-ai-shadow-size) * 3);
+  --position: 2px;
+  --space: calc(var(--position) * 2);
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(
+      circle at var(--position) var(--position),
+      currentColor calc(var(--position) / 4),
+      transparent 0
+    ) padding-box;
+  background-size: var(--space) var(--space);
+  background-repeat: space;
+  mask-image: conic-gradient(
+    from calc(var(--au-btn-ai-gradient-angle) + 45deg),
+    black, transparent 10% 90%, black
+  );
+  border-radius: var(--radius-full);
+  opacity: 0.22;
+  animation: au-btn-ai-angle linear var(--au-btn-ai-duration) infinite;
+}
+
+/* Soft tri-color shimmer */
+.au-btn--ai-spectrum::after {
+  width: 100%;
+  aspect-ratio: 1;
+  background: conic-gradient(
+    from calc(var(--au-btn-ai-gradient-angle) + 180deg),
+    transparent 0%,
+    var(--au-btn-ai-c1) 20%,
+    var(--au-btn-ai-c2) 35%,
+    var(--au-btn-ai-c3) 50%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(circle at bottom, transparent 35%, black);
+  opacity: 0.42;
+  animation: au-btn-ai-angle linear var(--au-btn-ai-duration) infinite;
+}
+
+/* Breathing inner glow on hover — anchored to button width */
+.au-btn--ai-spectrum .au-btn__label {
+  z-index: 1;
+}
+.au-btn--ai-spectrum .au-btn__label::before {
+  width: calc(100% + 1rem);
+  height: calc(100% + 1rem);
+  background: radial-gradient(
+    ellipse at center,
+    var(--au-btn-ai-c2),
+    transparent 70%
+  );
+  opacity: 0;
+  border-radius: var(--radius-full);
+  transition: opacity 800ms var(--au-btn-ai-easing);
+  animation: au-btn-ai-breathe linear calc(var(--au-btn-ai-duration) * 1.5) infinite;
+}
+
+.au-btn--ai-spectrum:hover:not(:disabled) .au-btn__label::before,
+.au-btn--ai-spectrum:focus-visible:not(:disabled) .au-btn__label::before {
+  opacity: 0.55;
+}
+.au-btn--ai-spectrum:active:not(:disabled) {
+  translate: 0 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-btn--ai-spectrum,
+  .au-btn--ai-spectrum::before,
+  .au-btn--ai-spectrum::after,
+  .au-btn--ai-spectrum .au-btn__label::before {
+    animation: none;
+  }
+}
+
+.dark .au-btn--ai-spectrum {
+  --au-btn-ai-c1: var(--au-blue-300);
+  --au-btn-ai-c2: var(--au-purple-300);
+  --au-btn-ai-c3: var(--au-amber-300);
+}
+
+/* -----------------------------------------------------------------
+ * AI Outline — the same tri-color ring, no interior choreography.
+ * For secondary AI actions where the gradient should *frame* the
+ * button instead of fill it. No dots, no shimmer, no breath.
+ * ----------------------------------------------------------------- */
+.au-btn--ai-outline {
+  --au-btn-ai-bg: var(--bg-canvas);
+  --au-btn-ai-c1: var(--au-blue-300);
+  --au-btn-ai-c2: var(--au-purple-300);
+  --au-btn-ai-c3: var(--au-amber-300);
+  --au-btn-ai-duration: 6s;
+
+  position: relative;
+  color: var(--fg-primary);
+  border-color: transparent;
+  background:
+    linear-gradient(var(--au-btn-ai-bg), var(--au-btn-ai-bg)) padding-box,
+    conic-gradient(
+      from var(--au-btn-ai-gradient-angle),
+      var(--au-btn-ai-c1),
+      var(--au-btn-ai-c2),
+      var(--au-btn-ai-c3),
+      var(--au-btn-ai-c1)
+    ) border-box;
+  animation: au-btn-ai-angle linear var(--au-btn-ai-duration) infinite;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.au-btn--ai-outline:hover:not(:disabled) {
+  --au-btn-ai-c1: var(--au-blue-400);
+  --au-btn-ai-c2: var(--au-purple-400);
+  --au-btn-ai-c3: var(--au-amber-400);
+}
+.au-btn--ai-outline:active:not(:disabled) {
+  translate: 0 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .au-btn--ai-outline {
+    animation: none;
+  }
+}
+
+.dark .au-btn--ai-outline {
+  --au-btn-ai-c1: var(--au-blue-400);
+  --au-btn-ai-c2: var(--au-purple-400);
+  --au-btn-ai-c3: var(--au-amber-400);
+}
+.dark .au-btn--ai-outline:hover:not(:disabled) {
+  --au-btn-ai-c1: var(--au-blue-300);
+  --au-btn-ai-c2: var(--au-purple-300);
+  --au-btn-ai-c3: var(--au-amber-300);
+}
+
+/* Loading */
+.au-btn--loading .au-btn__label { opacity: 0.6; }
+.au-btn__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: au-spin 600ms linear infinite;
+}
+@keyframes au-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+ * AuCard — card surface with optional AI gradient mesh.
+ * ============================================================ */
+.au-card {
+  position: relative;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
+  color: var(--fg-primary);
+}
+.au-card--interactive {
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+  cursor: pointer;
+}
+.au-card--interactive:hover {
+  border-color: var(--fg-primary);
+  background: var(--bg-surface);
+  /* Subtle lift + soft shadow on hover — the modern/OpenAI card feel. */
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+/* AI card — iridescent mesh: cool blue pocket on one corner, peach/cream
+ * pocket on the opposite, lavender drift in the middle. Sits over
+ * bg-raised so the card remains readable. Alpha values keep the mesh
+ * subtle — the card content stays the protagonist. */
+.au-card--ai {
+  background:
+    radial-gradient(ellipse 70% 90% at 88% 12%, rgba(143, 184, 255, 0.22), transparent 65%),
+    radial-gradient(ellipse 70% 90% at 12% 88%, rgba(252, 212, 163, 0.18), transparent 65%),
+    radial-gradient(ellipse 60% 80% at 50% 50%, rgba(219, 191, 242, 0.12), transparent 70%),
+    var(--bg-raised);
+}
+/* AI card warm — same iridescent family but pulling toward peach/pink.
+ * For agentic cards where the AI is "expressive" (responding, summarising). */
+.au-card--ai-warm {
+  background:
+    radial-gradient(ellipse 70% 90% at 88% 12%, rgba(252, 227, 238, 0.40), transparent 65%),
+    radial-gradient(ellipse 70% 90% at 12% 88%, rgba(252, 212, 163, 0.28), transparent 65%),
+    radial-gradient(ellipse 60% 80% at 50% 50%, rgba(184, 212, 255, 0.18), transparent 70%),
+    var(--bg-raised);
+}
+
+/* ============================================================
+ * Iridescent gradient utilities — the signature "thinking" surface.
+ * Compose existing color tokens (no new primitives) into reusable
+ * gradient patterns. Use these to brand any AI-adjacent surface
+ * (badges, banners, headers, hero accents) — not just buttons/cards.
+ *
+ * Three patterns, all sharing the same color story:
+ *   sky blue → lavender → peach/cream
+ *
+ *   .au-gradient-iridescent          fill (filled pill / banner)
+ *   .au-gradient-iridescent-soft     low-alpha mesh (background panel)
+ *   .au-gradient-iridescent-border   1px iridescent border on dark fill
+ * ============================================================ */
+.au-gradient-iridescent {
+  background:
+    radial-gradient(ellipse 70% 120% at 18% 50%, var(--au-blue-400) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 130% at 82% 50%, var(--au-amber-200) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 120% at 50% 50%, var(--au-purple-200) 0%, transparent 70%),
+    linear-gradient(90deg, var(--au-blue-300) 0%, var(--au-pink-200) 100%);
+  color: var(--au-gray-1200);
+}
+.au-gradient-iridescent-soft {
+  background:
+    radial-gradient(ellipse 60% 90% at 88% 12%, rgba(143, 184, 255, 0.22), transparent 65%),
+    radial-gradient(ellipse 60% 90% at 12% 88%, rgba(252, 212, 163, 0.18), transparent 65%),
+    radial-gradient(ellipse 50% 80% at 50% 50%, rgba(219, 191, 242, 0.12), transparent 70%),
+    var(--bg-raised);
+}
+/* 1px iridescent border on top of an arbitrary fill. Caller must set
+ * --au-iridescent-fill (defaults to bg-canvas) and `border: 1px solid transparent`
+ * on the element. The trick uses two backgrounds (padding-box for the
+ * fill, border-box for the gradient stroke). */
+.au-gradient-iridescent-border {
+  background:
+    linear-gradient(
+      var(--au-iridescent-fill, var(--bg-canvas)),
+      var(--au-iridescent-fill, var(--bg-canvas))
+    ) padding-box,
+    linear-gradient(90deg,
+      var(--au-blue-400) 0%,
+      var(--au-purple-300) 50%,
+      var(--au-amber-300) 100%
+    ) border-box;
+  border: 1px solid transparent;
+}
+/* Animated iridescent — estado "em execução"/active de superfícies de IA.
+   Deriva de cor suave (~2s) sobre o gradient da marca, alternando ida/volta.
+   Respeita prefers-reduced-motion. */
+@keyframes au-iridescent-drift {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+.au-gradient-iridescent-animated {
+  background:
+    radial-gradient(ellipse 70% 120% at 18% 50%, var(--au-blue-400) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 130% at 82% 50%, var(--au-amber-200) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 120% at 50% 50%, var(--au-purple-200) 0%, transparent 70%),
+    linear-gradient(90deg, var(--au-blue-300) 0%, var(--au-pink-200) 50%, var(--au-blue-300) 100%);
+  background-size: 220% 220%;
+  animation: au-iridescent-drift 2s var(--ease-in-out, ease-in-out) infinite alternate;
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-gradient-iridescent-animated { animation: none; }
+}
+/* Spinner com gradiente da marca — o "spin" do estado active é, ele próprio,
+   um anel iridescente que gira (azul→lavanda→pêssego). Mask vira anel. */
+@keyframes au-spin { to { transform: rotate(360deg); } }
+.au-spinner-gradient { position: relative; }
+.au-spinner-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    var(--au-blue-500),
+    var(--au-purple-500),
+    var(--au-pink-400),
+    var(--au-blue-500)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: au-spin 0.9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-spinner-gradient::before { animation: none; }
+}
+/* Ai-cortex — silver mesh inspired by the Cortex marble cube.
+   Cool slate base, brighter pocket on the left, darker pocket on the
+   right where the dark CTA usually sits. Designed for the AI side of
+   AuSpecialistsPair, where the AI is a system co-pilot rather than a
+   generative agent (which keeps using the blue/purple ai variant). */
+.au-card--ai-cortex {
+  background:
+    radial-gradient(ellipse 80% 100% at 8%  50%, rgba(226, 232, 240, 0.55), transparent 65%),
+    radial-gradient(ellipse 60% 80%  at 92% 50%, rgba(100, 116, 139, 0.22), transparent 65%),
+    radial-gradient(ellipse 70% 90%  at 50% 10%, rgba(248, 250, 252, 0.18), transparent 60%),
+    var(--bg-raised);
+}
+.au-card--interactive:focus-visible {
+  outline: 0;
+  border-color: var(--fg-primary);
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+/* Dashed variant — for "browse more" / placeholder cards. Sits on the canvas
+   instead of bg-raised so the dashed outline reads as "open slot". */
+.au-card--dashed {
+  border-style: dashed;
+  border-width: 2px;
+  background: var(--bg-canvas);
+}
+.au-card--dashed.au-card--interactive:hover {
+  background: var(--bg-surface);
+  /* Placeholder slot stays flat — no shadow under a dashed edge. */
+  box-shadow: none;
+  transform: none;
+}
+
+/* Quiet/explore variant — mirrors the catalog modal card affordance:
+   lighter resting border, more roundness, hover that shifts background
+   without the lift. Used by the Explore grid on /integrations. */
+.au-explore-card {
+  border-color: var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+.au-card--interactive.au-explore-card:hover {
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+  /* Quiet variant: shift background only, no lift/shadow. */
+  box-shadow: none;
+  transform: none;
+}
+.au-card--dashed.au-explore-card {
+  border-color: var(--border-subtle);
+}
+.au-card--dashed.au-explore-card.au-card--interactive:hover {
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+}
+
+/* ---------------- Slots — anatomy mirrors shadcn/ui Card. ---------------- */
+.au-card__header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 4px;
+}
+.au-card__header:has(> .au-card__action) {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.au-card__title {
+  font: 600 15px/1.3 var(--font-sans);
+  letter-spacing: -0.005em;
+  color: var(--fg-primary);
+}
+.au-card__description {
+  font: 400 13px/1.5 var(--font-sans);
+  color: var(--fg-secondary);
+}
+.au-card__action {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.au-card__content {
+  color: var(--fg-secondary);
+  font-size: var(--body-md-size, 14px);
+  line-height: 1.55;
+}
+.au-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Stack subcomponents with consistent vertical rhythm without forcing the
+ * root to a flex container — keeps direct-children call sites untouched. */
+.au-card > .au-card__header + .au-card__content,
+.au-card > .au-card__header + .au-card__footer,
+.au-card > .au-card__content + .au-card__footer,
+.au-card > .au-card__content + .au-card__content {
+  margin-top: 14px;
+}
+
+/* ============================================================
+ * AuInput + AuField — inputs with focus ring + error state.
+ * ============================================================ */
+.au-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.au-field__label {
+  font: 500 12px/1 var(--font-sans);
+  color: var(--fg-secondary);
+}
+.au-field__error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--au-red-700);
+}
+.au-field__helper {
+  font-size: 12px;
+  color: var(--fg-tertiary);
+}
+.au-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 12px;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+}
+/* Subtle hover before focus — border firms up a touch on intent. */
+.au-input:hover:not(:focus-within):not(.au-input--disabled) {
+  border-color: var(--fg-tertiary);
+}
+.au-input--dense { height: 34px; padding: 0 10px; }
+.au-input input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 14px/1.4 var(--font-sans);
+  color: var(--fg-primary);
+  min-width: 0;
+}
+.au-input input::placeholder { color: var(--fg-tertiary); }
+.au-input:focus-within {
+  border-color: var(--fg-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg-primary) 12%, transparent);
+}
+.au-input--invalid { border-color: var(--au-red-700); }
+.au-input--invalid:focus-within {
+  box-shadow: 0 0 0 3px rgba(168, 34, 34, 0.18);
+}
+.au-input--disabled,
+.au-input:has(input:disabled) {
+  background: var(--bg-surface);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.au-input--disabled input,
+.au-input input:disabled {
+  cursor: not-allowed;
+}
+
+/* Framed variant (AuField variant="framed") — notched outline where the label
+ * rides on the border and the value reads large. Opt-in, low-density screens
+ * only (login, account identity). The <fieldset> owns the border + focus ring;
+ * the inner .au-input frame is stripped so the two don't double up. */
+.au-field-framed-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.au-field--framed {
+  min-width: 0;
+  margin: 0;
+  padding: 7px 18px 12px;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-2xl);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+.au-field__legend {
+  margin-left: -4px;
+  padding: 0 6px;
+  font: 500 13px/1 var(--font-sans);
+  color: var(--fg-tertiary);
+  transition: color var(--dur-base) var(--ease-out);
+}
+.au-field--framed:hover:not(:focus-within) {
+  border-color: var(--fg-tertiary);
+}
+.au-field--framed:focus-within {
+  border-color: var(--fg-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg-primary) 12%, transparent);
+}
+.au-field--framed:focus-within .au-field__legend {
+  color: var(--fg-secondary);
+}
+/* Inner AuInput goes bare — the fieldset is the frame now. */
+.au-field--framed .au-input,
+.au-field--framed .au-input:hover,
+.au-field--framed .au-input:focus-within {
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.au-field--framed .au-input input {
+  font: 400 18px/1.5 var(--font-sans);
+}
+.au-field--framed-invalid,
+.au-field--framed-invalid:hover:not(:focus-within) {
+  border-color: var(--au-red-700);
+}
+.au-field--framed-invalid:focus-within {
+  box-shadow: 0 0 0 3px rgba(168, 34, 34, 0.18);
+}
+.au-field--framed-invalid .au-field__legend {
+  color: var(--au-red-700);
+}
+
+/* Search variant — pill-shaped input with a subtle hairline border on
+ * the canvas surface. Replaces the previous liquid-glass treatment with
+ * a flatter, calmer look that reads cleanly on any background and
+ * follows the semantic tokens straight through to dark mode. */
+.au-input--search {
+  border-radius: var(--radius-full);
+  border-color: var(--border-default);
+  background: color-mix(in srgb, var(--au-gray-100) 60%, transparent);
+}
+.au-input--search:focus-within {
+  border-color: var(--fg-primary);
+  background: var(--bg-canvas);
+}
+
+/* Clear button — sits inside the input, stays inside the rounded boundary
+ * regardless of variant. Suppress the native WebKit clear glyph so it can't
+ * leak through (any consumer passing type="search" would otherwise get two). */
+.au-input__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color var(--dur-base) var(--ease-out);
+}
+.au-input__clear:hover { color: var(--fg-secondary); }
+.au-input__clear:focus-visible {
+  outline: 2px solid var(--au-blue-500);
+  outline-offset: 2px;
+}
+/* Reveal (olhinho) — toggle de mostrar/ocultar senha; mesmo formato do clear,
+ * fica dentro da borda arredondada do input. */
+.au-input__reveal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--dur-base) var(--ease-out);
+}
+.au-input__reveal:hover { color: var(--fg-secondary); }
+.au-input__reveal:focus-visible {
+  outline: 2px solid var(--au-blue-500);
+  outline-offset: 2px;
+}
+.au-input input::-webkit-search-cancel-button,
+.au-input input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+
+/* ============================================================
+ * AuDropdownMenu — Radix DropdownMenu surface and items.
+ * Painted with semantic tokens so dark mode flips automatically.
+ * ============================================================ */
+.au-dropdown {
+  z-index: 1100;
+  min-width: 180px;
+  max-height: var(--radix-dropdown-menu-content-available-height);
+  overflow: hidden auto;
+  padding: 4px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  outline: 0;
+  animation: au-dropdown-in var(--dur-base) var(--ease-out);
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+@keyframes au-dropdown-in {
+  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.au-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font: 400 13px/1.3 var(--font-sans);
+  color: var(--fg-primary);
+  cursor: pointer;
+  user-select: none;
+  outline: 0;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.au-dropdown__item:focus,
+.au-dropdown__item[data-highlighted] {
+  background: var(--bg-hover);
+}
+.au-dropdown__item[data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.au-dropdown__item--danger { color: var(--accent-danger); }
+.au-dropdown__item--danger:focus,
+.au-dropdown__item--danger[data-highlighted] {
+  background: var(--au-red-150);
+}
+.au-dropdown__item-icon { flex-shrink: 0; }
+.au-dropdown__item-label { flex: 1; min-width: 0; }
+.au-dropdown__item-check {
+  flex-shrink: 0;
+  color: var(--fg-secondary);
+}
+.au-dropdown__item--checked { color: var(--fg-primary); }
+.au-dropdown__separator {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border-subtle);
+}
+.au-dropdown__label {
+  display: block;
+  padding: 6px 10px 4px;
+  font: 600 10px/1 var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+}
+
+/* ============================================================
+ * AuPill — inline status marker with optional pulse dot.
+ * ============================================================ */
+.au-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
+  font: 500 11px/1 var(--font-sans);
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.au-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+.au-pill--live {
+  background: var(--au-emerald-100);
+  color: var(--au-emerald-700);
+}
+.au-pill--live .au-pill__dot { background: var(--au-emerald-500); }
+.au-pill--draft {
+  background: var(--au-gray-150);
+  color: var(--au-gray-800);
+}
+.au-pill--draft .au-pill__dot { background: var(--au-gray-600); }
+.au-pill--warning {
+  background: var(--au-amber-150);
+  color: var(--au-amber-700);
+}
+.au-pill--warning .au-pill__dot { background: var(--au-amber-500); }
+.au-pill--beta {
+  background: var(--au-amber-100);
+  color: var(--au-amber-700);
+}
+.au-pill--beta .au-pill__dot { background: var(--au-amber-500); }
+.au-pill--error {
+  background: var(--au-red-100);
+  color: var(--au-red-700);
+}
+.au-pill--error .au-pill__dot { background: var(--au-red-500); }
+.au-pill--neutral {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+.au-pill--info {
+  background: var(--au-blue-100);
+  color: var(--au-blue-700);
+}
+.au-pill--info .au-pill__dot { background: var(--au-blue-500); }
+.au-pill--ai {
+  background: var(--au-blue-100);
+  color: var(--au-blue-700);
+}
+.au-pill--ai .au-pill__dot {
+  background: var(--au-blue-500);
+  box-shadow: 0 0 8px var(--au-blue-500);
+  animation: au-pill-pulse 2.2s ease-in-out infinite;
+}
+@keyframes au-pill-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ============================================================
+ * AuChatBubble — user/agent conversation bubbles.
+ * ============================================================ */
+.au-chat {
+  display: flex;
+  gap: 10px;
+  max-width: 680px;
+}
+.au-chat--user {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+.au-chat--agent { justify-content: flex-start; }
+.au-chat__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--fg-secondary);
+}
+.au-chat__bubble {
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  font: 400 14px/1.5 var(--font-sans);
+  max-width: 520px;
+  position: relative;
+}
+.au-chat--user .au-chat__bubble {
+  background: var(--fg-primary);
+  color: var(--bg-canvas);
+  border-bottom-right-radius: 4px;
+}
+.au-chat--agent .au-chat__bubble {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  border: 1px solid var(--border-subtle);
+  border-bottom-left-radius: 4px;
+}
+.au-chat__time {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--fg-tertiary);
+}
+.au-chat--user .au-chat__time { color: var(--au-gray-500); }
+.au-chat__dots {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.au-chat__dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.4;
+  animation: au-chat-dot 1.2s ease-in-out infinite;
+}
+.au-chat__dots i:nth-child(2) { animation-delay: 0.15s; }
+.au-chat__dots i:nth-child(3) { animation-delay: 0.30s; }
+@keyframes au-chat-dot {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+/* ============================================================
+ * AuModal — scrim + centered dialog, focus-trapped by React.
+ * ============================================================ */
+.au-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: au-scrim-in 180ms var(--ease-out);
+}
+/* Saída suave: Radix mantém o scrim montado até a animação de [closed] terminar. */
+.au-modal-scrim[data-state="closed"] {
+  animation: au-scrim-out 150ms var(--ease-out) forwards;
+}
+@keyframes au-scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes au-scrim-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.au-modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg-raised);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-overlay);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: au-modal-in 180ms var(--ease-out);
+}
+/* Fechar / Voltar / Cancelar deixam de ser abruptos — o conteúdo recua e some. */
+.au-modal[data-state="closed"] {
+  animation: au-modal-out 150ms var(--ease-out) forwards;
+}
+@keyframes au-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes au-modal-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(6px) scale(0.985); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-modal,
+  .au-modal[data-state="closed"],
+  .au-modal-scrim,
+  .au-modal-scrim[data-state="closed"] {
+    animation-duration: 1ms;
+  }
+}
+.au-modal__head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.au-modal__title {
+  margin: 0;
+  font: 500 20px/1.25 var(--font-sans);
+  letter-spacing: -0.01em;
+  color: var(--fg-primary);
+}
+.au-modal__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+.au-modal__close:hover {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+.au-modal__body {
+  font-size: 14px;
+  color: var(--fg-secondary);
+  line-height: 1.5;
+}
+.au-modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+/* ============================================================
+ * AuConnectModal — OAuth-style permission/connect dialog.
+ * Centered hero (dual brand logos + connector), permissions list,
+ * optional redirect URL with copy, three-slot footer.
+ * Reuses .au-modal-scrim + .au-modal shells; layout overrides only.
+ * ============================================================ */
+.au-connect-modal {
+  position: relative;
+  max-width: 480px;
+  padding: 28px 28px 22px;
+  gap: 20px;
+}
+.au-connect-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+.au-connect-modal__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
+.au-connect-modal__logos {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.au-connect-modal__connector {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  color: var(--fg-tertiary);
+}
+.au-connect-modal__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--fg-primary);
+  color: var(--bg-raised);
+  flex-shrink: 0;
+}
+.au-connect-modal__title {
+  margin: 0;
+  font: 600 19px/1.3 var(--font-sans);
+  letter-spacing: -0.01em;
+  color: var(--fg-primary);
+}
+.au-connect-modal__desc {
+  margin: 0;
+  max-width: 380px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+}
+.au-connect-modal__perms {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 18px;
+}
+.au-connect-modal__perms-title {
+  margin: 0 0 10px;
+  font: 600 13.5px/1.25 var(--font-sans);
+  color: var(--fg-primary);
+}
+.au-connect-modal__perms-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.au-connect-modal__perm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--fg-secondary);
+}
+.au-connect-modal__perm-icon {
+  color: var(--au-blue-700);
+  flex-shrink: 0;
+}
+.au-connect-modal__url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.au-connect-modal__url-input {
+  flex: 1;
+  min-width: 0;
+}
+.au-connect-modal__url-input input {
+  font-size: 12.5px;
+  color: var(--fg-secondary);
+}
+.au-connect-modal__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+}
+.au-connect-modal__foot-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── Kind-specific width tweaks ─── */
+.au-connect-modal--webhook,
+.au-connect-modal--apiKey {
+  max-width: 540px;
+}
+
+/* ─── Name field (shared by all kinds) ─── */
+.au-connect-modal__name {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.au-connect-modal__name-label {
+  font: 600 12.5px/1.2 var(--font-sans);
+  color: var(--fg-primary);
+  letter-spacing: -0.005em;
+}
+
+/* ─── Webhook flow ─── */
+.au-connect-modal__webhook {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 18px;
+}
+.au-connect-modal__step-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 500 11.5px/1.2 var(--font-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+}
+.au-connect-modal__step-meta > span:last-child {
+  color: var(--fg-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  font-size: 12.5px;
+}
+
+.au-connect-modal__steps {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0 6px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.au-connect-modal__steps-track,
+.au-connect-modal__steps-progress {
+  position: absolute;
+  top: 13px;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+.au-connect-modal__steps-track {
+  background: var(--border-subtle);
+}
+.au-connect-modal__steps-progress {
+  width: 0;
+  background: var(--fg-primary);
+  transition: width 320ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.au-connect-modal__step {
+  position: relative;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.au-connect-modal__step-node {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--border-subtle);
+  background: var(--bg-canvas);
+  color: var(--fg-tertiary);
+  font: 600 12px/1 var(--font-sans);
+  cursor: pointer;
+  transition: background 180ms, border-color 180ms, color 180ms,
+    transform 180ms;
+}
+.au-connect-modal__step-node:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--fg-secondary);
+}
+.au-connect-modal__step-node:disabled {
+  cursor: not-allowed;
+}
+.au-connect-modal__step--active .au-connect-modal__step-node {
+  background: var(--fg-primary);
+  border-color: var(--fg-primary);
+  color: var(--bg-canvas);
+  transform: scale(1.04);
+}
+.au-connect-modal__step--done .au-connect-modal__step-node {
+  background: var(--fg-primary);
+  border-color: var(--fg-primary);
+  color: var(--bg-canvas);
+}
+.au-connect-modal__step-label {
+  font: 500 11.5px/1.3 var(--font-sans);
+  color: var(--fg-tertiary);
+  text-align: center;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.au-connect-modal__step--active .au-connect-modal__step-label,
+.au-connect-modal__step--done .au-connect-modal__step-label {
+  color: var(--fg-primary);
+}
+
+.au-connect-modal__slides {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+.au-connect-modal__slides-track {
+  display: flex;
+  width: 100%;
+  transition: transform 360ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+.au-connect-modal__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.au-connect-modal__slide-title {
+  margin: 0;
+  font: 600 14.5px/1.3 var(--font-sans);
+  color: var(--fg-primary);
+  letter-spacing: -0.005em;
+}
+.au-connect-modal__slide-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+}
+.au-connect-modal__slide-body p {
+  margin: 0;
+}
+.au-connect-modal__slide-body ul,
+.au-connect-modal__slide-body ol {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.au-connect-modal__slide-body li {
+  font-size: 13px;
+}
+.au-connect-modal__slide-body strong {
+  color: var(--fg-primary);
+  font-weight: 600;
+}
+.au-connect-modal__slide-body a {
+  color: var(--au-blue-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.au-connect-modal__slide-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.au-connect-modal__slide-copy-label {
+  font: 500 11.5px/1.2 var(--font-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+}
+
+/* ─── API key flow ─── */
+.au-connect-modal__apikey {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 18px;
+}
+.au-connect-modal__apikey-intro {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+}
+.au-connect-modal__apikey-fields {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.au-connect-modal__apikey-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.au-connect-modal__apikey-field-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font: 500 13.5px/1.3 var(--font-sans);
+  color: var(--fg-primary);
+  letter-spacing: -0.005em;
+}
+.au-connect-modal__apikey-field-num {
+  font-weight: 700;
+  color: var(--fg-primary);
+}
+.au-connect-modal__apikey-field-req {
+  color: var(--au-red-700, var(--fg-secondary));
+  margin-left: 2px;
+}
+.au-connect-modal__apikey-field-helper {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--fg-tertiary);
+}
+.au-connect-modal__apikey-docs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  font: 500 12.5px/1.3 var(--font-sans);
+  color: var(--au-blue-700);
+  text-decoration: none;
+}
+.au-connect-modal__apikey-docs:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ============================================================
+ * AuAlert — inline contextual message. NEVER used as toast.
+ * ============================================================ */
+.au-alert {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--radius-xl);
+  background: var(--bg-raised);
+  color: var(--fg-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.au-alert__icon { flex: 0 0 auto; line-height: 0; }
+.au-alert__body { flex: 1; min-width: 0; }
+.au-alert__title {
+  color: var(--fg-primary);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  display: block;
+  margin: 0 0 2px 0;
+}
+.au-alert--info    { background: var(--au-blue-100); }
+.au-alert--info    .au-alert__icon { color: var(--au-blue-600); }
+.au-alert--success { background: var(--au-emerald-100); }
+.au-alert--success .au-alert__icon { color: var(--au-emerald-600); }
+.au-alert--warning { background: var(--au-amber-100); }
+.au-alert--warning .au-alert__icon { color: var(--au-amber-600); }
+.au-alert--danger  { background: var(--au-red-100); }
+.au-alert--danger  .au-alert__icon { color: var(--au-red-600); }
+
+/* ============================================================
+ * AuAvatar — 36 px circle with initials or glyph.
+ * ============================================================ */
+.au-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 13px;
+  border: 1px solid var(--border-default);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.au-avatar--sm { width: 24px; height: 24px; font-size: 11px; }
+.au-avatar--lg { width: 48px; height: 48px; font-size: 16px; }
+.au-avatar--ai {
+  background: var(--bg-raised);
+  border-color: var(--au-blue-400);
+  color: var(--au-blue-600);
+}
+.au-avatar-group { display: inline-flex; }
+.au-avatar-group .au-avatar + .au-avatar { margin-left: -10px; }
+
+/* ============================================================
+ * AuBreadcrumb — inline navigation path.
+ * ============================================================ */
+.au-crumbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--fg-tertiary);
+  flex-wrap: wrap;
+}
+.au-crumbs a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--dur-base) var(--ease-out);
+}
+.au-crumbs a:hover { color: var(--fg-primary); }
+.au-crumbs__current { color: var(--fg-primary); }
+.au-crumbs__sep { color: var(--fg-tertiary); opacity: 0.5; }
+
+/* ============================================================
+ * AuSelect — button-style dropdown trigger.
+ * ============================================================ */
+.au-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 12px 0 14px;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+  white-space: nowrap;
+}
+.au-select:hover:not(:disabled) { border-color: var(--fg-primary); }
+.au-select:focus-visible {
+  outline: 0;
+  border-color: var(--au-blue-500);
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.18);
+}
+.au-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.au-select__caret {
+  width: 16px;
+  height: 16px;
+  color: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+ * AuProgress — horizontal bar, 0–100.
+ * ============================================================ */
+.au-progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+.au-progress-row__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--fg-secondary);
+}
+.au-progress-row__top b {
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+}
+.au-progress {
+  height: 6px;
+  width: 100%;
+  background: var(--bg-muted);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.au-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  /* Progresso é neutro: dark/gray em vez de azul/verde/laranja/vermelho.
+   * As variantes mantêm distinção só pelo tom de cinza, sem matiz. */
+  background: var(--fg-primary);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+.au-progress--success .au-progress__fill { background: var(--au-gray-900); }
+.au-progress--warning .au-progress__fill { background: var(--au-gray-700); }
+.au-progress--danger  .au-progress__fill { background: var(--au-gray-1100); }
+
+/* ============================================================
+ * AuNavRail — vertical primary navigation (app chrome).
+ * Two widths: collapsed (icon-only) and expanded (header + groups
+ * + labels + inline counts). Each pairs with a light/dark theme.
+ * Whole rail is a rounded container; active state is a rounded-square
+ * behind the item row, not a full pill.
+ * ============================================================ */
+.au-nav-rail {
+  display: inline-flex;
+  flex-direction: column;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 10px 8px;
+  box-sizing: border-box;
+  transition:
+    width var(--dur-slow) var(--ease-out),
+    padding var(--dur-slow) var(--ease-out),
+    background var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+.au-nav-rail--collapsed { width: 64px; }
+.au-nav-rail--expanded  { width: 296px; padding: 12px; }
+/* Floating (translucent) rail: tighter shell to match app chrome my-2 / pl-2 */
+.au-nav-rail--translucent.au-nav-rail--collapsed {
+  padding: 8px 6px;
+}
+.au-nav-rail--translucent.au-nav-rail--expanded {
+  padding: 10px;
+}
+.au-nav-rail--dark {
+  background: var(--dark-bg);
+  border-color: var(--dark-border);
+  color: var(--dark-fg-secondary);
+}
+
+/* Liquid-glass variant — translucent shell with backdrop blur.
+ * Use on top of a rich canvas (photo, gradient, dense art) for
+ * the Apple-style floating rail. Light tint by default; pair with
+ * --dark for dark canvases. */
+.au-nav-rail--translucent {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.60),
+    0 10px 30px rgba(15, 15, 15, 0.12),
+    0 2px 6px rgba(15, 15, 15, 0.08);
+}
+.au-nav-rail--translucent.au-nav-rail--dark {
+  background: rgba(13, 13, 13, 0.42);
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 40px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.30);
+}
+/* Inner chrome: use low-opacity fills so the blurred canvas still
+ * reads through, but keep text legible. */
+.au-nav-rail--translucent .au-nav-rail__switcher-btn {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.40);
+}
+.au-nav-rail--translucent .au-nav-rail__switcher-btn:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__switcher-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__switcher-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+.au-nav-rail--translucent .au-nav-rail__item:hover,
+.au-nav-rail--translucent .au-nav-rail__item--active {
+  background: rgba(255, 255, 255, 0.50);
+  color: var(--fg-primary);
+}
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__item {
+  color: rgba(255, 255, 255, 0.72);
+}
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__item:hover,
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__item--active {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+}
+.au-nav-rail--translucent .au-nav-rail__top,
+.au-nav-rail--translucent .au-nav-rail__bottom,
+.au-nav-rail--translucent .au-nav-rail__group {
+  border-color: rgba(15, 15, 15, 0.08);
+}
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__top,
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__bottom,
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__group {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.au-nav-rail--translucent .au-nav-rail__toggle {
+  color: var(--fg-secondary);
+}
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__toggle {
+  color: rgba(255, 255, 255, 0.72);
+}
+.au-nav-rail--translucent.au-nav-rail--dark .au-nav-rail__toggle:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+}
+
+/* Brand / workspace header */
+.au-nav-rail__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 10px;
+}
+.au-nav-rail--expanded .au-nav-rail__header {
+  padding: 2px 6px 12px;
+}
+.au-nav-rail--collapsed .au-nav-rail__header {
+  justify-content: center;
+  padding: 2px 0 10px;
+}
+.au-nav-rail__brand {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--fg-primary);
+}
+.au-nav-rail--dark .au-nav-rail__brand {
+  background: var(--dark-bg-hover);
+  color: var(--dark-fg-primary);
+}
+.au-nav-rail__workspace {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--fg-primary);
+  letter-spacing: -0.01em;
+}
+.au-nav-rail--dark .au-nav-rail__workspace { color: var(--dark-fg-primary); }
+.au-nav-rail--collapsed .au-nav-rail__workspace { display: none; }
+
+/* Groups — visually separated by hairline dividers */
+.au-nav-rail__group {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+.au-nav-rail--dark .au-nav-rail__group { border-top-color: var(--dark-border); }
+.au-nav-rail__group--first { border-top: 0; padding-top: 0; }
+.au-nav-rail__body > .au-nav-rail__group:first-child { border-top: 0; padding-top: 0; }
+
+.au-nav-rail__group-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  padding: 6px 12px 8px;
+}
+.au-nav-rail--dark .au-nav-rail__group-label { color: var(--dark-fg-tertiary); }
+.au-nav-rail--collapsed .au-nav-rail__group-label { display: none; }
+
+.au-nav-rail__items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.au-nav-rail--collapsed .au-nav-rail__items { gap: 4px; align-items: center; }
+
+/* Item */
+.au-nav-rail__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  color: var(--au-gray-900);
+  cursor: pointer;
+  text-decoration: none;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    padding var(--dur-slow) var(--ease-out),
+    gap var(--dur-slow) var(--ease-out),
+    width var(--dur-slow) var(--ease-out),
+    height var(--dur-slow) var(--ease-out);
+}
+.au-nav-rail__item:hover {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+.au-nav-rail__item--active {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+  font-weight: 600;
+}
+.au-nav-rail__item--active:hover {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+}
+.au-nav-rail__item:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+.au-nav-rail--dark .au-nav-rail__item { color: var(--au-gray-400); }
+.au-nav-rail--dark .au-nav-rail__item:hover {
+  background: var(--dark-bg-hover);
+  color: var(--dark-fg-primary);
+}
+.au-nav-rail--dark .au-nav-rail__item--active,
+.au-nav-rail--dark .au-nav-rail__item--active:hover {
+  background: var(--au-white);
+  color: var(--au-gray-1200);
+}
+
+.au-nav-rail__item-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.au-nav-rail--collapsed .au-nav-rail__item {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+.au-nav-rail--collapsed .au-nav-rail__item-label { display: none; }
+
+/* Count — muted number on the right */
+.au-nav-rail__count {
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--fg-tertiary);
+}
+.au-nav-rail--dark .au-nav-rail__count { color: var(--dark-fg-tertiary); }
+.au-nav-rail--collapsed .au-nav-rail__count { display: none; }
+
+/* Collapse / expand toggle — lives in the header strip.
+ * In expanded state: icon button at the top-right.
+ * In collapsed state: same icon button centered above the items. */
+.au-nav-rail__toggle {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.au-nav-rail__toggle:hover { background: var(--bg-surface); color: var(--fg-primary); }
+.au-nav-rail__toggle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+.au-nav-rail--dark .au-nav-rail__toggle { color: var(--dark-fg-tertiary); }
+.au-nav-rail--dark .au-nav-rail__toggle:hover {
+  background: var(--dark-bg-hover);
+  color: var(--dark-fg-primary);
+}
+
+/* ============================================================
+ * AuNavRailOrgSwitcher + AuNavRailUserSwitcher — shared styling.
+ * Both are large buttons at top/bottom of the rail with a dropdown.
+ * ============================================================ */
+.au-nav-rail__switcher {
+  position: relative;
+  padding: 0 4px;
+}
+.au-nav-rail--expanded .au-nav-rail__switcher { padding: 0; }
+
+.au-nav-rail__switcher-btn {
+  appearance: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 6px 8px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+  transition:
+    background var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    padding var(--dur-slow) var(--ease-out),
+    gap var(--dur-slow) var(--ease-out);
+}
+.au-nav-rail__switcher-btn:hover {
+  background: var(--bg-raised);
+  border-color: var(--border-default);
+}
+.au-nav-rail__switcher-btn:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+.au-nav-rail--dark .au-nav-rail__switcher-btn {
+  background: var(--dark-bg-hover);
+  border-color: var(--dark-border);
+  color: var(--dark-fg-primary);
+}
+.au-nav-rail--dark .au-nav-rail__switcher-btn:hover {
+  background: var(--au-gray-900);
+}
+
+.au-nav-rail--collapsed .au-nav-rail__switcher-btn {
+  justify-content: center;
+  padding: 6px;
+  gap: 0;
+}
+
+.au-nav-rail__switcher-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 12px;
+}
+.au-nav-rail__switcher-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.au-nav-rail__switcher-avatar--round { border-radius: 50%; }
+.au-nav-rail--dark .au-nav-rail__switcher-avatar { background: var(--dark-bg); }
+
+.au-nav-rail__switcher-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.au-nav-rail__switcher-title {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.au-nav-rail--dark .au-nav-rail__switcher-title { color: var(--dark-fg-primary); }
+.au-nav-rail__switcher-sub {
+  font-size: 11px;
+  color: var(--fg-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.au-nav-rail--dark .au-nav-rail__switcher-sub { color: var(--dark-fg-tertiary); }
+.au-nav-rail--collapsed .au-nav-rail__switcher-text,
+.au-nav-rail--collapsed .au-nav-rail__switcher-caret {
+  display: none;
+}
+
+.au-nav-rail__switcher-caret {
+  width: 14px;
+  height: 14px;
+  color: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+.au-nav-rail--dark .au-nav-rail__switcher-caret { color: var(--dark-fg-tertiary); }
+
+/* Dropdown menu — popover style, opens to the right when collapsed. */
+.au-nav-rail__menu {
+  position: absolute;
+  z-index: 20;
+  min-width: 240px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  animation: au-nav-rail-menu-in 140ms var(--ease-out);
+}
+@keyframes au-nav-rail-menu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.au-nav-rail--dark .au-nav-rail__menu {
+  background: var(--au-gray-1100);
+  border-color: var(--dark-border);
+}
+.au-nav-rail__menu--top {
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+}
+.au-nav-rail__menu--bottom {
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+}
+.au-nav-rail--collapsed .au-nav-rail__menu--top {
+  bottom: 0;
+  left: calc(100% + 8px);
+  right: auto;
+}
+.au-nav-rail--collapsed .au-nav-rail__menu--bottom {
+  top: 0;
+  left: calc(100% + 8px);
+  right: auto;
+}
+
+.au-nav-rail__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.au-nav-rail__menu-item:hover { background: var(--bg-surface); }
+.au-nav-rail__menu-item--active {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+}
+.au-nav-rail__menu-item--active:hover {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+}
+.au-nav-rail--dark .au-nav-rail__menu-item { color: var(--dark-fg-primary); }
+.au-nav-rail--dark .au-nav-rail__menu-item:hover { background: var(--dark-bg-hover); }
+.au-nav-rail--dark .au-nav-rail__menu-item--active {
+  background: var(--au-white);
+  color: var(--au-gray-1200);
+}
+.au-nav-rail--dark .au-nav-rail__menu-item--active:hover {
+  background: var(--au-white);
+  color: var(--au-gray-1200);
+}
+.au-nav-rail__menu-item-body {
+  flex: 1;
+  min-width: 0;
+}
+.au-nav-rail__menu-item-title {
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.2;
+}
+.au-nav-rail__menu-item-sub {
+  font-size: 11px;
+  color: var(--fg-tertiary);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.au-nav-rail__menu-item--active .au-nav-rail__menu-item-sub {
+  color: inherit;
+  opacity: 0.7;
+}
+.au-nav-rail--dark .au-nav-rail__menu-item-sub { color: var(--dark-fg-tertiary); }
+
+.au-nav-rail__menu-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 4px;
+  margin: 4px -4px -4px;
+}
+.au-nav-rail--dark .au-nav-rail__menu-footer { border-color: var(--dark-border); }
+.au-nav-rail__menu-footer .au-nav-rail__menu-item { color: var(--fg-tertiary); }
+.au-nav-rail__menu-footer .au-nav-rail__menu-item:hover {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+.au-nav-rail__menu-footer .au-nav-rail__menu-item--danger { color: var(--au-red-600); }
+.au-nav-rail--dark .au-nav-rail__menu-footer .au-nav-rail__menu-item:hover {
+  background: var(--dark-bg-hover);
+  color: var(--dark-fg-primary);
+}
+
+/* Layout slots inside the rail */
+.au-nav-rail__top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 8px;
+}
+.au-nav-rail--dark .au-nav-rail__top { border-color: var(--dark-border); }
+.au-nav-rail--collapsed .au-nav-rail__top { align-items: center; gap: 6px; }
+
+.au-nav-rail__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+.au-nav-rail--collapsed .au-nav-rail__toolbar { justify-content: center; padding: 0; }
+
+/* Auis mark — top-right of the toolbar, expanded state only */
+.au-nav-rail__logo {
+  color: var(--fg-primary);
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-4px);
+  animation: au-nav-rail-logo-in var(--dur-slow) var(--ease-out) forwards;
+}
+.au-nav-rail--dark .au-nav-rail__logo { color: var(--dark-fg-primary); }
+@keyframes au-nav-rail-logo-in {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.au-nav-rail__bottom {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+.au-nav-rail--dark .au-nav-rail__bottom { border-color: var(--dark-border); }
+
+.au-nav-rail__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+ * AuNavList — stacked navigation (section rail).
+ * ============================================================ */
+.au-nav-list {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 6px;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+}
+.au-nav-list__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+.au-nav-list__item:hover {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+.au-nav-list__item--active {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+.au-nav-list__count {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--fg-tertiary);
+}
+
+/* ============================================================
+ * Tool UI surfaces — scoped resets.
+ * Some shadcn primitives (Radix Accordion) render their own <h3>
+ * as the trigger header. Without this scope, the styleguide's global
+ * h2/h3 sizing (28-32px) leaks into surface cards and blows up the
+ * typography. Reset to inherit so the component's own classes win.
+ * ============================================================ */
+[data-slot="data-table"] h2,
+[data-slot="data-table"] h3,
+[data-slot="data-table"] h4 {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: 0;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
+ * AuTable — dense entity list. Mono + right-align for numbers.
+ * ============================================================ */
+.au-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+  border: 0;
+  font-size: 14px;
+  color: var(--fg-primary);
+}
+.au-table th,
+.au-table td {
+  text-align: left;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+.au-table thead th {
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--fg-tertiary);
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.au-table td.au-table__mono,
+.au-table th.au-table__mono {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--fg-secondary);
+}
+.au-table td.au-table__num,
+.au-table th.au-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+.au-table td.au-table__name {
+  font-weight: 500;
+  color: var(--fg-primary);
+}
+.au-table tr:last-child td { border-bottom: 0; }
+.au-table tbody tr td {
+  transition: background var(--dur-base) var(--ease-out);
+}
+.au-table tbody tr:hover td { background: var(--bg-surface); border-radius: var(--radius-md); }
+
+/* Airy variant — no outer chrome, generous row height, sentence-case headers.
+   Used on the integrations list to match the Mobbin-style entity table. */
+.au-table--airy {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 14px;
+}
+.au-table--airy th {
+  background: transparent;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  padding: 14px 20px;
+}
+.au-table--airy td {
+  padding: 18px 20px;
+  border-bottom-color: var(--border-subtle);
+}
+.au-table--airy thead tr th { border-bottom: 1px solid var(--border-subtle); }
+.au-table--airy tbody tr.au-row-clickable { cursor: pointer; }
+/* Inactive integration rows fade back so the active ones lead the eye.
+   Hover restores full opacity so the row is still legible on intent. */
+.au-table tbody tr.au-row-inactive {
+  opacity: 0.55;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+.au-table tbody tr.au-row-inactive:hover { opacity: 1; border-radius: var(--radius-sm); }
+/* Failure-state row — pairs with the AuPill error variant to flag a
+   broken connection at a glance in long lists. The accent lives as an
+   inset shadow on the first cell so the row keeps the same height and
+   alignment as healthy ones. */
+.au-table tbody tr.au-row-attention td:first-child {
+  box-shadow: inset 3px 0 0 var(--au-red-500);
+}
+.au-table .au-th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.au-table .au-th-sort:hover {
+  color: var(--fg-primary);
+  border-radius: var(--radius-sm);
+}
+.au-table .au-th-sort[aria-sort="ascending"],
+.au-table .au-th-sort[aria-sort="descending"] {
+  color: var(--fg-primary);
+}
+.au-table .au-th-sort__icon {
+  display: inline-block;
+  min-width: 14px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.25;
+  font-variant-numeric: tabular-nums;
+}
+.au-table .au-th-sort[aria-sort="ascending"] .au-th-sort__icon,
+.au-table .au-th-sort[aria-sort="descending"] .au-th-sort__icon {
+  opacity: 1;
+}
+.au-table th.au-table__num .au-th-sort {
+  margin-left: auto;
+}
+
+/* ============================================================
+ * AuToggle — on/off switch, optional AI variant.
+ * ============================================================ */
+.au-toggle {
+  width: 38px;
+  height: 22px;
+  background: var(--au-gray-300);
+  border-radius: var(--radius-full);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out);
+  border: 0;
+  flex-shrink: 0;
+  padding: 0;
+}
+.au-toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  transition: all var(--dur-base) var(--ease-out);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+.au-toggle--on { background: var(--fg-primary); }
+.au-toggle--on::after { left: 19px; }
+.au-toggle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+.au-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.au-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  min-width: 260px;
+}
+.au-toggle-row__copy { flex: 1; min-width: 0; }
+.au-toggle-row__copy-title {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  color: var(--fg-primary);
+}
+.au-toggle-row__copy-desc {
+  font-size: 11.5px;
+  color: var(--fg-tertiary);
+  margin-top: 2px;
+}
+
+/* ============================================================
+ * AuSlider — styled range input.
+ * ============================================================ */
+.au-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 280px;
+}
+.au-slider__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--fg-secondary);
+}
+.au-slider__top b {
+  color: var(--fg-primary);
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 500;
+}
+.au-slider__help {
+  font-size: 11px;
+  color: var(--fg-tertiary);
+}
+.au-slider__rng {
+  width: 100%;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  /* --au-slider-progress (0%–100%) é definido inline pelo componente. */
+  background: linear-gradient(
+    to right,
+    var(--bg-inverse) 0% var(--au-slider-progress, 0%),
+    var(--bg-muted) var(--au-slider-progress, 0%) 100%
+  );
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  outline: none;
+}
+.au-slider__rng::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fg-primary);
+  border: 2px solid var(--bg-raised);
+  box-shadow: 0 0 0 1px var(--border-default);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.au-slider__rng::-webkit-slider-thumb:hover { transform: scale(1.1); }
+.au-slider__rng::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fg-primary);
+  border: 2px solid var(--bg-raised);
+  box-shadow: 0 0 0 1px var(--border-default);
+  cursor: pointer;
+}
+.au-slider__rng:focus-visible {
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+
+/* ============================================================
+ * AuTabs — inline tab group, segmented pill style.
+ * ============================================================ */
+.au-tabs {
+  display: inline-flex;
+  gap: 2px;
+}
+.au-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  background: transparent;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+}
+.au-tabs__tab:hover:not([disabled]) { color: var(--fg-primary); }
+.au-tabs__tab[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.au-tabs__tab:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+.au-tabs__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  opacity: 0.55;
+}
+.au-tabs__tab--active .au-tabs__count { opacity: 0.7; }
+
+/* Variant: segmented — toggle-style group with shared container. */
+.au-tabs--segmented {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+.au-tabs--segmented .au-tabs__tab {
+  border: none;
+  border-radius: var(--radius-full);
+}
+.au-tabs--segmented .au-tabs__tab--active {
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Variant: standalone — free-floating pill nav, wraps; one pill per item. */
+.au-tabs--standalone {
+  flex-wrap: wrap;
+  gap: 6px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.au-tabs--standalone .au-tabs__tab {
+  height: 32px;
+  padding: 0 12px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+}
+.au-tabs--standalone .au-tabs__tab:hover:not([disabled]) {
+  border-color: var(--fg-primary);
+}
+.au-tabs--standalone .au-tabs__tab--active {
+  background: var(--fg-primary);
+  border-color: var(--fg-primary);
+  color: var(--bg-raised);
+}
+/* Hover no tab ativo (bg escuro): mantém o texto claro — senão a regra
+ * genérica de hover pinta a fonte de --fg-primary e some no fundo preto. */
+.au-tabs--standalone .au-tabs__tab--active:hover:not([disabled]) {
+  color: var(--bg-raised);
+  border-color: var(--fg-primary);
+}
+
+/* Variant: underline — text-style nav with hairline divider + underline indicator. */
+.au-tabs--underline {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.au-tabs--underline .au-tabs__tab {
+  position: relative;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  margin-bottom: -1px;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: color var(--dur-base) var(--ease-out);
+}
+.au-tabs--underline .au-tabs__tab--active {
+  color: var(--fg-primary);
+}
+.au-tabs--underline .au-tabs__indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--fg-primary);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    width var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out);
+}
+.au-tabs--underline .au-tabs__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--fg-primary);
+  color: var(--bg-raised);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 1;
+}
+/* Danger tone — overdue/failed counts read as an alert, not a neutral tally.
+   Base paints red text (segmented/standalone); underline overrides the pill. */
+.au-tabs__count--danger {
+  color: var(--accent-danger);
+  opacity: 1;
+}
+.au-tabs--underline .au-tabs__count--danger {
+  background: var(--accent-danger);
+  color: #fff;
+}
+
+/* ============================================================
+ * AuEmpty — zero-state composition (port of shadcn `Empty`).
+ * ============================================================ */
+.au-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 24px;
+  text-align: center;
+}
+.au-empty__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 480px;
+}
+.au-empty__media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-tertiary);
+  margin-bottom: 4px;
+}
+.au-empty__media--icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--fg-secondary);
+}
+.au-empty__title {
+  margin: 0;
+  font: 600 16px/1.3 var(--font-sans);
+  letter-spacing: -0.01em;
+  color: var(--fg-primary);
+}
+.au-empty__description {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+}
+.au-empty__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ============================================================
+ * AuStatusDot — pulse animation when pulse=true.
+ * ============================================================ */
+@keyframes au-status-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+.au-status-dot--pulse {
+  animation: au-status-dot-pulse 1.8s ease-in-out infinite;
+}
+
+/* ============================================================
+ * AuIntegrationCard — composed card for third-party integrations.
+ * Built on AuCard --interactive, with bespoke anatomy:
+ * logo + status dot, status pill, name + domain, description,
+ * footer (sync metadata + CTA).
+ * ============================================================ */
+.au-integration-card {
+  /* AuCard supplies base shell. Override padding for denser anatomy. */
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: var(--radius-2xl);
+}
+/* Disable AuCard interactive border/background shift on integration cards —
+ * the CTA button is the affordance now. */
+.au-integration-card.au-card--interactive:hover {
+  border-color: var(--border-default);
+  background: var(--bg-raised);
+}
+.au-integration-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.au-integration-card__heading {
+  min-width: 0;
+}
+.au-integration-card__logo-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.au-integration-card__logo {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 10px;
+}
+.au-integration-card__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.au-integration-card__name {
+  margin: 0;
+  font: 600 14.5px/1.25 var(--font-sans);
+  letter-spacing: -0.005em;
+  color: var(--fg-primary);
+}
+.au-integration-card__domain {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--fg-tertiary);
+}
+.au-integration-card__desc {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--fg-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.au-integration-card__foot {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+.au-integration-card__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg-tertiary);
+  min-width: 0;
+}
+.au-integration-card__meta--warn {
+  color: var(--au-amber-700);
+}
+.au-integration-card__cta {
+  font: 500 12.5px/1 var(--font-sans);
+  color: var(--fg-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.au-integration-card__cta--warn {
+  color: var(--au-amber-700);
+}
+
+/* ============================================================
+ * Styleguide chrome — theme toggle, hero, code block.
+ * ============================================================ */
+
+/* Styleguide sidebar — slightly darker than the canvas in light mode so
+ * it reads as "chrome" without needing a heavy border. In dark mode stays
+ * flat with the canvas (canvas is already dark). */
+.au-sg-sidebar {
+  /* Sidebar branca em light, superfície escura em dark (bg-raised cobre os
+     dois) — pedido de review: bg white com stroke direito bem claro. */
+  background: var(--bg-raised);
+}
+.au-sg-sidebar__subtitle {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-tertiary);
+  letter-spacing: 0.02em;
+  margin-top: 6px;
+}
+
+/* Section labels in the styleguide sidebar — heading font, maior e com
+ * tracking negativo (em vez do eyebrow uppercase). Lê como uma categoria
+ * proper, não como um eyebrow decorativo. Scoped no nav. */
+.au-sg-sidebar nav .au-eyebrow {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+  text-transform: none;
+  color: var(--fg-primary);
+}
+
+/* Smooth height animation for the collapsible nav sections. Radix exposes
+ * --radix-collapsible-content-height + data-state on the content node, and
+ * keeps it mounted through the exit animation (same mechanism as accordion). */
+.au-sg-collapsible-content {
+  overflow: hidden;
+}
+.au-sg-collapsible-content[data-state="open"] {
+  animation: au-collapsible-down 0.2s ease-out;
+}
+.au-sg-collapsible-content[data-state="closed"] {
+  animation: au-collapsible-up 0.2s ease-out;
+}
+@keyframes au-collapsible-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+@keyframes au-collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+.au-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-default);
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+  cursor: pointer;
+  transition:
+    background var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+.au-theme-toggle:hover {
+  background: var(--bg-surface);
+  border-color: var(--fg-primary);
+}
+.au-theme-toggle:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+
+/* Hero — full-bleed page header. Sits above the content max-width so it
+ * spans the whole main area. Dark surface, fixed in both light and dark
+ * mode (uses `--dark-*` tokens, not theme-reactive `--bg-*`). */
+.au-hero {
+  background: var(--dark-bg);
+  color: var(--dark-fg-primary);
+  border-bottom: 1px solid var(--dark-border);
+  /* Sem padding horizontal aqui: o alinhamento do texto vem do __inner, que
+   * espelha o container do conteúdo (max-width 1200 + px-10) pra o cabeçalho
+   * casar com a coluna de baixo. */
+  padding: 64px 0 56px;
+  margin: 0 0 56px 0;
+}
+.au-hero__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.au-hero__title {
+  margin: 0;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+  color: var(--dark-fg-primary);
+}
+.au-hero__lead {
+  margin: 16px 0 0 0;
+  font-size: var(--body-lg-size);
+  color: var(--dark-fg-secondary);
+  line-height: 1.55;
+  max-width: 640px;
+}
+
+/* ============================================================
+ * AuCode — code block with IDE-like syntax colors.
+ * Background is fixed (dark IDE vibe) in both light and dark mode.
+ * Tokens ride on GitHub "dark dimmed" palette — tested for legibility.
+ * ============================================================ */
+.au-code {
+  display: block;
+  margin: 0;
+  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  background: #0D1117;
+  color: #E6EDF3;
+  font-family: var(--font-mono);
+  font-size: var(--mono-md-size);
+  line-height: 1.55;
+  overflow-x: auto;
+  white-space: pre;
+  border: 1px solid #1F252D;
+  tab-size: 2;
+}
+.au-code code { font-family: inherit; color: inherit; background: none; padding: 0; }
+
+/* Syntax token colors — GitHub dark-dimmed aligned */
+.au-code .tok-keyword    { color: #FF7B72; }          /* import, const, function */
+.au-code .tok-string     { color: #A5D6FF; }          /* "..." / '...' / `...` */
+.au-code .tok-comment    { color: #8B949E; font-style: italic; }
+.au-code .tok-number     { color: #79C0FF; }
+.au-code .tok-fn         { color: #D2A8FF; }          /* called functions */
+.au-code .tok-type       { color: #FFA657; }          /* types / JSX components */
+.au-code .tok-attr       { color: #FFA657; }          /* JSX attribute names */
+.au-code .tok-tag        { color: #7EE787; }          /* <div>, <button> */
+.au-code .tok-prop       { color: #79C0FF; }          /* object / css property */
+.au-code .tok-bool       { color: #79C0FF; }          /* true, false, null */
+.au-code .tok-punct      { color: #C9D1D9; }          /* default text */
+
+/* Inline code inside text — subtle surface, keeps reading flow */
+.au-code-inline {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--fg-primary);
+}
+
+/* ============================================================
+ * AuModal size variants — cockpit extends width for configuration
+ * screens (settings inspector, multi-panel dialogs).
+ * ============================================================ */
+.au-modal--md     { max-width: 520px; }
+.au-modal--cockpit {
+  max-width: 760px;
+  border-radius: 18px;
+  padding: 0;
+  overflow: hidden;
+}
+.au-modal--cockpit .au-modal__head {
+  padding: 22px 28px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.au-modal--cockpit .au-modal__body {
+  padding: 20px 28px;
+}
+.au-modal--cockpit .au-modal__foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-raised);
+}
+
+/* ============================================================
+ * AuAddIntegrationModal — wide catalog dialog with category rail.
+ * Reuses .au-modal-scrim shell; overrides modal layout for sidebar
+ * + main content layout.
+ * ============================================================ */
+.au-add-int-modal {
+  max-width: 1080px;
+  width: 100%;
+  height: min(720px, calc(100vh - 64px));
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 18px;
+}
+.au-add-int-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.au-add-int-modal__title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.au-add-int-modal__title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-secondary);
+}
+.au-add-int-modal__title {
+  margin: 0;
+  font: 600 19px/1.2 var(--font-sans);
+  letter-spacing: -0.01em;
+  color: var(--fg-primary);
+}
+.au-add-int-modal__body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+.au-add-int-modal__nav {
+  border-right: 1px solid var(--border-subtle);
+  padding: 18px 12px;
+  overflow-y: auto;
+  background: var(--bg-raised);
+}
+.au-add-int-modal__nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.au-add-int-modal__nav-item {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--fg-secondary);
+  font: 500 13px/1.35 var(--font-sans);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.au-add-int-modal__nav-item:hover {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+.au-add-int-modal__nav-item--active,
+.au-add-int-modal__nav-item--active:hover {
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+  font-weight: 600;
+}
+.au-add-int-modal__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 22px 24px 24px;
+  background: var(--bg-raised);
+}
+.au-add-int-modal__main-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.au-add-int-modal__main-title {
+  margin: 0;
+  font: 600 15px/1.3 var(--font-sans);
+  color: var(--fg-primary);
+  letter-spacing: -0.005em;
+}
+.au-add-int-modal__search {
+  width: 280px;
+  flex-shrink: 0;
+}
+.au-add-int-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 156px;
+  align-content: start;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
+  padding-bottom: 4px;
+}
+@media (max-width: 900px) {
+  .au-add-int-modal__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .au-add-int-modal__body { grid-template-columns: 200px 1fr; }
+}
+.au-add-int-modal__card {
+  position: relative;
+  appearance: none;
+  text-align: left;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  min-height: 132px;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.au-add-int-modal__card:hover {
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+}
+.au-add-int-modal__card:focus-visible {
+  outline: 0;
+  border-color: var(--fg-primary);
+  box-shadow: 0 0 0 3px rgba(71, 138, 255, 0.30);
+}
+.au-add-int-modal__card--custom {
+  border: 1px dashed var(--border-default);
+  background: transparent;
+}
+.au-add-int-modal__card--custom:hover {
+  border-color: var(--fg-primary);
+  background: var(--bg-raised);
+}
+.au-add-int-modal__card-logo--custom {
+  background: var(--bg-raised);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--fg-secondary);
+  width: 40px;
+  height: 40px;
+}
+.au-add-int-modal__card--custom:hover .au-add-int-modal__card-logo--custom {
+  border-color: var(--fg-primary);
+  color: var(--fg-primary);
+}
+.au-add-int-modal__card-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 4px;
+}
+.au-add-int-modal__card-name {
+  font: 600 14px/1.25 var(--font-sans);
+  color: var(--fg-primary);
+  letter-spacing: -0.005em;
+}
+.au-add-int-modal__card-desc {
+  font: 400 12.5px/1.45 var(--font-sans);
+  color: var(--fg-tertiary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.au-add-int-modal__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  padding: 64px 24px;
+  color: var(--fg-tertiary);
+}
+.au-add-int-modal__empty-title {
+  font: 600 14px/1.3 var(--font-sans);
+  color: var(--fg-primary);
+  margin-top: 6px;
+}
+.au-add-int-modal__empty-desc {
+  font: 400 12.5px/1.5 var(--font-sans);
+  color: var(--fg-tertiary);
+  max-width: 320px;
+}
+
+/* ============================================================
+ * AuToast — transient feedback, bottom-right stack.
+ * ============================================================ */
+.au-toast-stack {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  pointer-events: none;
+}
+.au-toast-stack > * { pointer-events: auto; }
+
+.au-toast {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  box-shadow: var(--shadow-lg);
+  animation: au-toast-in 220ms var(--ease-out);
+  color: var(--fg-primary);
+}
+@keyframes au-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.au-toast--leaving { animation: au-toast-out 160ms var(--ease-in-out) forwards; }
+@keyframes au-toast-out {
+  to { opacity: 0; transform: translateY(8px); }
+}
+.au-toast__icon { line-height: 0; flex: 0 0 auto; color: var(--au-emerald-600); }
+.au-toast__body { flex: 1; min-width: 0; }
+.au-toast__title {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-primary);
+  margin: 0 0 2px 0;
+}
+.au-toast__desc {
+  font-size: 12px;
+  color: var(--fg-tertiary);
+  line-height: 1.45;
+  margin: 0;
+}
+.au-toast__desc a,
+.au-toast__action {
+  color: var(--au-blue-600);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+  background: none;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  padding: 0;
+  font: inherit;
+}
+.au-toast__close {
+  color: var(--fg-tertiary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 2px 4px;
+  line-height: 1;
+  border-radius: var(--radius-xs);
+}
+.au-toast__close:hover { color: var(--fg-primary); background: var(--bg-surface); }
+
+.au-toast--ai    .au-toast__icon { color: var(--au-blue-600); }
+.au-toast--ai    .au-toast__desc a { color: var(--au-blue-600); }
+.au-toast--error .au-toast__icon { color: var(--au-red-600); }
+.au-toast--error .au-toast__desc a { color: var(--au-red-600); }
+.au-toast--warning .au-toast__icon { color: var(--au-amber-500); }
+.au-toast--warning .au-toast__desc a { color: var(--au-amber-600); }
+
+/* ============================================================
+ * AuSheet — right-side drawer. Scrim reuses .au-modal-scrim.
+ * ============================================================ */
+.au-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.40);
+  display: flex;
+  justify-content: flex-end;
+  animation: au-scrim-in 180ms var(--ease-out);
+}
+.au-sheet-scrim[data-state="closed"] {
+  animation: au-scrim-out 150ms var(--ease-out) forwards;
+}
+.au-sheet {
+  width: 520px;
+  max-width: 100%;
+  height: 100%;
+  background: var(--bg-raised);
+  border-left: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-overlay);
+  display: flex;
+  flex-direction: column;
+  animation: au-sheet-in 220ms var(--ease-out);
+  overflow: hidden;
+}
+.au-sheet--wide { width: 1080px; }
+.au-sheet--xwide { width: 1440px; }
+@keyframes au-sheet-in {
+  from { transform: translateX(100%); }
+  to   { transform: none; }
+}
+.au-sheet[data-state="closed"] {
+  animation: au-sheet-out 200ms var(--ease-out) forwards;
+}
+@keyframes au-sheet-out {
+  from { transform: none; }
+  to   { transform: translateX(100%); }
+}
+
+/* ============================================================
+ * AuCollapsible — disclosure leve. Anima a altura via a var do
+ * Radix collapsible (--radix-collapsible-content-height).
+ * ============================================================ */
+.au-collapsible-content {
+  overflow: hidden;
+}
+.au-collapsible-content[data-state="open"] {
+  animation: au-collapsible-down var(--dur-base) var(--ease-out);
+}
+.au-collapsible-content[data-state="closed"] {
+  animation: au-collapsible-up var(--dur-base) var(--ease-out);
+}
+@keyframes au-collapsible-down {
+  from { height: 0; }
+  to   { height: var(--radix-collapsible-content-height); }
+}
+@keyframes au-collapsible-up {
+  from { height: var(--radix-collapsible-content-height); }
+  to   { height: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-collapsible-content[data-state="open"],
+  .au-collapsible-content[data-state="closed"] {
+    animation-duration: 1ms;
+  }
+}
+
+.au-sheet__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.au-sheet__title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--fg-primary);
+  margin: 0;
+}
+.au-sheet__meta {
+  font-size: 12px;
+  color: var(--fg-tertiary);
+  font-family: var(--font-body);
+  margin-top: 2px;
+}
+.au-sheet__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+.au-sheet__close:hover { background: var(--bg-surface); color: var(--fg-primary); }
+
+.au-sheet__tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.au-sheet__tab {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 10px 14px;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  font: 500 12px var(--font-body);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.au-sheet__tab:hover { color: var(--fg-primary); }
+.au-sheet__tab--active {
+  color: var(--fg-primary);
+  border-bottom-color: var(--fg-primary);
+}
+
+.au-sheet__body {
+  padding: 22px 20px;
+  flex: 1;
+  overflow: auto;
+}
+.au-sheet__row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border-subtle);
+  font-size: 12.5px;
+}
+.au-sheet__row:last-child { border-bottom: 0; }
+.au-sheet__row-k { color: var(--fg-tertiary); }
+.au-sheet__row-v { color: var(--fg-primary); }
+.au-sheet__row-v.mono { font-family: var(--font-mono); font-size: 12px; }
+
+.au-sheet__foot {
+  border-top: 1px solid var(--border-subtle);
+  padding: 14px 20px;
+  background: var(--bg-surface);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ============================================================
+ * AuSkeleton — shape-mimicking loading placeholder, 1.6s shimmer.
+ * ============================================================ */
+.au-skel {
+  position: relative;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: block;
+  height: 52px;
+  width: 100%;
+}
+.au-skel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.04) 50%,
+    transparent 100%
+  );
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  background-position: -100% 0;
+  animation: au-skel-shimmer 1.6s linear infinite;
+}
+.dark .au-skel::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  background-position: -100% 0;
+}
+@keyframes au-skel-shimmer {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+.au-skel--line   { height: 12px; border-radius: var(--radius-xs); border: 0; }
+.au-skel--title  { height: 22px; border-radius: var(--radius-xs); border: 0; }
+.au-skel--avatar { height: 36px; width: 36px; border-radius: 50%; border: 0; }
+.au-skel--card   { height: 140px; border-radius: var(--radius-lg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .au-skel::after { animation: none; }
+  .au-toast { animation: none; }
+  .au-sheet,
+  .au-sheet[data-state="closed"],
+  .au-sheet-scrim,
+  .au-sheet-scrim[data-state="closed"] {
+    animation-duration: 1ms;
+  }
+}
+
+/* ============================================================
+ * Integrations page — split layout (sidebar + main store).
+ * Sidebar lists active integrations; main is the catalog grid.
+ * ============================================================ */
+.au-int-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .au-int-layout {
+    grid-template-columns: 1fr;
+  }
+}
+.au-int-aside {
+  position: sticky;
+  top: 24px;
+  padding-right: 8px;
+  border-right: 1px solid var(--border-subtle);
+}
+@media (max-width: 900px) {
+  .au-int-aside {
+    position: static;
+    padding-right: 0;
+    padding-bottom: 16px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}
+.au-int-aside__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.au-int-aside__row {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  color: var(--fg-primary);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.au-int-aside__row:hover {
+  background: var(--bg-raised);
+}
+.au-int-aside__row:focus-visible {
+  outline: 2px solid var(--ring-focus);
+  outline-offset: 2px;
+}
+.au-int-aside__name {
+  flex: 1;
+  min-width: 0;
+  font: 500 13px/1.25 var(--font-sans);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.au-int-main {
+  min-width: 0;
+}
+
+/* ============================================================
+ * Permission segmented control — always / approval / never.
+ * Three-way radio of icon-only buttons.
+ * ============================================================ */
+.au-perm-seg {
+  display: inline-flex;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.au-perm-seg__btn {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 6px 9px;
+  cursor: pointer;
+  color: var(--fg-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--dur-fast) var(--ease-out),
+              background var(--dur-fast) var(--ease-out);
+}
+.au-perm-seg__btn + .au-perm-seg__btn {
+  border-left: 1px solid var(--border-subtle);
+}
+.au-perm-seg__btn:hover { color: var(--fg-primary); }
+.au-perm-seg__btn--active {
+  background: var(--bg-raised);
+  color: var(--fg-primary);
+}
+.au-perm-seg__btn--always.au-perm-seg__btn--active   { color: var(--au-emerald-700); }
+.au-perm-seg__btn--approval.au-perm-seg__btn--active { color: var(--au-amber-700); }
+.au-perm-seg__btn--never.au-perm-seg__btn--active    { color: var(--au-red-600, var(--fg-primary)); }
+
+/* ============================================================
+ * Permission group — collapsible bucket of tools.
+ * ============================================================ */
+.au-perm-group {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.au-perm-group__head {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  color: var(--fg-primary);
+  text-align: left;
+}
+.au-perm-group__head:hover { background: var(--bg-surface); }
+.au-perm-group__title {
+  font: 600 13px var(--font-sans);
+  letter-spacing: -0.005em;
+}
+.au-perm-group__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--fg-tertiary);
+  font: 500 11px/1 var(--font-sans);
+  border: 1px solid var(--border-subtle);
+}
+.au-perm-group__summary {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--fg-tertiary);
+}
+.au-perm-group__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border-subtle);
+}
+.au-perm-group__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.au-perm-group__row:last-child { border-bottom: 0; }
+.au-perm-group__row-copy { flex: 1; min-width: 0; }
+.au-perm-group__row-name {
+  font: 500 13px/1.35 var(--font-sans);
+  color: var(--fg-primary);
+}
+.au-perm-group__row-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--fg-tertiary);
+}
+.au-perm-group__hint {
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--fg-tertiary);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+/* ============================================================
+ * AuCardShiny — conic-gradient holographic border for "hero" cards.
+ * Cousin of `.au-btn--ai` (eldoraui/animated-shiny-button), adapted
+ * from pill (radius-full) to rectangle (radius-xl). Skips the dot
+ * overlay and breathing inner glow that suit a button; keeps the
+ * rotating conic ring + soft inner shimmer pass to read as "shiny
+ * premium card" rather than "blinking ad".
+ * ============================================================ */
+@property --au-card-shiny-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.au-card--shiny {
+  --au-card-shiny-bg: #ffffff;
+  --au-card-shiny-highlight: var(--au-blue-400);
+  --au-card-shiny-shine: #ffffff;
+  --au-card-shiny-duration: 6s;
+  --au-card-shiny-percent: 8%;
+
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  border-color: transparent;
+  background:
+    linear-gradient(var(--au-card-shiny-bg), var(--au-card-shiny-bg)) padding-box,
+    conic-gradient(
+      from var(--au-card-shiny-angle),
+      transparent,
+      var(--au-card-shiny-highlight) var(--au-card-shiny-percent),
+      var(--au-card-shiny-shine) calc(var(--au-card-shiny-percent) * 2),
+      var(--au-card-shiny-highlight) calc(var(--au-card-shiny-percent) * 3),
+      transparent calc(var(--au-card-shiny-percent) * 4)
+    ) border-box;
+  box-shadow: inset 0 0 0 1px var(--bg-surface);
+  animation: au-card-shiny-angle linear var(--au-card-shiny-duration) infinite;
+}
+.au-card--shiny::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    -50deg,
+    transparent 30%,
+    color-mix(in srgb, var(--au-card-shiny-highlight) 22%, transparent) 50%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  animation: au-card-shiny-sweep linear calc(var(--au-card-shiny-duration) * 1.3) infinite;
+}
+.au-card--shiny > * {
+  position: relative;
+  z-index: 1;
+}
+@keyframes au-card-shiny-angle {
+  to { --au-card-shiny-angle: 360deg; }
+}
+@keyframes au-card-shiny-sweep {
+  0%   { transform: translateX(-30%); }
+  100% { transform: translateX(30%); }
+}
+.dark .au-card--shiny {
+  --au-card-shiny-bg: var(--bg-raised);
+  --au-card-shiny-highlight: var(--au-blue-300);
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-card--shiny,
+  .au-card--shiny::after {
+    animation: none;
+  }
+}
+
+/* ============================================================
+ * Auis login — title-card landing with centered login box.
+ * Page background and wordmark switch via prefers-color-scheme;
+ * inner Aw components inherit theme from .dark on the wrapper.
+ * ============================================================ */
+.auis-login-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--bg-canvas);
+  color: var(--fg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7rem 1.5rem 4rem;
+}
+
+.auis-login-wordmark {
+  position: absolute;
+  top: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130vw;
+  aspect-ratio: 2331 / 172;
+  background-color: rgba(0, 0, 0, 0.55);
+  -webkit-mask-image: url("/assets/brand/auis-wordmark.svg");
+  mask-image: url("/assets/brand/auis-wordmark.svg");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.auis-login-page.dark .auis-login-wordmark {
+  background-color: rgba(255, 255, 255, 0.76);
+}
+
+.auis-login-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 26rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.auis-login-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.auis-login-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--fg-primary);
+}
+
+.auis-login-subtitle {
+  font-size: 0.875rem;
+  color: var(--fg-secondary);
+  margin: 0;
+}
+
+.auis-login-foot {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--fg-secondary);
+  margin: 0;
+}
+
+.auis-login-foot-link {
+  color: var(--fg-primary);
+  text-decoration: none;
+}
+
+.auis-login-foot-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ============================================================
+ * AuUserAgentOrb — `thinking` shape morph. The orb gently rotates a full
+ * turn while morphing rounded-square (radius 30%) ↔ circle (radius 50%)
+ * and back, looping until the state changes. A rounded square's corners
+ * always reach past its edge midpoints, so the squarest keyframe
+ * (rotate 0/360°, radius 30%) is the MAX overflow of the inscribed circle —
+ * ~5% per side — and the scale 0.94 dip there is what keeps it bounded,
+ * well inside the grid gap. The 30% radius floor + 0.94 scale are the
+ * knobs that cap the overflow (raising radius toward 50% or scale toward
+ * 1.0 increases it); the full circle forms at rotate 180°. The WebGL flow
+ * + hue rainbow are driven separately (shader).
+ * ============================================================ */
+@keyframes au-agent-think-morph {
+  0% {
+    border-radius: 30%;
+    transform: rotate(0deg) scale(0.94);
+  }
+  50% {
+    border-radius: 50%;
+    transform: rotate(180deg) scale(1);
+  }
+  100% {
+    border-radius: 30%;
+    transform: rotate(360deg) scale(0.94);
+  }
+}
+.au-agent-think {
+  animation: au-agent-think-morph 4s ease-in-out infinite;
+  will-change: border-radius, transform;
+}
+
+/* Cortex pensando: o hex morfa por formas geométricas (hex → círculo →
+   quadrado → triângulo) via clip-path. Pontos equidistantes (12) em cada
+   forma pra o CSS interpolar suave. Combina com hueSpeed na textura. */
+@keyframes au-cortex-think-morph {
+  0%, 100% {
+    clip-path: polygon(50.0% 0.0%, 74.1% 12.1%, 98.2% 24.1%, 100.0% 50.0%, 98.2% 75.9%, 74.1% 87.9%, 50.0% 100.0%, 25.9% 87.9%, 1.8% 75.9%, 0.0% 50.0%, 1.8% 24.1%, 25.9% 12.1%);
+  }
+  25% {
+    clip-path: polygon(50.0% 0.0%, 75.0% 6.7%, 93.3% 25.0%, 100.0% 50.0%, 93.3% 75.0%, 75.0% 93.3%, 50.0% 100.0%, 25.0% 93.3%, 6.7% 75.0%, 0.0% 50.0%, 6.7% 25.0%, 25.0% 6.7%);
+  }
+  50% {
+    clip-path: polygon(0.0% 0.0%, 33.3% 0.0%, 66.7% 0.0%, 100.0% 0.0%, 100.0% 33.3%, 100.0% 66.7%, 100.0% 100.0%, 66.7% 100.0%, 33.3% 100.0%, 0.0% 100.0%, 0.0% 66.7%, 0.0% 33.3%);
+  }
+  75% {
+    clip-path: polygon(50.0% 3.0%, 61.6% 22.4%, 73.2% 41.8%, 84.8% 61.2%, 95.2% 80.0%, 72.6% 80.0%, 50.0% 80.0%, 27.4% 80.0%, 4.8% 80.0%, 15.2% 61.2%, 26.8% 41.8%, 38.4% 22.4%);
+  }
+}
+.au-cortex-think {
+  clip-path: polygon(50.0% 0.0%, 74.1% 12.1%, 98.2% 24.1%, 100.0% 50.0%, 98.2% 75.9%, 74.1% 87.9%, 50.0% 100.0%, 25.9% 87.9%, 1.8% 75.9%, 0.0% 50.0%, 1.8% 24.1%, 25.9% 12.1%);
+  animation: au-cortex-think-morph 5s ease-in-out infinite;
+  will-change: clip-path;
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-cortex-think {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .au-agent-think {
+    animation: none;
+  }
+}
