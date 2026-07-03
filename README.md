@@ -1,4 +1,4 @@
-# Auis
+# Auis Design
 
 **Auis is a code-native design builder.** It replaces most of the design-tool loop with a live environment where the design system, the screens, the UX flows, and the review process all live **in the codebase** — and where AI agents (Claude Code, Codex, Cursor) do the building under strict, skill-encoded rules.
 
