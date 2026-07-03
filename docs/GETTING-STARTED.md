@@ -5,7 +5,7 @@ This guide takes you from `git clone` to a working design system built by your A
 ## 1. Install and run
 
 ```bash
-git clone https://github.com/gregoriopinheiro/auis.git my-product
+git clone https://github.com/gregoriombp/auis.git my-product
 cd my-product
 npm install        # postinstall generates .claude/skills + .agents/skills
 npm run dev        # http://127.0.0.1:3000

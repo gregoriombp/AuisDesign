@@ -27,7 +27,7 @@ Created by **Gregório Pinheiro** — Design Engineer UX/UI, a creator of comple
 ## Installation
 
 ```bash
-git clone https://github.com/gregoriopinheiro/auis.git
+git clone https://github.com/gregoriombp/auis.git
 cd auis
 npm install            # postinstall generates the agent skill trees (.claude/skills, .agents/skills)
 npm run dev            # Next.js on http://127.0.0.1:3000
