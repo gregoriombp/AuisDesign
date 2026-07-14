@@ -4,8 +4,8 @@
 // trigger token immediately before the caret in a <textarea>, surfaces the
 // matching agents / skills / directives, and inserts the canonical token on
 // pick. Presentation is the shared AuMentionMenu (see ReviewCommandMenu);
-// keyboard UX mirrors the Agent Studio editor (↑↓ cycle, Enter/Tab select,
-// Esc close).
+// keyboard UX follows the standard inline-picker conventions (↑↓ cycle,
+// Enter/Tab select, Esc close).
 //
 // Reads value + caret straight from the DOM element (not React state) so it
 // never lags a keystroke. The composer keeps owning the text; this hook only

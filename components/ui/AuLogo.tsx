@@ -22,7 +22,7 @@ export type AuLogoProps = {
  * Assets estáticos são para: e-mail, deck, social, favicon, exports de
  * marketing — qualquer lugar onde `currentColor` não funciona.
  */
-export const AW_LOGO_ASSETS = {
+export const AU_LOGO_ASSETS = {
   symbol: {
     positive: "/assets/brand/auis-symbol-positive.svg",
     negative: "/assets/brand/auis-symbol-negative.svg",
@@ -41,7 +41,7 @@ export const AW_LOGO_ASSETS = {
   },
 } as const
 
-export type AuLogoLockup = keyof typeof AW_LOGO_ASSETS
+export type AuLogoLockup = keyof typeof AU_LOGO_ASSETS
 export type AuLogoTone = "positive" | "negative"
 
 /* Geometria oficial do símbolo: três lâminas em leque, grudadas na base,

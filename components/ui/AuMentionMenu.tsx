@@ -6,17 +6,16 @@ import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 /**
- * AuMentionMenu — o menu de menções (@) do editor de checkpoints.
+ * AuMentionMenu — the mention (@) menu for the checkpoint editor.
  *
- * Card compacto com as tools nativas no topo, uma seção de Integrações com
- * drill-in (chevron) e o atalho "+ Nova Integração" no rodapé. O item ativo
- * (teclado ou hover) vira uma pill invertida (preta) — referência de design
- * do Agent Studio.
+ * A compact card with the native tools on top, an Integrations section with
+ * drill-in (chevron) and the "+ New Integration" shortcut in the footer. The
+ * active item (keyboard or hover) becomes an inverted (black) pill.
  *
- * Componente PURAMENTE presentacional: quem manda é o dono (o editor) — ele
- * controla `activeKey`, decide o que cada pick faz (inserir, drill-in,
- * abrir modal) e posiciona o card. Assim o mesmo visual serve para o menu
- * de variáveis ({{) e qualquer outro picker inline.
+ * A PURELY presentational component: the owner (the editor) is in charge — it
+ * controls `activeKey`, decides what each pick does (insert, drill-in, open a
+ * modal) and positions the card. That way the same visual serves the variables
+ * menu ({{) and any other inline picker.
  */
 
 export type AuMentionMenuEntry = {
