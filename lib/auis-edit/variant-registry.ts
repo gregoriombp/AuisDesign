@@ -35,7 +35,7 @@ function opt(prefix: string, value: string, label: string): VariantOption {
 }
 
 // An option that is the component's default and carries NO modifier class, but
-// whose prop value is real (e.g. AuAvatar size="md" → no `au-avatar--md`).
+// whose prop value is real (e.g. AuModal size="md" → no `au-modal--md`).
 function bare(value: string, label: string): VariantOption {
   return { value, label, className: "" }
 }
@@ -44,14 +44,12 @@ const AU_BTN = "au-btn--"
 const AU_CARD = "au-card--"
 const AU_PILL = "au-pill--"
 const AU_ALERT = "au-alert--"
-const AU_AVATAR = "au-avatar--"
 const AU_PROGRESS = "au-progress--"
 const AU_TABS = "au-tabs--"
 const AU_TOAST = "au-toast--"
 const AU_INPUT = "au-input--"
 const AU_SHEET = "au-sheet--"
 const AU_MODAL = "au-modal--"
-const AU_CHAT = "au-chat--"
 
 export const COMPONENT_REGISTRY: ComponentSpec[] = [
   {
@@ -131,20 +129,6 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
           opt(AU_ALERT, "warning", "Warning"),
           opt(AU_ALERT, "danger", "Danger"),
         ],
-      },
-    ],
-  },
-  {
-    component: "AuAvatar",
-    rootClass: "au-avatar",
-    label: "Avatar",
-    axes: [
-      {
-        key: "size",
-        label: "Size",
-        // AuAvatarSize = "sm" | "md" | "lg"; "md" is the default and has no
-        // class (`size !== "md" && au-avatar--${size}`).
-        options: [opt(AU_AVATAR, "sm", "SM"), bare("md", "MD"), opt(AU_AVATAR, "lg", "LG")],
       },
     ],
   },
@@ -249,21 +233,6 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "size",
         label: "Size",
         options: [bare("md", "MD"), opt(AU_MODAL, "cockpit", "Cockpit")],
-      },
-    ],
-  },
-  {
-    component: "AuChatBubble",
-    rootClass: "au-chat",
-    label: "Chat bubble",
-    axes: [
-      {
-        key: "author",
-        label: "Author",
-        options: [
-          opt(AU_CHAT, "agent", "Agent"),
-          opt(AU_CHAT, "user", "User"),
-        ],
       },
     ],
   },

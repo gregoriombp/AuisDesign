@@ -66,7 +66,7 @@ skills/registry.json + CATALOG.md        .claude/skills/<name>/   (Claude Code)
 
 ## Stack
 
-Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `globals.css`, no `tailwind.config`) · shadcn/ui (lowercase primitives + `Au*` wrapper) · Material Symbols via `components/ui/Icon.tsx` · Zustand · framer-motion · `@xyflow/react` (flows). MCPs in `.mcp.json` (figma, shadcn, playwright, mobbin).
+Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `globals.css`, no `tailwind.config`) · shadcn/ui (lowercase primitives + `Au*` wrapper) · Material Symbols via `components/ui/Icon.tsx` · Zustand · `@xyflow/react` (flows). MCPs in `.mcp.json` (figma, shadcn, playwright, mobbin).
 
 ## Branding & theming
 
