@@ -1,213 +1,213 @@
 ---
 name: auis-ux-writing
-description: Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits each one against the Auis PRODUCT voice (it solves, it doesn't sell), proposes rewrites with rationale, waits for approval, and applies surgically (text only, never layout). The voice is inspired by ElevenLabs (efficiency, simplicity, clarity) and OpenAI (warm, concise, confident, never sycophantic), adapted to PT-BR and anchored in PRODUCT_CONTEXT.md. Use when the user says "/auis-ux-writing", "apply the ux writing", "review the copy on this page", "look at the text/microcopy of /route", "improve the ux writing", "review the labels/errors/empty states", "make this screen match the product tone", or pastes a route/link/text asking for an interface-writing review. This is NOT the marketing/site voice (that is `auis-brand-voice`) and it does NOT touch layout/structure (that is `ux-page-rework`).
-argument-hint: "<rota(s), link(s), ou cole o texto>"
+description: Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits each one against the Auis PRODUCT voice (it solves, it doesn't sell), proposes rewrites with rationale, waits for approval, and applies surgically (text only, never layout). The voice is inspired by ElevenLabs (efficiency, simplicity, clarity) and OpenAI (warm, concise, confident, never sycophantic), and is anchored in PRODUCT_CONTEXT.md. Use when the user says "/auis-ux-writing", "apply the ux writing", "review the copy on this page", "look at the text/microcopy of /route", "improve the ux writing", "review the labels/errors/empty states", "make this screen match the product tone", or pastes a route/link/text asking for an interface-writing review. This is NOT the marketing/site voice (that is `auis-brand-voice`) and it does NOT touch layout/structure (that is `ux-page-rework`).
+argument-hint: "<route(s), link(s), or paste the text>"
 ---
 
-# UX Writing — Auis (produto)
+# UX Writing — Auis (product)
 
-Uma passada de UX writing dentro do produto. O usuário aponta pra uma rota, várias, ou cola links/texto; você lê as strings reais, audita contra a voz do produto, propõe reescritas com motivo, e — depois de aprovado — aplica **só o texto**. Sem tocar em layout, props ou lógica.
+A UX writing pass inside the product. The user points at one route, several, or pastes links/text; you read the real strings, audit them against the product voice, propose rewrites with a reason, and — once approved — apply **text only**. No layout, no props, no logic.
 
-## O que esta skill É (e o que NÃO é)
+## What this skill IS (and what it is NOT)
 
-- **É** uma revisão de microcopy in-product: labels, botões, headings, placeholders, help text, empty states, erros, toasts, tooltips, confirmações, status.
-- **Não é marketing.** Voz de site/redes/copy de venda é `auis-brand-voice`. Regra-âncora do repo: **site vende, produto resolve** (`PRODUCT_CONTEXT.md` → "Voz: site ≠ produto"). Esta skill é a voz do **produto**. Slogan de venda dentro de UI é antipadrão.
-- **Não mexe em layout.** Reorganizar hierarquia, trocar componente, propor duas direções em branches — isso é `ux-page-rework`. Aqui é cirúrgico: troca string, mantém tudo o resto.
-- **Não é a global `ux-copy`.** Aquela é genérica e em inglês. Esta é Auis, PT-BR, ciente das rotas e aplicada nos arquivos reais.
+- **It IS** an in-product microcopy review: labels, buttons, headings, placeholders, help text, empty states, errors, toasts, tooltips, confirmations, status.
+- **It is NOT marketing.** Site/social/sales copy is `auis-brand-voice`. The repo's anchor rule: **the site sells, the product solves** (`PRODUCT_CONTEXT.md` → "Voice: site ≠ product"). This skill is the **product** voice. A sales slogan inside the UI is an antipattern.
+- **It does NOT touch layout.** Reorganizing hierarchy, swapping a component, proposing two directions on branches — that is `ux-page-rework`. Here it is surgical: swap the string, keep everything else.
+- **It is NOT the generic `ux-copy`.** That one is generic and product-blind. This one is Auis: it follows `PRODUCT_CONTEXT.md`, knows the routes, and edits the real files.
 
 ---
 
-## A voz (o spec)
+## The voice (the spec)
 
-Síntese de três fontes. As duas primeiras dão o *princípio*; a terceira manda no *resultado* — quando houver conflito, a voz do Auis no produto ganha.
+A synthesis of three sources. The first two give the *principle*; the third rules the *result* — when they conflict, the Auis product voice wins.
 
-### Os 4 pilares (ElevenLabs)
+### The 4 pillars (ElevenLabs)
 
-1. **Eficiência** — máximo de significado no mínimo de palavras. Respeite o tempo de quem lê.
-2. **Simplicidade** — palavra do dia a dia, não de cartório. "usar" > "utilizar", "fazer" > "efetuar", "por" > "através de".
-3. **Clareza** — sem juízo de valor não-verificável. Nada de "poderoso", "revolucionário", "de ponta", "inteligente" como enfeite. Deixe o leitor concluir.
-4. **Frescor** — vá direto ao ponto. Sem aquecimento ("Nesse momento, é importante notar que…").
+1. **Efficiency** — maximum meaning in the fewest words. Respect the reader's time.
+2. **Simplicity** — everyday words, not bureaucratic ones. "use" > "utilize", "do" > "perform", "by" > "by means of".
+3. **Clarity** — no unverifiable value judgments. Nothing like "powerful", "revolutionary", "cutting-edge", "intelligent" as decoration. Let the reader draw the conclusion.
+4. **Freshness** — get to the point. No warm-up ("At this time, it is important to note that…").
 
-### As 3 regras (Orwell, via ElevenLabs)
+### The 3 rules (Orwell, via ElevenLabs)
 
-1. Não use palavra longa quando uma curta resolve.
-2. Se dá pra cortar uma palavra, corte.
-3. Não use voz passiva quando a ativa serve.
+1. Never use a long word where a short one will do.
+2. If it is possible to cut a word out, cut it out.
+3. Never use the passive where you can use the active.
 
-### A camada OpenAI
+### The OpenAI layer
 
-- **Caloroso, conciso, confiante, nunca bajulador.** Calor na intenção, concisão na forma.
-- **Linguagem simples**, mesmo no técnico.
-- **Clareza calma** com um traço leve de personalidade — mas contido, é produto enterprise. Nunca fofo, nunca puxa-saco ("Ótima escolha!", "Você é incrível!").
+- **Warm, concise, confident, never sycophantic.** Warmth in the intent, concision in the form.
+- **Plain language**, even when technical.
+- **Calm clarity** with a light trace of personality — but restrained; this is an enterprise product. Never cute, never fawning ("Great choice!", "You're amazing!").
 
-### O tom Auis no produto (manda aqui)
+### The Auis product tone (this one rules)
 
-Direto do `PRODUCT_CONTEXT.md`. O produto **resolve** — cada texto ajuda a entender o que algo faz, por que existe, e o que acontece ao clicar.
+Straight from `PRODUCT_CONTEXT.md`. The product **solves** — every string helps the reader understand what something does, why it exists, and what happens on click.
 
-- **Imperativo amigável + objetivo claro:** "Defina o objetivo principal para começar a configurar o comportamento do agente."
-- **Mecânica explícita** (o produto sempre diz como funciona por baixo): "A cada 5 minutos, o sistema verifica todas as conversas ativas da campanha, identificando leads que não responderam."
-- **Empty state que ensina, não vende:** "Crie sua primeira conversa para testar o seu agente."
-- **Status calmo:** "Salvo como rascunho às 13:48".
-- **Erro que orienta, não julga:** "Prompt de comando vazio. O prompt é obrigatório para publicar o agente."
-- **Recomendação ancorada em razão:** "As configurações de checkpoint não estão otimizadas para o objetivo do agente."
+- **Friendly imperative + clear objective:** "Set the main objective to start configuring the agent's behavior."
+- **Explicit mechanics** (the product always says how it works underneath): "Every 5 minutes, the system checks all active conversations in the campaign and identifies leads that haven't replied."
+- **Empty state that teaches, doesn't sell:** "Create your first conversation to test your agent."
+- **Calm status:** "Saved as draft at 13:48".
+- **Error that guides, doesn't judge:** "Command prompt is empty. The prompt is required to publish the agent."
+- **Recommendation anchored in a reason:** "The checkpoint settings aren't optimized for the agent's objective."
 
-> Antes de reescrever, **leia 2-3 strings que já existem na rota.** O corpus canônico está no `PRODUCT_CONTEXT.md`. Copie o tom de lá, não invente um novo.
+> Before rewriting, **read 2-3 strings that already exist on the route.** The canonical corpus is in `PRODUCT_CONTEXT.md` (§ Canonical copy corpus). Copy the tone from there — don't invent a new one.
 
-### Adaptação PT-BR (não importe o inglês)
+### Language & locale (follow the product, don't import English)
 
-O princípio vem de fora; o texto é PT-BR. Não traga idiomatismo nem formato americano.
+The principles above are language-independent. The **output language is not yours to pick**: read `PRODUCT_CONTEXT.md` → **§ Language & locale** for the product's copy language and its date, number/currency, and casing conventions, and write to that. Never import English/US formatting or idiom when the product's locale says otherwise.
 
-- **Voz ativa, tempo presente:** "O agente envia o follow-up" > "O follow-up será enviado pelo agente". "A cada 5 min o sistema verifica" > "as conversas serão verificadas".
-- **Sem gerúndio de call center:** "Vamos te avisar" / "Avisamos você" > "Estaremos te avisando".
-- **Fale com "você", não com "o usuário".**
-- **Sentence case** em botão, label e título. Nada de "Publicar Agente Agora".
-- **Formato PT-BR:** "às 13:48", "09/04/2026", "R$ 344 mil", vírgula decimal. (ElevenLabs usa data US — ignore isso.)
-- **Corte o cartório, mantenha a precisão.** O produto é técnico-mas-digestível: "Configure", "Defina", "Selecione" ficam (são imperativos claros). O alvo é o burocratês, não o termo técnico.
+- **Copy language:** whatever `PRODUCT_CONTEXT.md` declares. This skill follows the product's language — it does not impose one.
+- **Date, number, currency:** the formats declared in § Language & locale. A source you're borrowing a principle from (ElevenLabs, OpenAI) may use US formats — take the principle, not the format.
+- **Casing:** as declared in § Language & locale (typically sentence case for buttons, labels, and headings; no decorative ALL CAPS).
+- **Active voice, present tense:** "The agent sends the follow-up" > "The follow-up will be sent by the agent". "Every 5 min the system checks" > "the conversations will be checked".
+- **Talk to "you", not to "the user".**
+- **Cut the bureaucracy, keep the precision.** The product is technical-but-digestible: "Configure", "Set", "Select" stay (they are clear imperatives). The target is bureaucratic filler, not the technical term.
 
-Trocas rápidas (burocratês → claro):
+Quick swaps (bureaucratic → clear):
 
-| Cartório | Claro |
+| Bureaucratic | Clear |
 |---|---|
-| utilizar | usar |
-| realizar / efetuar | fazer |
-| através de | por / via |
-| a fim de / com o intuito de | para |
-| no momento em que | quando |
-| possui | tem |
-| é necessário que você | você precisa / basta |
-| efetuar a configuração de | configurar |
-| proceder com | seguir / fazer |
+| utilize | use |
+| perform / execute | do |
+| by means of | by / via |
+| in order to / for the purpose of | to |
+| at the moment when | when |
+| possesses | has |
+| it is necessary that you | you need to / just |
+| perform the configuration of | configure |
+| proceed with | follow / do |
 
-### Antipadrões (rejeite de cara)
+> The table illustrates the *principle* in English. Apply the same principle in the product's own language — every language has its own bureaucratic register to cut.
 
-- Slogan de marketing em UI ("Você dá o objetivo, nós construímos" não vai em label).
-- Adjetivo sem dado: "poderoso", "completo", "robusto", "inteligente" (como enfeite), "de última geração".
-- "Transformar", "revolucionar", "potencializar".
-- "Em breve" como conteúdo de feature (Coming Soon é página, não copy de label).
-- Placeholder textual ("Imagine que aqui tem X").
-- Passiva e futuro onde o presente serve ("será exibido" → "aparece").
-- Bajulação ("Boa escolha!", "Perfeito!") e exclamação à toa.
-- Title Case e CAIXA ALTA decorativa em PT-BR.
-- Tooltip que repete o óbvio do label.
-- `font-mono` como decoração (mono só pra código real exibido em bloco).
-- Inventar termo fora do vocabulário canônico (ver abaixo).
+### Antipatterns (reject on sight)
 
-### Vocabulário canônico — NÃO reescrever
+- Marketing slogan in the UI (a tagline like "You set the objective, we build it" does not belong in a label).
+- Adjective without data: "powerful", "complete", "robust", "intelligent" (as decoration), "next-generation".
+- "Transform", "revolutionize", "supercharge".
+- "Coming soon" as feature content (Coming Soon is a page, not label copy).
+- Textual placeholder ("Imagine there's an X here").
+- Passive and future tense where the present works ("will be displayed" → "appears").
+- Flattery ("Good choice!", "Perfect!") and gratuitous exclamation marks.
+- Decorative Title Case and ALL CAPS (follow the casing declared in § Language & locale).
+- A tooltip that repeats what the label already says.
+- `font-mono` as decoration (mono only for real code shown in a block).
+- Inventing a term outside the protected vocabulary (see below).
 
-Estes termos são fixos (Figma + `PRODUCT_CONTEXT.md`). Trate como protegidos, não "melhore":
+### Protected vocabulary — do NOT rewrite
 
-`Agente`, `Agente Core™`, `Objetivo`, `Checkpoint`, `Prompt do agente`, `AOPs`, `Habilidades`, `Variáveis`, `Knowledge layers` / `Base de conhecimento`, `Memory Base`, `Templates`, `Triggers` / `Eventos acionadores`, `Canais`, `Follow-up`, `Playground`, `Handoff` / `Transferência para humano`, `Insights`, `Qualidade do agente`, `Compatibilidade`, `Cortex`. Dentro do produto é sempre **"Agente"** (nunca "Specialist" — isso é site).
+The product's fixed terms are declared in `PRODUCT_CONTEXT.md` → **§ Protected vocabulary** (plus the Figma source of truth, when the product has one). Treat every term listed there as protected: never translate it, never "improve" it, never swap it for a synonym you find nicer. When the site and the product use different words for the same thing, the **product** term wins inside the UI — the marketing term belongs to `auis-brand-voice`. If the word you want isn't on that list, you're inventing product vocabulary: flag it as a product decision instead of shipping it.
 
 ---
 
-## Padrões de copy por tipo de elemento
+## Copy patterns by element type
 
-| Elemento | Estrutura | Exemplo bom |
+| Element | Structure | Good example |
 |---|---|---|
-| **Botão / CTA** | verbo + objeto; diga o resultado | "Publicar agente" (não "Enviar", não "OK") |
-| **Empty state** | o que é + por que está vazio + como começar | "Crie sua primeira conversa para testar o seu agente." |
-| **Erro** | o que aconteceu + por quê + como resolver | "Nenhuma variável encontrada. Adicione pelo menos uma para o agente funcionar." |
-| **Help text** | o que faz + como funciona por baixo | "Define a janela de envio (ex: 08:00–22:00). Mensagens fora dela são reagendadas para o próximo horário permitido." |
-| **Status** | factual e calmo | "Salvo como rascunho às 13:48" · "8 de 9 gatilhos ativos" |
-| **Confirmação** | ação clara + consequência; botões com o verbo | "Excluir 3 checkpoints? Isso não pode ser desfeito." → "Excluir" / "Cancelar" |
-| **Toast** | resultado em uma linha | "Agente publicado." (não "Sucesso!") |
-| **Tooltip** | só o que o label não diz | (no `@`) "Insere uma variável do sistema" |
-| **Label de campo** | substantivo curto | "Objetivo do agente" (não "Insira aqui o objetivo do seu agente") |
+| **Button / CTA** | verb + object; say the outcome | "Publish agent" (not "Submit", not "OK") |
+| **Empty state** | what it is + why it's empty + how to start | "Create your first conversation to test your agent." |
+| **Error** | what happened + why + how to fix it | "No variables found. Add at least one for the agent to work." |
+| **Help text** | what it does + how it works underneath | "Sets the sending window (e.g. 08:00–22:00). Messages outside it are rescheduled to the next allowed slot." |
+| **Status** | factual and calm | "Saved as draft at 13:48" · "8 of 9 triggers active" |
+| **Confirmation** | clear action + consequence; buttons carry the verb | "Delete 3 checkpoints? This can't be undone." → "Delete" / "Cancel" |
+| **Toast** | outcome in one line | "Agent published." (not "Success!") |
+| **Tooltip** | only what the label doesn't say | (on `@`) "Inserts a system variable" |
+| **Field label** | short noun | "Agent objective" (not "Enter your agent's objective here") |
 
 ---
 
 ## Workflow
 
-### Fase 0 — Contexto (antes de tudo)
+### Phase 0 — Context (before anything else)
 
-1. **Regras do repo:** `AGENTS.md` (hard rules) e a seção **"Voz: site ≠ produto"** + vocabulário do `PRODUCT_CONTEXT.md`.
-2. **Memory do usuário:** `~/.claude/projects/<repo-encoded>/memory/MEMORY.md`, se existir, só como contexto consultivo. Se conflitar com `AGENTS.md`, ignore a memória.
-3. **git status.** Se o working tree estiver sujo, pergunte (commita/stash/ignora). Se ignorar: **nunca** `git add .` / `-A` — sempre arquivo a arquivo.
-4. **Dev server:** se algo roda em `:3000`, deixe quieto (hot reload pega). Não mate (Next 16 bloqueia 2ª instância).
+1. **Repo rules:** `AGENTS.md` (hard rules) and, in `PRODUCT_CONTEXT.md`, **§ Language & locale**, **§ Voice: site ≠ product**, and **§ Protected vocabulary**.
+2. **User memory:** `~/.claude/projects/<repo-encoded>/memory/MEMORY.md`, if it exists, as advisory context only. If it conflicts with `AGENTS.md`, ignore the memory.
+3. **git status.** If the working tree is dirty, ask (commit/stash/ignore). If ignoring: **never** `git add .` / `-A` — always file by file.
+4. **Dev server:** if something is running on `:3000`, leave it alone (hot reload picks it up). Don't kill it (Next 16 blocks a 2nd instance).
 
-### Fase 1 — Resolver os alvos
+### Phase 1 — Resolve the targets
 
-A entrada vem de três jeitos. Classifique cada item:
+Input arrives in three shapes. Classify each item:
 
-- **Rota / link interno** (`/agent-studio`, `127.0.0.1:3000/...`, `localhost:3000/...`, `?step=`) → **ALVO**. Mapeie pro arquivo: `app/<rota>/page.tsx` + `_components/` locais. Se a rota tem tabs/sub-rotas, leia o arquivo de tabs e liste as filhas.
-- **Link externo** (elevenlabs.io, openai.com, qualquer site) → **REFERÊNCIA de voz**, nunca alvo. Absorva o princípio, declare que é inferência, e **não edite nada de lá**.
-- **Figma** (`figma.com/...`) → **fonte de copy canônica** do produto. Use o Figma MCP pra ler o texto oficial (Agent Studio / Memory Base têm copy canônica lá) e alinhe a rota a ele.
-- **Texto colado solto** (sem rota) → revise no chat e devolva; só edite arquivo se o usuário apontar onde.
+- **Route / internal link** (`/agent-studio`, `127.0.0.1:3000/...`, `localhost:3000/...`, `?step=`) → **TARGET**. Map it to the file: `app/<route>/page.tsx` + local `_components/`. If the route has tabs/sub-routes, read the tabs file and list the children.
+- **External link** (elevenlabs.io, openai.com, any site) → voice **REFERENCE**, never a target. Absorb the principle, declare that it's inference, and **edit nothing from there**.
+- **Figma** (`figma.com/...`) → the product's **canonical copy source**. Use the Figma MCP to read the official text (Agent Studio / Memory Base have canonical copy there) and align the route to it.
+- **Loose pasted text** (no route) → review it in chat and hand it back; only edit a file if the user points at one.
 
-**Liste os arquivos que vai tocar, com o papel de cada um, e confirme** antes de seguir. Se inferiu errado, o usuário corrige aqui.
+**List the files you're going to touch, with the role of each, and confirm** before moving on. If you inferred wrong, the user corrects you here.
 
-Modos:
-- **Auditar** ("olha o ux writing de X") → entrega o diagnóstico e **pergunta** se aplica.
-- **Aplicar** ("aplica o ux writing em X") → segue até a Fase 4, sempre passando pelo gate da Fase 3.
+Modes:
+- **Audit** ("look at the ux writing of X") → deliver the diagnosis and **ask** whether to apply.
+- **Apply** ("apply the ux writing to X") → go through to Phase 4, always passing the Phase 3 gate.
 
-### Fase 2 — Extrair as strings
+### Phase 2 — Extract the strings
 
-Puxe **só o texto que o usuário vê**: headings, labels, placeholders, texto de botão, help/descrição, empty states, mensagens de erro, toasts, tooltips, `aria-label` visível.
+Pull **only the text the user sees**: headings, labels, placeholders, button text, help/description, empty states, error messages, toasts, tooltips, visible `aria-label`.
 
-Não toque em: nomes de variável, chaves de objeto, `console.log`, comentários, imports, e **dados mock que são conteúdo real** (nomes de agente, empresas, métricas do `PRODUCT_CONTEXT.md`) — a menos que sejam claramente copy de UI.
+Don't touch: variable names, object keys, `console.log`, comments, imports, and **mock data that is real content** (agent names, companies, metrics from `PRODUCT_CONTEXT.md`) — unless it's clearly UI copy.
 
-Se as strings forem centralizadas (arquivo de i18n/constantes), edite **lá**; se forem inline no JSX, edite inline.
+If the strings are centralized (an i18n/constants file), edit **there**; if they're inline in the JSX, edit them inline.
 
-### Fase 3 — Auditar + propor (GATE)
+### Phase 3 — Audit + propose (GATE)
 
-Pra cada string problemática, monte a tabela. **Não liste o que já está bom** — churn de copy boa é busywork (e o usuário detesta over-spec). Marque severidade em texto, **sem emoji**:
+For each problematic string, build the table. **Don't list what's already good** — churning good copy is busywork (and the user hates over-spec). Mark severity as text, **no emoji**:
 
 ```
-Página: /agent-studio  ·  arquivo: app/agent-studio/_components/Header.tsx
+Page: /agent-studio  ·  file: app/agent-studio/_components/Header.tsx
 
-| Onde | Atual | Problema | Proposto | Sev |
+| Where | Current | Problem | Proposed | Sev |
 |---|---|---|---|---|
-| Botão header | "Submeter" | verbo vago, não diz o resultado | "Publicar agente" | Corrigir |
-| Help do objetivo | "Utilize este campo para realizar a definição do objetivo" | cartório + passiva | "Defina o objetivo do agente." | Corrigir |
-| Tooltip do @ | "Clique para inserir variável aqui" | repete o óbvio | "Insere uma variável do sistema" | Polir |
+| Header button | "Submit" | vague verb, doesn't say the outcome | "Publish agent" | Fix |
+| Objective help | "Utilize this field to perform the definition of the objective" | bureaucratic + passive | "Set the agent's objective." | Fix |
+| @ tooltip | "Click to insert a variable here" | repeats the obvious | "Inserts a system variable" | Polish |
 ```
 
-Feche com **"Deixei como está (já no tom):"** + 2-3 exemplos, pra mostrar que não saiu reescrevendo tudo.
+Close with **"Left as is (already on tone):"** + 2-3 examples, to show you didn't go rewriting everything.
 
-**PARE.** Espere aprovação. O usuário pode aprovar tudo, só os "Corrigir", cortar, ou redirecionar. Se algo depende de decisão de produto (termo novo, mudança de fluxo), **não decida sozinho** — marque como "precisa de decisão" e siga sem.
+**STOP.** Wait for approval. The user can approve everything, only the "Fix" items, cut some, or redirect. If something depends on a product decision (a new term, a flow change), **don't decide alone** — mark it "needs a decision" and move on without it.
 
-### Fase 4 — Aplicar (cirúrgico)
+### Phase 4 — Apply (surgical)
 
-1. **Edits string por string** nos `.tsx`. Só texto. Não mexa em estrutura, props, classes, lógica.
-2. **Preserve interpolação:** `{{lead_name}}`, `${var}`, template literals, `<strong>`, pluralização. O texto muda em volta da variável, a variável fica.
-3. **Não crie token nem componente.** Se a copy nova precisar de espaço/quebra que o componente não dá, **reporte** — não force `text-[..]` nem refatore o componente (isso é outra skill).
-4. **Valide antes de fechar:**
-   - `npx tsc --noEmit` limpo.
-   - Pra cada rota tocada, se o dev server estiver de pé: `curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3000<rota>` → espera 200/3xx. (Verificação visual, se pedida, é via Playwright MCP apontando para `127.0.0.1:3000`.)
-5. **Stage seletivo:** `git add <arquivo>` por arquivo tocado. **Sem commit, sem push** a menos que o usuário peça (aí o estilo é `copy(<rota>): ...`).
+1. **Edit string by string** in the `.tsx`. Text only. Don't touch structure, props, classes, or logic.
+2. **Preserve interpolation:** `{{lead_name}}`, `${var}`, template literals, `<strong>`, pluralization. The text changes around the variable; the variable stays.
+3. **Don't create a token or a component.** If the new copy needs space/wrapping the component doesn't give, **report it** — don't force `text-[..]` and don't refactor the component (that's another skill).
+4. **Validate before closing:**
+   - `npx tsc --noEmit` clean.
+   - For each route touched, if the dev server is up: `curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3000<route>` → expect 200/3xx. (Visual verification, if asked for, is via the Playwright MCP pointing at `127.0.0.1:3000`.)
+5. **Selective staging:** `git add <file>` for each file touched. **No commit, no push** unless the user asks (then the style is `copy(<route>): ...`).
 
-### Fase 5 — Reportar
+### Phase 5 — Report
 
-- O que mudou, agrupado por rota/arquivo.
-- Os princípios aplicados (1 linha: "cortei passiva e cartório, ativei verbos de CTA").
-- O que ficou flagado mas não mudou (precisa de decisão de produto, ou copy canônica que veio do Figma).
-- O que **não** foi tocado (layout, tokens, componentes) — pra deixar claro o escopo.
+- What changed, grouped by route/file.
+- The principles applied (1 line: "cut the passive voice and the bureaucratic filler, activated the CTA verbs").
+- What got flagged but not changed (needs a product decision, or canonical copy that came from Figma).
+- What was **not** touched (layout, tokens, components) — to make the scope clear.
 
 ---
 
-## Regras do repo (herdadas — valem sempre)
+## Repo rules (inherited — always apply)
 
-- **Tokens são sagrados.** Esta skill não cria nem toca em token. Proibido `text-[#hex]`, `p-[Npx]`, etc.
-- **Componentes antes de código.** Não crie componente pra acomodar copy; reporte o aperto.
-- **Desktop-only.** Não escreva copy sobre "deslize", "toque", "no celular".
-- **Sem emoji** em UI, doc ou saída de agente, salvo pedido explícito ou asset de origem.
-- **Material Symbols** é o ícone padrão; `font-mono` só pra código real.
-- **Português do produto** segue o corpus existente; não anglicize ("deletar"/"excluir" conforme o repo já usa — confira antes).
+- **Tokens are sacred.** This skill neither creates nor touches a token. `text-[#hex]`, `p-[Npx]`, etc. are forbidden.
+- **Components before code.** Don't create a component to accommodate copy; report the squeeze.
+- **Desktop-only.** Don't write copy about "swipe", "tap", "on your phone".
+- **No emoji** in UI, docs, or agent output, unless explicitly asked for or already present in a source asset.
+- **Material Symbols** is the default icon; `font-mono` only for real code.
+- **The product's language** follows the existing corpus. Don't drift into another language and don't swap a term the repo already uses for a synonym you prefer — check `PRODUCT_CONTEXT.md` → § Language & locale and the strings already on the route first.
 
 ## Edge cases
 
-- **Working tree sujo de outro agente** → `git add` por arquivo, nunca `-A`.
-- **Linter format-on-save** pode reescrever no meio → releia o arquivo antes do próximo Edit.
-- **String repetida em N lugares** (mesmo label em vários arquivos) → troque em todos pra não criar inconsistência; liste todos no report.
-- **Copy que veio do Figma** (Agent Studio / Memory Base) é canônica → alinhe a rota ao Figma, não o contrário; em divergência, pergunte.
-- **Mobbin/Dribbble** como referência → WebFetch falha (paywall). Peça screenshot ou use inferência declarada. Mas referência aqui é de **voz/princípio**, não de visual.
-- **Rota é redirect** (`page.tsx` que só faz `redirect()`) → trabalhe nas sub-rotas, não no redirect.
+- **Working tree dirtied by another agent** → `git add` per file, never `-A`.
+- **Format-on-save linter** may rewrite mid-flight → re-read the file before the next Edit.
+- **String repeated in N places** (same label across several files) → change it everywhere so you don't create an inconsistency; list them all in the report.
+- **Copy that came from Figma** (Agent Studio / Memory Base) is canonical → align the route to Figma, not the other way around; if they diverge, ask.
+- **Mobbin/Dribbble** as a reference → WebFetch fails (paywall). Ask for a screenshot or use declared inference. But the reference here is **voice/principle**, not visual.
+- **Route is a redirect** (`page.tsx` that only calls `redirect()`) → work on the sub-routes, not on the redirect.
 
-## Referências de voz (declaradas, não copiadas)
+## Voice references (declared, not copied)
 
-A inspiração informa o **princípio**, não o texto — assim como "referência informa estrutura, não estilo" no resto do repo.
+The inspiration informs the **principle**, not the text — just like "reference informs structure, not style" everywhere else in the repo.
 
-- **ElevenLabs** — eficiência, simplicidade, clareza, as 3 regras, sentence case, sem juízo de valor vazio. ([guidelines](https://11labs-guides-dev.a17.dev/))
-- **OpenAI** — caloroso, conciso, confiante, nunca bajulador; linguagem simples; clareza calma com personalidade contida.
-- **Stripe** — preciso, técnico-mas-humano, nunca grita (já é referência da `auis-brand-voice`).
-- **Manda no resultado:** a voz do produto Auis no `PRODUCT_CONTEXT.md` — **resolve, não vende**.
+- **ElevenLabs** — efficiency, simplicity, clarity, the 3 rules, sentence case, no empty value judgments. ([guidelines](https://11labs-guides-dev.a17.dev/))
+- **OpenAI** — warm, concise, confident, never sycophantic; plain language; calm clarity with restrained personality.
+- **Stripe** — precise, technical-but-human, never shouts (already a reference for `auis-brand-voice`).
+- **Rules the result:** the Auis product voice in `PRODUCT_CONTEXT.md` — **it solves, it doesn't sell**.

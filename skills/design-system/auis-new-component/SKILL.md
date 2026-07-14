@@ -1,7 +1,7 @@
 ---
 name: auis-new-component
 description: >
-  Add or update an Auis Auis design system component using existing
+  Add or update an Auis design system component using existing
   tokens, shadcn primitives where appropriate, a showcase page, and navigation.
 ---
 

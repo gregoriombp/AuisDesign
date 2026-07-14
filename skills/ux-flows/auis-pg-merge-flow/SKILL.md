@@ -7,71 +7,69 @@ description: >
   a readable diff, analyzes the UX viability of each change, asks for
   selective approval, and applies it. Always records an entry in
   `updates[]` when there is a structural change. Use when the user says
-  "mesclar flow do PG" (merge the PG flow), "atualizar flow com o
-  .awflow" (update the flow with the .awflow), "aplicar mudanças do
-  design no flow X" (apply the design changes to flow X), "diff entre o
-  flow local e o do PG" (diff between the local flow and the PG one), or
-  attaches a `.awflow.json` whose slug already exists in `ux-flows/`. Do
+  "merge the PG flow", "update the flow with the .awflow", "apply the
+  design changes to flow X", "diff between the local flow and the PG one",
+  or attaches a `.awflow.json` whose slug already exists in `ux-flows/`. Do
   NOT use when the flow does not yet exist locally — for that case, use
   `auis-pg-create-flow`.
 ---
 
 # Auis PG — Merge `.awflow.json` into existing flow
 
-Compara um export do PG com o flow local correspondente, mostra o
-delta, classifica cada mudança (estrutural vs cosmética vs
-problemática em UX) e aplica seletivamente sob aprovação. Adiciona a
-entrada de changelog quando há mudança estrutural.
+Compares a PG export against the corresponding local flow, shows the delta,
+classifies each change (structural vs cosmetic vs problematic in UX terms)
+and applies it selectively under approval. Adds the changelog entry when
+there is a structural change.
 
-## Pré-requisitos
+## Prerequisites
 
-- `app/auis/styleguide/ux-flows/_lib/awflow-import.ts` existe.
-- O flow alvo já existe em `app/auis/styleguide/ux-flows/<slug>/page.tsx`.
-- Se não existe, pare e redirecione pra
+- `app/auis/styleguide/ux-flows/_lib/awflow-import.ts` exists.
+- The target flow already exists at `app/auis/styleguide/ux-flows/<slug>/page.tsx`.
+- If it doesn't exist, stop and redirect to
   [`auis-pg-create-flow`](../auis-pg-create-flow/SKILL.md).
 
 ---
 
-## Step 1 — Carregar arquivo + flow local
+## Step 1 — Load the file + the local flow
 
-1. Carregue o `.awflow.json` (path, conteúdo colado, ou anexo) e
-   parse via `parseAuFlowFile`. Pare em erro.
-2. Resolva o slug local:
+1. Load the `.awflow.json` (path, pasted content, or attachment) and
+   parse it via `parseAuFlowFile`. Stop on error.
+2. Resolve the local slug:
    - default: `file.flow.id`
-   - se o usuário usar um slug diferente (ex: PG `login` → local
-     `login-auth`), confirme.
-3. Leia o `page.tsx` do flow local e extraia `NODES` e `EDGES`
-   (parse manual do array literal — não tenta executar o arquivo).
+   - if the user uses a different slug (e.g. PG `login` → local
+     `login-auth`), confirm it.
+3. Read the local flow's `page.tsx` and extract `NODES` and `EDGES`
+   (parse the array literal by hand — don't try to execute the file).
 
 ---
 
-## Step 2 — Computar o diff
+## Step 2 — Compute the diff
 
-Compare por `id` (nodes) e por `from+to+label` (edges, já que edges não
-têm id estável no PG nem no styleguide local).
+Compare by `id` (nodes) and by `from+to+label` (edges, since edges have no
+stable id in PG nor in the local styleguide).
 
-### Diff de nodes
+### Node diff
 
-| Mudança | Detecção | Classificação |
+| Change | Detection | Classification |
 |---|---|---|
-| Node adicionado | id existe no .awflow mas não no local | `new-page` |
-| Node removido | id existe no local mas não no .awflow | `removed-page` |
-| `kind` mudou (screen ↔ decision) | mesmo id, kinds diferentes | `flow-rework` |
-| `title` mudou | mesmo id, kinds iguais, titles diferentes | cosmético (não loga) |
-| `position` mudou | mesmo id, kinds e títulos iguais, posições diferentes | cosmético (não loga) |
-| `note`/`question` mudou | textuais | cosmético (não loga) |
+| Node added | id exists in the .awflow but not locally | `new-page` |
+| Node removed | id exists locally but not in the .awflow | `removed-page` |
+| `kind` changed (screen ↔ decision) | same id, different kinds | `flow-rework` |
+| `title` changed | same id, same kinds, different titles | cosmetic (not logged) |
+| `position` changed | same id, same kinds and titles, different positions | cosmetic (not logged) |
+| `note`/`question` changed | textual | cosmetic (not logged) |
 
-### Diff de edges
+### Edge diff
 
-| Mudança | Detecção | Classificação |
+| Change | Detection | Classification |
 |---|---|---|
-| Edge adicionada | (from,to,label) novo | `new-branch` se `branch=true`, senão `flow-rework` |
-| Edge removida | (from,to,label) sumiu | `flow-rework` |
-| Edge reroute | mesmo from, novo target ou novo label | `flow-rework` |
+| Edge added | (from,to,label) is new | `new-branch` if `branch=true`, otherwise `flow-rework` |
+| Edge removed | (from,to,label) is gone | `flow-rework` |
+| Edge reroute | same from, new target or new label | `flow-rework` |
 
-### Resultado
+### Result
 
-Produza uma estrutura assim antes de mostrar pro usuário:
+Produce a structure like this before showing it to the user:
 
 ```ts
 {
@@ -84,124 +82,124 @@ Produza uma estrutura assim antes de mostrar pro usuário:
 }
 ```
 
-Onde `fields` lista o que mudou (ex: `["title", "note"]`).
+Where `fields` lists what changed (e.g. `["title", "note"]`).
 
 ---
 
-## Step 3 — Análise de viabilidade UX
+## Step 3 — UX viability analysis
 
-Pra **cada item** do diff, classifique:
+For **each item** in the diff, classify:
 
-- 🟢 **Safe** — mudança estrutural clara, sem efeitos colaterais (ex:
-  nova decision com branches simétricos).
-- 🟡 **Review** — vale o usuário olhar antes (ex: tela removida que
-  era terminal, fluxo perdeu caminho de volta, decision sem branch de
-  erro, novo branch que diverge muito do padrão local).
-- 🔴 **Block** — bloqueia até justificar (ex: remove tela que tem
-  sugestões abertas no flow-bridge, edge aponta pra node inexistente,
-  novo flow encerra com decision sem terminal).
+- 🟢 **Safe** — clear structural change, no side effects (e.g. a new
+  decision with symmetric branches).
+- 🟡 **Review** — worth the user looking first (e.g. a removed screen that
+  was terminal, a flow that lost its way back, a decision with no error
+  branch, a new branch that diverges a lot from the local pattern).
+- 🔴 **Block** — blocks until justified (e.g. removes a screen that has open
+  suggestions in the flow-bridge, an edge points at a nonexistent node, the
+  new flow ends on a decision with no terminal).
 
-**Não invente regras** — use senso comum. Se em dúvida, marque 🟡.
+**Don't invent rules** — use common sense. When in doubt, mark it 🟡.
 
 ---
 
-## Step 4 — Apresentar o diff + análise
+## Step 4 — Present the diff + analysis
 
-Mostre ao usuário um resumo compacto:
+Show the user a compact summary:
 
 ```
-Diff: <slug> (local) vs <repo PG>
+Diff: <slug> (local) vs <PG repo>
 
-Telas:
-  + 3 novas:
-    🟢 sso-connecting — "Conectando ao IdP" (SSO · screen)
-    🟢 2fa-backup    — "Códigos de backup" (screen)
-    🟡 sem-acesso    — "Sem acesso por este método" (terminal sem caminho de volta)
-  - 1 removida:
-    🟡 erro-generico — antes ligada a [email, password]; órfão depois
+Screens:
+  + 3 new:
+    🟢 sso-connecting — "Connecting to the IdP" (SSO · screen)
+    🟢 2fa-backup    — "Backup codes" (screen)
+    🟡 sem-acesso    — "No access via this method" (terminal, no way back)
+  - 1 removed:
+    🟡 erro-generico — was linked to [email, password]; orphan afterwards
 
 Decisions:
-  + 1 nova:
-    🟢 dec-auth-compat — "Org compatível c/ método?" (filtra anti-enumeração)
-  ~ 1 alterada:
-    🟢 dec-multiorg — pergunta mudou de "1 org?" pra "1+ org compatível?"
+  + 1 new:
+    🟢 dec-auth-compat — "Org compatible w/ method?" (filters anti-enumeration)
+  ~ 1 changed:
+    🟢 dec-multiorg — question changed from "1 org?" to "1+ compatible org?"
 
 Edges:
-  + 5 novas (3 branches âmbar)
-  - 2 removidas (1 era branch)
-  ~ 4 redirecionadas
+  + 5 new (3 amber branches)
+  - 2 removed (1 was a branch)
+  ~ 4 rerouted
 
-Análise:
+Analysis:
   🔴 0
-  🟡 2 (vale revisar)
-  🟢 todo o resto
+  🟡 2 (worth reviewing)
+  🟢 everything else
 
-Tags do changelog: ["new-page", "new-branch", "flow-rework"]
+Changelog tags: ["new-page", "new-branch", "flow-rework"]
 ```
 
 ---
 
-## Step 5 — Aprovação seletiva
+## Step 5 — Selective approval
 
-Pergunte ao usuário:
+Ask the user:
 
-1. **Aplicar tudo** (todos os deltas, ignora 🟡 — só bloqueia 🔴)
-2. **Aplicar só os safe** (🟢) e listar os 🟡 manualmente
-3. **Revisar item por item** — itera, pra cada delta pergunta
-   "aplicar / pular / abortar"
-4. **Abortar** — não muda nada
+1. **Apply everything** (all deltas, ignores 🟡 — only 🔴 blocks)
+2. **Apply only the safe ones** (🟢) and list the 🟡 manually
+3. **Review item by item** — iterate, and for each delta ask
+   "apply / skip / abort"
+4. **Abort** — change nothing
 
-Se houver 🔴, **não aplica nenhum** até o usuário resolver.
+If there is any 🔴, **apply none of them** until the user resolves it.
 
-Quando aplicar parcialmente, faça commit mental do conjunto aprovado e
-prossiga.
-
----
-
-## Step 6 — Aplicar no `page.tsx`
-
-Edite `NODES` e `EDGES` no arquivo do flow:
-
-- Adicione novos nodes/edges respeitando o pattern existente
-  (`edgeBase`, `branchEdge`, `sourceHandle` em decisions).
-- Remova nodes que sumiram + edges órfãs ligadas a eles.
-- Atualize campos textuais quando aprovado (title/note/question).
-- **Preserve `href` dos nodes existentes** — o PG não tem essa info,
-  então não sobrescreva o que está local. Pra screens NOVAS, pergunte
-  href igual à skill `auis-pg-create-flow` Step 4.
-- Atualize a `position` quando aprovado — não mexa em layout sem o
-  usuário confirmar (decisões de geometria são caras de refazer).
+When applying partially, make a mental commit of the approved set and move
+on.
 
 ---
 
-## Step 7 — Adicionar entrada em `updates[]`
+## Step 6 — Apply it to `page.tsx`
 
-Se houve mudança estrutural (alguma das tags `new-page`,
-`removed-page`, `new-branch`, `flow-rework`, `integration` se aplica),
-adicione **uma única entrada** no topo do `updates`:
+Edit `NODES` and `EDGES` in the flow's file:
+
+- Add new nodes/edges respecting the existing pattern (`edgeBase`,
+  `branchEdge`, `sourceHandle` on decisions).
+- Remove the nodes that are gone + the orphan edges attached to them.
+- Update textual fields when approved (title/note/question).
+- **Preserve the existing nodes' `href`** — PG doesn't have that info, so
+  don't overwrite what is already local. For NEW screens, ask for the href
+  the same way the `auis-pg-create-flow` skill does in Step 4.
+- Update the `position` when approved — don't touch layout without the user
+  confirming (geometry decisions are expensive to redo).
+
+---
+
+## Step 7 — Add an entry to `updates[]`
+
+If there was a structural change (any of the tags `new-page`,
+`removed-page`, `new-branch`, `flow-rework`, `integration` applies), add
+**a single entry** at the top of `updates`:
 
 ```ts
 {
-  date: "<YYYY-MM-DD hoje>",
-  summary: "<frase única PT-BR, ≤140 chars descrevendo o conjunto>",
+  date: "<YYYY-MM-DD today>",
+  summary: "<single sentence, ≤140 chars, describing the set>",
   tags: [...],
 }
 ```
 
-Resumo é UMA frase descrevendo o conjunto, não item-por-item. Ex:
+The summary is ONE sentence describing the set, not item-by-item. E.g.:
 
-- "SSO ganhou fast-lane via HRD e novo gate de compatibilidade por
-  método de auth (anti-enumeração)."
-- "Removida a tela genérica de erro; cada decisão agora tem caminho de
-  erro próprio."
+- "SSO got a fast-lane via HRD and a new compatibility gate per auth
+  method (anti-enumeration)."
+- "Generic error screen removed; every decision now has its own error
+  path."
 
-Se a página ainda **não tem** scaffolding de updates (import,
-`const updates`, render do badge + history section), adicione
-seguindo o que a skill `auis-update-ux-flow` Step 4 descreve.
+If the page does **not yet have** the updates scaffolding (import,
+`const updates`, badge + history section render), add it following what the
+`auis-update-ux-flow` skill describes in Step 4.
 
 ---
 
-## Step 8 — Validação
+## Step 8 — Validation
 
 ```bash
 npm run typecheck
@@ -209,55 +207,55 @@ npm run typecheck
 
 Visual:
 
-- Badge "Atualizado em <data>" atualizou.
-- Histórico de atualizações lista a nova entrada no topo com as tags
-  corretas (pills coloridas).
-- Diagrama reflete a estrutura nova.
-- Cards das telas novas mostram o href correto.
+- The "Atualizado em <data>" badge updated.
+- The "Histórico de atualizações" section lists the new entry at the top
+  with the correct tags (colored pills).
+- The diagram reflects the new structure.
+- The cards of the new screens show the right href.
 
-Pra cada tela que era 🟡 ou 🔴, ofereça preview de cuidado especial.
+For every screen that was 🟡 or 🔴, offer a preview with extra care.
 
 ---
 
-## Output esperado
+## Expected output
 
 ```md
-Flow atualizado: <meta.title>
+Flow updated: <meta.title>
 
-Rota: /auis/styleguide/ux-flows/<slug>
+Route: /auis/styleguide/ux-flows/<slug>
 
-Aplicado:
+Applied:
   + N nodes / + N edges
   - N nodes / - N edges
-  ~ N mudanças textuais
+  ~ N textual changes
 
-Pulado (🟡 não-aprovado): N
-Bloqueado (🔴): N
+Skipped (🟡 not approved): N
+Blocked (🔴): N
 
 Tags: [new-page, new-branch, ...]
-Summary: <linha registrada no changelog>
+Summary: <line recorded in the changelog>
 
-Arquivos:
+Files:
 - app/auis/styleguide/ux-flows/<slug>/page.tsx — NODES/EDGES + updates
 
-Validação:
+Validation:
 - typecheck: passed
 ```
 
 ---
 
-## O que NÃO fazer
+## What NOT to do
 
-- **Não sobrescreva `href` existentes** das telas. PG não tem essa info
-  — manter o que já está no flow local.
-- **Não rode merge automaticamente**. Sempre pede aprovação, mesmo
-  quando tudo é 🟢.
-- **Não cole a narrativa/screens specs do `.awflow` em comentários do
-  page.tsx** — esses dados ficam disponíveis pra a skill ler quando
-  precisar (do JSON), mas o `page.tsx` permanece enxuto.
-- **Não delete updates anteriores.** Só prepend; nunca rewrite history.
-- **Não combine com create.** Se o flow não existe, é
+- **Don't overwrite the screens' existing `href`.** PG doesn't have that
+  info — keep what is already in the local flow.
+- **Don't run the merge automatically**. Always ask for approval, even when
+  everything is 🟢.
+- **Don't paste the `.awflow` narrative/screens specs into comments in
+  page.tsx** — that data stays available for the skill to read when it needs
+  it (from the JSON), but `page.tsx` stays lean.
+- **Don't delete previous updates.** Only prepend; never rewrite history.
+- **Don't combine this with create.** If the flow doesn't exist, it's
   `auis-pg-create-flow`.
-- **Não tente "mesclar" comentários do flow-bridge.** Esse é outro
-  domínio — sugestões abertas no bridge devem ser resolvidas separado
-  via `auis-flow-bridge-solve` antes ou depois desse merge.
+- **Don't try to "merge" flow-bridge comments.** That's another domain —
+  open suggestions in the bridge must be resolved separately via
+  `auis-flow-bridge-solve`, before or after this merge.

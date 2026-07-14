@@ -1,101 +1,101 @@
-# Styleguide page structure — padrão canônico
+# Styleguide page structure — the canonical pattern
 
-> Fonte de verdade para qualquer página em `app/auis/styleguide/`.
-> Skills podem gerar o esqueleto livre; **o agente reordena pro padrão antes de aplicar**.
+> Source of truth for any page in `app/auis/styleguide/`.
+> Skills may generate a free-form skeleton; **the agent reorders it to the pattern before applying**.
 
-Esta é a versão 2026-05. Vive em `_primitives.tsx`; mude lá quando mudar aqui.
+This is the 2026-05 version. It lives in `_primitives.tsx`; change it there when you change it here.
 
-## Por que existe
+## Why it exists
 
-Antes desta convenção, cada página do styleguide escolhia a ordem das seções
-e o que documentar. Resultado: devs achavam a API num lugar, anatomia em
-outro, e a11y/responsive/tokens consumidos não existiam consistentemente.
+Before this convention, every styleguide page chose its own section order
+and what to document. Result: devs found the API in one place, anatomy in
+another, and a11y/responsive/tokens-consumed didn't exist consistently.
 
-Esta página fixa **a ordem das seções** e **quais primitivos usar em cada
-uma**. A intenção é que um dev novo encontre a mesma informação no mesmo
-lugar, qualquer componente que abrir.
+This page fixes **the section order** and **which primitives to use in each
+one**. The intent is that a new dev finds the same information in the same
+place, whichever component they open.
 
-## Estrutura de uma página de **componente individual** (15 seções)
+## Structure of an **individual component** page (15 sections)
 
-Use este padrão para uma página que documenta **um** componente específico
-(`AuButton`, `AuSelect`, `AuCheckpointChip`, etc.). Para uma página-mãe que agrupa
-várias implementações da mesma família, use a seção "página-hub de família"
-abaixo.
+Use this pattern for a page that documents **one** specific component
+(`AuButton`, `AuSelect`, `AuCheckpointChip`, etc.). For a parent page that groups
+several implementations of the same family, use the "family hub page" section
+below.
 
-A ordem é fixa. Seções podem ser **puladas** quando não se aplicam (ex: um
-componente puramente visual sem interação pula `States`, `Accessibility` fica
-mais curto). Nunca **reordene**.
+The order is fixed. Sections may be **skipped** when they don't apply (e.g. a
+purely visual component with no interaction skips `States`, and `Accessibility` gets
+shorter). Never **reorder**.
 
-| # | Seção | Primitivo | Quando pular |
+| # | Section | Primitive | When to skip |
 |---|---|---|---|
-| 1 | PageHero — título e lead | `PageHero` | Nunca |
-| 2 | Tldr — quando usar / não usar | `Tldr` | Nunca |
-| 3 | Toc — sumário (página >400 linhas) | `Toc` | Páginas curtas |
-| 4 | Anatomy — partes nomeadas | `Section` + `Spec` | Componente trivial (1 elemento) |
-| 5 | Variants — variantes visuais | `Section` + `Stage` | Componente sem variantes |
-| 6 | Sizes — densidades / escalas | `Section` + `Stage` | Componente com 1 tamanho |
-| 7 | States — interativos | `StatesMatrix` | Componente puramente visual |
-| 8 | Composition — uso real combinado | `Section` + `Stage` | Componente folha |
-| 9 | Responsive — comportamento por viewport | `ResponsiveStage` | Componente fora de layout (ex: dot, badge) |
-| 10 | API — props | `ApiTable` + `PropRow` | Nunca (mesmo zero props vale como linha "—") |
-| 11 | TokensConsumed — design tokens lidos | `TokensConsumed` | Nunca (ao menos `--fg-*` ou `--bg-*`) |
-| 12 | Accessibility — ARIA, keyboard, SR | `Section` + `KeyboardTable` | Componente sem foco/keyboard |
-| 13 | Code — exemplos canônicos | `CodeExample` x3-4 | Nunca |
-| 14 | DoDont — regras visuais | `DoDont` | Nunca |
-| 15 | RelatedLinks — navegação contextual | `RelatedLinks` | Nunca (mínimo 2 itens) |
+| 1 | PageHero — title and lead | `PageHero` | Never |
+| 2 | Tldr — when to use / when not to | `Tldr` | Never |
+| 3 | Toc — table of contents (page >400 lines) | `Toc` | Short pages |
+| 4 | Anatomy — named parts | `Section` + `Spec` | Trivial component (1 element) |
+| 5 | Variants — visual variants | `Section` + `Stage` | Component with no variants |
+| 6 | Sizes — densities / scales | `Section` + `Stage` | Component with a single size |
+| 7 | States — interactive | `StatesMatrix` | Purely visual component |
+| 8 | Composition — real combined usage | `Section` + `Stage` | Leaf component |
+| 9 | Responsive — behavior per viewport | `ResponsiveStage` | Component outside layout (e.g. dot, badge) |
+| 10 | API — props | `ApiTable` + `PropRow` | Never (even zero props counts as a "—" row) |
+| 11 | TokensConsumed — design tokens read | `TokensConsumed` | Never (at least `--fg-*` or `--bg-*`) |
+| 12 | Accessibility — ARIA, keyboard, SR | `Section` + `KeyboardTable` | Component with no focus/keyboard |
+| 13 | Code — canonical examples | `CodeExample` x3-4 | Never |
+| 14 | DoDont — visual rules | `DoDont` | Never |
+| 15 | RelatedLinks — contextual navigation | `RelatedLinks` | Never (minimum 2 items) |
 
-## Estrutura de uma **página-hub de família**
+## Structure of a **family hub page**
 
-Use quando a sidebar tem um item-mãe com mais de um filho, por exemplo:
+Use it when the sidebar has a parent item with more than one child, for example:
 
-- `Tabelas` → `AuTable`, `Data table`, `Members table`
-- `Modais e dialogs` → `AuModal`, `Connect modal`, `Welcome modal`
-- `Visual dos agentes` → `Agent Core`, `Agente do Usuário`, `Cortex`
+- `Tables` → `AuTable`, `Data table`, `Members table`
+- `Modals and dialogs` → `AuModal`, `Connect modal`, `Welcome modal`
+- `Agent visuals` → `Agent Core`, `User Agent`, `Cortex`
 
-A página-hub serve para decisão rápida e comparação visual. Ela não deve
-começar com cards de "quando usar / quando não usar"; primeiro mostra o
-inventário inteiro.
+The hub page exists for quick decisions and visual comparison. It must not
+open with "when to use / when not to use" cards; it shows the whole
+inventory first.
 
-| # | Seção | Primitivo | Observação |
+| # | Section | Primitive | Note |
 |---|---|---|---|
-| 1 | PageHero | `PageHero` | Explica a família, não um item específico |
-| 2 | Toc | `Toc` | Sempre que a página tiver mais de 3 seções |
-| 3 | Inventário inline | `Section` + previews reais/estáticos | Mostre todos os filhos na mesma página, sem depender de botões que abrem overlays |
-| 4 | Anatomia / padrões compartilhados | `Section` + `Spec` | Só o que vale para a família inteira |
-| 5 | API do item base | `ApiTable` + `PropRow` | Quando há primitivo-base (`AuModal`, `AuTable`) |
-| 6 | Quando usar | tabela HTML | Colunas mínimas: componente, quando usar, quando não usar, observação |
-| 7 | RelatedLinks | `RelatedLinks` | Links para subpáginas técnicas dos filhos |
+| 1 | PageHero | `PageHero` | Explains the family, not a specific item |
+| 2 | Toc | `Toc` | Whenever the page has more than 3 sections |
+| 3 | Inline inventory | `Section` + real/static previews | Show every child on the same page, without relying on buttons that open overlays |
+| 4 | Anatomy / shared patterns | `Section` + `Spec` | Only what holds for the whole family |
+| 5 | API of the base item | `ApiTable` + `PropRow` | When there is a base primitive (`AuModal`, `AuTable`) |
+| 6 | When to use | HTML table | Minimum columns: component, when to use, when not to use, note |
+| 7 | RelatedLinks | `RelatedLinks` | Links to the children's technical subpages |
 
-Regras da página-hub:
+Hub page rules:
 
-- O item-mãe é a entrada principal na sidebar.
-- Cada filho aparece como `children` no item-mãe de `navigation.ts`.
-- Subpáginas técnicas dos filhos podem continuar existindo, mas não competem
-  com o hub na sidebar como top-level.
-- Mostre todos os filhos inline no hub; em modais, não obrigue o usuário a
-  clicar num botão para entender qual modal existe.
-- A decisão "quando usar / quando não usar" fica no fim em formato de tabela,
-  não em `Tldr` no topo.
+- The parent item is the main entry in the sidebar.
+- Each child appears as `children` on the parent item in `navigation.ts`.
+- The children's technical subpages may keep existing, but they don't compete
+  with the hub in the sidebar as top-level entries.
+- Show every child inline in the hub; for modals, don't force the user to
+  click a button to understand which modal exists.
+- The "when to use / when not to use" decision goes at the end as a table,
+  not in a `Tldr` at the top.
 
-## Estrutura de uma página de **foundation** (10 seções)
+## Structure of a **foundation** page (10 sections)
 
-Foundations (cor, typography, spacing, grid, motion, iconography, logos…)
-documentam *tokens* e *princípios*, não props.
+Foundations (color, typography, spacing, grid, motion, iconography, logos…)
+document *tokens* and *principles*, not props.
 
-| # | Seção | Primitivo |
+| # | Section | Primitive |
 |---|---|---|
 | 1 | PageHero | `PageHero` |
-| 2 | Princípios / Quando usar o quê | `Tldr` ou tabela de decisão |
-| 3 | Toc (opcional) | `Toc` |
-| 4 | Anatomy / Unidade-raiz | `Section` + `Spec` |
-| 5 | Catálogo / Inventário | `Section` (grid próprio) |
-| 6 | Em contexto | `Section` |
-| 7 | Em código | `CodeExample` |
-| 8 | Accessibility (quando aplicável) | `Section` |
+| 2 | Principles / When to use what | `Tldr` or a decision table |
+| 3 | Toc (optional) | `Toc` |
+| 4 | Anatomy / Root unit | `Section` + `Spec` |
+| 5 | Catalog / Inventory | `Section` (its own grid) |
+| 6 | In context | `Section` |
+| 7 | In code | `CodeExample` |
+| 8 | Accessibility (when applicable) | `Section` |
 | 9 | DoDont | `DoDont` |
 | 10 | RelatedLinks | `RelatedLinks` |
 
-## Snippet de imports padrão
+## Default imports snippet
 
 ```tsx
 import {
@@ -117,16 +117,16 @@ import {
 } from "../../_primitives"
 ```
 
-Importe **só o que usar**. ESLint não bloqueia, mas o reviewer pede.
+Import **only what you use**. ESLint doesn't block it, but the reviewer will ask.
 
-## Esqueleto mínimo de uma página de componente
+## Minimal skeleton of a component page
 
 ```tsx
 export default function FooPage() {
   return (
     <>
       <PageHero title="Foo">
-        Descrição do que é Foo em 1-2 frases.
+        What Foo is, in 1-2 sentences.
       </PageHero>
 
       <div className="max-w-[1200px] mx-auto px-10 pb-14 flex flex-col gap-16">
@@ -135,27 +135,27 @@ export default function FooPage() {
           dontUse={[<>Item 1</>, <>Item 2</>]}
         />
 
-        <Section id="anatomy" title="Anatomia" lead="…">
-          {/* Spec rows com partes nomeadas */}
+        <Section id="anatomy" title="Anatomy" lead="…">
+          {/* Spec rows with named parts */}
         </Section>
 
-        <Section id="variants" title="Variantes" lead="…">
+        <Section id="variants" title="Variants" lead="…">
           <Stage label="…"> {/* … */} </Stage>
         </Section>
 
-        <Section id="sizes" title="Tamanhos" lead="…">
+        <Section id="sizes" title="Sizes" lead="…">
           <Stage label="sm · md · lg"> {/* … */} </Stage>
         </Section>
 
-        <Section id="states" title="Estados" lead="…">
+        <Section id="states" title="States" lead="…">
           <StatesMatrix states={[/* … */]} />
         </Section>
 
         <Section id="composition" title="Composition" lead="…">
-          {/* exemplos com outros componentes */}
+          {/* examples with other components */}
         </Section>
 
-        <Section id="responsive" title="Responsivo" lead="…">
+        <Section id="responsive" title="Responsive" lead="…">
           <ResponsiveStage mobile={/* … */} desktop={/* … */} />
         </Section>
 
@@ -165,19 +165,19 @@ export default function FooPage() {
           </ApiTable>
         </Section>
 
-        <Section id="tokens" title="Tokens consumidos" lead="…">
+        <Section id="tokens" title="Tokens consumed" lead="…">
           <TokensConsumed tokens={[
-            { token: "--bg-raised", role: "fundo do card", value: "var(--au-white)" },
+            { token: "--bg-raised", role: "card background", value: "var(--au-white)" },
           ]} />
         </Section>
 
-        <Section id="accessibility" title="Acessibilidade" lead="…">
+        <Section id="accessibility" title="Accessibility" lead="…">
           <KeyboardTable rows={[
-            { keys: ["Tab"], action: "Move foco" },
+            { keys: ["Tab"], action: "Move focus" },
           ]} />
         </Section>
 
-        <Section id="code" title="Em código" lead="…">
+        <Section id="code" title="In code" lead="…">
           <CodeExample>{`/* … */`}</CodeExample>
         </Section>
 
@@ -185,7 +185,7 @@ export default function FooPage() {
           <DoDont dos={[/* … */]} donts={[/* … */]} />
         </Section>
 
-        <Section id="related" title="Veja também">
+        <Section id="related" title="See also">
           <RelatedLinks items={[
             { name: "Component X", href: "/auis/styleguide/components/x", description: "…" },
           ]} />
@@ -196,30 +196,30 @@ export default function FooPage() {
 }
 ```
 
-## Convenções
+## Conventions
 
-- **Container externo:** `<div className="max-w-[1200px] mx-auto px-10 pb-14 flex flex-col gap-16">`
-- **gap entre seções:** `gap-16` (64px)
-- **Ids das `Section`:** kebab-case, semântica (não numeração). Use `id="api"`, não `id="section-9"`.
-- **Lead das `Section`:** uma frase curta. Explica **por que** existe a seção, não repete o título.
-- **Linguagem:** PT-BR principal, código e nomes técnicos em inglês quando fazem sentido. Não traduza nomes de tokens nem componentes.
-- **Tokens:** **nunca** hardcode cores, paddings, radius. Sempre `var(--*)`.
-- **Acessibilidade do <kbd>:** `KeyboardTable` já cuida do styling — só passe a lista.
-- **Camada do componente:** a *estrutura* da página é definida aqui; a *camada*
-  (Primitivos / Componentes / Padrões / Domínio) onde ele entra na sidebar é
-  definida em [`component-layers.md`](./component-layers.md). Os dois andam juntos.
+- **Outer container:** `<div className="max-w-[1200px] mx-auto px-10 pb-14 flex flex-col gap-16">`
+- **gap between sections:** `gap-16` (64px)
+- **`Section` ids:** kebab-case, semantic (not numbering). Use `id="api"`, not `id="section-9"`.
+- **`Section` lead:** one short sentence. It explains **why** the section exists; it does not repeat the title.
+- **Language:** follow the product's language (see `PRODUCT_CONTEXT.md`); keep code and technical names in English. Never translate token or component names.
+- **Tokens:** **never** hardcode colors, paddings, radius. Always `var(--*)`.
+- **<kbd> accessibility:** `KeyboardTable` already handles the styling — just pass the list.
+- **Component layer:** the page *structure* is defined here; the *layer*
+  (Primitives / Components / Patterns / Domain) where it lands in the sidebar is
+  defined in [`component-layers.md`](./component-layers.md). The two go together.
 
-## Exemplo vivo
+## Living example
 
-A página de referência canônica é
+The canonical reference page is
 [components/buttons/page.tsx](../app/auis/styleguide/components/buttons/page.tsx).
-Use-a como espelho ao criar uma página nova.
+Use it as a mirror when creating a new page.
 
-## Migração de páginas existentes
+## Migrating existing pages
 
-A migração é **incremental**: cada página antiga é refatorada quando o
-componente correspondente for tocado. Não há corrida para refatorar tudo
-de uma vez. O padrão deste documento vale apenas para:
+The migration is **incremental**: each old page is refactored when its
+corresponding component gets touched. There is no race to refactor everything
+at once. The pattern in this document applies only to:
 
-1. Páginas novas
-2. Páginas existentes que estão sendo substancialmente reescritas
+1. New pages
+2. Existing pages that are being substantially rewritten

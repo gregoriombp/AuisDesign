@@ -92,8 +92,6 @@ npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 - [`PRODUCT_CONTEXT.md`](PRODUCT_CONTEXT.md) — template for **your** product's voice and vocabulary (writing skills read it).
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — engine internals; [`docs/component-map.md`](docs/component-map.md) — "need X → use Y" index.
 
-Some deep-dive docs are currently in Portuguese (PT-BR); English translations are welcome — see [Contributing](CONTRIBUTING.md).
-
 ## Security notes
 
 The review bridge binds to `127.0.0.1` only — never expose it on a LAN or bind to `0.0.0.0`. Runtime data dirs (`flow-bridge/`, `page-editor/`, `review-bridge/data/`) are gitignored.

@@ -1,124 +1,124 @@
 # Auis Review Bridge
 
-Backend local que guarda os comentários visuais do **Review Mode** (Auis)
-e os expõe pra agentes rodando na mesma máquina. Desde o commit
-`2f7dd24e` o bridge virou **serverless**: as rotas vivem dentro do Next em
-`/api/review-bridge/*` (same-origin), sem token e sem `.env`. Os dados continuam
-nos mesmos arquivos JSON em `review-bridge/data/` — só a casca mudou.
+Local backend that stores the **Review Mode** (Auis) visual comments
+and exposes them to agents running on the same machine. Since commit
+`2f7dd24e` the bridge went **serverless**: the routes live inside Next at
+`/api/review-bridge/*` (same-origin), with no token and no `.env`. The data still
+lives in the same JSON files in `review-bridge/data/` — only the shell changed.
 
-> **Como subir:** `npm run dev` na raiz já sobe tudo. Não precisa de token, não
-> precisa de `.env.local`, não precisa de um segundo processo.
+> **How to start it:** `npm run dev` at the root already brings everything up. No token
+> needed, no `.env.local` needed, no second process needed.
 >
-> **Modo legado opt-in:** `npm run dev:bridge` ainda existe e sobe o servidor
-> Express avulso na `:9878` em paralelo com o Next (config velha:
-> `NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL=http://127.0.0.1:9878`). Use só se
-> tiver motivo específico pra rodar o bridge fora do Next — não é a fonte
-> recomendada e o `src/` do Express não recebe mais features novas.
+> **Opt-in legacy mode:** `npm run dev:bridge` still exists and brings up the standalone
+> Express server on `:9878` alongside Next (old config:
+> `NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL=http://127.0.0.1:9878`). Use it only if you
+> have a specific reason to run the bridge outside Next — it is not the recommended
+> source and the Express `src/` no longer gets new features.
 
 ---
 
-## Lifecycle de um comment
+## Lifecycle of a comment
 
 ```
-                       ┌─────────────────────────────────────┐
-                       │                                     │
-                       ▼                                     │
-  (cria pin/desenho)  open  ──── transition: in_review ─►  in_review
-                       │                                     │
-                       │ transition: resolve_direct          │ transition: approve
-                       │ (user marca como resolvido)         │ (user aprova revisão)
-                       │                                     │
-                       └─────────►  resolved  ◄──────────────┘
-                                       │
-                                       │ comments.archive.json
-                                       │
-                                       ▼
-                                  (arquivado — fora da listagem padrão)
+                          ┌─────────────────────────────────────┐
+                          │                                     │
+                          ▼                                     │
+  (creates pin/drawing)  open  ──── transition: in_review ─►  in_review
+                          │                                     │
+                          │ transition: resolve_direct          │ transition: approve
+                          │ (user marks it as resolved)         │ (user approves the review)
+                          │                                     │
+                          └─────────►  resolved  ◄──────────────┘
+                                          │
+                                          │ comments.archive.json
+                                          │
+                                          ▼
+                                     (archived — outside the default listing)
 
-  in_review  ── transition: reject ──►  open       (rejeita: volta pra ativo)
-  resolved   ── transition: reopen_from_archive ──►  open  (desarquiva)
+  in_review  ── transition: reject ──►  open       (reject: back to active)
+  resolved   ── transition: reopen_from_archive ──►  open  (unarchive)
 ```
 
-**Resumo:**
+**Summary:**
 
-- `open` → comment ativo, ninguém ainda alegou resolver.
-- `in_review` → algum **agente** ou **usuário** alegou resolver e está aguardando aprovação humana. Vive no mesmo arquivo que os abertos.
-- `resolved` → aprovado. **Sai fisicamente** de `comments.json` e vai pra `comments.archive.json`.
+- `open` → active comment, nobody has claimed to resolve it yet.
+- `in_review` → some **agent** or **user** claimed to resolve it and it is waiting for human approval. It lives in the same file as the open ones.
+- `resolved` → approved. It **physically leaves** `comments.json` and goes to `comments.archive.json`.
 
-A separação física do arquivo existe para que **agentes que leem o JSON pra contexto** só vejam comments ainda em jogo — sem ler centenas de comments já resolvidos que vazam pra dentro da janela de contexto.
-
----
-
-## Arquivos de dados
-
-| Arquivo | Conteúdo | Quando ler |
-|---|---|---|
-| `data/comments.json` | comments com status `open` e `in_review` + identidades dos revisores | sempre |
-| `data/comments.archive.json` | comments com status `resolved` (arquivados) | só quando você precisa consultar histórico |
-
-`schemaVersion = 3`. Tanto o backend serverless (`app/api/review-bridge/_store.ts`)
-quanto o Express legado escrevem nesse formato. Se você ainda tiver dados v2 por
-aí, veja a seção [Migração v2 → v3](#migração-v2--v3) — no fluxo padrão a
-migração já aconteceu há bastante tempo.
+The physical file split exists so that **agents that read the JSON for context** only see comments still in play — without reading hundreds of already-resolved comments that leak into the context window.
 
 ---
 
-## API HTTP
+## Data files
 
-Base URL local: `http://127.0.0.1:3000/api/review-bridge` (porta padrão do
-`next dev`; se você rodou com `PORT=xxxx`, troque). **Sem token, sem header
-custom** — é uma rota Next como qualquer outra do app.
-
-### Listagem
-
-| Método | Path | Descrição |
+| File | Content | When to read |
 |---|---|---|
-| `GET` | `/health` | `{ ok, service, mode: "serverless", schemaVersion: 3, tokenRequired: false }` — usado pelas skills (`solve`, `germano-*`) pra confirmar que o bridge serverless está de pé antes de operar |
-| `GET` | `/version` | `{ signature }` — assinatura derivada do `mtime` dos dois arquivos JSON. Usada pelo overlay como polling barato (4s) pra detectar escritas externas (skill do agente editou enquanto o user estava com o overlay aberto). **Substitui o antigo SSE** |
-| `GET` | `/comments?url=&status=` | Ativos. `status` aceita `open` ou `in_review`. Resolvidos **não saem aqui** |
-| `GET` | `/comments/archive?url=&before=&limit=` | Arquivo, paginado por cursor `updatedAt` |
-| `GET` | `/comments/:id` | Retorna `{ comment, location: "main" \| "archive" }` |
+| `data/comments.json` | comments with status `open` and `in_review` + reviewer identities | always |
+| `data/comments.archive.json` | comments with status `resolved` (archived) | only when you need to look up history |
 
-### Modificação
-
-| Método | Path | Notas |
-|---|---|---|
-| `PUT` | `/comments/:id` | **Modo upsert** (body é um `ReviewComment` completo) — cria/edita texto, anchor, autor. **Modo transição** (body com `{ transition, actor }`) — ver abaixo |
-| `POST` | `/comments/:id/replies` | Adiciona reply. Funciona em comments do main e do arquivo |
-| `DELETE` | `/comments/:id` | Remove totalmente (main ou archive) |
-
-### Transitions (modo `PUT /comments/:id` com `transition`)
-
-| `transition` | Efeito | `actor` obrigatório? |
-|---|---|---|
-| `in_review` | open → in_review, popula `resolution` com a string formatada | sim |
-| `approve` | in_review → resolved, move pro archive, popula `resolution.approvedAt/approvedBy` | sim (quem aprovou) |
-| `reject` | in_review → open, limpa `resolution`. Replies preservadas | não |
-| `resolve_direct` | open → resolved direto (user marcou sem agente intermediário). Move pro archive | sim |
-| `reopen_from_archive` | resolved → open, move do archive pro main | não |
-
-Erro `400 { error: "invalid_actor" }` quando o `actor` é exigido e está ausente/malformado.
-
-### Outros
-
-| Método | Path | |
-|---|---|---|
-| `PUT` | `/identity/:id` | Upsert da identidade do revisor |
-| `GET` | `/export` | Snapshot completo: `comments[]` + `archivedComments[]` |
-| `POST` | `/import` | Merge de snapshot (skipa IDs duplicados) |
-
-> **SSE saiu.** O servidor Express antigo expunha `GET /events` como stream
-> SSE. No modo serverless o Next não mantém conexão aberta por cliente — o
-> overlay faz polling de `/version` a cada 4s e só dispara `onChange` quando a
-> assinatura muda. É o suficiente porque os writes externos vêm das skills
-> (lotes ocasionais), não de outro humano editando ao vivo.
+`schemaVersion = 3`. Both the serverless backend (`app/api/review-bridge/_store.ts`)
+and the legacy Express write in this format. If you still have v2 data lying
+around, see the [v2 → v3 migration](#v2--v3-migration) section — in the standard flow the
+migration happened a long time ago.
 
 ---
 
-## Como agentes resolvem comments
+## HTTP API
 
-Quando o usuário pedir "resolve esse aí", **NÃO chame o endpoint legado de upsert**.
-Use o transition `in_review` — o usuário aprova ou rejeita depois pelo inbox.
+Local base URL: `http://127.0.0.1:3000/api/review-bridge` (default port of
+`next dev`; if you ran it with `PORT=xxxx`, swap it). **No token, no custom
+header** — it is a Next route like any other in the app.
+
+### Listing
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/health` | `{ ok, service, mode: "serverless", schemaVersion: 3, tokenRequired: false }` — used by the skills (`solve`, `germano-*`) to confirm the serverless bridge is up before operating |
+| `GET` | `/version` | `{ signature }` — signature derived from the `mtime` of the two JSON files. Used by the overlay as cheap polling (4s) to detect external writes (an agent skill edited while the user had the overlay open). **Replaces the old SSE** |
+| `GET` | `/comments?url=&status=` | Active ones. `status` accepts `open` or `in_review`. Resolved ones **do not come out here** |
+| `GET` | `/comments/archive?url=&before=&limit=` | Archive, paginated by an `updatedAt` cursor |
+| `GET` | `/comments/:id` | Returns `{ comment, location: "main" \| "archive" }` |
+
+### Modification
+
+| Method | Path | Notes |
+|---|---|---|
+| `PUT` | `/comments/:id` | **Upsert mode** (the body is a complete `ReviewComment`) — creates/edits text, anchor, author. **Transition mode** (body with `{ transition, actor }`) — see below |
+| `POST` | `/comments/:id/replies` | Adds a reply. Works on comments in main and in the archive |
+| `DELETE` | `/comments/:id` | Removes it entirely (main or archive) |
+
+### Transitions (`PUT /comments/:id` mode with `transition`)
+
+| `transition` | Effect | `actor` required? |
+|---|---|---|
+| `in_review` | open → in_review, populates `resolution` with the formatted string | yes |
+| `approve` | in_review → resolved, moves it to the archive, populates `resolution.approvedAt/approvedBy` | yes (whoever approved) |
+| `reject` | in_review → open, clears `resolution`. Replies preserved | no |
+| `resolve_direct` | open → resolved directly (the user marked it with no agent in between). Moves it to the archive | yes |
+| `reopen_from_archive` | resolved → open, moves it from the archive to main | no |
+
+Error `400 { error: "invalid_actor" }` when the `actor` is required and is missing/malformed.
+
+### Others
+
+| Method | Path | |
+|---|---|---|
+| `PUT` | `/identity/:id` | Upsert of the reviewer identity |
+| `GET` | `/export` | Full snapshot: `comments[]` + `archivedComments[]` |
+| `POST` | `/import` | Snapshot merge (skips duplicate IDs) |
+
+> **SSE is gone.** The old Express server exposed `GET /events` as an SSE
+> stream. In serverless mode Next does not keep an open connection per client — the
+> overlay polls `/version` every 4s and only fires `onChange` when the
+> signature changes. That is enough because the external writes come from the skills
+> (occasional batches), not from another human editing live.
+
+---
+
+## How agents resolve comments
+
+When the user asks to "resolve that one", **do NOT call the legacy upsert endpoint**.
+Use the `in_review` transition — the user approves or rejects it afterward from the inbox.
 
 ```bash
 curl -X PUT "http://127.0.0.1:3000/api/review-bridge/comments/$ID" \
@@ -129,7 +129,7 @@ curl -X PUT "http://127.0.0.1:3000/api/review-bridge/comments/$ID" \
   }'
 ```
 
-Resposta:
+Response:
 
 ```json
 {
@@ -148,20 +148,20 @@ Resposta:
 }
 ```
 
-O campo `resolution.summary` é **sempre** uma string no formato:
+The `resolution.summary` field is **always** a string in the format:
 
 ```
 Resolvido por <name> em DD/MM/YYYY às HH:MM:SS.
 ```
 
-Agentes que lerem esse JSON depois saberão exatamente quem alegou resolver e quando. Use timezone do servidor (horário da máquina rodando o Next).
+Agents that read this JSON later will know exactly who claimed to resolve it and when. Use the server timezone (the clock of the machine running Next).
 
 ---
 
-## Como agentes respondem a comments
+## How agents reply to comments
 
-Use o endpoint de replies quando você tiver uma dúvida, opinião ou pergunta antes de
-resolver — o usuário vê a thread inteira no card.
+Use the replies endpoint when you have a doubt, an opinion or a question before
+resolving — the user sees the whole thread on the card.
 
 ```bash
 curl -X POST "http://127.0.0.1:3000/api/review-bridge/comments/$ID/replies" \
@@ -171,32 +171,32 @@ curl -X POST "http://127.0.0.1:3000/api/review-bridge/comments/$ID/replies" \
     "authorId": "claude",
     "authorName": "Claude",
     "authorColorToken": "var(--au-purple-600)",
-    "text": "Antes de fixar isso, prefere botão primário ou ghost?"
+    "text": "Before pinning this down, do you prefer a primary or a ghost button?"
   }'
 ```
 
-Resposta: `{ "reply": {...}, "location": "main" | "archive" }`.
+Response: `{ "reply": {...}, "location": "main" | "archive" }`.
 
-Replies funcionam em qualquer comment, independente do status (até em arquivados — útil para deixar nota sobre uma decisão antiga).
+Replies work on any comment, regardless of status (even archived ones — useful for leaving a note about an old decision).
 
 ---
 
-## Como agentes leem só o que importa
+## How agents read only what matters
 
-| Cenário | Endpoint sugerido |
+| Scenario | Suggested endpoint |
 |---|---|
-| Trabalhar nos comments **abertos** da página em que o user está | `GET /comments?url=/caminho/da/pagina&status=open` |
-| Revisar a fila do que **você (agente)** já marcou em revisão | `GET /comments?status=in_review` |
-| Olhar histórico de uma página específica | `GET /comments/archive?url=/caminho&limit=20` |
+| Work on the **open** comments of the page the user is on | `GET /comments?url=/path/of/the/page&status=open` |
+| Review the queue of what **you (the agent)** already marked as in review | `GET /comments?status=in_review` |
+| Look at the history of a specific page | `GET /comments/archive?url=/path&limit=20` |
 
-> Não busque `GET /comments` sem filtro a menos que você precise mesmo de todos os
-> ativos. O archive não vem por padrão — chame `/comments/archive` explicitamente.
+> Do not fetch `GET /comments` with no filter unless you really do need all the
+> active ones. The archive does not come by default — call `/comments/archive` explicitly.
 
-### Contexto visual do alvo
+### Visual context of the target
 
-Comentários novos podem carregar um campo opcional `context`, capturado no
-momento em que o pin ou desenho foi criado. Ele existe para reduzir ambiguidade
-em instruções curtas como "remove isso":
+New comments may carry an optional `context` field, captured at the
+moment the pin or drawing was created. It exists to reduce ambiguity
+in short instructions like "remove this":
 
 ```json
 {
@@ -219,68 +219,68 @@ em instruções curtas como "remove isso":
 }
 ```
 
-Ao resolver, use `context.target.text`, `label`, `attributes`, `fingerprint` e
-`nearbyText` para mapear o comentário ao trecho de código antes de editar. As
-coordenadas continuam sendo só apoio visual; não trate `rect` como contrato
-pixel-perfect.
+When resolving, use `context.target.text`, `label`, `attributes`, `fingerprint` and
+`nearbyText` to map the comment to the snippet of code before editing. The
+coordinates remain visual support only; do not treat `rect` as a pixel-perfect
+contract.
 
 ---
 
-## Migração v2 → v3
+## v2 → v3 migration
 
-Quem rodou o bridge em algum momento depois da migração já tem os arquivos no
-formato v3 — esta seção é histórica. O que mudou:
+Anyone who ran the bridge at any point after the migration already has the files in
+v3 format — this section is historical. What changed:
 
-1. `schemaVersion: 2` → `3` em `data/comments.json` e `data/comments.archive.json`.
-2. Status `"resolved"` que estavam no main migram pro archive.
-3. `resolvedBy: "Gregorio"` + `resolvedAt: 1779...` viram:
+1. `schemaVersion: 2` → `3` in `data/comments.json` and `data/comments.archive.json`.
+2. `"resolved"` statuses that were in main migrate to the archive.
+3. `resolvedBy: "Alex"` + `resolvedAt: 1779...` become:
    ```json
    {
      "resolution": {
-       "actor": { "kind": "user", "id": "legacy", "name": "Gregorio" },
+       "actor": { "kind": "user", "id": "legacy", "name": "Alex" },
        "at": 1779...,
-       "summary": "Resolvido por Gregorio em DD/MM/YYYY às HH:MM:SS."
+       "summary": "Resolvido por Alex em DD/MM/YYYY às HH:MM:SS."
      }
    }
    ```
-4. Comments sem `resolvedBy` que estavam como `resolved` ganham `actor = { kind: "user", id: "legacy", name: "unknown" }`.
+4. Comments with no `resolvedBy` that were `resolved` get `actor = { kind: "user", id: "legacy", name: "unknown" }`.
 
-No backend serverless o `_store` não tem um passo de migração — ele assume v3 no
-read e força `schemaVersion: 3` no write. Se você precisa migrar dados v2 hoje,
-suba o Express legado (`npm run dev:bridge`) uma vez: a migração v2→v3 dele é
-idempotente e roda no boot.
+In the serverless backend the `_store` has no migration step — it assumes v3 on
+read and forces `schemaVersion: 3` on write. If you need to migrate v2 data today,
+bring up the legacy Express (`npm run dev:bridge`) once: its v2→v3 migration is
+idempotent and runs at boot.
 
-Rollback: a v2 não tinha o conceito de archive, então um downgrade exigiria mesclar
-os dois arquivos de volta e reescrever `resolvedBy`/`resolvedAt` como flat strings.
-**Não há script automatizado** — guarde backup antes de fazer downgrade.
+Rollback: v2 had no concept of an archive, so a downgrade would require merging
+the two files back and rewriting `resolvedBy`/`resolvedAt` as flat strings.
+**There is no automated script** — keep a backup before downgrading.
 
 ---
 
 ## Troubleshooting
 
-Problemas comuns:
+Common problems:
 
-| Sintoma | Causa | Onde checar |
+| Symptom | Cause | Where to check |
 |---|---|---|
-| `ECONNREFUSED 127.0.0.1:3000` em qualquer rota do bridge | `next dev` não está rodando | subir `npm run dev` na raiz |
-| `404` em `/api/review-bridge/...` | bateu numa rota errada (path antigo do Express?) ou Next ainda não compilou esse route | conferir o path em `app/api/review-bridge/` |
-| Overlay falando com `:9878` em vez de same-origin | `.env.local` antigo com `NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL=http://127.0.0.1:9878` em cache | apagar a linha do `.env.local` e reiniciar `npm run dev` |
-| `EADDRINUSE :9878` ao rodar `npm run dev:bridge` | porta do Express legado ocupada | `lsof -i :9878` — geralmente é uma instância antiga, mata e sobe de novo |
-| Overlay não atualiza quando uma skill escreve no JSON | polling de `/version` parado ou hot-reload travou | reload da aba; em último caso reiniciar `next dev` |
-| Comment "some" depois de aprovar | foi pro archive — esperado | `GET /comments/archive` |
-| Agente alegou resolver mas user não vê em revisão | falta `actor.kind === "agent"` na request | inspecionar curl |
+| `ECONNREFUSED 127.0.0.1:3000` on any bridge route | `next dev` is not running | start `npm run dev` at the root |
+| `404` on `/api/review-bridge/...` | you hit the wrong route (an old Express path?) or Next has not compiled that route yet | check the path in `app/api/review-bridge/` |
+| Overlay talking to `:9878` instead of same-origin | an old `.env.local` with a cached `NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL=http://127.0.0.1:9878` | delete the line from `.env.local` and restart `npm run dev` |
+| `EADDRINUSE :9878` when running `npm run dev:bridge` | the legacy Express port is taken | `lsof -i :9878` — usually an old instance; kill it and start it again |
+| Overlay does not update when a skill writes to the JSON | the `/version` polling stopped or hot-reload froze | reload the tab; as a last resort restart `next dev` |
+| Comment "disappears" after approving | it went to the archive — expected | `GET /comments/archive` |
+| The agent claimed to resolve it but the user does not see it in review | the request is missing `actor.kind === "agent"` | inspect the curl |
 
 ---
 
-## Convenções de identidade do actor
+## Actor identity conventions
 
-- `kind: "user"` — revisor humano. O `id` é o `ReviewIdentity.id` (UUID gerado pelo overlay no primeiro uso) e o `name` é o nome que o user escolheu.
-- `kind: "agent"` — qualquer cliente automatizado. Use um id estável por tipo de agente (`claude`, `claude-haiku`, `cursor`, etc.) e um `name` legível pra humanos.
+- `kind: "user"` — human reviewer. The `id` is the `ReviewIdentity.id` (UUID generated by the overlay on first use) and the `name` is the name the user chose.
+- `kind: "agent"` — any automated client. Use a stable id per agent type (`claude`, `claude-haiku`, `cursor`, etc.) and a human-readable `name`.
 
-Para Claude Code, o padrão recomendado é:
+For Claude Code, the recommended default is:
 
 ```json
 { "kind": "agent", "id": "claude", "name": "Claude" }
 ```
 
-Se você é um agente diferente, mude o `id` e `name`. O `colorToken` é opcional em replies — default `var(--fg-tertiary)`.
+If you are a different agent, change the `id` and `name`. The `colorToken` is optional in replies — default `var(--fg-tertiary)`.

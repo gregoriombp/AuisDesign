@@ -8,150 +8,147 @@ description: >
   `<FlowDiagram>` shape via `mapAuFlowToLocal`, asks for the screens'
   `href` values (PG doesn't carry that info), scaffolds the full page,
   and registers it in `navigation.ts`. Use when the user asks to
-  "importar flow do PG" (import a flow from PG), "criar flow a partir do
-  .awflow" (create a flow from the .awflow), "novo flow do design" (new
-  flow from design), "scaffold do .awflow.json", or attaches/points to
-  an `.awflow.json` file to create a brand-new flow. Do NOT use when the
+  "import a flow from PG", "create a flow from the .awflow", "new flow
+  from design", "scaffold the .awflow.json", or attaches/points to an
+  `.awflow.json` file to create a brand-new flow. Do NOT use when the
   slug already exists in `ux-flows/` — for that case, use
   `auis-pg-merge-flow`.
 ---
 
 # Auis PG — Create flow from `.awflow.json`
 
-Cria um novo flow no styleguide a partir do export do designer (PG). O
-arquivo `.awflow.json` carrega o diagrama (nodes + edges) e specs das
-telas (propósito, cenários, critérios). Esta skill **não** mescla — se o
-flow já existe, redirecione pra [`auis-pg-merge-flow`](../auis-pg-merge-flow/SKILL.md).
+Creates a new flow in the styleguide from the designer's (PG) export. The
+`.awflow.json` file carries the diagram (nodes + edges) and the screens'
+specs (purpose, scenarios, criteria). This skill does **not** merge — if the
+flow already exists, redirect to [`auis-pg-merge-flow`](../auis-pg-merge-flow/SKILL.md).
 
-## Pré-requisitos
+## Prerequisites
 
-- Existe `app/auis/styleguide/ux-flows/_lib/awflow-import.ts` no
-  repo (módulo do importer). Se não existir, pare e avise o usuário —
-  algo está fora do lugar.
-- Existe pelo menos um flow de referência em `ux-flows/login-auth/` ou
-  `ux-flows/primeiro-acesso/` pra copiar o padrão de página.
+- `app/auis/styleguide/ux-flows/_lib/awflow-import.ts` exists in the
+  repo (the importer module). If it doesn't, stop and tell the user —
+  something is out of place.
+- There is at least one reference flow in `ux-flows/login-auth/` or
+  `ux-flows/primeiro-acesso/` to copy the page pattern from.
 
 ---
 
-## Step 1 — Localizar e validar o arquivo
+## Step 1 — Locate and validate the file
 
-O usuário fornece o `.awflow.json` de uma destas formas:
+The user provides the `.awflow.json` in one of these ways:
 
-1. **Path local** — "use /Users/.../login.awflow.json"
-2. **Conteúdo colado** — JSON no próprio chat
-3. **Anexado no Claude** — arquivo visível na conversa
+1. **Local path** — "use /Users/.../login.awflow.json"
+2. **Pasted content** — JSON in the chat itself
+3. **Attached in Claude** — file visible in the conversation
 
-Carregue o conteúdo. Em seguida, valide rodando o `parseAuFlowFile`
-através de uma chamada temporária (você pode usar uma `tsx`-like inline,
-ou simplesmente ler o JSON e checar:
+Load the content. Then validate it by running `parseAuFlowFile` through a
+temporary call (you can use an inline `tsx`-like runner, or simply read the
+JSON and check:
 
 - `schemaVersion === 1`
-- `flow.id` é string não-vazia
+- `flow.id` is a non-empty string
 - `graph.nodes` array, `graph.edges` array
 - `screens` array
 
-Se qualquer um falhar, **pare** e mostre o erro pro usuário. Não tente
-"corrigir" o arquivo — peça um export limpo do PG.
+If any of them fails, **stop** and show the user the error. Don't try to
+"fix" the file — ask for a clean export from PG.
 
 ---
 
-## Step 2 — Resolver o slug
+## Step 2 — Resolve the slug
 
-- O default é `file.flow.id` (ex: `"login"`, `"pa-responsavel"`).
-- O styleguide do meu repo usa slugs próprios — ex: o flow do PG `login`
-  pode virar `login-auth` aqui. Liste os flows existentes em
-  `app/auis/styleguide/ux-flows/` e pergunte ao usuário se ele
-  quer o slug do PG ou outro.
-- Se o slug escolhido **já existe**, pare e diga: "esse flow já existe.
-  Use `auis-pg-merge-flow`."
+- The default is `file.flow.id` (e.g. `"login"`, `"pa-responsavel"`).
+- The styleguide in my repo uses its own slugs — e.g. the PG flow `login`
+  may become `login-auth` here. List the existing flows in
+  `app/auis/styleguide/ux-flows/` and ask the user whether they
+  want the PG slug or another one.
+- If the chosen slug **already exists**, stop and say: "that flow already
+  exists. Use `auis-pg-merge-flow`."
 
 ---
 
-## Step 3 — Mapear pro shape local
+## Step 3 — Map to the local shape
 
-Carregue o importer dinamicamente (via `tsx`/`node --import tsx/esm`,
-ou através do dev server com um endpoint temporário se mais fácil) e
-rode `mapAuFlowToLocal(file)`. Você obtém:
+Load the importer dynamically (via `tsx`/`node --import tsx/esm`, or
+through the dev server with a temporary endpoint if that's easier) and
+run `mapAuFlowToLocal(file)`. You get:
 
-- `nodes` — `Node<ScreenData|DecisionData>[]` prontos pro `<FlowDiagram>`
-- `edges` — `Edge[]` com `markerEnd`, `style`, `sourceHandle` corretos
+- `nodes` — `Node<ScreenData|DecisionData>[]` ready for `<FlowDiagram>`
+- `edges` — `Edge[]` with the correct `markerEnd`, `style`, `sourceHandle`
 - `meta` — `{ id, title, description, section }`
-- `screens` — specs ricas (purpose, scenarios, criteria) pra cada tela
-- `narrative` — `{ persona, context, value }` (pode ser null)
-- `proposedUpdate` — sugestão de primeira entrada em `updates[]`
-- `screensMissingHref` — lista de IDs de telas screen sem href
+- `screens` — rich specs (purpose, scenarios, criteria) for each screen
+- `narrative` — `{ persona, context, value }` (may be null)
+- `proposedUpdate` — suggested first entry in `updates[]`
+- `screensMissingHref` — list of screen node IDs with no href
 
-Se preferir não rodar runtime, faça o map **na mão** seguindo o que o
-`awflow-import.ts` faz (a função é pura e o código é a referência).
-Mas runtime é mais seguro contra drift.
-
----
-
-## Step 4 — Resolver `href` de cada tela
-
-O PG não tem o conceito de href (rota real do produto). Esse é o único
-campo do `ScreenData` que precisa de input humano.
-
-Pra cada id em `screensMissingHref`:
-
-1. Mostre `screen.name` + `screen.purpose` (pelas specs do JSON).
-2. Sugira 1-3 rotas plausíveis com base no nome/propósito (ex: tela
-   "login" → `/login`, `/`, `/entrar`).
-3. Pergunte ao usuário; aceite o valor literal, "#" (placeholder), ou
-   "skip" (deixa "#").
-
-**Não pergunte um por um se forem mais que 6 telas** — apresente todas
-de uma vez (lista numerada) e peça pro usuário responder em batch.
-Reduza fricção.
+If you'd rather not run it at runtime, do the map **by hand** following what
+`awflow-import.ts` does (the function is pure and the code is the reference).
+But runtime is safer against drift.
 
 ---
 
-## Step 5 — Resumo + análise UX leve
+## Step 4 — Resolve each screen's `href`
 
-Antes de criar arquivos, mostre um plano:
+PG has no concept of href (the product's real route). This is the only
+`ScreenData` field that needs human input.
+
+For each id in `screensMissingHref`:
+
+1. Show `screen.name` + `screen.purpose` (from the JSON specs).
+2. Suggest 1-3 plausible routes based on the name/purpose (e.g. the
+   "login" screen → `/login`, `/`, `/entrar`).
+3. Ask the user; accept the literal value, "#" (placeholder), or
+   "skip" (leaves "#").
+
+**Don't ask one by one if there are more than 6 screens** — present them all
+at once (numbered list) and ask the user to answer in batch. Reduce friction.
+
+---
+
+## Step 5 — Summary + light UX analysis
+
+Before creating files, show a plan:
 
 ```
-Novo flow: <meta.title>
+New flow: <meta.title>
 Slug: ux-flows/<slug>
 Section: <meta.section>
 
-Diagrama:
+Diagram:
 - <X> screens, <Y> decisions
 - <Z> edges (<W> branches)
 
-Telas com href real: <count>/<total>
-Telas com href "#" (placeholder): <count>
+Screens with a real href: <count>/<total>
+Screens with href "#" (placeholder): <count>
 
-Narrativa: <persona resumida, se houver>
+Narrative: <persona summary, if any>
 
-Updates iniciais: 1 entrada ("Estrutura importada de [repo] em [data]")
+Initial updates: 1 entry ("Structure imported from [repo] on [date]")
 ```
 
-**Análise UX rápida** — só sinalize, não bloqueie:
+**Quick UX analysis** — only flag, don't block:
 
-- Decisions sem branch de erro (saída só "sim", sem "não") — comum, mas
-  vale flagar
-- Nodes terminal sem caminho de volta (dead-end) — normal pra success,
-  problemático pra erro
-- Branches que convergem rápido demais (pode estar perdendo
-  granularidade)
-- Muitas decisions seguidas sem screen entre elas (decision chain
-  longa) — pode confundir o leitor
+- Decisions with no error branch (only a "yes" exit, no "no") — common, but
+  worth flagging
+- Terminal nodes with no way back (dead-end) — normal for success,
+  problematic for errors
+- Branches that converge too quickly (may be losing granularity)
+- Many decisions in a row with no screen between them (long decision
+  chain) — may confuse the reader
 
-**Não corrija**. Apenas mencione no resumo: "FYI: encontrei N pontos
-que podem valer revisar — quer ver detalhe ou seguir?"
+**Don't fix them**. Just mention them in the summary: "FYI: I found N points
+that may be worth reviewing — want the detail, or should I go ahead?"
 
-Peça **aprovação explícita** antes de criar arquivos.
+Ask for **explicit approval** before creating files.
 
 ---
 
-## Step 6 — Scaffold da página
+## Step 6 — Scaffold the page
 
-Crie `app/auis/styleguide/ux-flows/<slug>/page.tsx` seguindo o
-padrão das páginas existentes (use `login-auth/page.tsx` ou
-`primeiro-acesso/page.tsx` como referência).
+Create `app/auis/styleguide/ux-flows/<slug>/page.tsx` following the
+pattern of the existing pages (use `login-auth/page.tsx` or
+`primeiro-acesso/page.tsx` as reference).
 
-Estrutura mínima:
+Minimum structure:
 
 ```tsx
 "use client"
@@ -172,15 +169,15 @@ import type { Node, Edge } from "@xyflow/react"
 import type { ScreenData, DecisionData } from "../_components/flow-editor"
 
 const NODES: Node<ScreenData | DecisionData>[] = [
-  // ... do mapped.nodes, COM os hrefs preenchidos
+  // ... from mapped.nodes, WITH the hrefs filled in
 ]
 
 const EDGES: Edge[] = [
-  // ... do mapped.edges
+  // ... from mapped.edges
 ]
 
 const updates: FlowUpdate[] = [
-  // proposedUpdate do mapper
+  // proposedUpdate from the mapper
 ]
 
 export default function Page() {
@@ -190,15 +187,15 @@ export default function Page() {
         title="<meta.title>"
         trailing={<FlowUpdatesBadge updates={updates} />}
       >
-        <p>{/* meta.description em markdown */}</p>
+        <p>{/* meta.description in markdown */}</p>
       </PageHero>
 
-      <Section id="diagrama" title="Diagrama" lead="...">
+      <Section id="diagrama" title="Diagram" lead="...">
         <FlowDiagram flow="<slug>" nodes={NODES} edges={EDGES} />
       </Section>
 
-      {/* opcional: Section "Narrativa" se narrative != null */}
-      {/* opcional: Section "Critérios" listando screens[].criteria */}
+      {/* optional: Section "Narrative" if narrative != null */}
+      {/* optional: Section "Criteria" listing screens[].criteria */}
 
       <FlowUpdatesHistorySection updates={updates} />
     </main>
@@ -206,25 +203,25 @@ export default function Page() {
 }
 ```
 
-Notas:
+Notes:
 
-- Use **edgeBase** ou **branchEdge** misturados ao output do mapper —
-  o mapper já preencheu `markerEnd` e `style`, então no .tsx final é
-  só listar.
-- `FlowDiagram` precisa do prop `flow="<slug>"` (chave pro bridge de
-  sugestões — ver `flow-editor.tsx`).
-- Adicione `Section`s pra narrativa e critérios **somente se a
-  narrativa estiver presente**. Sem narrativa, o conteúdo da página é
-  só o diagrama + updates.
-- **Não invente conteúdo**: se o screen não tem `purpose`, não escreva
-  prosa do nada — deixe a seção vazia ou omita.
+- Use **edgeBase** or **branchEdge** mixed into the mapper's output — the
+  mapper already filled in `markerEnd` and `style`, so in the final .tsx you
+  just list them.
+- `FlowDiagram` needs the `flow="<slug>"` prop (the key for the suggestions
+  bridge — see `flow-editor.tsx`).
+- Add `Section`s for the narrative and the criteria **only if the narrative
+  is present**. With no narrative, the page content is just the diagram +
+  updates.
+- **Don't invent content**: if the screen has no `purpose`, don't write prose
+  out of thin air — leave the section empty or omit it.
 
 ---
 
-## Step 7 — Registrar em `navigation.ts`
+## Step 7 — Register in `navigation.ts`
 
-Edite `app/auis/styleguide/navigation.ts`. Adicione na seção "UX
-Flows" (ou seção apropriada se for `section: "adm"`):
+Edit `app/auis/styleguide/navigation.ts`. Add it under the "UX
+Flows" section (or the appropriate section if it is `section: "adm"`):
 
 ```ts
 {
@@ -233,65 +230,65 @@ Flows" (ou seção apropriada se for `section: "adm"`):
 }
 ```
 
-Mantém ordem alfabética dentro da seção quando possível.
+Keep alphabetical order within the section when possible.
 
 ---
 
-## Step 8 — Validação
+## Step 8 — Validation
 
 ```bash
 npm run typecheck
 ```
 
-Se passar:
+If it passes:
 
-- Abra `http://localhost:3000/auis/styleguide/ux-flows/<slug>` no
-  browser (normalmente `127.0.0.1:3000`).
-- Confirme: PageHero com badge "Atualizado em", diagrama renderiza,
-  cards de tela têm o href correto.
-- Confirme que o link na sidebar do styleguide aparece.
+- Open `http://localhost:3000/auis/styleguide/ux-flows/<slug>` in the
+  browser (usually `127.0.0.1:3000`).
+- Confirm: PageHero with the "Atualizado em" badge, the diagram renders,
+  the screen cards carry the right href.
+- Confirm the link shows up in the styleguide sidebar.
 
-Se o usuário quiser ver o diff visual antes, **não rode `git add`** —
-deixa ele revisar com `git diff` e commitar quando estiver pronto.
+If the user wants to see the visual diff first, **don't run `git add`** —
+let them review it with `git diff` and commit when they're ready.
 
 ---
 
-## Output esperado
+## Expected output
 
 ```md
-Flow criado: <meta.title>
+Flow created: <meta.title>
 
-Rota: /auis/styleguide/ux-flows/<slug>
+Route: /auis/styleguide/ux-flows/<slug>
 Section: <studio|adm>
 
-Diagrama:
+Diagram:
 - <X> screens, <Y> decisions
 - <Z> edges (<W> branches)
-- <count>/<total> telas com href real
+- <count>/<total> screens with a real href
 
-Updates: 1 entrada inicial (importação de <repo>)
+Updates: 1 initial entry (import from <repo>)
 
-Arquivos:
-- app/auis/styleguide/ux-flows/<slug>/page.tsx (novo)
-- app/auis/styleguide/navigation.ts (entrada adicionada)
+Files:
+- app/auis/styleguide/ux-flows/<slug>/page.tsx (new)
+- app/auis/styleguide/navigation.ts (entry added)
 
-Validação:
+Validation:
 - typecheck: passed
 ```
 
 ---
 
-## O que NÃO fazer
+## What NOT to do
 
-- **Não invente hrefs.** Se o usuário não souber a rota, deixa "#".
-- **Não combine com merge.** Se o slug existe, pare e redirecione.
-- **Não tente "melhorar" o diagrama** automaticamente — você cria
-  exatamente o que o `.awflow.json` descreve. Melhorias de UX são
-  conversa separada.
-- **Não traduza identifiers**. `screen.id` é estável e usado pelo
-  bridge de sugestões — manter idêntico ao do PG.
-- **Não crie um arquivo `screens.ts` ou `narrative.ts` separado**. Tudo
-  inline no `page.tsx`, padrão do styleguide.
-- **Não adicione novos tokens**. Reuse os existentes (`var(--au-*)`,
-  `var(--border-*)`, etc.). Se faltar token pra um caso, peça ajuste
-  no design system primeiro.
+- **Don't invent hrefs.** If the user doesn't know the route, leave "#".
+- **Don't combine this with merge.** If the slug exists, stop and redirect.
+- **Don't try to "improve" the diagram** automatically — you create exactly
+  what the `.awflow.json` describes. UX improvements are a separate
+  conversation.
+- **Don't translate identifiers**. `screen.id` is stable and used by the
+  suggestions bridge — keep it identical to PG's.
+- **Don't create a separate `screens.ts` or `narrative.ts` file**. Everything
+  inline in `page.tsx`, the styleguide pattern.
+- **Don't add new tokens**. Reuse the existing ones (`var(--au-*)`,
+  `var(--border-*)`, etc.). If a token is missing for a case, ask for the
+  design system to be adjusted first.

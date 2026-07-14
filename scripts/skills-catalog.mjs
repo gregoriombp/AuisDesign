@@ -59,11 +59,11 @@ skills.sort((a, b) => a.capability.localeCompare(b.capability) || a.name.localeC
 
 writeFileSync(join(SK, "registry.json"), JSON.stringify({ version: 1, generated: new Date().toISOString().slice(0, 10), count: skills.length, skills }, null, 2))
 
-let md = `# Auis Skills — Catálogo\n\n> Gerado de \`skills/registry.json\` (\`npm run skills:catalog\`). **${skills.length} skills.** Fonte única em \`skills/<capability>/<name>/\`. As pastas de auto-discovery \`.claude/skills/\` (Claude Code) e \`.agents/skills/\` (Codex/Cursor) são **geradas** por \`npm run skills:sync\`.\n\n**Legenda:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (genérica/zerada) · ⭐ set recomendado · ◐ tem variante \`SKILL.codex.md\` · _legacy_ neutralizada.\n\n`
+let md = `# Auis Skills — Catalog\n\n> Generated from \`skills/registry.json\` (\`npm run skills:catalog\`). **${skills.length} skills.** Single source of truth in \`skills/<capability>/<name>/\`. The auto-discovery trees \`.claude/skills/\` (Claude Code) and \`.agents/skills/\` (Codex/Cursor) are **generated** by \`npm run skills:sync\`.\n\n**Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a \`SKILL.codex.md\` variant · _legacy_ neutralized.\n\n`
 for (const cap of CAP_ORDER) {
   const items = skills.filter((r) => r.capability === cap)
   if (!items.length) continue
-  md += `## ${CAP_LABELS[cap]} (${items.length})\n\n| Skill | Plataforma | Origem | Tags | O que faz |\n|---|---|---|---|---|\n`
+  md += `## ${CAP_LABELS[cap]} (${items.length})\n\n| Skill | Platform | Origin | Tags | What it does |\n|---|---|---|---|---|\n`
   for (const r of items) {
     const plat = (r.platforms.includes("claude") ? "🟣" : "") + (r.platforms.includes("codex") ? "🟠" : "") + (r.origin === "cowork" ? "🌐" : "")
     const tags = [r.recommended ? "⭐" : "", r.divergent ? "◐" : "", r.legacy ? "legacy" : ""].filter(Boolean).join(" ") || "—"
@@ -72,7 +72,7 @@ for (const cap of CAP_ORDER) {
   }
   md += "\n"
 }
-md += `---\n\n## Set recomendado — núcleo "zerado" (pronto pra qualquer produto)\n\n${skills.filter((r) => r.recommended).map((r) => "- `" + r.name + "`" + (r.origin === "cowork" ? " 🌐" : "")).join("\n")}\n\nAs 🌐 (origin \`cowork\`) são as versões **genéricas publicadas** — preferir para construir do zero. As \`repo\` são variantes mais ricas (bridges, ux-flow, audit) do uso real. Sobreposições conhecidas: \`auis-foundation\` 🌐 vs \`auis-design-system-foundation\`; \`auis-component\` 🌐 vs \`auis-new-component\`; \`auis-page\` 🌐 vs \`auis-new-page\`; \`auis-audit\` 🌐 vs \`auis-design-system-audit\`.\n\n## Plataformas\n\nDas ${skills.length}: ${skills.filter((r) => r.platforms.includes("codex")).length} em Claude+Codex, ${skills.filter((r) => r.platforms.length === 1).length} só Claude (\`${skills.filter((r) => r.platforms.length === 1).map((r) => r.name).join("`, `")}\`). ${skills.filter((r) => r.divergent).length} têm variante Codex própria (◐).\n`
+md += `---\n\n## Recommended set — the "zeroed" core (ready for any product)\n\n${skills.filter((r) => r.recommended).map((r) => "- `" + r.name + "`" + (r.origin === "cowork" ? " 🌐" : "")).join("\n")}\n\nThe 🌐 ones (origin \`cowork\`) are the **published generic** versions — prefer them when starting from scratch. The \`repo\` ones are richer variants (bridges, ux-flow, audit) taken from real use. Known overlaps: \`auis-foundation\` 🌐 vs \`auis-design-system-foundation\`; \`auis-component\` 🌐 vs \`auis-new-component\`; \`auis-page\` 🌐 vs \`auis-new-page\`; \`auis-audit\` 🌐 vs \`auis-design-system-audit\`.\n\n## Platforms\n\nOf the ${skills.length}: ${skills.filter((r) => r.platforms.includes("codex")).length} on Claude+Codex, ${skills.filter((r) => r.platforms.length === 1).length} Claude-only (\`${skills.filter((r) => r.platforms.length === 1).map((r) => r.name).join("`, `")}\`). ${skills.filter((r) => r.divergent).length} have their own Codex variant (◐).\n`
 writeFileSync(join(SK, "CATALOG.md"), md)
 
 console.log(`skills:catalog ✓  ${skills.length} skills · ${skills.filter((r) => r.divergent).length} divergent · ${skills.filter((r) => r.recommended).length} recommended`)

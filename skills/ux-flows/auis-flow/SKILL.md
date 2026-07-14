@@ -9,8 +9,8 @@ description: >
   shipped/in-progress/planned screens, and writes "// Flow:" back-reference
   comments at the top of each corresponding page.tsx so code and flow stay
   cross-linked. Use whenever the user asks to "design a user flow", "draw a
-  flow", "map navigation", "where should this button lead", "criar FigJam
-  desse fluxo", "fluxo dessa feature", "plan the screens for [feature]", or
+  flow", "map navigation", "where should this button lead", "create a FigJam
+  for this flow", "this feature's flow", "plan the screens for [feature]", or
   hands over a feature description that needs flow design before
   implementation.
 ---
@@ -49,16 +49,16 @@ and being in the wrong folder defeats discoverability.
 ## Non-negotiables
 
 - **File name:** `Auis Flow — [Product] — [Feature]`. No exceptions.
-- One FigJam file per feature or jornada. If the feature grows past ~15
-  screens, split by sub-jornada and add a macro flow that links to each.
+- One FigJam file per feature or journey. If the feature grows past ~15
+  screens, split by sub-journey and add a macro flow that links to each.
 - A screen card is the only thing that represents a screen. **Never draw screen
   mockups inside FigJam.** Mockups live in the prototype (the running app).
 - Every card carries: name, route, file path, status
-  (`planejada` / `em desenvolvimento` / `em produção`).
+  (`planned` / `in development` / `in production`).
 - Every transition (edge) carries a trigger label. No bare arrows.
 - Every decision is a diamond, with the condition as its label.
 - Every screen has a sticky listing UI states. The states are *named*, not drawn.
-- Each `page.tsx` corresponding to an `em desenvolvimento` or `em produção`
+- Each `page.tsx` corresponding to an `in development` or `in production`
   card carries `// Flow: <figjam url>` as the first non-import line.
 
 ## Workflow
@@ -75,11 +75,11 @@ Before drawing anything, look at the target repo:
 - recent `page.tsx` files in the feature directory — record route, file path,
   and any existing `// Flow:` comment
 
-This determines which screen cards start as `em produção` /
-`em desenvolvimento` / `planejada`. A screen with a `page.tsx` that exports
-something useful and is reachable from the nav is `em produção`. A `page.tsx`
-that exists but is mostly stub/placeholder is `em desenvolvimento`. Anything
-not yet on disk is `planejada`.
+This determines which screen cards start as `in production` /
+`in development` / `planned`. A screen with a `page.tsx` that exports
+something useful and is reachable from the nav is `in production`. A `page.tsx`
+that exists but is mostly stub/placeholder is `in development`. Anything
+not yet on disk is `planned`.
 
 ### 2. Build the screen list
 
@@ -119,8 +119,8 @@ For each pair of screens that connects, write down:
 - trigger label (button text, form submit, redirect cause)
 - condition (only if it's a branch — see step 5)
 
-Triggers are user-visible and human-readable. Good: `clica em "Conectar"`,
-`submete o form com sucesso`, `redirect após 3s`. Bad: `onClick handler fires`,
+Triggers are user-visible and human-readable. Good: `clicks "Connect"`,
+`submits the form successfully`, `redirect after 3s`. Bad: `onClick handler fires`,
 `POST /api/integrations succeeded`. The flow speaks the user's language; the
 code translates it.
 
@@ -131,9 +131,9 @@ depending on state.
 
 Examples:
 
-- `primeiro acesso?` — sim → onboarding, não → dashboard
-- `integração já existe?` — sim → reconnect, não → fresh connect
-- `tem permissão de admin?` — sim → settings, não → request access
+- `first access?` — yes → onboarding, no → dashboard
+- `integration already exists?` — yes → reconnect, no → fresh connect
+- `has admin permission?` — yes → settings, no → request access
 
 Each diamond replaces the equivalent `if` statement in code. The code stays
 short — `if (firstTime) redirect('/onboarding')` — and the *why* lives in the
@@ -166,17 +166,17 @@ Use `mcp__Figma__use_figma` (with `figma-use-figjam` already loaded). Create:
    ┌───────────────────────────┐
    │ [Screen name]             │
    ├───────────────────────────┤
-   │ Rota:    /path/to/screen  │
-   │ Arquivo: app/.../page.tsx │
-   │ Status:  em produção      │
+   │ Route:  /path/to/screen   │
+   │ File:   app/.../page.tsx  │
+   │ Status: in production     │
    └───────────────────────────┘
    ```
 
 3. **Decision diamonds** at branch points, with the condition as label.
 4. **Transitions** as labeled connectors. Never bare arrows.
 5. **State stickies** docked to the right of each card, listing states.
-6. **Color coding** by status: green for `em produção`, yellow for
-   `em desenvolvimento`, gray for `planejada`. Use Auis brand colors
+6. **Color coding** by status: green for `in production`, yellow for
+   `in development`, gray for `planned`. Use Auis brand colors
    when available; otherwise FigJam defaults.
 
 If Figma MCP is **not** connected, stop here. Output a structured Markdown
@@ -185,7 +185,7 @@ FigJam manually. Don't claim the flow exists when it doesn't.
 
 ### 8. Write back-reference comments
 
-For each screen card with status `em produção` or `em desenvolvimento`, find
+For each screen card with status `in production` or `in development`, find
 the corresponding `page.tsx` and prepend:
 
 ```tsx
@@ -198,7 +198,7 @@ Rules:
 - Skip if an identical line already exists.
 - If a `// Flow:` line exists pointing somewhere else, update it instead of
   duplicating.
-- Don't add the comment to `planejada` screens — the file doesn't exist yet.
+- Don't add the comment to `planned` screens — the file doesn't exist yet.
   When `auis-page` later creates the file, it should include the comment.
 
 ### 9. Update the macro flow if it exists
@@ -233,22 +233,22 @@ Output the flow as a Markdown spec the user can paste into Figma manually:
 ## Screens
 
 ### [Screen 1 name]
-- Rota: `/path`
-- Arquivo: `app/.../page.tsx`
-- Status: planejada / em desenvolvimento / em produção
-- Estados: loading, empty, error, success
+- Route: `/path`
+- File: `app/.../page.tsx`
+- Status: planned / in development / in production
+- States: loading, empty, error, success
 
 ### [Screen 2 name]
 ...
 
 ## Transitions
 
-- [Screen 1] → [Screen 2]: clica em "Conectar"
-- [Screen 2] → [Screen 3]: submete o form com sucesso
+- [Screen 1] → [Screen 2]: clicks "Connect"
+- [Screen 2] → [Screen 3]: submits the form successfully
 
 ## Decisions
 
-- `primeiro acesso?` — sim → [Screen A], não → [Screen B]
+- `first access?` — yes → [Screen A], no → [Screen B]
 ```
 
 ## Output to return
@@ -270,10 +270,10 @@ States listed:
 - [screen] — [states]
 
 Back-references written:
-- [file path] — added / updated / already present / skipped (planejada)
+- [file path] — added / updated / already present / skipped (planned)
 
 Next steps:
-- Implement planejada screens via `auis-page`
+- Implement planned screens via `auis-page`
 - Add new components via `auis-component` if any state needs UI not in the styleguide
 - Run `auis-audit` after first round of implementations
 ```

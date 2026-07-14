@@ -8,13 +8,10 @@ description: >
   an "Atualizado em" badge plus a "Histórico de atualizações" section. Use
   when the user asks to "update flow X", "log an update on the flow", "add a
   page to the flow", "new branch on the flow", says "the flow's dynamic
-  changed", "remove a screen from the flow" (in Portuguese: "atualizar flow
-  X", "registrar atualização no flow", "adicionar página ao flow", "novo
-  branch no flow", "mudou a dinâmica do flow", "remover tela do flow"), or
-  hands over a meeting decision that changes an existing flow. NOT for
-  creating a new flow from scratch — for that, use `auis-create-ux-flow`.
-  NOT for tweaking copy or styling of an existing flow page — that's a
-  normal edit, no changelog.
+  changed", "remove a screen from the flow", or hands over a meeting decision
+  that changes an existing flow. NOT for creating a new flow from scratch —
+  for that, use `auis-create-ux-flow`. NOT for tweaking copy or styling of an
+  existing flow page — that's a normal edit, no changelog.
 ---
 
 # Auis — UX Flow Update Logger
@@ -60,13 +57,13 @@ them to edit the page directly — do not create a changelog entry.
 Inputs you need from the user:
 
 - **Slug** — folder name under `app/auis/styleguide/ux-flows/`. If the
-  user gives a friendly name ("primeiro acesso"), resolve it by listing
+  user gives a friendly name ("first access"), resolve it by listing
   existing flows and matching.
-- **Change description** — one sentence, PT-BR, describing the structural
+- **Change description** — one sentence describing the structural
   delta. Examples:
-  - "Nova tela 'link expirado' no branch de convite quando o e-mail passa de 10 dias."
-  - "Magic-link substitui senha temporária no primeiro login."
-  - "Removida a tela de boas-vindas — fluxo agora vai direto pro dashboard."
+  - "New 'link expired' screen on the invite branch when the e-mail is over 10 days old."
+  - "Magic-link replaces the temporary password on first login."
+  - "Welcome screen removed — the flow now goes straight to the dashboard."
 - **Date** — default to today (`YYYY-MM-DD`). The user can override.
 - **Optional graph changes** — exact node/edge additions, removals, or
   rewires. If not given, infer from the description and confirm before
@@ -84,7 +81,7 @@ Apply the table above to the requested change. If it lands in a "no" row,
 the edit directly without logging.
 
 Pick the matching tag(s) — one update entry can carry multiple tags
-(e.g. `["new-page", "new-branch"]` when a new tela also introduces a new
+(e.g. `["new-page", "new-branch"]` when a new screen also introduces a new
 decision exit).
 
 ---
@@ -107,7 +104,7 @@ Rules that mirror `auis-create-ux-flow`:
   constant (e.g. `EXPIRADO_X = 560`).
 - Always specify `sourceHandle` on edges leaving a decision node.
 - Use `edgeBase` for main-flow edges, `branchEdge` for decision exits, `crossEdge` for edges touching a `crossflow` node.
-- Label every decision exit with the choice ("Sim", "Não", "Pix", etc.).
+- Label every decision exit with the choice ("Yes", "No", "Pix", etc.).
 - Update the `Y` table if you insert a new row.
 - Update the container `height` if the diagram grew.
 - For any new `screen` node, fill `href` with the real internal route
@@ -116,7 +113,7 @@ Rules that mirror `auis-create-ux-flow`:
 - Update the `screens` array (Section 3 of the page) when adding/removing a
   documented screen. Sub-branch variants that don't get their own doc entry
   in the original page also don't need one now.
-- Update the "Decisões de design" section only when the rationale changes.
+- Update the "Design decisions" section only when the rationale changes.
 
 ---
 
@@ -173,7 +170,7 @@ in place since 2026-05.
 const updates: FlowUpdate[] = [
   {
     date: "2026-05-22",
-    summary: "Nova tela 'link expirado' no branch de convite quando o e-mail passa de 10 dias.",
+    summary: "New 'link expired' screen on the invite branch when the e-mail is over 10 days old.",
     tags: ["new-page", "new-branch"],
   },
   // ...older entries below, untouched...
@@ -182,7 +179,7 @@ const updates: FlowUpdate[] = [
 
 Rules for `summary`:
 
-- One sentence, PT-BR, ≤ 140 characters.
+- One sentence, ≤ 140 characters.
 - Describe **what changed in the flow**, not what changed in the code (no
   "added node X with id Y").
 - Avoid trailing tech jargon — readers are designers and PMs.
@@ -230,7 +227,7 @@ If the dev server is running on the LAN, open the page and confirm:
 - [ ] `screens` array updated if a documented screen was added/removed
 - [ ] `updates` array exists with import + render wiring
 - [ ] New entry prepended with `{ date, summary, tags }`
-- [ ] `summary` ≤ 140 chars, PT-BR, design-oriented language
+- [ ] `summary` ≤ 140 chars, design-oriented language
 - [ ] `npm run typecheck` passes
 
 ---

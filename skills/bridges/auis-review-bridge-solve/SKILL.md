@@ -9,155 +9,153 @@ description: >
   `actor: { kind: "agent", id: "claude", name: "Claude" }` — the user then
   approves or rejects it afterward via the inbox. It can also respond with a
   question (an agent reply) when a comment is ambiguous. Use whenever the
-  user asks for "/auis-review-bridge-solve", "resolve todos os
-  comentários do review" (resolve all the review comments), "pega os de hoje
-  e resolve" (take today's and resolve them), "resolve os abertos em lote"
-  (resolve the open ones in bulk), "resolva os comments do /pagina/x"
-  (resolve the comments on /page/x), "responder os comments do bridge"
-  (reply to the bridge comments), or variations. Do NOT use it to start the
-  server — for that, see `auis-review-bridge`.
+  user asks for "/auis-review-bridge-solve", "resolve all the review
+  comments", "take today's and resolve them", "resolve the open ones in
+  bulk", "resolve the comments on /page/x", "reply to the bridge comments",
+  or variations. Do NOT use it to start the server — for that, see
+  `auis-review-bridge`.
 ---
 
-# Auis Review Bridge — Resolver em lote
+# Auis Review Bridge — Batch resolve
 
-Esta skill é o **agente que resolve** os comentários do Review Mode. Ela
-lê o bridge local, planeja correções, implementa, e devolve cada item
-marcado como **em revisão** pra o usuário aprovar pelo inbox.
+This skill is the **agent that resolves** Review Mode comments. It reads
+the local bridge, plans the fixes, implements them, and hands each item
+back marked as **in review** for the user to approve from the inbox.
 
-> Pré-requisito: `npm run dev` já está rodando na raiz. O bridge agora é
-> **serverless, embutido no Next** (rotas `/api/review-bridge/*`, same-origin,
-> sem token). O servidor Express `review-bridge/` é legado opt-in (`npm run
-> dev:bridge`) e não é mais a fonte.
+> Prerequisite: `npm run dev` is already running at the root. The bridge is
+> now **serverless, embedded in Next** (routes `/api/review-bridge/*`,
+> same-origin, no token). The Express server `review-bridge/` is opt-in legacy
+> (`npm run dev:bridge`) and is no longer the source.
 >
-> Source of truth dos endpoints: `app/api/review-bridge/*/route.ts`. O
-> `review-bridge/README.md` ainda descreve o Express antigo (porta 9878, token)
-> — **não use como referência**.
+> Source of truth for the endpoints: `app/api/review-bridge/*/route.ts`. The
+> `review-bridge/README.md` still describes the old Express (port 9878, token)
+> — **do not use it as a reference**.
 
-## Regra de ouro
+## Golden rule
 
-**Você NÃO arquiva direto.** Sempre transiciona para `in_review` e deixa
-o usuário aprovar. A única exceção é quando o usuário pedir
-explicitamente "arquive direto" / "marca como resolvido sem revisão".
+**You do NOT archive directly.** Always transition to `in_review` and let
+the user approve. The only exception is when the user explicitly asks to
+"archive it directly" / "mark it as resolved without review".
 
 ```
-status atual → o que você faz
+current status → what you do
 ─────────────────────────────────
-open         → in_review  (após implementar a correção)
-open         → reply       (se você quer uma opinião do user antes)
-in_review    → não tocar  (já está com você ou outro agente; só user pode aprovar/rejeitar)
-resolved     → ignorar     (já arquivado; outra fila)
+open         → in_review  (after implementing the fix)
+open         → reply       (if you want the user's opinion first)
+in_review    → don't touch  (already with you or another agent; only the user can approve/reject)
+resolved     → ignore      (already archived; different queue)
 ```
 
-## Identidade do actor
+## Actor identity
 
-Em TODAS as chamadas que escrevem no bridge, use:
+On ALL calls that write to the bridge, use:
 
 ```json
 { "kind": "agent", "id": "claude", "name": "Claude" }
 ```
 
-Se for um agente diferente (Haiku, Sonnet rodando em paralelo, etc.), use
-um id estável diferente (`claude-haiku`, `cursor`, etc.) e um `name` legível.
+If it is a different agent (Haiku, Sonnet running in parallel, etc.), use
+a different stable id (`claude-haiku`, `cursor`, etc.) and a readable `name`.
 
 ---
 
-## Fluxo
+## Flow
 
-### 0. Setup — validar bridge
+### 0. Setup — validate the bridge
 
 ```bash
-# URL do bridge serverless (same-origin no Next).
-# NÃO leia BRIDGE_URL do env: um .env.local antigo pode apontar pro Express
-# morto na :9878. Use sempre o literal abaixo.
+# URL of the serverless bridge (same-origin in Next).
+# Do NOT read BRIDGE_URL from the env: an old .env.local may point at the dead
+# Express on :9878. Always use the literal below.
 BRIDGE_URL=http://127.0.0.1:3000/api/review-bridge
 
-# Confere se o Next está vivo e respondendo no modo serverless.
+# Checks that Next is alive and answering in serverless mode.
 curl -s "$BRIDGE_URL/health" | python3 -c "import sys,json;d=json.load(sys.stdin);assert d['ok'] and d['schemaVersion']==3 and d.get('mode')=='serverless', d"
 ```
 
-Sem token. As rotas Next gravam direto em `review-bridge/data/*.json` com
-escrita atômica + lock (espelhando o page-edits). Se o health falhar, parar
-com mensagem dizendo pra rodar `npm run dev` na raiz e voltar.
+No token. The Next routes write straight to `review-bridge/data/*.json` with
+atomic writes + a lock (mirroring page-edits). If health fails, stop with a
+message telling the user to run `npm run dev` at the root and come back.
 
-### 1. Parsear o filtro da request do usuário
+### 1. Parse the filter from the user's request
 
-Mapeie o que o user pediu pro filtro certo:
+Map what the user asked for to the right filter:
 
-| User disse | Filtro a aplicar |
+| What the user said | Filter to apply |
 |---|---|
-| "todos os comentários" / "tudo" / sem filtro | `status=open` (default — não puxa in_review nem archive) |
-| "os abertos" / "open" | `status=open` |
-| "os em revisão" / "in_review" / "pendentes minha aprovação" | `status=in_review` (mas você NÃO deve mexer nesses; aborte com explicação) |
-| "os de hoje" | `status=open` + filtrar `createdAt >= meia-noite local de hoje` |
-| "os de ontem pra cá" / "últimos N dias" | `status=open` + filtro de data |
-| "os da página X" / "/perfil" | `status=open&url=/perfil` |
-| "comentário cmt-xxx" | GET direto por id |
-| "responda os abertos com pergunta" | filtro `status=open`, mas em vez de implementar, postar reply |
+| "all the comments" / "everything" / no filter | `status=open` (default — does not pull in_review or archive) |
+| "the open ones" / "open" | `status=open` |
+| "the ones in review" / "in_review" / "pending my approval" | `status=in_review` (but you must NOT touch these; abort with an explanation) |
+| "today's" | `status=open` + filter `createdAt >= today's local midnight` |
+| "since yesterday" / "the last N days" | `status=open` + date filter |
+| "the ones on page X" / "/perfil" | `status=open&url=/perfil` |
+| "comment cmt-xxx" | direct GET by id |
+| "reply to the open ones with a question" | `status=open` filter, but instead of implementing, post a reply |
 
-Memória relevante:
-> Memory `feedback_review_bridge_filter` — `status === "open"` puxa
-> comments velhos sem filtro adicional. SEMPRE filtre por
-> `createdAt >= today_midnight` quando o user falar "hoje". E SEMPRE
-> filtre por `url` quando o user está focado em uma página.
+Relevant memory:
+> Memory `feedback_review_bridge_filter` — `status === "open"` pulls old
+> comments when there is no additional filter. ALWAYS filter by
+> `createdAt >= today_midnight` when the user says "today". And ALWAYS
+> filter by `url` when the user is focused on one page.
 
-### 2. Buscar e ranquear
+### 2. Fetch and rank
 
 ```bash
 curl -s "$BRIDGE_URL/comments?status=open" \
   | python3 -m json.tool > /tmp/review-bridge-open.json
 ```
 
-Aplique os filtros adicionais (data, url, autor) em Python ou jq.
+Apply the additional filters (date, url, author) in Python or jq.
 
-Ranking padrão pra ordem de processamento:
-1. Comentários mais antigos primeiro (FIFO — user já espera há mais tempo).
-2. Empate: mesma URL → bloco contínuo (pra você ler aquele arquivo só
-   uma vez no plano).
+Default ranking for the processing order:
+1. Oldest comments first (FIFO — the user has been waiting longer).
+2. Tie-break: same URL → one contiguous block (so you read that file only
+   once while planning).
 
-### 3. Plano — SEMPRE antes de tocar em código
+### 3. Plan — ALWAYS before touching any code
 
-Pra cada comentário no escopo, monte uma linha:
+For each comment in scope, build one line:
 
 ```
-- cmt-xxx · /url/da/pagina · "primeiras 60 chars do texto..."
-  proposta: <o que você vai mudar, em 1 linha>
-  arquivos: <arquivo:linha> (opcional, se já identificou)
-  confiança: alta | média | baixa
-  ação: implementar | responder com pergunta | pular (motivo)
+- cmt-xxx · /page/url · "first 60 chars of the text..."
+  proposal: <what you are going to change, in 1 line>
+  files: <file:line> (optional, if you already found it)
+  confidence: high | medium | low
+  action: implement | reply with a question | skip (reason)
 ```
 
-Apresente o plano consolidado pro user com:
-- Total de comments no escopo
-- Quantos "implementar", "responder", "pular"
-- Lista detalhada (até 30; se passar de 30, use AskUserQuestion pra confirmar
-  prosseguir ou fatiar)
+Present the consolidated plan to the user with:
+- Total comments in scope
+- How many "implement", "reply", "skip"
+- Detailed list (up to 30; if it goes past 30, use AskUserQuestion to confirm
+  whether to proceed or slice it)
 
-**Espere aprovação explícita** antes de executar (AskUserQuestion com
-opções "executar tudo", "executar só os de confiança alta", "cancelar").
-Em auto mode, prossiga com "executar tudo" mas avise no resumo final.
+**Wait for explicit approval** before executing (AskUserQuestion with the
+options "run everything", "run only the high-confidence ones", "cancel").
+In auto mode, proceed with "run everything" but flag it in the final summary.
 
-### 4. Executar item por item
+### 4. Execute item by item
 
-Pra cada comentário marcado como **implementar**:
+For each comment marked **implement**:
 
-1. Ler o arquivo da página (`comment.url` → mapear pra `app/.../page.tsx`
-   ou o componente correspondente). Anchor tem `viewportWidth/Height` e
-   `scrollY` — use só pra contexto, não pra precisão pixel-perfect.
-   - Antes de editar, leia `comment.context` quando existir. Use
+1. Read the page file (`comment.url` → map it to `app/.../page.tsx`
+   or the corresponding component). The anchor has `viewportWidth/Height` and
+   `scrollY` — use it only for context, not for pixel-perfect precision.
+   - Before editing, read `comment.context` when it exists. Use
      `context.target.label`, `context.target.text`, `context.target.attributes`,
-     `context.target.fingerprint` e `context.nearbyText` para identificar o alvo
-     real de pedidos curtos como "remove isso" ou "troca esse texto". Se o
-     contexto contradiz a coordenada visual, confie primeiro no texto/label do
-     alvo e confirme no código da página.
-   - **Comentário de UX flow** (`comment.origin === "ux-flow"`): foi deixado
-     no diagrama de um flow do styleguide. Tem `flowRef: { flow, nodeId,
-     nodeLabel }` — a correção vai nos arrays `NODES`/`EDGES` de
-     `app/auis/styleguide/ux-flows/<flow>/page.tsx` (o nó é `flowRef.nodeId`).
-     Trate como uma edição de fluxo (mesma lógica de `auis-update-ux-flow`)
-     e registre changelog se for mudança estrutural. Depois marque o comment
-     `in_review` igual aos demais.
-2. Implementar a correção no código com Edit/Write.
-3. Marcar o comment como `in_review`:
+     `context.target.fingerprint` and `context.nearbyText` to identify the real
+     target of short requests like "remove this" or "swap this text". If the
+     context contradicts the visual coordinate, trust the target's text/label
+     first and confirm against the page code.
+   - **UX flow comment** (`comment.origin === "ux-flow"`): it was left on the
+     diagram of a styleguide flow. It has `flowRef: { flow, nodeId,
+     nodeLabel }` — the fix goes into the `NODES`/`EDGES` arrays of
+     `app/auis/styleguide/ux-flows/<flow>/page.tsx` (the node is `flowRef.nodeId`).
+     Treat it as a flow edit (same logic as `auis-update-ux-flow`)
+     and add a changelog entry if it is a structural change. Then mark the comment
+     `in_review` like the others.
+2. Implement the fix in the code with Edit/Write.
+3. Mark the comment as `in_review`:
 
 ```bash
 curl -s -X PUT "$BRIDGE_URL/comments/$ID" \
@@ -168,15 +166,15 @@ curl -s -X PUT "$BRIDGE_URL/comments/$ID" \
   }' | python3 -m json.tool
 ```
 
-A resposta deve incluir `resolution.summary` no formato:
+The response must include `resolution.summary` in the format:
 
 ```
 Resolvido por Claude em DD/MM/YYYY às HH:MM:SS.
 ```
 
-Anote o id+summary pra colocar no resumo final.
+Note the id+summary to put in the final summary.
 
-Pra os marcados como **responder com pergunta**:
+For the ones marked **reply with a question**:
 
 ```bash
 curl -s -X POST "$BRIDGE_URL/comments/$ID/replies" \
@@ -186,71 +184,71 @@ curl -s -X POST "$BRIDGE_URL/comments/$ID/replies" \
     "authorId": "claude",
     "authorName": "Claude",
     "authorColorToken": "var(--au-purple-600)",
-    "text": "<sua pergunta concisa, terminando em ?>"
+    "text": "<your concise question, ending in ?>"
   }'
 ```
 
-Não marque esses como `in_review` — eles ficam `open` esperando o user
-responder na thread.
+Do not mark these as `in_review` — they stay `open` waiting for the user
+to reply in the thread.
 
-### 5. Resumo final
+### 5. Final summary
 
-Reportar pro usuário em uma mensagem só (não vai goteirando):
+Report to the user in a single message (do not trickle it out):
 
 ```
-✅ N implementados (em revisão no inbox):
-   - cmt-... · /url · 1 linha do que foi feito
+✅ N implemented (in review in the inbox):
+   - cmt-... · /url · 1 line on what was done
    ...
 
-💬 M respondidos (esperando você na thread):
-   - cmt-... · /url · "pergunta?"
+💬 M replied (waiting for you in the thread):
+   - cmt-... · /url · "question?"
    ...
 
-⏭️ K pulados:
-   - cmt-... · /url · motivo
+⏭️ K skipped:
+   - cmt-... · /url · reason
 
-▶ Confira o inbox em /auis/styleguide/review pra aprovar/rejeitar
-  os implementados. Aprovar move pro arquivo; rejeitar volta pra "open".
+▶ Check the inbox at /auis/styleguide/review to approve/reject
+  the implemented ones. Approving moves them to the archive; rejecting sends them back to "open".
 ```
 
-Mencionar o badge âmbar com a contagem que apareceu no toolbar.
+Mention the amber badge with the count that appeared in the toolbar.
 
 ---
 
-## Decisões de "implementar vs responder vs pular"
+## "implement vs reply vs skip" decisions
 
-| Sinal no texto do comentário | Decisão |
+| Signal in the comment text | Decision |
 |---|---|
-| "muda X para Y" / "deveria ser Y" / instruções claras | implementar |
-| "isso parece estranho" / "não gostei" / sem direção | responder com pergunta pedindo direção |
-| "quebrado" / "bug" / aponta um problema concreto na UI | implementar (investigar e corrigir) |
-| pergunta direta ao agente ("@claude, qual...") | responder |
-| screenshot anexada + sem texto | responder com "o que você quer mudar nessa marcação?" |
-| comentário se referindo a backend/dados | pular (memória: repo é UI/UX, devs cuidam do backend) |
-| referência a feature mobile | pular (memória: produto não tem mobile) |
+| "change X to Y" / "it should be Y" / clear instructions | implement |
+| "this looks odd" / "I don't like it" / no direction | reply with a question asking for direction |
+| "broken" / "bug" / points at a concrete problem in the UI | implement (investigate and fix) |
+| direct question to the agent ("@claude, which...") | reply |
+| screenshot attached + no text | reply with "what do you want to change in this annotation?" |
+| comment referring to backend/data | skip (memory: this repo is UI/UX, devs handle the backend) |
+| reference to a mobile feature | skip (memory: the product has no mobile) |
 
-## Restrições
+## Constraints
 
-- ❌ Não use `transition: "approve"` nem `transition: "resolve_direct"` —
-  só o user humano aprova/arquiva direto.
-- ❌ Não delete comentários (`DELETE /comments/:id`).
-- ❌ Não toque em comentários com `status: "in_review"` (já estão na fila do user).
-- ❌ Não toque em comentários do arquivo (`/comments/archive`) a menos que
-  o user pergunte explicitamente.
-- ❌ Não responda à thread se o reply é "OK" / sem conteúdo. Reply é pra
-  fazer pergunta legítima.
-- ❌ Não passe header `X-Review-Token` — o bridge serverless é same-origin
-  e ignora o header. Adicionar lixo nas requests só polui o log.
-- ❌ Não use `BRIDGE_URL` vindo do ambiente — um `.env.local` antigo aponta
-  pro Express morto na :9878. Hardcode `http://127.0.0.1:3000/api/review-bridge`.
-- ✅ Sempre pegar timezone do servidor pro `summary` (o bridge faz isso
-  sozinho — não recalcule no cliente).
-- ✅ Se cair conexão no meio do lote, retomar do próximo id pendente
-  (o status `in_review` já persistido protege contra repetição).
+- ❌ Do not use `transition: "approve"` or `transition: "resolve_direct"` —
+  only the human user approves/archives directly.
+- ❌ Do not delete comments (`DELETE /comments/:id`).
+- ❌ Do not touch comments with `status: "in_review"` (they are already in the user's queue).
+- ❌ Do not touch archived comments (`/comments/archive`) unless
+  the user explicitly asks.
+- ❌ Do not reply in the thread if the reply is "OK" / has no content. A reply is for
+  asking a legitimate question.
+- ❌ Do not send the `X-Review-Token` header — the serverless bridge is same-origin
+  and ignores the header. Adding junk to the requests only pollutes the log.
+- ❌ Do not use `BRIDGE_URL` coming from the environment — an old `.env.local` points
+  at the dead Express on :9878. Hardcode `http://127.0.0.1:3000/api/review-bridge`.
+- ✅ Always take the server timezone for the `summary` (the bridge does this
+  on its own — do not recompute it on the client).
+- ✅ If the connection drops mid-batch, resume from the next pending id
+  (the already-persisted `in_review` status protects against repeats).
 
-## Filtros úteis — receitas prontas
+## Useful filters — ready-made recipes
 
-### Hoje, status open
+### Today, status open
 
 ```bash
 TODAY_MS=$(python3 -c "import datetime;t=datetime.datetime.now().replace(hour=0,minute=0,second=0,microsecond=0);print(int(t.timestamp()*1000))")
@@ -264,14 +262,14 @@ print(json.dumps({'count': len(hoje), 'ids': [c['id'] for c in hoje]}, indent=2)
 " TODAY_MS=$TODAY_MS
 ```
 
-### Tudo open de uma URL específica
+### Everything open on a specific URL
 
 ```bash
 URL_ENC=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))" "/settings/perfil")
 curl -s "$BRIDGE_URL/comments?status=open&url=$URL_ENC"
 ```
 
-### IDs específicos
+### Specific IDs
 
 ```bash
 for ID in cmt-aaa cmt-bbb cmt-ccc; do
@@ -280,7 +278,7 @@ for ID in cmt-aaa cmt-bbb cmt-ccc; do
 done
 ```
 
-### Conferir o que ficou pra você revisar (pós-execução)
+### Check what was left for you to review (post-run)
 
 ```bash
 curl -s "$BRIDGE_URL/comments?status=in_review" \
@@ -295,13 +293,13 @@ for c in d['comments']:
 
 ## Troubleshooting
 
-| Sintoma | Causa | Como contornar |
+| Symptom | Cause | Workaround |
 |---|---|---|
-| `ECONNREFUSED` / `Failed to connect to 127.0.0.1:3000` | Next não está rodando | `npm run dev` na raiz |
-| `ECONNREFUSED 127.0.0.1:9878` | algo enviou request pro Express legado morto (ex.: `.env.local` com `BRIDGE_URL=…:9878` antigo) | use o literal `http://127.0.0.1:3000/api/review-bridge`; não leia do env |
-| health responde mas `mode != "serverless"` | `dev:bridge` (Express opt-in) está sendo usado | matar o Express e mirar no Next |
-| `404` numa transition | comment já foi arquivado/deletado | pular do lote |
-| `400 invalid_actor` | esqueci de mandar `actor` no body | sempre incluir `{kind,id,name}` |
-| 0 comentários retornados quando deveria ter | filtro pegou só `status=open`, mas o que quer pode estar em `in_review` ou archive | rever filtro |
-| Lote demorado, conexão caiu | mantém o que já marcou; refazer pegando `status=open` de novo já vai pular os que viraram `in_review` | OK by design |
-| Comment volta como `open` mesmo depois de eu marcar in_review | user rejeitou — você não precisa repetir, espere ele ajustar a request | OK |
+| `ECONNREFUSED` / `Failed to connect to 127.0.0.1:3000` | Next is not running | `npm run dev` at the root |
+| `ECONNREFUSED 127.0.0.1:9878` | something sent a request to the dead legacy Express (e.g. an `.env.local` with an old `BRIDGE_URL=…:9878`) | use the literal `http://127.0.0.1:3000/api/review-bridge`; do not read it from the env |
+| health responds but `mode != "serverless"` | `dev:bridge` (opt-in Express) is being used | kill the Express and point at Next |
+| `404` on a transition | comment was already archived/deleted | skip it in the batch |
+| `400 invalid_actor` | you forgot to send `actor` in the body | always include `{kind,id,name}` |
+| 0 comments returned when there should be some | the filter only took `status=open`, but what you want may be in `in_review` or the archive | review the filter |
+| Long batch, connection dropped | it keeps what you already marked; re-running with `status=open` will skip the ones that became `in_review` | OK by design |
+| Comment comes back as `open` even after I marked it in_review | the user rejected it — you do not need to repeat, wait for them to adjust the request | OK |
