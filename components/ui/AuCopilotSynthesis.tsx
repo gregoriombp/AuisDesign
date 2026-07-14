@@ -85,7 +85,7 @@ const fragmentShader = `
   }
 `;
 
-export interface AuCortexSynthesisProps {
+export interface AuCopilotSynthesisProps {
   className?: string;
   style?: React.CSSProperties;
   speed?: number;
@@ -115,7 +115,7 @@ const Effect = ({
   flowFrequency,
   contrast,
   hueSpeed,
-}: Required<Omit<AuCortexSynthesisProps, "className" | "style" | "backgroundColor">>) => {
+}: Required<Omit<AuCopilotSynthesisProps, "className" | "style" | "backgroundColor">>) => {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
 
   // Uniforms are created ONCE, then mutated by ref (useEffect on prop change +
@@ -189,7 +189,7 @@ const Effect = ({
   );
 };
 
-export function AuCortexSynthesis({
+export function AuCopilotSynthesis({
   className,
   style,
   speed = 0.1,
@@ -204,7 +204,7 @@ export function AuCortexSynthesis({
   contrast = 1.0,
   hueSpeed = 0,
   backgroundColor = "#000000",
-}: AuCortexSynthesisProps) {
+}: AuCopilotSynthesisProps) {
   // Cada Canvas é um contexto WebGL, e o navegador só mantém ~16 vivos. Em
   // páginas com muitos orbs (styleguide, listas) os mais antigos eram
   // descartados e o preview ficava preto ("bugado"). Solução: só montar o

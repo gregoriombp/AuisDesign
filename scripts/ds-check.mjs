@@ -49,7 +49,7 @@ const AW_EQUIVALENT = {
 // Files where a raw <svg> or a hex literal is legitimately expected:
 // brand marks, illustrations, agent/decorative visuals, the Icon component.
 const RAW_VISUAL_RE =
-  /(BrandIllustration|BrandLogo|CardBrand|MemoryBaseLogo|Logo|AgentCore|AgentAvatar|UserAgentOrb|CortexSynthesis|Beams|DotTunnel|NeuralPattern|QrPlaceholder|Icon)\.tsx$/;
+  /(BrandIllustration|BrandLogo|CardBrand|MemoryBaseLogo|Logo|AgentCore|AgentAvatar|UserAgentOrb|CopilotSynthesis|Beams|DotTunnel|NeuralPattern|QrPlaceholder|Icon)\.tsx$/;
 // WebGL/shader files pass numeric hex to the GPU (var() can't be read there).
 const SHADER_HINT_RE =
   /@react-three|from ["']three["']|ShaderMaterial|uniforms|gl_FragColor|createShader/;

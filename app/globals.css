@@ -2077,12 +2077,12 @@
 @media (prefers-reduced-motion: reduce) {
   .au-spinner-gradient::before { animation: none; }
 }
-/* Ai-cortex — silver mesh inspired by the Cortex marble cube.
+/* Ai-copilot — silver mesh inspired by the Copilot marble cube.
    Cool slate base, brighter pocket on the left, darker pocket on the
    right where the dark CTA usually sits. Designed for the AI side of
    AuSpecialistsPair, where the AI is a system co-pilot rather than a
    generative agent (which keeps using the blue/purple ai variant). */
-.au-card--ai-cortex {
+.au-card--ai-copilot {
   background:
     radial-gradient(ellipse 80% 100% at 8%  50%, rgba(226, 232, 240, 0.55), transparent 65%),
     radial-gradient(ellipse 60% 80%  at 92% 50%, rgba(100, 116, 139, 0.22), transparent 65%),
@@ -5516,10 +5516,10 @@
   will-change: border-radius, transform;
 }
 
-/* Cortex pensando: o hex morfa por formas geométricas (hex → círculo →
+/* Copilot pensando: o hex morfa por formas geométricas (hex → círculo →
    quadrado → triângulo) via clip-path. Pontos equidistantes (12) em cada
    forma pra o CSS interpolar suave. Combina com hueSpeed na textura. */
-@keyframes au-cortex-think-morph {
+@keyframes au-copilot-think-morph {
   0%, 100% {
     clip-path: polygon(50.0% 0.0%, 74.1% 12.1%, 98.2% 24.1%, 100.0% 50.0%, 98.2% 75.9%, 74.1% 87.9%, 50.0% 100.0%, 25.9% 87.9%, 1.8% 75.9%, 0.0% 50.0%, 1.8% 24.1%, 25.9% 12.1%);
   }
@@ -5533,13 +5533,13 @@
     clip-path: polygon(50.0% 3.0%, 61.6% 22.4%, 73.2% 41.8%, 84.8% 61.2%, 95.2% 80.0%, 72.6% 80.0%, 50.0% 80.0%, 27.4% 80.0%, 4.8% 80.0%, 15.2% 61.2%, 26.8% 41.8%, 38.4% 22.4%);
   }
 }
-.au-cortex-think {
+.au-copilot-think {
   clip-path: polygon(50.0% 0.0%, 74.1% 12.1%, 98.2% 24.1%, 100.0% 50.0%, 98.2% 75.9%, 74.1% 87.9%, 50.0% 100.0%, 25.9% 87.9%, 1.8% 75.9%, 0.0% 50.0%, 1.8% 24.1%, 25.9% 12.1%);
-  animation: au-cortex-think-morph 5s ease-in-out infinite;
+  animation: au-copilot-think-morph 5s ease-in-out infinite;
   will-change: clip-path;
 }
 @media (prefers-reduced-motion: reduce) {
-  .au-cortex-think {
+  .au-copilot-think {
     animation: none;
   }
 }

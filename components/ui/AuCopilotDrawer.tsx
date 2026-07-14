@@ -2,16 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { AuCortexSynthesis } from "@/components/ui/AuCortexSynthesis";
+import { AuCopilotSynthesis } from "@/components/ui/AuCopilotSynthesis";
 import { Icon } from "@/components/ui/Icon";
 import {
-  CORTEX_STATE_PRESETS,
-  type CortexState,
+  COPILOT_STATE_PRESETS,
+  type CopilotState,
 } from "@/lib/copilot-orb-presets";
 
 // Flat-top regular hex inscribed in a 1:1 box (height ≈ 86.6%) with sharp
 // vertices. Encoded as an SVG mask so it scales with any container size.
-const CORTEX_HEX_MASK = (() => {
+const COPILOT_HEX_MASK = (() => {
   const path = "M25 6.7 L75 6.7 L100 50 L75 93.3 L25 93.3 L0 50 Z";
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><path d='${path}' fill='black'/></svg>`;
   return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
@@ -38,7 +38,7 @@ export function AuCopilotOrb({
   bg,
 }: {
   size?: number;
-  state?: CortexState;
+  state?: CopilotState;
   speed?: number;
   color1?: string;
   color2?: string;
@@ -51,7 +51,7 @@ export function AuCopilotOrb({
   contrast?: number;
   bg?: string;
 }) {
-  const preset = CORTEX_STATE_PRESETS[state];
+  const preset = COPILOT_STATE_PRESETS[state];
 
   // Size-aware density. The presets are tuned for large orbs (hero/panel).
   // At small pixel sizes that same complexity/scale crams too many swirls
@@ -72,7 +72,7 @@ export function AuCopilotOrb({
     <div
       className={
         "relative shrink-0 overflow-hidden" +
-        (thinking ? " au-cortex-think" : "")
+        (thinking ? " au-copilot-think" : "")
       }
       style={
         thinking
@@ -80,8 +80,8 @@ export function AuCopilotOrb({
           : {
               width: size,
               height: size,
-              maskImage: CORTEX_HEX_MASK,
-              WebkitMaskImage: CORTEX_HEX_MASK,
+              maskImage: COPILOT_HEX_MASK,
+              WebkitMaskImage: COPILOT_HEX_MASK,
               maskSize: "100% 100%",
               WebkitMaskSize: "100% 100%",
               maskRepeat: "no-repeat",
@@ -91,7 +91,7 @@ export function AuCopilotOrb({
       }
       aria-hidden="true"
     >
-      <AuCortexSynthesis
+      <AuCopilotSynthesis
         speed={speed ?? preset.speed}
         color1={color1 ?? preset.color1}
         color2={color2 ?? preset.color2}
@@ -198,7 +198,7 @@ export function AuCopilotDrawer({
         isOpen ? "w-[405px]" : "w-0"
       }`}
       role="dialog"
-      aria-label="Cortex"
+      aria-label="Copilot"
     >
       <div className="h-full w-[405px] min-w-[405px] bg-(--bg-raised) flex flex-col">
         {/* Top bar */}
@@ -207,7 +207,7 @@ export function AuCopilotDrawer({
             <AuCopilotOrb size={46} />
             <div className="flex flex-col">
               <div className="body-xl font-semibold text-(--fg-primary)">
-                Cortex
+                Copilot
               </div>
               <div className="flex items-center gap-2 body-xs leading-4 text-(--accent-success)">
                 <span className="h-[6px] w-[6px] rounded-full bg-(--accent-success) opacity-50" />
@@ -356,7 +356,7 @@ export function AuCopilotDrawer({
           </div>
 
           <div className="body-xs text-(--fg-tertiary) text-center">
-            Cortex pode cometer erros. Verifique informações importantes.
+            Copilot pode cometer erros. Verifique informações importantes.
           </div>
         </div>
       </div>
@@ -374,7 +374,7 @@ export function AuCopilotDrawer({
     >
       <button
         type="button"
-        aria-label="Fechar Cortex"
+        aria-label="Fechar Copilot"
         className={`absolute inset-0 h-full w-full bg-black/0 transition-opacity ${
           isOpen ? "opacity-100" : "opacity-0"
         }`}
@@ -386,7 +386,7 @@ export function AuCopilotDrawer({
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
-        aria-label="Cortex"
+        aria-label="Copilot"
       >
         <div className="h-full w-full bg-(--bg-raised)">{/* content reused from panel */}</div>
       </aside>
