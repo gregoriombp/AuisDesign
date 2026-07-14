@@ -20,8 +20,8 @@ Use this skill for product pages, feature screens, and substantial page reworks.
 - Do not create tokens or arbitrary Tailwind values.
 - Desktop-only: do not add mobile/tablet variants unless explicitly requested.
 - Product icons use `components/ui/Icon.tsx`.
-- Feature modules under `components/{auth,memory-base,...}` consume `Au*`; they
-  are not DS components and should not be renamed to `Au*`.
+- App-feature modules under `components/` (e.g. `components/auth/`) consume `Au*`;
+  they are not DS components and should not be renamed to `Au*`.
 
 ## Pre-flight (mandatory — before writing the page)
 

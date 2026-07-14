@@ -129,9 +129,9 @@ The product's fixed terms are declared in `PRODUCT_CONTEXT.md` → **§ Protecte
 
 Input arrives in three shapes. Classify each item:
 
-- **Route / internal link** (`/agent-studio`, `localhost:3000/...`, the LAN IP, `?step=`) → **TARGET**. Map it to the file: `app/<route>/page.tsx` + local `_components/`. If the route has tabs/sub-routes, read the tabs file and list the children.
+- **Route / internal link** (`/onboarding`, `localhost:3000/...`, the LAN IP, `?step=`) → **TARGET**. Map it to the file: `app/<route>/page.tsx` + local `_components/`. If the route has tabs/sub-routes, read the tabs file and list the children.
 - **External link** (elevenlabs.io, openai.com, any site) → voice **REFERENCE**, never a target. Absorb the principle, declare that it's inference, and **edit nothing from there**.
-- **Figma** (`figma.com/...`) → the product's **canonical copy source**. Use the Figma MCP to read the official text (Agent Studio / Memory Base have canonical copy there) and align the route to it.
+- **Figma** (`figma.com/...`) → the product's **canonical copy source**. Use the Figma MCP to read the official text (product screens usually carry the canonical copy there) and align the route to it.
 - **Loose pasted text** (no route) → review it in chat and hand it back; only edit a file if the user points at one.
 
 **List the files you're going to touch, with the role of each, and confirm** before moving on. If you inferred wrong, the user corrects you here.
@@ -153,12 +153,12 @@ If the strings are centralized (an i18n/constants file), edit **there**; if they
 For each problematic string, build the table. **Don't list what's already good** — churning good copy is busywork (and the user hates over-spec). Mark severity as text, **no emoji**:
 
 ```
-Page: /agent-studio  ·  file: app/agent-studio/_components/Header.tsx
+Page: /onboarding  ·  file: app/onboarding/_components/Header.tsx
 
 | Where | Current | Problem | Proposed | Sev |
 |---|---|---|---|---|
-| Header button | "Submit" | vague verb, doesn't say the outcome | "Publish agent" | Fix |
-| Objective help | "Utilize this field to perform the definition of the objective" | bureaucratic + passive | "Set the agent's objective." | Fix |
+| Header button | "Submit" | vague verb, doesn't say the outcome | "Create workspace" | Fix |
+| Objective help | "Utilize this field to perform the definition of the objective" | bureaucratic + passive | "Set the workspace objective." | Fix |
 | @ tooltip | "Click to insert a variable here" | repeats the obvious | "Inserts a system variable" | Polish |
 ```
 
@@ -199,7 +199,7 @@ Close with **"Left as is (already on tone):"** + 2-3 examples, to show you didn'
 - **Working tree dirtied by another agent** → `git add` per file, never `-A`.
 - **Format-on-save linter** may rewrite mid-flight → re-read the file before the next Edit.
 - **String repeated in N places** (same label across several files) → change it everywhere so you don't create an inconsistency; list them all in the report.
-- **Copy that came from Figma** (Agent Studio / Memory Base) is canonical → align the route to Figma, not the other way around; if they diverge, ask.
+- **Copy that came from Figma** is canonical → align the route to Figma, not the other way around; if they diverge, ask.
 - **Mobbin/Dribbble** as a reference → WebFetch fails (paywall). Ask for a screenshot or use declared inference. But the reference here is **voice/principle**, not visual.
 - **Route is a redirect** (`page.tsx` that only calls `redirect()`) → work on the sub-routes, not on the redirect.
 

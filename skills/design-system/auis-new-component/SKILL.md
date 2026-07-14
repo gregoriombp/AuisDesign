@@ -34,7 +34,7 @@ Use this skill when adding a design system component or touching an existing
    only when nothing fits and the semantics are genuinely new — never duplicate
    under a new name.
 3. **Compose from primitives.** The new piece is a *recipe* of existing `Au*`
-   primitives (`AuButton`, `Icon`, `AuInput`, `AuAvatar`, `AuPill`…) — don't
+   primitives (`AuButton`, `Icon`, `AuInput`, `AuCard`, `AuPill`…) — don't
    re-implement a button/input/icon inline.
 4. **Icons through `Icon`** (Material Symbols). Never a raw `<svg>` or hardcoded
    glyph; `react-icons` only for brand marks.

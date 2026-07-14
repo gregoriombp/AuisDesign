@@ -9,14 +9,39 @@
 >
 > Source of truth for the rules: [`AGENTS.md`](../AGENTS.md). If they conflict, AGENTS wins.
 
+## Read this first — the map has two layers
+
+Auis is a **builder**. This repo ships the UI that the builder itself is made of. It does
+**not** ship a component catalog for *your* product. Those are two different things, and
+collapsing them into one list is exactly how an agent ends up importing a component that
+was never here.
+
+| | **Layer A — Auis builder components** | **Layer B — your product's components** |
+|---|---|---|
+| What | The **31** `Au*` files in `components/ui/` | Whatever you build |
+| Does it ship? | **Yes** — it is the tool's own UI | **No — empty on purpose** |
+| Why it exists | The Review Bridge, the Copilot drawer, the workbench shell, and the primitives those stand on | Your product |
+| Can I import it? | Yes — freely | — |
+| Registered where | Already here (see [Layer A](#layer-a--auis-builder-components-what-ships)) | `/auis/styleguide`, as you add it (see [Layer B](#layer-b--your-products-components-empty-on-purpose)) |
+
+**Layer A is importable and reusable — but its reason for existing is the tool.** Read it as
+*"what Auis is made of, which you may reuse"*, not as *"the catalog your product should be
+assembled from"*. If you need a pricing table, a payment card, or an integration tile,
+Layer A does not have one and never did — that is Layer B, and Layer B is yours to build.
+
+**Layer B ships deliberately empty.** The styleguide gallery
+([`navigation.ts`](../app/auis/styleguide/navigation.ts)) is a zeroed template waiting for
+**your** components. That is a starting line, not a gap.
+
 ## Golden rule (the atomic recipe)
 
 1. **Reuse > extend > create.** Look here and in `components/ui/Au*` before writing
    anything. Only create from scratch if nothing fits and the semantics are
    genuinely new — never duplicate under a new name.
 2. **Compose from primitives.** A bigger piece (card, modal, screen) is a *recipe*
-   of `Au*` primitives. An `AuGroupCard` uses `AuButton` + `Icon` + `AuAvatar` — it does not
-   reimplement button, icon, or avatar by hand.
+   of `Au*` primitives. `AuDashboardLayout` is literally `AuSidebar` + `AuHeader` +
+   `AuBreadcrumbsBar` + `AuCopilotDrawer`; `AuMentionMenu` is `AuBrandLogo` + `Icon`. Neither
+   reimplements a button, an icon, or a logo by hand.
 3. **Tokens only.** No `#hex`, `w-[37px]`, `rounded-[10px]`. Use the
    [token vocabulary](#token-vocabulary-paste-this-instead-of-hardcoding)
    below. Missing token → report it, don't create it (only the `foundation` skill creates tokens).
@@ -28,44 +53,118 @@
 
 ---
 
+# Layer A — Auis builder components (what ships)
+
+The 31 `Au*` in `components/ui/`. They exist because the **Auis builder** needed them:
+the Review Bridge, the Copilot drawer, and the workbench shell are built out of them, and
+the primitives underneath exist to serve those three. You may import and reuse any of them
+in your own screens — just don't mistake this for a product catalog.
+
+## What each cluster is for
+
+| Cluster | Components | What it powers |
+|---|---|---|
+| **Review Bridge** | `AuMentionMenu` · `AuCheckpointChip` | The comment/review layer: `@agent` mention picker and the checkpoint chips inside comment text. |
+| **Copilot drawer** | `AuCopilotDrawer` · `AuCopilotSynthesis` | The side Copilot panel and its animated orb. |
+| **Workbench shell** | `AuDashboardLayout` · `AuSidebar` · `AuHeader` · `AuNavRail` · `AuBreadcrumbsBar` · `AuBreadcrumb` · `AuNotificationsPanel` | The chrome every Auis route renders inside. `AuDashboardLayout` injects the rest. |
+| **Brand** | `AuLogo` · `AuBrandLogo` · `AuBrandIllustration` | Auis's own mark, 3rd-party app logos, and brand artwork. |
+| **Primitives & feedback** | The remaining 19 | The bricks the four clusters above stand on. Genuinely generic — this is the part most worth reusing. |
+
 ## Shortcut by intent (the fast path)
 
-| I need… | Use | Import | Watch out |
+Every row below resolves to a file that **exists**. If your need isn't here, it is Layer B —
+build it (see [Genuinely missing something?](#genuinely-missing-something)).
+
+| I need… | Use | Import | When NOT to use it |
 |---|---|---|---|
 | Icon | `Icon` | `@/components/ui/Icon` | `<Icon name="..." size={20} />`. Automatic optical default (`wght`/`GRAD`/`opsz`) — don't force `weight={200}` on a small icon. Never a raw `<svg>`. |
-| App / integration logo | `AuBrandLogo` | `@/components/ui/AuBrandLogo` | 3rd-party mark (Google, Chrome, Pipedrive…). Curate it from Iconify `logos` → `markSrc`. **Not** an `Icon`. See AGENTS.md §4. |
+| App / integration logo | `AuBrandLogo` | `@/components/ui/AuBrandLogo` | Only for a 3rd-party mark (Google, Chrome, Pipedrive…). **Not** for Auis's own logo (that's `AuLogo`) and **not** an `Icon`. See AGENTS.md §4. |
+| Auis logo / lockup | `AuLogo` | `@/components/ui/AuLogo` | Not for 3rd-party brands → `AuBrandLogo`. |
+| Brand illustration | `AuBrandIllustration` | `@/components/ui/AuBrandIllustration` | Decorative brand artwork only. Not an icon, not a chart. |
 | Button | `AuButton` | `@/components/ui/AuButton` | has `intent`/`size`/an `Icon` slot. Don't style a `<button>` by hand. |
-| Form field | `AuField` (or `AuInput`) | `@/components/ui/AuInput` | `AuField` (label + error + `framed` variant) and `AuInput` come from the same file. |
-| Select | `AuSelect` | `@/components/ui/AuSelect` | |
-| Checkbox / toggle / slider | `AuCheckbox` · `AuToggle` · `AuSlider` | `@/components/ui/Au{Checkbox,Toggle,Slider}` | **don't** use the `fluid/*` equivalents directly (see [Motion](#motion-two-layers)). |
-| Tag / chip / badge | `AuPill` | `@/components/ui/AuPill` | there is a `badge.tsx` (shadcn) and a `fluid/badge` — prefer `AuPill`. |
-| Generic card | `AuCard` | `@/components/ui/AuCard` | **don't** use `components/ui/card.tsx` (raw shadcn primitive). See [families](#cards). |
-| Metric card | `AuStatCard` | `@/components/ui/AuStatCard` | number + delta + icon. |
-| Simple table | `AuTable` | `@/components/ui/AuTable` | data w/ sort/pagination/selection → `DataTable`. See [families](#tables). |
-| Modal / dialog | `AuModal` | `@/components/ui/AuModal` | the base. Ready-made variants: Connect/Welcome/Contact channel/Add integration. |
-| Side panel / drawer | `AuSheet` | `@/components/ui/AuSheet` | |
-| Dropdown menu | `AuDropdownMenu` | `@/components/ui/AuDropdownMenu` | |
+| Form field | `AuField` (or `AuInput`) | `@/components/ui/AuInput` | `AuField` (label + error + `framed` variant) and `AuInput` are exported from the **same file**. Use `AuField` when you need a label/error; bare `AuInput` otherwise. |
+| Checkbox / toggle / slider | `AuCheckbox` · `AuToggle` · `AuSlider` | `@/components/ui/AuCheckbox` · `@/components/ui/AuToggle` · `@/components/ui/AuSlider` | Don't hand-roll a styled `<input type=checkbox>`. |
+| Tag / chip / badge | `AuPill` | `@/components/ui/AuPill` | There is a raw shadcn `badge.tsx` — it is the base of `AuCheckpointChip`, not for product use. Prefer `AuPill`. |
+| Generic card | `AuCard` | `@/components/ui/AuCard` | Sub-exports: `AuCardHeader`/`Title`/`Description`/`Content`/`Footer`/`Action`. For a single metric → `AuStatCard`. |
+| Metric card | `AuStatCard` | `@/components/ui/AuStatCard` | Number + delta + icon. Anything richer is a plain `AuCard`. |
+| Table | `AuTable` | `@/components/ui/AuTable` | Simple, styled, static table. It has **no** built-in sort/pagination/selection — if you need those, that's a Layer B component you build on top. |
+| Modal / dialog | `AuModal` | `@/components/ui/AuModal` | The base for every modal. For a wizard, pass `stepKey` (the body re-animates per step) — don't swap content silently. **Never** hand-roll an overlay. |
+| Side panel / drawer | `AuSheet` | `@/components/ui/AuSheet` | Not for the Copilot panel specifically (that's `AuCopilotDrawer`). |
+| Dropdown menu | `AuDropdownMenu` | `@/components/ui/AuDropdownMenu` | **Never** hand-roll a floating menu. |
+| Mention menu | `AuMentionMenu` | `@/components/ui/AuMentionMenu` | The `@`/`/` picker of the Review Bridge. It is a mention surface, not a generic dropdown → `AuDropdownMenu`. |
+| Checkpoint chip | `AuCheckpointChip` | `@/components/ui/AuCheckpointChip` | Review-Bridge checkpoint marker inside comment text. Not a generic tag → `AuPill`. |
 | Tabs | `AuTabs` | `@/components/ui/AuTabs` | |
-| Accordion / disclosure | `AuAccordion` | `@/components/ui/AuAccordion` | several sections in one bordered group; already animates expand/collapse + chevron. |
-| Light disclosure / "show more" | `AuCollapsible` | `@/components/ui/AuCollapsible` | one expandable row/section (trigger + meta), lighter than the accordion; already animates. **Never** hand-roll it. |
-| Calendar / date picker | `Calendar` | `@/components/ui/calendar` | shadcn primitive sanctioned for direct use. For a date-range picker, compose with `Popover` + `AuButton`; don't create a ceremonial `AuCalendar`. |
-| Avatar | `AuAvatar` | `@/components/ui/AuAvatar` | group: `AuAvatarGroup` (same file). |
-| Empty state | `AuEmpty` | `@/components/ui/AuEmpty` | slots: `AuEmptyTitle`/`Media`/`Description`/`Content`. |
-| Inline alert | `AuAlert` | `@/components/ui/AuAlert` | |
-| Toast | `AuToast` | `@/components/ui/AuToast` | `AuToastProvider` at the top of the tree. |
-| Skeleton / loading | `AuSkeleton` | `@/components/ui/AuSkeleton` | |
-| Progress | `AuProgress` | `@/components/ui/AuProgress` | |
-| Status dot | `AuStatusDot` | `@/components/ui/AuStatusDot` | |
-| Breadcrumb | `AuBreadcrumb` / `AuBreadcrumbsBar` | `@/components/ui/Au{Breadcrumb,BreadcrumbsBar}` | atom vs. full bar. |
-| Page header | `AuPageHeader` | `@/components/ui/AuPageHeader` | |
-| Side navigation | `AuNavRail` / `AuNavList` | `@/components/ui/Au{NavRail,NavList}` | rail = rail with groups; list = plain list. |
-| Chart | `AuChart` | `@/components/ui/AuChart` | recharts wrapper. Don't import recharts directly in the page. |
-| Chat composer | `AuInputMessage` | `@/components/ui/AuInputMessage` | already the entry point into Fluid. |
-| Reasoning steps | `AuThinkingSteps` | `@/components/ui/AuThinkingSteps` | same. |
-| Dashboard layout | `AuDashboardLayout` | `@/components/ui/AuDashboardLayout` | already injects sidebar/header. |
+| Empty state | `AuEmpty` | `@/components/ui/AuEmpty` | Slots: `AuEmptyTitle` / `AuEmptyMedia` / `AuEmptyDescription` / `AuEmptyContent` / `AuEmptyHeader`. |
+| Inline alert | `AuAlert` | `@/components/ui/AuAlert` | Persistent, in-flow feedback. Transient feedback → `AuToast`. |
+| Toast | `AuToast` | `@/components/ui/AuToast` | Mount `AuToastProvider` at the top of the tree (already done in the root layout). |
+| Progress | `AuProgress` | `@/components/ui/AuProgress` | Determinate progress bar. |
+| Breadcrumb | `AuBreadcrumb` / `AuBreadcrumbsBar` | `@/components/ui/AuBreadcrumb` · `@/components/ui/AuBreadcrumbsBar` | Atom vs. the full bar. `AuDashboardLayout` already renders the bar — don't add a second one. |
+| Side navigation | `AuNavRail` | `@/components/ui/AuNavRail` | The rail with groups + org/user switchers. Consumed by `AuSidebar` — in a page, you almost always want the layout instead. |
+| Notifications | `AuNotificationsPanel` | `@/components/ui/AuNotificationsPanel` | Consumed by `AuHeader`. |
+| Copilot panel / orb | `AuCopilotDrawer` · `AuCopilotSynthesis` | `@/components/ui/AuCopilotDrawer` · `@/components/ui/AuCopilotSynthesis` | Auis's Copilot surface. Not a generic drawer → `AuSheet`. |
+| Dashboard layout | `AuDashboardLayout` | `@/components/ui/AuDashboardLayout` | Already injects `AuSidebar` + `AuHeader` + `AuBreadcrumbsBar` + `AuCopilotDrawer`. Don't re-add them. |
 
-> Didn't find it here? Check the [full inventory by layer](#full-inventory-by-layer)
-> before concluding it's missing — it probably already exists.
+## Full Layer A inventory (31)
+
+Terse on purpose (name · import `@/components/ui/<Name>` · role). Mirrors the taxonomy in
+[`component-layers.md`](./component-layers.md).
+
+### Primitives
+`AuButton` button · `AuInput`/`AuField` input/field · `AuCheckbox` checkbox ·
+`AuToggle` switch (+`AuToggleRow`) · `AuSlider` slider · `AuPill` tag/chip ·
+`AuProgress` progress · `AuAlert` alert · `AuToast` toast (+`AuToastProvider`) ·
+`AuEmpty` empty state (+ slots) · `AuTabs` tabs · `AuDropdownMenu` dropdown ·
+`AuBreadcrumb` breadcrumb (atom) · `Icon` base icon.
+
+### Components
+`AuCard` card (+ sub-exports) · `AuStatCard` metric · `AuTable` table ·
+`AuModal` modal · `AuSheet` drawer · `AuNavRail` nav rail (+ groups, org/user switchers) ·
+`AuBreadcrumbsBar` breadcrumb bar · `AuNotificationsPanel` notifications.
+
+### Domain (tied to Auis)
+`AuMentionMenu` mentions (Review Bridge) · `AuCheckpointChip` checkpoint (Review Bridge) ·
+`AuCopilotSynthesis` Copilot orb · `AuLogo` Auis mark (+`AuLogoLockup`) ·
+`AuBrandLogo` 3rd-party app logos · `AuBrandIllustration` brand artwork.
+
+### Infra / layout (consumed by others — rarely imported directly in a page)
+`AuDashboardLayout` · `AuSidebar` · `AuHeader` · `AuCopilotDrawer`.
+
+---
+
+# Layer B — Your product's components (empty on purpose)
+
+**Nothing ships here yet. That is the design.** Auis was extracted from a private product;
+that product's component catalog was deliberately left behind. What you get is the builder
+plus a clean, empty styleguide — so the first component in this table is *yours*.
+
+Fill the table as you build. Same shape as Layer A, same "when NOT to use" discipline —
+that column is what stops the next agent from duplicating what you just made.
+
+| I need… | Use | Import | When NOT to use it |
+|---|---|---|---|
+| *(example — not shipped)* A pricing tier table | `AuPricingTable` | `@/components/ui/Au[Name]` | *Placeholder row showing the shape. Delete it when you add your first real component.* For a plain static table → `AuTable` (Layer A). |
+| | | | |
+
+## How a component gets into this table
+
+1. **Build it with the [`auis-component`](../skills/design-system/auis-component/SKILL.md)
+   skill.** It checks the shadcn registry first, prefers extending an existing primitive over
+   building from scratch, and emits the implementation **and** the styleguide showcase in one
+   pass. Apply this repo's convention on top (see AGENTS.md §1): `Au` prefix, PascalCase file
+   in `components/ui/`, showcase at `app/auis/styleguide/components/au-[name]/page.tsx`.
+2. **Register it in the styleguide.** The skill appends the entry to
+   [`navigation.ts`](../app/auis/styleguide/navigation.ts). Keep links pointing only at pages
+   that exist, or the sidebar 404s.
+3. **Add a row here.** The map is the index agents read at step 0. A component that isn't in
+   it will get rebuilt by the next agent — `ds:check` flags it as `map-missing`.
+4. **Keep it honest with [`auis-audit`](../skills/design-system/auis-audit/SKILL.md).** It
+   scans the repo and reports every component that is *used or implemented but missing from
+   `/auis/styleguide`* — the exact drift this map exists to prevent. Run it when the gallery
+   starts feeling out of date.
+
+> Layer B components are **yours**: they may be domain-bound, business-aware, and as
+> specific as your product needs. The [layer taxonomy](./component-layers.md) still applies —
+> use it to decide where each one sits in the styleguide sidebar.
 
 ---
 
@@ -82,6 +181,7 @@ never arbitrary values for color/spacing/radius/shadow/typography.
 **Accent/semantic:** `accent-brand` (+`-hover`, `-pressed`) · `accent-success` ·
 `accent-danger` (+`-hover`, `-pressed`) · `accent-warning` · focus: `ring-focus`
 **Radius:** `rounded-xs|sm|md|lg|xl|2xl|full`  ·  **Shadow:** `shadow-xs|sm|md|lg|overlay`
+**Motion:** `--dur-fast|base|slow` · `--ease-out|in|au|fluid`
 **Typography (size):** `text-3xs`(10) · `text-2xs`(11) · `text-xs`(12) · `text-sm`(14) ·
 `text-base`(16) · `text-lg`(18) · `text-xl`(20) · `text-2xl`(24) · `text-3xl`(30). Or the
 semantic utilities, which already carry line-height/tracking: `display-{sm…xxl}`, `body-{xs…xl}`,
@@ -95,146 +195,96 @@ Correct example (from `AuStatCard`): `bg-raised border-subtle text-fg-primary te
 
 ## Families (which one to use when)
 
-The "duplicates" you spot are almost always one family with distinct roles.
-Here is the yardstick.
+The "duplicates" you spot are almost always one family with distinct roles. Here is the
+yardstick — **for the components that actually ship** (Layer A).
 
 ### Cards
 | Component | When |
 |---|---|
-| `AuCard` | generic card (header/title/description/content/footer/action via sub-exports). **Default.** |
-| `AuStatCard` | a single metric: number + delta + icon. |
-| `AuGroupCard` | list/grid item with avatar + actions. |
-| `AuIntegrationCard` | integration catalog/state (domain). |
-| `AuPaymentMethodCard` | saved payment card (billing). |
-| `AuCardBrand` | just the card brand (Visa/Amex…). |
-| `card.tsx` (lowercase) | **raw shadcn primitive — don't use it directly.** It exists only as a base; consume `AuCard`. |
+| `AuCard` | Generic card (header/title/description/content/footer/action via sub-exports). **Default.** |
+| `AuStatCard` | A single metric: number + delta + icon. |
+
+Anything more specific (a payment card, an integration tile, a pricing card) is **Layer B** —
+compose it from `AuCard` + `AuButton` + `Icon`, don't fork `AuCard`.
 
 ### Tables
-| Component | When |
-|---|---|
-| `AuTable` | simple, static, styled table. **Default.** |
-| `DataTable` (`@/components/tool-ui/data-table`) | data with sort, pagination, selection, configurable columns. |
-| `AuMembersTable` | members/permissions table (person/selection/text cells ready to go). |
-| `table.tsx` (lowercase) | **raw shadcn primitive.** The default is `AuTable`/`DataTable`; the raw one is only acceptable in a rich domain table they don't cover (e.g. `KnowledgeBaseTable`), never for a simple table. |
+`AuTable` is the only table that ships: simple, static, styled. It carries **no** sort,
+pagination, or selection. A data grid with those features is a **Layer B** component — build
+it once, register it, and add it to the Layer B table so nobody builds a second one.
 
-### Modals and dialogs
+### Modals, drawers and menus
 | Component | When |
 |---|---|
-| `AuModal` | the **base** of every modal. |
-| `AuConnectModal` · `AuWelcomeModal` · `AuContactChannelModal` · `AuAddIntegrationModal` | ready-made flows — reuse them before assembling a new one on top of `AuModal`. |
+| `AuModal` | The **base** of every modal. Wizard → pass `stepKey`. |
+| `AuSheet` | Side panel / drawer. |
+| `AuCopilotDrawer` | The Copilot panel specifically (Auis surface, not a generic drawer). |
+| `AuDropdownMenu` | Floating menu. |
+| `AuMentionMenu` | The Review Bridge `@`/`/` picker. |
+
+**Never hand-roll an overlay** — see [Motion](#motion) below.
 
 ### Inputs
-`AuField` (label + error message + `framed` variant) composes `AuInput`. For a
-standalone input, use `AuInput`. Select = `AuSelect`.
+`AuField` (label + error message + `framed` variant) composes `AuInput`. Both are exported
+from `@/components/ui/AuInput`. For a standalone input, use `AuInput`.
 
 ### Icons
 `Icon` (Material Symbols Rounded, automatic optical defaults: visual `size` decoupled from
 `opticalSize`, with firmer `weight`/`grade` at small sizes). `fill={1}` is the
 active/selected state, not a legibility fix. `react-icons` **only** for brand
-marks with no equivalent (Visa/Mastercard/Amex/Slack/WhatsApp). `lucide-react` only
-shows up inside generated shadcn primitives — don't pull it into product code.
-
-### shadcn primitives: direct use vs. Au wrapper
-
-The lowercase files in `components/ui/*.tsx` are shadcn primitives (CLI-generated),
-wired to your tokens by a *compat layer* in `globals.css` — so they already
-render with Auis colors. **They are not duplicates to delete.** The rule:
-
-- **Has an Au wrapper → use the wrapper, never the raw primitive:** `card`→`AuCard`,
-  `button`→`AuButton`, `badge`→`AuPill`, `dropdown-menu`→`AuDropdownMenu`.
-  `ds:check` warns if one of these leaks into product code.
-- **Sanctioned for direct use** (no Au wrapper, low customization): `tooltip`,
-  `popover`, `collapsible`, `separator`, `calendar`, `accordion`. Importing them
-  directly is OK — we don't create a ceremonial wrapper just to rename something.
-- **Special cases:** `chart` has the `AuChart` helper layer (palette +
-  `awChartConfig()`) — use the helpers, don't recreate the palette. Table: simple →
-  `AuTable`; rich (sort/pagination) → `DataTable`; the raw `table` is left to the adapters.
-- **`tool-ui/` is a vendored subsystem** (data-table, stats-display) that consumes the
-  primitives via `_adapter.tsx`. Don't migrate its internals to `Au*`.
+marks with no equivalent (Visa/Mastercard/Amex/Slack/WhatsApp). Third-party **app** logos are
+`AuBrandLogo`, not `Icon`.
 
 ---
 
-## Motion: two layers
+## Motion
 
-1. **Global paint (free, already on).** Hover/focus on interactive elements
-   get a smooth transition from a `@layer base` rule in `globals.css`. **Don't**
-   add `transition-colors` by hand for a plain hover.
-2. **Fluid (spring physics).** The **Fluid kit** (`components/ui/fluid/`) brings rich
-   motion with framer-motion, mapped to the Auis tokens. It is in **preview ("leva 1")**.
-3. **Overlays (enter/exit) — free, lives in the component.** Modals, sheets,
-   dropdowns, toasts, and accordions animate open **and close** on their own
-   because they are `Au*` on top of Radix (`data-state` + `--dur-*`/`--ease-*` tokens, with a
+1. **Global paint (free, already on).** Hover/focus on interactive elements get a smooth
+   transition from a `@layer base` rule in `globals.css`. **Don't** add `transition-colors` by
+   hand for a plain hover.
+2. **Overlays (enter/exit) — free, lives in the component.** `AuModal`, `AuSheet`,
+   `AuDropdownMenu`, and `AuToast` animate open **and close** on their own, because they are
+   `Au*` built on Radix (`data-state` + `--dur-*`/`--ease-*` tokens, with a
    `prefers-reduced-motion` guard). **Never hand-roll an overlay**
-   (`fixed inset-0` + `{open && …}` / `if (!open) return null`): it unmounts instantly
-   and kills the close transition. Use `AuModal` (sequential wizard: `stepKey`
-   prop), `AuSheet`, `AuDropdownMenu`, `AuToast`, `AuAccordion`. `BaseModal`
-   is **deprecated** → `AuModal`. `ds:check` flags hand-rolled overlays.
-
-**Fluid rule:** the `fluid/*` primitives (`switch`, `slider`, `checkbox-group`,
-`dialog`, `dropdown`, `accordion`, `badge`, `tooltip`) **duplicate** the `Au*` ones and are
-preview — **don't import them directly**; use the `Au*` equivalent. Fluid's sanctioned
-entry point is the 3 already-promoted components:
-**`AuInputMessage`**, **`AuThinkingSteps`**, **`AuAskUserQuestions`** (chat/agent
-surfaces). Folding the motors into the `Au*` (leva 2) is future work.
+   (`fixed inset-0` + `{open && …}` / `if (!open) return null`): it unmounts instantly and kills
+   the close transition. That is exactly why hand-made modals "open but don't close smoothly."
+   For a sequential modal (wizard), pass `AuModal`'s `stepKey` prop. `ds:check` flags
+   hand-rolled overlays.
+3. **Custom motion.** Reach for Tailwind `transition-*`/`duration-*` or the raw
+   `var(--dur-*)`/`var(--ease-*)` tokens only for a *custom* motion (transform, opacity, a
+   different curve). Never blanket-animate `transform`/`opacity` globally.
 
 ---
 
-## Full inventory by layer
+## shadcn primitives — what's actually here
 
-Terse on purpose (name · import `@/components/ui/<Name>` · role). Mirrors the
-taxonomy in [`component-layers.md`](./component-layers.md).
+`components/ui/` ships **34** `.tsx` files: the **31** `Au*`, plus `Icon.tsx`, plus exactly
+**two** shadcn primitives — `badge.tsx` and `popover.tsx`. There is no `card.tsx`,
+`button.tsx`, `table.tsx`, `chart.tsx` or `calendar.tsx` in this repo, and no `tool-ui/`
+subsystem. Don't import one; it isn't there.
 
-### Primitives
-`AuButton` button · `AuInput`/`AuField` input/field · `AuSelect` select ·
-`AuCheckbox` checkbox · `AuToggle` switch · `AuSlider` slider · `AuPill` tag/chip ·
-`AuAvatar` avatar (+group) · `AuStatusDot` status · `AuProgress` progress ·
-`AuSkeleton` loading · `AuAlert` alert · `AuBreadcrumb` breadcrumb (atom) ·
-`AuTabs` tabs · `AuDropdownMenu` dropdown · `AuAccordion` accordion ·
-`AuCollapsible` light disclosure · `AuEmpty` empty state ·
-`AuFileIcon` file icon · `AuChannelIcon` channel icon ·
-`AuDropzone` upload · `AuTransition` transition · `AuToast` toast · `Icon` base icon ·
-`AuBrowserIcon` browser icon · `AuPlanIcon` plan icon · `AuRadialProgress`
-radial progress · `AuTrendDelta` trend delta · `AuAuditTypeBadge` event badge.
-
-### Components
-`AuCard` card · `AuStatCard` metric · `AuGroupCard` item with actions ·
-`AuPaymentMethodCard`/`AuCardBrand` payment · `AuTable`/`AuMembersTable` table ·
-`AuModal` (+`AuConnectModal`/`AuWelcomeModal`/`AuContactChannelModal`/`AuAddIntegrationModal`)
-modals · `AuSheet` drawer · `AuNavList`/`AuNavRail` navigation · `AuOptionList` options ·
-`AuListGroup` collapsible group · `AuPageHeader` header · `AuNotificationsPanel`
-notifications · `AuChatBubble` chat bubble · `AuInputMessage` composer ·
-`AuThinkingSteps` reasoning · `AuAskUserQuestions` interview · `AuChart` chart ·
-`AuShortcutTile` shortcut · `AuNavTree` navigation tree ·
-`AuBeams`/`AuDotTunnel` decorative backgrounds.
-
-### Patterns
-`AuOnboardingShell` onboarding shell · `AuOnboardingTimeline` timeline ·
-`AuPasswordSetup` password setup · `AuBackupCodes` backup codes ·
-`AuQrPlaceholder` QR.
-
-### Domain (tied to Auis)
-`AuIntegrationCard` integration · `AuSpecialistsPair`/`AuAgentCore`/`AuUserAgentOrb`/
-`AuCortexSynthesis` agent visuals · `AuCapabilityTile` capability ·
-`AuBrandLogo`/`AuLogo`/`AuBrandIllustration` brand · `AuAdditionalPlanBanner` plan ·
-`AuCheckpointChip` checkpoint · `AuMentionMenu` mentions · `AuAgentAvatar` agent avatar ·
-`AuToolCallCard` tool/integration call · `AuAgentRunTrace` agent run timeline ·
-`AuSourceChip` Memory Base citation/grounding · `AuAgentStatusBadge` agent lifecycle.
-
-### Domain — Billing
-`AuConsumptionBar` consumption bar · `AuCostBreakdown` cost breakdown ·
-`AuInvoiceForecastCard` next-invoice forecast · `AuInvoiceRow` invoice row ·
-`AuPlanSummaryCard` plan summary · `AuPaymentMethodRow` payment method (list
-item) · `AuPaymentMethodChip` payment method (inline/link).
-
-### Infra / layout (consumed by others, don't use directly in a page)
-`AuThemeProvider` · `AuDashboardLayout` · `AuSidebar` · `AuHeader` · `AuNavRail`
-(chrome) · `AuNeuralPattern` · `AuMemoryBaseLogo` · `AuCopilotDrawer`.
+- **`badge.tsx`** — the base of `AuCheckpointChip`. In product code use **`AuPill`**.
+- **`popover.tsx`** — sanctioned for direct use (the styleguide flow editor uses it).
+- **The 31 `Au*` are not shadcn wrappers today.** Nine of them use `@radix-ui/*` directly
+  (`AuButton`, `AuCheckbox`, `AuDropdownMenu`, `AuModal`, `AuProgress`, `AuSheet`, `AuTabs`,
+  `AuToggle`, `AuToast`); the rest are hand-rolled in Tailwind + tokens. This is known debt,
+  not a pattern to copy — see AGENTS.md §1.
+- **New components follow the wrapper flow.** Install the primitive on demand
+  (`npx shadcn@latest add [name]` → `components/ui/[name].tsx`, lowercase), then wrap it in
+  `components/ui/Au[Name].tsx`. Pages import only `Au[Name]`. `ds:check` warns if a raw
+  primitive that has an `Au` wrapper leaks into product code.
 
 ---
 
 ## Genuinely missing something?
 
-If nothing above fits **and** the semantics are new, then create it — via the
-[`auis-new-component`](../.claude/skills/auis-new-component/SKILL.md) skill
-(`Au` prefix, in `components/ui/`, with a showcase + an entry in `navigation.ts`).
-Register the new piece **here** too. Run `npm run ds:check` when you're done.
+If nothing in **Layer A** fits, you are not missing a component — you are about to write your
+first **Layer B** one. That is the expected path, not an exception.
+
+Create it via the [`auis-component`](../skills/design-system/auis-component/SKILL.md) skill
+(`Au` prefix, in `components/ui/`, with a showcase + an entry in
+[`navigation.ts`](../app/auis/styleguide/navigation.ts)). Then **register it in the
+[Layer B table](#layer-b--your-products-components-empty-on-purpose) above** — a component
+that isn't in this map gets rebuilt by the next agent.
+
+Run `npm run ds:check` when you're done: it flags a map line pointing at a component that
+doesn't exist (`map-broken`) and a component missing from the map (`map-missing`).

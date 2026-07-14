@@ -13,8 +13,8 @@ description: >
   the current DS. It stamps each request `in_review`/`apply` with
   `actor {kind:"agent",id:"claude",name:"Claude"}` + `builtRoute`, and
   updates the manifest. Use when the user asks to "resolve the project
-  builds", "build the requested screens", "apply the Memory Base
-  requests", or "take the build requests and resolve them". Do NOT use it
+  builds", "build the requested screens", "apply the requests for a
+  project", or "take the build requests and resolve them". Do NOT use it
   for importing (that is `auis-import-figma-flow`) nor for UX Flow
   suggestions (that is `auis-flow-bridge-solve`).
 ---
@@ -85,8 +85,8 @@ page (component lookup: Au* → shadcn → custom; tokens are sacred).
   ⚠️ Do NOT create a folder named after the project's slug under `projects/`:
   that shadows the `[slug]` viewer.
 - `builtRoute` = `/auis/projects/built/<slug>/<...>`.
-- Compose with Au* (e.g. the Memory Base welcome screen uses
-  `AuMemoryBaseLogo` + `AuButton`). Include a context bar at the top
+- Compose with Au* (e.g. a project's welcome screen uses
+  `AuLogo` + `AuButton`). Include a context bar at the top
   ("Rebuilt from <step · name>", a link back to the project, an
   "Original in Figma" link). Desktop-only screen.
 
