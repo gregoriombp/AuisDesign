@@ -7,7 +7,7 @@
 // Single source of truth for: the "@" mention menu, the per-agent control panel
 // on the floating Auis dot, and chip rendering for rendered mentions.
 
-import type { AuCheckpointChipTone } from "@/components/ui/AuCheckpointChip"
+import type { AuMentionChipTone } from "@/components/ui/AuMentionChip"
 import type { ReviewSkillSlug } from "./skills"
 
 /**
@@ -37,7 +37,7 @@ export interface ReviewAgent {
   /** One-liner for the "@" menu row. */
   blurb: string
   /** Chip tone for rendered @mentions. */
-  tone: AuCheckpointChipTone
+  tone: AuMentionChipTone
   /** CSS var for the agent dot / icon tint. */
   accentVar: string
   /** Material Symbol glyph — the "agent" gesture, never a robot. */

@@ -36,9 +36,10 @@ const KNOWN_PRIMITIVES = [
 // is a real miss, so we flag it with an actionable target. The rest are
 // "sanctioned bare primitives": low-customization Radix utilities already styled
 // via the globals.css compat tokens, with no drop-in Au to point to (tooltip,
-// popover, collapsible, separator, calendar, accordion). `chart` has the AuChart
-// helper layer, not a drop-in; `table` uses AuTable for simple cases or DataTable
-// for rich ones — neither a 1:1 swap. See docs/component-map.md → primitives.
+// popover, collapsible, separator, calendar, accordion). `chart` has no Au layer
+// at all; `table` maps to AuTable for simple, static cases, but AuTable carries no
+// sort/pagination/selection — a rich data grid is a Layer B component you build,
+// so it is not a 1:1 swap either. See docs/component-map.md → primitives.
 const AU_EQUIVALENT = {
   card: "AuCard",
   button: "AuButton",
@@ -46,20 +47,20 @@ const AU_EQUIVALENT = {
   "dropdown-menu": "AuDropdownMenu",
 };
 
-// Files where a raw <svg> or a hex literal is legitimately expected: brand
-// marks, illustrations, decorative visuals, and the Icon component itself.
-// Every name here must resolve to a real component — a dead name silently
-// widens the allowlist and hides real findings.
-const RAW_VISUAL_RE =
-  /(BrandIllustration|BrandLogo|Logo|CopilotSynthesis|Icon)\.tsx$/;
-// WebGL/shader files pass numeric hex to the GPU (var() can't be read there).
-const SHADER_HINT_RE =
-  /@react-three|from ["']three["']|ShaderMaterial|uniforms|gl_FragColor|createShader/;
-// Overlays that are legitimately "raw": the fullscreen gate and the legacy
-// BaseModal shell itself (deprecated; its imports are flagged separately). The
-// Au* overlay primitives (AuModal/AuSheet/AuCopilotDrawer…) are already
-// excluded via !inUi.
-const OVERLAY_EXEMPT_RE = /(DesktopOnlyBlocker|modals\/BaseModal)\.tsx$/;
+// Files where a raw <svg> or a hex literal is legitimately expected: Auis's own
+// mark and the Icon component itself. Every name here must resolve to a real
+// component — a dead name silently widens the allowlist and hides real findings.
+// (`Logo` → AuLogo.tsx, `Icon` → Icon.tsx.)
+const RAW_VISUAL_RE = /(Logo|Icon)\.tsx$/;
+// WebGL/shader code passes numeric hex to the GPU (var() can't be read there).
+// Nothing in the repo matches today — Auis ships no shader files — but the rule
+// is content-based, so it keeps working if you add one.
+const SHADER_HINT_RE = /ShaderMaterial|uniforms|gl_FragColor|createShader/;
+// Overlays that are legitimately "raw". Nothing qualifies today: every overlay
+// in the repo goes through an Au* primitive (AuModal/AuSheet/AuDropdownMenu/
+// AuMentionMenu/AuToast), which is already excluded via !inUi. Add a file here
+// only with a reason — an empty allowlist is the honest default.
+const OVERLAY_EXEMPT_RE = /$^/;
 
 const LINE_RULES = [
   {

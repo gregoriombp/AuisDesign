@@ -1,39 +1,37 @@
 "use client";
 
 import * as React from "react";
-import { AuBrandLogo } from "@/components/ui/AuBrandLogo";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/utils";
 
 /**
- * AuMentionMenu — the mention (@) menu for the checkpoint editor.
+ * AuMentionMenu — the inline picker card for a "@"/"#"-style trigger in a text
+ * composer (in this repo: the Review Bridge's agent/skill autocomplete).
  *
- * A compact card with the native tools on top, an Integrations section with
- * drill-in (chevron) and the "+ New Integration" shortcut in the footer. The
- * active item (keyboard or hover) becomes an inverted (black) pill.
+ * A compact card with sectioned rows, an optional drill-in header and an
+ * optional pinned footer action. The active item (keyboard or hover) becomes an
+ * inverted (black) pill.
  *
  * A PURELY presentational component: the owner (the editor) is in charge — it
  * controls `activeKey`, decides what each pick does (insert, drill-in, open a
- * modal) and positions the card. That way the same visual serves the variables
- * menu ({{) and any other inline picker.
+ * modal) and positions the card. That way the same visual serves any other
+ * inline picker.
  */
 
 export type AuMentionMenuEntry = {
   /** Stable identity of the item — used in activeKey/onPick. */
   key: string;
   label: string;
-  /** Material Symbol (ignored when `brand` is present). */
+  /** Material Symbol. */
   icon?: string;
-  /** AuBrandLogo brand key — real logos for integrations. */
-  brand?: string;
-  /** Chevron on the right — signals a drill-in (e.g. an integration with subskills). */
+  /** Chevron on the right — signals a drill-in (an item with a nested list). */
   chevron?: boolean;
   /** Color accent on the label (e.g. the "Custom" item). */
   accent?: "purple";
 };
 
 export type AuMentionMenuSection = {
-  /** Section label (e.g. "Integrations"). Omit for a flat list. */
+  /** Section label (e.g. "Agents"). Omit for a flat list. */
   label?: string;
   entries: AuMentionMenuEntry[];
 };
@@ -46,7 +44,7 @@ export type AuMentionMenuProps = {
   onHover?: (key: string) => void;
   /** Click/Enter on an item. mousedown already calls preventDefault (focus stays in the editor). */
   onPick: (key: string) => void;
-  /** Pinned footer action (e.g. "+ New integration"). */
+  /** Pinned footer action (e.g. "+ New skill"). */
   footer?: { key: string; label: string };
   /** Drill-in header — shows the current context and the back arrow. */
   header?: { label: string; onBack?: () => void };
@@ -87,27 +85,19 @@ function EntryRow({
             : "text-(--fg-primary)",
       )}
     >
-      {entry.brand ? (
-        <AuBrandLogo
-          brand={entry.brand}
-          size="sm"
-          bare
-          style={{ width: 18, height: 18, borderRadius: 5 }}
-        />
-      ) : (
-        <Icon
-          name={entry.icon ?? "bolt"}
-          size={16}
-          className={cn(
-            "shrink-0",
-            active
-              ? "text-(--fg-on-inverse)"
-              : entry.accent === "purple"
-                ? "text-(--au-purple-600)"
-                : "text-(--fg-tertiary)",
-          )}
-        />
-      )}
+      <Icon
+        name={entry.icon ?? "bolt"}
+        size={16}
+        className={cn(
+          "shrink-0",
+          active
+            ? "text-(--fg-on-inverse)"
+            : entry.accent === "purple"
+              ? "text-(--au-purple-600)"
+              : "text-(--fg-tertiary)",
+        )}
+      />
+
       <span className="min-w-0 flex-1 truncate font-medium">{entry.label}</span>
       {entry.chevron && (
         <Icon

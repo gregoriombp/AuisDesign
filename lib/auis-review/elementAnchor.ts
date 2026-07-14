@@ -8,8 +8,8 @@ import type {
 } from "@/components/auis-review/types"
 
 // Pins store an absolute position (doc coords), but when a side panel opens or
-// closes (Copilot, sidebars) `<main>` changes width and the content reflows
-// horizontally — and a pin nailed to a fixed x "comes unstuck" from its element.
+// closes the container can change width and the content reflows horizontally —
+// and a pin nailed to a fixed x "comes unstuck" from its element.
 //
 // To fix that, on top of the absolute coord we anchor the pin to the ELEMENT
 // under it: a resolvable selector + the fraction (fx, fy) of where the click

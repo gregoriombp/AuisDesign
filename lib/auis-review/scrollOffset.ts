@@ -124,8 +124,8 @@ export function useCumulativeScrollOffset() {
   return offset
 }
 
-// Re-renders when the layout reflows WITHOUT a scroll or a window resize — the
-// Copilot/sidebar case, which changes `<main>`'s width via flex.
+// Re-renders when the layout reflows WITHOUT a scroll or a window resize — e.g.
+// a side panel that changes the primary container's width via flex.
 // `useCumulativeScrollOffset` only listens to scroll/resize, so element-anchored
 // pins would never re-resolve. A ResizeObserver on the primary container
 // (+ body) covers that case.

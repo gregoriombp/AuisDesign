@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 
 // Server-side proxy to OpenAI's voice transcription for Review Mode. The key
 // lives in OPENAI_API_KEY in .env.local and is NEVER exposed to the client —
-// same pattern as app/api/copilot/chat. The card records the audio with
-// MediaRecorder and posts it here; we return only the text.
+// every server-side model call in this repo follows that pattern. The card
+// records the audio with MediaRecorder and posts it here; we return only the text.
 const OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions"
 const MODEL = "gpt-4o-mini-transcribe"
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024 // OpenAI endpoint limit

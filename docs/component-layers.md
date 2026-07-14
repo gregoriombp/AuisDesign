@@ -7,7 +7,7 @@
 > lives in within the styleguide sidebar (`app/auis/styleguide/navigation.ts`).
 >
 > **This is a classification yardstick, not an inventory.** It applies to both layers of the
-> [component map](./component-map.md): the 31 `Au*` that ship (Layer A — the builder's own UI)
+> [component map](./component-map.md): the 21 `Au*` that ship (Layer A — the builder's own UI)
 > and, above all, **the components you are about to build** (Layer B). Since the styleguide
 > gallery ships empty, this taxonomy is mostly here to tell you where *your* next component
 > goes in the sidebar.
@@ -15,7 +15,7 @@
 ## Why it exists
 
 Taxonomy: a dev glancing at the sidebar should be able to tell a reusable brick (`AuButton`)
-from a piece that only makes sense inside this product (`AuCheckpointChip`) — without them
+from a piece that only makes sense inside this product (`AuMentionChip`) — without them
 sitting side by side in one undifferentiated "Components" list.
 
 The sidebar reflects the design system's **abstraction pyramid**. Reading top to
@@ -33,8 +33,8 @@ most specific and product-bound (top).
 ```
 
 **Dependency rule:** each layer depends only on the layers **below** it, never on the
-ones above. `AuButton` (primitive) never imports `AuCheckpointChip` (domain); `AuCheckpointChip`
-is free to use `AuBrandLogo`, `Icon`, and the `badge` primitive — which is exactly what it
+ones above. `AuButton` (primitive) never imports `AuMentionChip` (domain); `AuMentionChip`
+is free to use `Icon` and the `badge` primitive — which is exactly what it
 does. That is what keeps the base stable: touching a primitive propagates to everyone;
 touching a domain piece keeps the damage local.
 
@@ -45,10 +45,10 @@ the same way.
 
 | Layer | Key question | Business-aware? | Examples that ship |
 |---|---|---|---|
-| **Primitives** | Is it a single-purpose brick, made only of tokens + HTML/Radix? | No | `AuButton`, `AuInput`/`AuField`, `AuCheckbox`, `AuToggle`, `AuSlider`, `AuPill`, `AuToast`, `AuAlert`, `AuEmpty`, `Icon` |
-| **Components** | Does it combine primitives into a generic block, reusable in any product? | No | `AuCard`, `AuStatCard`, `AuTable`, `AuModal`, `AuSheet`, `AuNavRail`, `AuBreadcrumbsBar`, `AuNotificationsPanel` |
-| **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | *(none ship — this layer is yours to fill: an onboarding shell, a multi-step wizard, a settings region)* |
-| **Domain** | Is it tied to an Auis concept (Review Bridge, Copilot, brand)? | Yes | `AuMentionMenu`, `AuCheckpointChip`, `AuCopilotSynthesis`, `AuLogo`, `AuBrandLogo`, `AuBrandIllustration` |
+| **Primitives** | Is it a single-purpose brick, made only of tokens + HTML/Radix? | No | `AuButton`, `AuInput`/`AuField`, `AuCheckbox`, `AuToggle`, `AuSlider`, `AuPill`, `AuToast`, `AuAlert`, `AuEmpty`, `AuProgress`, `AuTabs`, `AuDropdownMenu`, `AuBreadcrumb`, `Icon` |
+| **Components** | Does it combine primitives into a generic block, reusable in any product? | No | `AuCard`, `AuStatCard`, `AuTable`, `AuModal`, `AuSheet` |
+| **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | *(none ship — this layer is yours to fill: an app shell, an onboarding flow, a multi-step wizard, a settings region)* |
+| **Domain** | Is it tied to an Auis concept (Review Bridge, brand)? | Yes | `AuMentionMenu`, `AuMentionChip`, `AuLogo` |
 
 > The **Patterns** row is empty on purpose, and the **Domain** row is Auis's own domain (the
 > builder), not your product's. When you build a pricing table, an integration tile, or a
@@ -86,9 +86,10 @@ When a family has more than one concrete item, use a parent item with
 canonical hub; the children point at technical subpages or anchors inside the
 hub.
 
-The one family that ships today is **Navigation** → `AuNavRail`, `AuSidebar`, `AuBreadcrumb`.
-The pattern generalizes: when your second table variant appears, don't add a second top-level
-`Tables` entry — make the first one the hub and hang the variant off it as a child.
+No family ships with more than one item today — every `Au*` is a single top-level entry. The
+pattern is there for when that changes: when your second table variant appears, don't add a
+second top-level `Tables` entry — make the first one the hub and hang the variant off it as a
+child.
 
 ## Current mapping
 
@@ -114,13 +115,12 @@ Kept because the reasoning transfers to the calls you'll have to make:
   feedback purpose; they stay in the base for reuse.
 
 Applied to what ships, that leaves **Domain** holding only the unmistakably-Auis pieces: the
-Review Bridge surfaces (`AuMentionMenu`, `AuCheckpointChip`), the Copilot orb
-(`AuCopilotSynthesis`), and brand (`AuLogo`, `AuBrandLogo`, `AuBrandIllustration`).
+Review Bridge surfaces (`AuMentionMenu`, `AuMentionChip`) and Auis's own mark (`AuLogo`).
 
 ## Scope of this phase
 
 The physical `components/ui/` folder stays **flat on purpose** — the layer lives in
-**navigation and governance**, not in the filesystem. Splitting 31 files into subfolders
+**navigation and governance**, not in the filesystem. Splitting 21 files into subfolders
 would break every import for marginal gain. If a folder migration is ever wanted, it follows
 exactly this mapping as its script.
 

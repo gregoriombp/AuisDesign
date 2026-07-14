@@ -27,8 +27,8 @@ Auis is a **Next.js product** (not documentation): the design system runs alongs
 Dependency is **one-way** (upper layers consume lower ones — see [`component-layers.md`](component-layers.md)):
 
 - **Builder chrome** — `components/auis-review/` (canvas, pins, popovers, command menu), `components/auis-edit/` (toolbar, inspector, controls), `components/auis/` (AuisDot, ModeFamilySwitch).
-- **Primitives** — `components/ui/` (33 `Au*` files): only the subset the chrome imports (`AuButton`, `AuModal`, `AuSheet`, `AuDropdownMenu`, `AuInput`, `Icon`, …), plus the shell the workbench uses (`AuDashboardLayout`/`AuSidebar`/`AuHeader`). The origin product's full catalog was **not** brought over.
-- **State/logic** — `lib/auis-review/`, `lib/auis-edit/`, `lib/copilot/`, `lib/hooks/` (Zustand stores, element anchoring, command parsing, voice, AI assist).
+- **Primitives** — `components/ui/` (24 `.tsx`: **21** `Au*` + `Icon.tsx` + two shadcn primitives, `badge.tsx` and `popover.tsx`): the subset the chrome imports (`AuButton`, `AuModal`, `AuSheet`, `AuDropdownMenu`, `AuInput`, `Icon`, …), plus the Review Bridge's own surfaces (`AuMentionMenu`/`AuMentionChip`) and Auis's mark (`AuLogo`). The origin product's full catalog was **not** brought over.
+- **State/logic** — `lib/auis-review/`, `lib/auis-edit/`, `lib/hooks/` (Zustand stores, element anchoring, command parsing, voice, AI assist).
 
 ## Bridges (runtime)
 
@@ -44,7 +44,7 @@ Review Mode (UI)  ──creates comment──▶  /api/review-bridge/*  ──�
 - **Flow Bridge** — suggestions via `/api/flow-suggestions` → `flow-bridge/data/`.
 - **Edit Bridge** — non-destructive "ops" via `/api/page-edits` → `page-editor/data/`; `auis-edit-bridge-solve` materializes them into code.
 - **Project Builds** — `/api/project-builds` feeds `auis-project-build-solve`.
-- **Copilot** — `/api/copilot` gives Review Mode its AI assist. ⚠️ calls an LLM.
+- **Review AI** — `/api/review/transcribe` (voice → text) and `/api/review/suggest` (comment assist) give Review Mode its AI help. Both are server-only proxies to OpenAI, keyed by `OPENAI_API_KEY`. ⚠️ call an LLM.
 
 The `*/data/` directories are **runtime state** (gitignored), not source code.
 
@@ -70,4 +70,4 @@ Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `glob
 
 ## Branding & theming
 
-The visual identity is Auis's own, not residue: `AuLogo` + `auis-wordmark.svg` and the `comet-*` assets are the Auis mark; `AuBrandIllustration` and `AuCopilotSynthesis` (the animated orb of the Copilot drawer) are DS components; `AuBrandLogo` is a registry of **third-party** marks (Google, Slack, …) that integration surfaces render, so it is product-neutral by design. `AuDashboardLayout` is the workbench shell. The tokens sit on a neutral baseline — re-theming for your own product is the `auis-foundation` skill.
+Auis ships **no brand assets for your product** — it is a builder, and your product doesn't exist yet. The one mark in `public/` is `auis-wordmark.svg`: Auis's own, rendered by `AuLogo` in the builder chrome (`/auis/*`). No logo registry, no illustration set, no integration icons. `AuLogo` is the only component allowed to render a mark, and it renders *Auis's* — a component in `components/ui/` must never hardcode one, because it lands in *your* product. The tokens sit on a neutral baseline; theming for your own product is the `auis-foundation` skill.
