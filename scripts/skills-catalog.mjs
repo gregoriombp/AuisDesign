@@ -11,7 +11,7 @@ const SK = join(ROOT, "skills")
 
 // Curation metadata. Edit here when adding/curating skills.
 const COWORK = new Set(["auis-foundation", "auis-component", "auis-page", "auis-audit", "auis-flow", "auis-handoff"])
-const RECOMMENDED = new Set([...COWORK, "auis-review-bridge-solve", "auis-ux-writing"])
+const RECOMMENDED = new Set([...COWORK, "auis-review-bridge-solve", "auis-voice", "auis-ux-writing"])
 const LEGACY = new Set(["design-system-new-component", "design-system-new-page", "setup-design-system-from-cla-design", "setup-design-system-from-reference"])
 const CLAUDE_ONLY = new Set(["auis-review-bridge-dispatch", "auis-edit-bridge-solve"])
 

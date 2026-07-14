@@ -1,6 +1,6 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **35 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **36 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
@@ -50,11 +50,12 @@
 | `auis-handoff` | 🟣🟠🌐 | cowork | ⭐ | Converts a Claude Design (or Cloud Design) handoff into production code by remapping the generated output onto Auis/styleguide components first and sh |
 | `auis-project-build-solve` | 🟣🟠 | repo | ◐ | Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the "Atualizar pro design system" button (kind `restyle`) and  |
 
-## Content / UX Writing (1)
+## Content / UX Writing (2)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-ux-writing` | 🟣🟠 | repo | ⭐ ◐ | Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits |
+| `auis-voice` | 🟣🟠 | repo | ⭐ | Bootstraps a product's voice by filling in PRODUCT_CONTEXT.md — the file every Auis writing skill reads. Derives the copy language and locale, the sit |
 
 ## Support (8)
 
@@ -76,6 +77,7 @@
 - `auis-review-bridge-solve`
 - `auis-handoff` 🌐
 - `auis-ux-writing`
+- `auis-voice`
 - `auis-audit` 🌐
 - `auis-component` 🌐
 - `auis-foundation` 🌐
@@ -86,4 +88,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 35: 33 on Claude+Codex, 2 Claude-only (`auis-edit-bridge-solve`, `auis-review-bridge-dispatch`). 13 have their own Codex variant (◐).
+Of the 36: 34 on Claude+Codex, 2 Claude-only (`auis-edit-bridge-solve`, `auis-review-bridge-dispatch`). 13 have their own Codex variant (◐).
