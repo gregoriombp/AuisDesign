@@ -92,7 +92,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
           opt(AU_CARD, "default", "Default"),
           opt(AU_CARD, "ai", "AI"),
           opt(AU_CARD, "ai-warm", "AI warm"),
-          opt(AU_CARD, "ai-copilot", "AI copilot"),
+          opt(AU_CARD, "ai-cool", "AI cool"),
         ],
       },
     ],

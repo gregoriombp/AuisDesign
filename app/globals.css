@@ -1931,11 +1931,10 @@
 @media (prefers-reduced-motion: reduce) {
   .au-spinner-gradient::before { animation: none; }
 }
-/* Ai-copilot — silver mesh. Cool slate base, brighter pocket on the left,
-   darker pocket on the right where the dark CTA usually sits. Use it when the
-   AI is a system co-pilot rather than a generative agent (the latter keeps the
-   blue/purple `ai` variant). */
-.au-card--ai-copilot {
+/* Ai-cool — silver mesh. Cool slate base, brighter pocket on the left, darker
+   pocket on the right where the dark CTA usually sits. The cool counterpart to
+   `ai-warm`; the blue/purple `ai` stays the default. */
+.au-card--ai-cool {
   background:
     radial-gradient(ellipse 80% 100% at 8%  50%, rgba(226, 232, 240, 0.55), transparent 65%),
     radial-gradient(ellipse 60% 80%  at 92% 50%, rgba(100, 116, 139, 0.22), transparent 65%),
