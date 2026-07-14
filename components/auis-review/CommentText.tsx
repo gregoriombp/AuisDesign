@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { AuCheckpointChip } from "@/components/ui/AuCheckpointChip"
+import { AuMentionChip } from "@/components/ui/AuMentionChip"
 import { getReviewAgent } from "@/lib/auis-review/agents"
 import { getReviewSkill } from "@/lib/auis-review/skills"
 import { parseReviewCommand } from "@/lib/auis-review/commandParse"
 
 /**
  * Renders a Review Bridge comment/reply body, painting @agent, /skill and #now
- * as AuCheckpointChips while leaving every other character verbatim (newlines
+ * as AuMentionChips while leaving every other character verbatim (newlines
  * included, via the caller's whitespace-pre-wrap class). The segmentation is
  * lossless, so the text reads exactly as authored — only the commands light up.
  */
@@ -30,28 +30,28 @@ export function CommentText({
         if (seg.type === "mention") {
           const agent = getReviewAgent(seg.agentId)
           return (
-            <AuCheckpointChip
+            <AuMentionChip
               key={i}
               tone={agent?.tone ?? "neutral"}
               icon={agent?.icon ?? "agent"}
             >
               {agent?.handle ?? seg.value}
-            </AuCheckpointChip>
+            </AuMentionChip>
           )
         }
         if (seg.type === "skill") {
           const skill = getReviewSkill(seg.slug)
           return (
-            <AuCheckpointChip key={i} tone="neutral" icon={skill?.icon ?? "bolt"}>
+            <AuMentionChip key={i} tone="neutral" icon={skill?.icon ?? "bolt"}>
               {skill?.label ?? seg.value}
-            </AuCheckpointChip>
+            </AuMentionChip>
           )
         }
         // directive (#now) — the "go" signal that lets an agent act.
         return (
-          <AuCheckpointChip key={i} tone="amber" icon="bolt">
+          <AuMentionChip key={i} tone="amber" icon="bolt">
             {seg.value}
-          </AuCheckpointChip>
+          </AuMentionChip>
         )
       })}
     </p>

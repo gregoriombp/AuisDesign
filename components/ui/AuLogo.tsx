@@ -9,39 +9,21 @@ export type AuLogoProps = {
 }
 
 /**
- * Official export catalog for the Auis logo (Logo System v0.1).
+ * The Auis mark — the brand of the *builder itself*, not of the design system
+ * it generates. It belongs to Auis's own chrome (`/auis/*`: the hub, the
+ * styleguide shell, the floating dot) and must never be hardcoded into a
+ * component that ships into the user's product. Components that need a brand
+ * expose a `logo` slot the consumer fills instead.
  *
- * Use this registry as the **source of truth** for any static asset served from
- * `/public/assets/brand/`. **Inside the app**, prefer the `<AuLogo />` component
- * (inline SVG, `fill="currentColor"`), which inherits the color of its context.
+ * Inside the app, use the `<AuLogo />` component below: inline SVG with
+ * `fill="currentColor"`, so it inherits the color of its context and needs no
+ * light/dark asset pair.
  *
- * `positive` = ink (#0D0D0D) on a transparent background.
- * `negative` = white on a #0D0D0D plate (self-contained asset, with background).
- *
- * Static assets are for: email, decks, social, favicon, marketing exports —
- * anywhere `currentColor` does not work.
+ * The single static export is for contexts where `currentColor` does not work
+ * (email, decks, favicon, CSS `mask-image`). It is the only brand file this
+ * repo ships, and it is the only path listed here.
  */
-export const AU_LOGO_ASSETS = {
-  symbol: {
-    positive: "/assets/brand/auis-symbol-positive.svg",
-    negative: "/assets/brand/auis-symbol-negative.svg",
-  },
-  wordmark: {
-    positive: "/assets/brand/auis-wordmark-positive.svg",
-    negative: "/assets/brand/auis-wordmark-negative.svg",
-  },
-  horizontal: {
-    positive: "/assets/brand/auis-horizontal-positive.svg",
-    negative: "/assets/brand/auis-horizontal-negative.svg",
-  },
-  vertical: {
-    positive: "/assets/brand/auis-vertical-positive.svg",
-    negative: "/assets/brand/auis-vertical-negative.svg",
-  },
-} as const
-
-export type AuLogoLockup = keyof typeof AU_LOGO_ASSETS
-export type AuLogoTone = "positive" | "negative"
+export const AU_LOGO_ASSET = "/assets/brand/auis-wordmark.svg"
 
 /* Official geometry of the symbol: three blades fanned out, joined at the base,
  * with a harmonic 6° progression of tilt (15° · 21° · 27°). */

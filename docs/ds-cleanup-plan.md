@@ -88,18 +88,20 @@ everything into `Icon`. Triage each one into two destinations:
   ad-hoc svgs. This is the bulk of the ~117.
 - **Custom animation / visual** (hero animations, decorative orbs, brand
   illustrations) → **these are not icons.** They keep SVG/Canvas/WebGL and,
-  when reused, become a **dedicated `Au*` component** (in this snapshot: `AuCopilotSynthesis`
-  and `AuBrandIllustration`, which is why `ds:check` already allowlists them). The task
-  here is only to assess case-by-case whether some page-level `<svg>` still needs to be formalized as a component.
+  when reused, become a **dedicated `Au*` component**. No such component ships in this
+  snapshot: `ds:check` allowlists raw `<svg>` only in `*Logo.tsx` (Auis's own mark) and
+  `Icon.tsx`. The task here is only to assess case-by-case whether some page-level `<svg>`
+  still needs to be formalized as a component.
 
 Rule: the **triage** decides the destination of each `<svg>`; **only the normal ones become
 `Icon`**. The custom/animated ones are never "fixed" into an `Icon` — that would be a regression.
 
 ### Larger backlog (outside the "Foundation" scope, deliberately deferred)
-- **Perf:** `dynamic()`/lazy-load `three.js` (~1.2MB). In this snapshot it is eager in
-  exactly one place — `AuCopilotSynthesis.tsx` (via `@react-three/fiber`).
 
-*(The old "Fluid leva 2" item is gone: the `fluid/*` kit was not extracted into this
+*(Nothing queued here today. The former `three.js` lazy-loading item is gone: WebGL entered
+this repo only through the Copilot orb, which was removed along with the rest of the origin
+product's shell — `three` and `@react-three/fiber` are no longer dependencies. The old
+"Fluid leva 2" item is likewise gone: the `fluid/*` kit was never extracted into this
 snapshot, so there is nothing left to fold into the `Au*` primitives.)*
 
 ## 4. How to resume efficiently (fresh session)
