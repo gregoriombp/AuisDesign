@@ -7,7 +7,7 @@ export type AuAlertProps = React.HTMLAttributes<HTMLDivElement> & {
   variant?: AuAlertVariant
   title?: React.ReactNode
   icon?: string
-  /** Quando passado, mostra um botão de fechar (X) à direita. */
+  /** When passed, shows a close button (X) on the right. */
   onClose?: () => void
   children?: React.ReactNode
 }
@@ -45,7 +45,7 @@ export function AuAlert({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar"
+          aria-label="Close"
           className="-mr-1 ml-auto inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center self-start rounded-md opacity-60 transition-opacity duration-au-fast hover:opacity-100"
         >
           <Icon name="close" size={16} />

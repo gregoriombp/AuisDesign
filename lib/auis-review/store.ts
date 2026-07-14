@@ -26,8 +26,8 @@ import {
 export type StorageBackend = "local" | "bridge"
 
 function pickStorage(): { storage: ReviewStorage; backend: StorageBackend } {
-  // Legado opt-in: se a env de um bridge Express externo (porta 9878) estiver
-  // setada, usa ele. Caso contrário, padrão = bridge serverless embutido.
+  // Legacy opt-in: when the env vars for an external Express bridge (port 9878)
+  // are set, use it. Otherwise the default is the embedded serverless bridge.
   const bridgeUrl = process.env.NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL
   const bridgeToken = process.env.NEXT_PUBLIC_AUIS_REVIEW_TOKEN
   if (bridgeUrl && bridgeToken) {
@@ -39,7 +39,7 @@ function pickStorage(): { storage: ReviewStorage; backend: StorageBackend } {
       backend: "bridge",
     }
   }
-  // Padrão: rotas same-origin /api/review-bridge/* sobre os mesmos JSON.
+  // Default: same-origin /api/review-bridge/* routes over the same JSON files.
   return { storage: new ServerlessReview(), backend: "bridge" }
 }
 
@@ -105,13 +105,13 @@ type ReviewState = {
   rejectComment: (id: string) => Promise<void>
   reopenFromArchive: (id: string) => Promise<void>
   addReply: (id: string, text: string, images?: string[]) => Promise<ReviewReply | null>
-  /** Edita texto/imagens de um comentário existente, preservando o resto. */
+  /** Edit an existing comment's text/images, preserving everything else. */
   editComment: (id: string, text: string, images?: string[]) => Promise<void>
-  /** Cria uma "ideia futura" avulsa (sem pino) — vai pra aba de backlog. */
+  /** Create a standalone "future idea" (no pin) — lands in the backlog tab. */
   addBacklogIdea: (text: string, images?: string[]) => Promise<void>
-  /** Move um comentário existente pro backlog (vira "ideia futura"). */
+  /** Move an existing comment to the backlog (it becomes a "future idea"). */
   moveToBacklog: (id: string) => Promise<void>
-  /** Tira do backlog, voltando pra "aberto". */
+  /** Take it out of the backlog, back to "open". */
   restoreFromBacklog: (id: string) => Promise<void>
   deleteComment: (id: string) => Promise<void>
   refreshFromStorage: () => Promise<void>
@@ -322,7 +322,7 @@ export const useReviewStore = create<ReviewState>()((set, get) => ({
 
   archiveDirect: async (id) => {
     const { storage, identity } = get()
-    const actor = identityToActor(identity) ?? { kind: "user", id: "anonymous", name: "Anônimo" }
+    const actor = identityToActor(identity) ?? { kind: "user", id: "anonymous", name: "Anonymous" }
     if (storage.transitionComment) {
       await storage.transitionComment(id, "resolve_direct", actor)
     } else {
@@ -350,7 +350,7 @@ export const useReviewStore = create<ReviewState>()((set, get) => ({
 
   approveComment: async (id) => {
     const { storage, identity } = get()
-    const actor = identityToActor(identity) ?? { kind: "user", id: "anonymous", name: "Anônimo" }
+    const actor = identityToActor(identity) ?? { kind: "user", id: "anonymous", name: "Anonymous" }
     if (storage.transitionComment) {
       await storage.transitionComment(id, "approve", actor)
     }
@@ -401,7 +401,7 @@ export const useReviewStore = create<ReviewState>()((set, get) => ({
       get().archivedComments.find((c) => c.id === id) ??
       (await storage.getComment(id))
     if (!existing) return
-    // images === undefined → mantém as atuais; array (mesmo vazio) → substitui.
+    // images === undefined → keep the current ones; an array (even empty) → replace.
     const nextImages = images === undefined ? existing.images : images
     const updated: ReviewComment = {
       ...existing,
@@ -433,8 +433,9 @@ export const useReviewStore = create<ReviewState>()((set, get) => ({
       viewportHeight: window.innerHeight,
       scrollY: 0,
       documentHeight: 0,
-      // Âncora-sentinela: passa na validação mas NÃO vira pino — o canvas pula
-      // origin "backlog". Ideia futura é avulsa, não fixada num elemento.
+      // Sentinel anchor: passes validation but does NOT become a pin — the canvas
+      // skips origin "backlog". A future idea is standalone, not pinned to an
+      // element.
       anchor: { kind: "pin", position: { x: 0, y: 0 } },
       text: trimmed,
       ...(images && images.length > 0 ? { images } : {}),

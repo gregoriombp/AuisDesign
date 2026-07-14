@@ -38,7 +38,7 @@ type ShotData = {
   built: boolean
 }
 
-/** Nó-tela: o screenshot do Figma como nó do fluxo. */
+/** Screen node: the Figma screenshot as a node in the flow. */
 function ShotNode({ data }: NodeProps) {
   const d = data as unknown as ShotData
   return (
@@ -55,7 +55,7 @@ function ShotNode({ data }: NodeProps) {
         />
         {d.built && (
           <span className="absolute right-1 top-1">
-            <AuPill variant="live">No repo</AuPill>
+            <AuPill variant="live">In repo</AuPill>
           </span>
         )}
       </div>
@@ -86,7 +86,7 @@ export function ProjectFlow({ project }: { project: Project }) {
   const { initialNodes, initialEdges } = React.useMemo(() => {
     const screens = [...project.screens].sort((a, b) => a.order - b.order)
 
-    // Colunas por etapa (Tela 01..N), linhas = ordem dentro da etapa.
+    // Columns by step (Screen 01..N), rows = order within the step.
     const steps = Array.from(new Set(screens.map((s) => s.step))).sort(
       (a, b) => stepNum(a) - stepNum(b),
     )
@@ -160,13 +160,13 @@ export function ProjectFlow({ project }: { project: Project }) {
           <Panel position="top-left">
             <div className="flex flex-col gap-1.5 rounded-xl border border-(--border-default) bg-(--bg-raised) px-3 py-2 text-[11px] text-(--fg-secondary)">
               <span className="inline-flex items-center gap-2">
-                <span className="h-px w-5 bg-(--border-strong)" /> fluxo (etapa → etapa)
+                <span className="h-px w-5 bg-(--border-strong)" /> flow (step → step)
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="h-px w-5 bg-(--au-amber-500)" /> branch (mesma etapa)
+                <span className="h-px w-5 bg-(--au-amber-500)" /> branch (same step)
               </span>
               <span className="text-(--fg-tertiary)">
-                Conexões inferidas dos conectores do Figma
+                Connections inferred from the Figma connectors
               </span>
             </div>
           </Panel>
@@ -198,12 +198,12 @@ export function ProjectFlow({ project }: { project: Project }) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-(--fg-secondary) no-underline hover:text-(--fg-primary)"
               >
-                Ver no Figma <Icon name="open_in_new" size={14} />
+                View in Figma <Icon name="open_in_new" size={14} />
               </a>
               {current.status === "built" && current.builtRoute && (
                 <Link href={current.builtRoute} className="no-underline">
                   <AuButton variant="secondary" size="sm" iconRight="open_in_new">
-                    Ver no repo
+                    View in repo
                   </AuButton>
                 </Link>
               )}

@@ -29,7 +29,7 @@ type FlowSuggestion = {
   resolution?: { summary: string }
 }
 
-const USER_ACTOR = { kind: "user", id: "user", name: "Usuário" } as const
+const USER_ACTOR = { kind: "user", id: "user", name: "User" } as const
 
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n)
@@ -42,8 +42,8 @@ function formatTimestamp(ts: number): string {
 }
 
 function StatusPill({ status }: { status: SuggestionStatus }) {
-  if (status === "in_review") return <AuPill variant="beta">Em revisão</AuPill>
-  return <AuPill variant="draft">Aberta</AuPill>
+  if (status === "in_review") return <AuPill variant="beta">In review</AuPill>
+  return <AuPill variant="draft">Open</AuPill>
 }
 
 function SuggestionCard({
@@ -63,7 +63,7 @@ function SuggestionCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm font-medium text-(--fg-primary)">
-              {suggestion.authorName?.trim() || "Anônimo"}
+              {suggestion.authorName?.trim() || "Anonymous"}
             </span>
             <StatusPill status={suggestion.status} />
           </div>
@@ -84,7 +84,7 @@ function SuggestionCard({
       <div className="flex flex-wrap items-center gap-2">
         <Link href={`/auis/ux-flow/${suggestion.flow}`} className="no-underline">
           <AuButton variant="ghost" size="sm" iconLeft="account_tree">
-            Abrir flow
+            Open flow
           </AuButton>
         </Link>
         <span className="text-[11px] text-(--fg-tertiary)">
@@ -99,7 +99,7 @@ function SuggestionCard({
               disabled={busy}
               onClick={() => onTransition(suggestion.id, "reject")}
             >
-              Reabrir
+              Reopen
             </AuButton>
           ) : (
             <AuButton
@@ -109,7 +109,7 @@ function SuggestionCard({
               disabled={busy}
               onClick={() => onTransition(suggestion.id, "in_review")}
             >
-              Em revisão
+              In review
             </AuButton>
           )}
           <AuButton
@@ -119,7 +119,7 @@ function SuggestionCard({
             disabled={busy}
             onClick={() => onTransition(suggestion.id, "discard")}
           >
-            Descartar
+            Discard
           </AuButton>
           <AuButton
             variant="primary"
@@ -128,7 +128,7 @@ function SuggestionCard({
             disabled={busy}
             onClick={() => onTransition(suggestion.id, "apply")}
           >
-            Aplicar
+            Apply
           </AuButton>
         </div>
       </div>
@@ -150,7 +150,11 @@ export function SuggestionsPanel() {
       setSuggestions(Array.isArray(data.suggestions) ? data.suggestions : [])
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha ao carregar")
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Could not load suggestions. Refresh to try again."
+      )
     } finally {
       setLoaded(true)
     }
@@ -172,7 +176,11 @@ export function SuggestionsPanel() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         await refresh()
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Falha na ação")
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Could not update the suggestion. Try again."
+        )
       } finally {
         setBusyId(null)
       }
@@ -196,18 +204,18 @@ export function SuggestionsPanel() {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <AuStatCard icon="lightbulb" label="Pendentes" value={suggestions.length} />
-        <AuStatCard icon="pending" label="Abertas" value={openCount} />
-        <AuStatCard icon="hourglass_top" label="Em revisão" value={inReviewCount} />
+        <AuStatCard icon="lightbulb" label="Pending" value={suggestions.length} />
+        <AuStatCard icon="pending" label="Open" value={openCount} />
+        <AuStatCard icon="hourglass_top" label="In review" value={inReviewCount} />
       </div>
 
       <div className="flex items-center justify-between gap-3">
         <p className="m-0 text-xs text-(--fg-tertiary)">
-          Sugestões de edição vindas do editor de UX Flow. Aplicar/Descartar arquiva
-          a sugestão; a alteração real dos nós é feita via skill.
+          Edit suggestions coming from the UX Flow editor. Apply/Discard archives the
+          suggestion; the actual node changes are made by a skill.
         </p>
         <AuButton variant="ghost" size="sm" iconLeft="refresh" onClick={() => void refresh()}>
-          Atualizar
+          Refresh
         </AuButton>
       </div>
 
@@ -225,11 +233,11 @@ export function SuggestionsPanel() {
               <Icon name="lightbulb" size={20} />
             </AuEmptyMedia>
             <AuEmptyTitle>
-              {!loaded ? "Carregando sugestões…" : "Nenhuma sugestão pendente"}
+              {!loaded ? "Loading suggestions…" : "No pending suggestions"}
             </AuEmptyTitle>
             <AuEmptyDescription>
-              Abra um fluxo, ative &quot;Sugerir edição&quot; no editor e as propostas
-              aparecem aqui pra você triar.
+              Open a flow, hit &quot;Suggest edit&quot; in the editor, and the proposals
+              show up here for you to triage.
             </AuEmptyDescription>
           </AuEmptyHeader>
         </AuEmpty>
@@ -252,7 +260,7 @@ export function SuggestionsPanel() {
                     {meta?.title ?? flow}
                   </Link>
                   <span className="text-xs text-(--fg-tertiary) shrink-0">
-                    {items.length} sugest{items.length === 1 ? "ão" : "ões"}
+                    {items.length} {items.length === 1 ? "suggestion" : "suggestions"}
                   </span>
                 </header>
                 <div className="flex flex-col gap-2">

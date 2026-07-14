@@ -19,36 +19,36 @@ import { cn } from "@/lib/utils";
  */
 
 export type AuMentionMenuEntry = {
-  /** Identidade estável do item — usada em activeKey/onPick. */
+  /** Stable identity of the item — used in activeKey/onPick. */
   key: string;
   label: string;
-  /** Material Symbol (ignorado quando `brand` está presente). */
+  /** Material Symbol (ignored when `brand` is present). */
   icon?: string;
-  /** Brand key do AuBrandLogo — logos reais para integrações. */
+  /** AuBrandLogo brand key — real logos for integrations. */
   brand?: string;
-  /** Chevron à direita — sinaliza drill-in (ex.: integração com subskills). */
+  /** Chevron on the right — signals a drill-in (e.g. an integration with subskills). */
   chevron?: boolean;
-  /** Realce de cor do rótulo (ex.: item "Personalizado"). */
+  /** Color accent on the label (e.g. the "Custom" item). */
   accent?: "purple";
 };
 
 export type AuMentionMenuSection = {
-  /** Rótulo da seção (ex.: "Integrações"). Omitir = lista corrida. */
+  /** Section label (e.g. "Integrations"). Omit for a flat list. */
   label?: string;
   entries: AuMentionMenuEntry[];
 };
 
 export type AuMentionMenuProps = {
   sections: AuMentionMenuSection[];
-  /** Item realçado (pill invertida). */
+  /** Highlighted item (inverted pill). */
   activeKey?: string;
-  /** Hover em um item — normalmente sincroniza o activeKey do dono. */
+  /** Hover on an item — usually syncs the owner's activeKey. */
   onHover?: (key: string) => void;
-  /** Clique/Enter em um item. mousedown já vem com preventDefault (foco fica no editor). */
+  /** Click/Enter on an item. mousedown already calls preventDefault (focus stays in the editor). */
   onPick: (key: string) => void;
-  /** Ação fixa do rodapé (ex.: "+ Nova Integração"). */
+  /** Pinned footer action (e.g. "+ New integration"). */
   footer?: { key: string; label: string };
-  /** Header de drill-in — mostra o contexto atual e a seta de voltar. */
+  /** Drill-in header — shows the current context and the back arrow. */
   header?: { label: string; onBack?: () => void };
   className?: string;
   style?: React.CSSProperties;
@@ -73,7 +73,7 @@ function EntryRow({
       aria-selected={active}
       tabIndex={-1}
       onMouseDown={(e) => {
-        // Mantém o foco (e o caret) no editor durante o clique.
+        // Keeps focus (and the caret) in the editor during the click.
         e.preventDefault();
         onPick(entry.key);
       }}

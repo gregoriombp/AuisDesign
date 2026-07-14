@@ -7,9 +7,10 @@ import type {
   MobbinSearchStatus,
 } from "./types.js"
 
-// Fila efêmera de buscas no Mobbin. Vive só em memória — uma busca nasce
-// `pending`, o agente devolve resultados (`done`) ou erro (`error`), o app anexa
-// a imagem escolhida e segue a vida. Não persiste, não migra, não toca o lowdb.
+// Ephemeral Mobbin search queue. Lives only in memory — a search starts
+// `pending`, the agent posts back results (`done`) or a failure (`error`), the
+// app attaches the chosen image and moves on. Never persisted, never migrated,
+// never touches lowdb.
 const MAX_SEARCHES = 50
 
 const searches = new Map<string, MobbinSearch>()

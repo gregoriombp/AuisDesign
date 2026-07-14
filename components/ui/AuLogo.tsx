@@ -9,18 +9,17 @@ export type AuLogoProps = {
 }
 
 /**
- * Catálogo oficial de exportações da logo Auis (Logo System v0.1).
+ * Official export catalog for the Auis logo (Logo System v0.1).
  *
- * Use este registry como **fonte de verdade** para qualquer asset estático
- * servido a partir de `/public/assets/brand/`. Para uso **dentro do app**
- * prefira o componente `<AuLogo />` (SVG inline, `fill="currentColor"`),
- * que herda a cor do contexto.
+ * Use this registry as the **source of truth** for any static asset served from
+ * `/public/assets/brand/`. **Inside the app**, prefer the `<AuLogo />` component
+ * (inline SVG, `fill="currentColor"`), which inherits the color of its context.
  *
- * `positive` = tinta (#0D0D0D) sobre fundo transparente.
- * `negative` = branco sobre placa #0D0D0D (asset autocontido, com fundo).
+ * `positive` = ink (#0D0D0D) on a transparent background.
+ * `negative` = white on a #0D0D0D plate (self-contained asset, with background).
  *
- * Assets estáticos são para: e-mail, deck, social, favicon, exports de
- * marketing — qualquer lugar onde `currentColor` não funciona.
+ * Static assets are for: email, decks, social, favicon, marketing exports —
+ * anywhere `currentColor` does not work.
  */
 export const AU_LOGO_ASSETS = {
   symbol: {
@@ -44,8 +43,8 @@ export const AU_LOGO_ASSETS = {
 export type AuLogoLockup = keyof typeof AU_LOGO_ASSETS
 export type AuLogoTone = "positive" | "negative"
 
-/* Geometria oficial do símbolo: três lâminas em leque, grudadas na base,
- * inclinação em progressão harmônica de 6° (15° · 21° · 27°). */
+/* Official geometry of the symbol: three blades fanned out, joined at the base,
+ * with a harmonic 6° progression of tilt (15° · 21° · 27°). */
 const SYMBOL_POLYGONS = (
   <>
     <polygon points="0,300 62.12,300 142.50,0 80.39,0" />

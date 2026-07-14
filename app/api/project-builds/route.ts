@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Corpo inválido." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid body." }, { status: 400 });
   }
   if (
     typeof body.projectSlug !== "string" ||
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     !KINDS.includes(body.kind as BuildKind)
   ) {
     return NextResponse.json(
-      { error: "projectSlug, screenId e kind (restyle|build) são obrigatórios." },
+      { error: "projectSlug, screenId and kind (restyle|build) are required." },
       { status: 400 },
     );
   }

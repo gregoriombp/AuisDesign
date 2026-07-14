@@ -476,8 +476,8 @@ export function EditModeProvider() {
   )
 
   const onPickToken = React.useCallback((token: string, value: string) => {
-    // Preview global instantâneo: sobrescreve o token no :root (todas as
-    // instâncias mudam). No ship a materialização reescreve no globals.css.
+    // Instant global preview: overrides the token on :root (every instance
+    // changes). On ship, materialization rewrites it in globals.css.
     document.documentElement.style.setProperty(token, value)
     void useEditStore.getState().saveToken(token, value)
   }, [])
@@ -650,8 +650,8 @@ function DragGrip({
   return (
     <button
       type="button"
-      aria-label="Arrastar pra reordenar"
-      title="Arrastar pra reordenar"
+      aria-label="Drag to reorder"
+      title="Drag to reorder"
       {...{ [EDIT_OVERLAY_DATA_ATTR]: "grip" }}
       onPointerDown={onStart}
       className="flex h-6 w-6 items-center justify-center rounded-full border border-(--border-subtle) bg-(--bg-raised) text-(--fg-secondary) shadow-(--shadow-sm) hover:text-(--fg-primary)"

@@ -3,21 +3,20 @@
 import * as React from "react"
 
 /**
- * Avatar dos atores do Review Mode. Quatro casos:
- *  · agente Claude   → círculo laranja (clay) com a marca sunburst branca
- *  · agente Germano  → círculo grafite (slate-900) com o monograma "GF"
- *  · usuário greg    → foto de perfil real (/assets/users/greg.jpg)
- *  · qualquer outro  → círculo na cor do autor com a inicial (comportamento antigo)
+ * Avatar for the Review Mode actors. Three cases:
+ *  · Claude agent   → clay-orange circle with the white sunburst mark
+ *  · Germano agent  → graphite circle (slate-900) with the "GF" monogram
+ *  · any human      → circle in the author's color with their initial
  */
 
-const GREG_PHOTO = "/assets/users/greg.jpg"
 const CLAUDE_CLAY = "#D97757"
 const GERMANO_INK = "var(--au-slate-900)"
 
-// `kind !== "user"` (em vez de `=== "agent"`) porque comments de topo não
-// carregam authorKind — só replies carregam. Assim o avatar do AUTOR de um
-// comentário criado por agente (ex.: pin de bonus do Germano) também resolve
-// pelo id/name estável, sem falsar num revisor humano (kind === "user").
+// `kind !== "user"` (rather than `=== "agent"`) because top-level comments do
+// not carry authorKind — only replies do. That way the avatar of the AUTHOR of a
+// comment created by an agent (e.g. a bonus pin from Germano) also resolves
+// through the stable id/name, without misfiring on a human reviewer
+// (kind === "user").
 function isClaude(kind: string | undefined, id: string | undefined, name: string): boolean {
   return kind !== "user" && (id === "claude" || name.trim().toLowerCase() === "claude")
 }
@@ -26,12 +25,7 @@ function isGermano(kind: string | undefined, id: string | undefined, name: strin
   return kind !== "user" && (id === "germano" || name.trim().toLowerCase().startsWith("germano"))
 }
 
-function isGreg(id: string | undefined, name: string): boolean {
-  const n = name.trim().toLowerCase()
-  return id === "u-greg" || n === "greg" || n.startsWith("greg")
-}
-
-/** Marca radial do Claude (sunburst de raios alternados) em branco. */
+/** Claude's radial mark (sunburst of alternating rays), in white. */
 function ClaudeMark({ size }: { size: number }) {
   const c = 12
   const rays = Array.from({ length: 12 }, (_, i) => {
@@ -98,7 +92,7 @@ export function ReviewAvatar({
   }
 
   if (isGermano(authorKind, authorId, authorName)) {
-    // monograma "GF" em #fff literal (não --fg-on-inverse, que inverte no dark) sobre o grafite fixo
+    // "GF" monogram in literal #fff (not --fg-on-inverse, which flips in dark) on the fixed graphite
     return (
       <span
         className={`${base} font-semibold tracking-tight`}
@@ -108,19 +102,6 @@ export function ReviewAvatar({
       >
         GF
       </span>
-    )
-  }
-
-  if (isGreg(authorId, authorName)) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={GREG_PHOTO}
-        alt={label}
-        title={label}
-        className={base}
-        style={{ ...dim, objectFit: "cover" }}
-      />
     )
   }
 

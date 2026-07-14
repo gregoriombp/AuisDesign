@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
   const items: DispatchItem[] = [];
   for (const c of open) {
     // No self-loop: agent-authored pins (e.g. Germano's suggestions, which often
-    // say "manda o @Claude fazer") never auto-trigger another agent. Only the
+    // say "have @Claude do it") never auto-trigger another agent. Only the
     // user's own directives dispatch.
     if (getReviewAgent(c.authorId)) continue;
 

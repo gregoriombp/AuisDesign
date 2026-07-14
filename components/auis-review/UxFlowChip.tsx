@@ -9,7 +9,7 @@ import type { ReviewFlowRef } from "./types"
 export function UxFlowChip({ flowRef }: { flowRef?: ReviewFlowRef }) {
   const title = flowRef
     ? `Flow: ${flowRef.flow}${flowRef.nodeLabel ? ` · ${flowRef.nodeLabel}` : ""}`
-    : "Comentário de UX flow"
+    : "UX flow comment"
   return (
     <span
       className="inline-flex shrink-0 items-center gap-1 rounded-xs bg-(--au-purple-100) px-1.5 py-0.5 body-xs font-medium text-(--au-purple-700)"

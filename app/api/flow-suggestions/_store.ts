@@ -74,14 +74,12 @@ function summarize(
   kind: "applied" | "discarded" | "claimed",
 ): string {
   const verb =
-    kind === "applied" ? "Aplicada" : kind === "discarded" ? "Descartada" : "Em revisão por";
+    kind === "applied" ? "Applied" : kind === "discarded" ? "Discarded" : "In review";
   const d = new Date(at);
-  const stamp = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} às ${pad2(
+  const stamp = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} at ${pad2(
     d.getHours(),
   )}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-  return kind === "claimed"
-    ? `${verb} ${actor.name} em ${stamp}.`
-    : `${verb} por ${actor.name} em ${stamp}.`;
+  return `${verb} by ${actor.name} on ${stamp}.`;
 }
 
 export async function listSuggestions(
@@ -131,7 +129,7 @@ export async function transitionSuggestion(
   if (idx === -1) return null;
   const suggestion = main.suggestions[idx];
   const at = Date.now();
-  const who: FlowActor = actor ?? { kind: "user", id: "user", name: "Usuário" };
+  const who: FlowActor = actor ?? { kind: "user", id: "user", name: "User" };
 
   if (transition === "in_review") {
     if (suggestion.status === "open") {

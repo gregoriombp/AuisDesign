@@ -2,7 +2,7 @@
   "name": "auis-review-bridge",
   "version": "0.2.0",
   "private": true,
-  "description": "Servidor local para a fila de comentários do Auis Review Mode usada por agentes. SSE + POST, lowdb em arquivo, auth por token.",
+  "description": "Local server for the Auis Review Mode comment queue used by agents. SSE + POST, file-backed lowdb, token auth.",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {

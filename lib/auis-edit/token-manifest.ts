@@ -1,13 +1,13 @@
-// O picker de estilo do Live Edit SÓ oferece tokens do design system — nunca um
-// valor cru. Aqui está a paleta COMPLETA, transcrita do globals.css (fonte de
-// verdade): todas as rampas de cor (canal var `--au-{família}-{step}`), os
-// tokens semânticos, raios e sombras. O apply engine valida todo valor contra
-// ALLOWED_* antes de tocar o DOM. "Tokens são sagrados" por construção.
+// The Live Edit style picker ONLY offers design-system tokens — never a raw
+// value. This is the FULL palette, transcribed from globals.css (the source of
+// truth): every color ramp (var channel `--au-{family}-{step}`), the semantic
+// tokens, radii and shadows. The apply engine validates every value against
+// ALLOWED_* before touching the DOM. "Tokens are sacred" by construction.
 
 export interface TokenSwatch {
-  /** Nome do token, ex.: "--au-blue-600". */
+  /** Token name, e.g. "--au-blue-600". */
   token: string
-  /** `var(--token)` — o que é gravado/persistido (segue dark mode). */
+  /** `var(--token)` — what gets written/persisted (follows dark mode). */
   cssValue: string
   label: string
 }
@@ -15,7 +15,7 @@ export interface TokenSwatch {
 export interface ColorRamp {
   family: string
   label: string
-  /** `var(--token)` da cor do rótulo da família (um step médio). */
+  /** `var(--token)` for the family label's color (a middle step). */
   swatch: string
   swatches: TokenSwatch[]
 }
@@ -29,7 +29,7 @@ function swatch(token: string, label: string): TokenSwatch {
   return { token, cssValue: `var(${token})`, label }
 }
 
-// ── Rampas primitivas (transcritas do @theme do globals.css) ──────────────────
+// ── Primitive ramps (transcribed from the @theme block in globals.css) ────────
 const RAMP_STEPS: Record<string, { label: string; steps: number[] }> = {
   gray: { label: "Gray", steps: [25, 50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200] },
   slate: { label: "Slate", steps: [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200] },
@@ -52,9 +52,9 @@ export const COLOR_RAMPS: ColorRamp[] = Object.entries(RAMP_STEPS).map(
   }),
 )
 
-// ── Semânticos (canal var no :root) ───────────────────────────────────────────
+// ── Semantic tokens (var channel on :root) ────────────────────────────────────
 const SEMANTIC_BG: SemanticGroup = {
-  label: "Superfícies",
+  label: "Surfaces",
   tokens: [
     swatch("--bg-canvas", "Canvas"),
     swatch("--bg-surface", "Surface"),
@@ -66,36 +66,36 @@ const SEMANTIC_BG: SemanticGroup = {
   ],
 }
 const SEMANTIC_FG: SemanticGroup = {
-  label: "Texto",
+  label: "Text",
   tokens: [
-    swatch("--fg-primary", "Primário"),
-    swatch("--fg-secondary", "Secundário"),
-    swatch("--fg-tertiary", "Terciário"),
+    swatch("--fg-primary", "Primary"),
+    swatch("--fg-secondary", "Secondary"),
+    swatch("--fg-tertiary", "Tertiary"),
     swatch("--fg-muted", "Muted"),
     swatch("--fg-on-inverse", "On inverse"),
   ],
 }
 const SEMANTIC_BORDER: SemanticGroup = {
-  label: "Bordas",
+  label: "Borders",
   tokens: [
-    swatch("--border-subtle", "Sutil"),
-    swatch("--border-default", "Padrão"),
-    swatch("--border-strong", "Forte"),
+    swatch("--border-subtle", "Subtle"),
+    swatch("--border-default", "Default"),
+    swatch("--border-strong", "Strong"),
     swatch("--ring-focus", "Focus ring"),
   ],
 }
 const SEMANTIC_ACCENT: SemanticGroup = {
-  label: "Acentos",
+  label: "Accents",
   tokens: [
     swatch("--accent-brand", "Brand"),
     swatch("--accent-brand-hover", "Brand hover"),
-    swatch("--accent-success", "Sucesso"),
-    swatch("--accent-danger", "Perigo"),
-    swatch("--accent-warning", "Atenção"),
+    swatch("--accent-success", "Success"),
+    swatch("--accent-danger", "Danger"),
+    swatch("--accent-warning", "Warning"),
   ],
 }
 
-// ── Escalas (raio / sombra) ───────────────────────────────────────────────────
+// ── Scales (radius / shadow) ──────────────────────────────────────────────────
 const RADIUS_SCALE: TokenSwatch[] = [
   swatch("--radius-xs", "XS"),
   swatch("--radius-sm", "SM"),
@@ -112,9 +112,9 @@ const SHADOW_SCALE: TokenSwatch[] = [
   swatch("--shadow-lg", "LG"),
   swatch("--shadow-overlay", "Overlay"),
 ]
-// Escala de espaçamento (padding/margin/gap). Subconjunto curado dos --space-*
-// do globals.css — começa em --space-0 (0px, "Nenhum") pra dar conta de
-// "reduzir/zerar padding" sem sair do token.
+// Spacing scale (padding/margin/gap). A curated subset of the --space-* tokens
+// in globals.css — it starts at --space-0 (0px) so "shrink/zero the padding" is
+// reachable without leaving the token system.
 const SPACING_SCALE: TokenSwatch[] = [
   swatch("--space-0", "0"),
   swatch("--space-1", "4"),
@@ -130,26 +130,26 @@ export interface StyleProperty {
   prop: string
   label: string
   kind: "color" | "radius" | "shadow" | "spacing"
-  /** Grupos semânticos relevantes pra esta propriedade (atalhos no topo). */
+  /** Semantic groups relevant to this property (shortcuts at the top). */
   semantic: SemanticGroup[]
-  /** Propriedades de cor mostram TODAS as rampas embaixo dos semânticos. */
+  /** Color properties show ALL the ramps below the semantic tokens. */
   showRamps: boolean
-  /** Escala (raio/sombra/espaçamento). */
+  /** Scale (radius/shadow/spacing). */
   scale?: TokenSwatch[]
 }
 
 export const STYLE_PROPERTIES: StyleProperty[] = [
-  { prop: "color", label: "Cor do texto", kind: "color", semantic: [SEMANTIC_FG, SEMANTIC_ACCENT], showRamps: true },
-  { prop: "background-color", label: "Fundo", kind: "color", semantic: [SEMANTIC_BG, SEMANTIC_ACCENT], showRamps: true },
-  { prop: "border-color", label: "Borda", kind: "color", semantic: [SEMANTIC_BORDER, SEMANTIC_ACCENT], showRamps: true },
-  { prop: "border-radius", label: "Raio", kind: "radius", semantic: [], showRamps: false, scale: RADIUS_SCALE },
-  { prop: "box-shadow", label: "Sombra", kind: "shadow", semantic: [], showRamps: false, scale: SHADOW_SCALE },
+  { prop: "color", label: "Text color", kind: "color", semantic: [SEMANTIC_FG, SEMANTIC_ACCENT], showRamps: true },
+  { prop: "background-color", label: "Background", kind: "color", semantic: [SEMANTIC_BG, SEMANTIC_ACCENT], showRamps: true },
+  { prop: "border-color", label: "Border", kind: "color", semantic: [SEMANTIC_BORDER, SEMANTIC_ACCENT], showRamps: true },
+  { prop: "border-radius", label: "Radius", kind: "radius", semantic: [], showRamps: false, scale: RADIUS_SCALE },
+  { prop: "box-shadow", label: "Shadow", kind: "shadow", semantic: [], showRamps: false, scale: SHADOW_SCALE },
   { prop: "padding", label: "Padding", kind: "spacing", semantic: [], showRamps: false, scale: SPACING_SCALE },
-  { prop: "margin", label: "Margem", kind: "spacing", semantic: [], showRamps: false, scale: SPACING_SCALE },
+  { prop: "margin", label: "Margin", kind: "spacing", semantic: [], showRamps: false, scale: SPACING_SCALE },
   { prop: "gap", label: "Gap", kind: "spacing", semantic: [], showRamps: false, scale: SPACING_SCALE },
 ]
 
-// ── Allow-lists pro apply engine ──────────────────────────────────────────────
+// ── Allow-lists for the apply engine ─────────────────────────────────────────
 const COLOR_VALUES = new Set<string>([
   ...COLOR_RAMPS.flatMap((r) => r.swatches.map((s) => s.cssValue)),
   ...[SEMANTIC_BG, SEMANTIC_FG, SEMANTIC_BORDER, SEMANTIC_ACCENT].flatMap((g) =>
@@ -163,8 +163,8 @@ const SPACING_VALUES = new Set(SPACING_SCALE.map((t) => t.cssValue))
 const COLOR_PROPS = new Set(["color", "background-color", "border-color"])
 const SPACING_PROPS = new Set(["padding", "margin", "gap"])
 
-/** Guarda: uma op de estilo só é honrada se a propriedade for conhecida E o
- *  valor for um token válido pra ela. Defende o DOM de qualquer não-token. */
+/** Guard: a style op is only honored when the property is known AND the value is
+ *  a valid token for it. Keeps any non-token out of the DOM. */
 export function isAllowedStyle(prop: string, cssValue: string): boolean {
   if (COLOR_PROPS.has(prop)) return COLOR_VALUES.has(cssValue)
   if (SPACING_PROPS.has(prop)) return SPACING_VALUES.has(cssValue)

@@ -13,15 +13,17 @@ export function formatFullTimestamp(ts: number): string {
   )}:${pad2(d.getMinutes())}`
 }
 
-/** "agora" / "12m" / "3h" / "2d" / locale date — relative, for replies. */
+/** "now" / "12m" / "3h" / "2d" / locale date — relative, for replies. */
 export function formatRelative(timestamp: number): string {
   const diff = Date.now() - timestamp
   const minutes = Math.floor(diff / 60_000)
-  if (minutes < 1) return "agora"
+  if (minutes < 1) return "now"
   if (minutes < 60) return `${minutes}m`
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return `${hours}h`
   const days = Math.floor(hours / 24)
   if (days < 7) return `${days}d`
-  return new Date(timestamp).toLocaleDateString("pt-BR")
+  // en-GB, not en-US: the repo standardizes on DD/MM/YYYY (same as the absolute
+  // timestamp above and the persisted resolution summary).
+  return new Date(timestamp).toLocaleDateString("en-GB")
 }

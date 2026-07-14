@@ -16,4 +16,3 @@ export const EDIT_Z = {
   inbox: 1065,
 } as const
 
-export const EDIT_AUTHOR = { kind: "user", id: "greg", name: "Greg" } as const

@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 
 /**
  * GET /api/copilot/status
- * Verifica se a chave do Gemini está disponível no servidor (não revela a chave).
- * Útil para debug: se keyConfigured for false, reinicie o servidor após editar .env.local
+ * Reports whether the Gemini key is available on the server (never reveals it).
+ * Useful for debugging: if keyConfigured is false, restart the server after
+ * editing .env.local.
  */
 export async function GET() {
   const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -11,7 +12,7 @@ export async function GET() {
   return NextResponse.json({
     keyConfigured,
     hint: keyConfigured
-      ? "Chave encontrada. Se o chat ainda falhar, o erro pode ser da API do Gemini (ex.: chave inválida)."
-      : "Chave não encontrada. Defina GEMINI_API_KEY em .env.local na raiz do projeto e reinicie o servidor (Ctrl+C e npm run dev).",
+      ? "Key found. If the chat still fails, the error may come from the Gemini API (e.g. an invalid key)."
+      : "Key not found. Set GEMINI_API_KEY in .env.local at the project root and restart the server (Ctrl+C, then npm run dev).",
   });
 }

@@ -1,16 +1,16 @@
-// Registro de classes de TIPOGRAFIA do Live Edit (frente 2). Diferente das
-// variantes (presas à classe-raiz de um componente Au*), estas classes valem
-// pra QUALQUER elemento de texto — escala, peso e alinhamento. Cada grupo é
-// mutuamente exclusivo; trocar via classList (só classes que existem no DS).
+// Live Edit TYPOGRAPHY class registry. Unlike variants (bound to an Au*
+// component's root class), these classes apply to ANY text element — scale,
+// weight and alignment. Each group is mutually exclusive; swapping happens via
+// classList (only classes that exist in the design system).
 //
-// Curado das @utility do globals.css (body-*/display-*/caption) + utilitários
-// padrão do Tailwind (font-*, text-align). Token-safe por curadoria: nada de
-// classe arbitrária.
+// Curated from the @utility rules in globals.css (body-*/display-*/caption) plus
+// standard Tailwind utilities (font-*, text-align). Token-safe by curation: no
+// arbitrary classes.
 
 export interface ClassOption {
   value: string
   label: string
-  /** Classe aplicada; "" = sem classe (não usado aqui, todos têm classe). */
+  /** Class applied; "" = no class (unused here — every option has one). */
   className: string
 }
 
@@ -23,7 +23,7 @@ export interface ClassGroup {
 export const TYPOGRAPHY_GROUPS: ClassGroup[] = [
   {
     key: "scale",
-    label: "Escala",
+    label: "Scale",
     options: [
       { value: "caption", label: "Caption", className: "caption" },
       { value: "body-xs", label: "XS", className: "body-xs" },
@@ -31,14 +31,14 @@ export const TYPOGRAPHY_GROUPS: ClassGroup[] = [
       { value: "body-md", label: "MD", className: "body-md" },
       { value: "body-lg", label: "LG", className: "body-lg" },
       { value: "body-xl", label: "XL", className: "body-xl" },
-      { value: "display-sm", label: "Disp. SM", className: "display-sm" },
-      { value: "display-md", label: "Disp. MD", className: "display-md" },
-      { value: "display-lg", label: "Disp. LG", className: "display-lg" },
+      { value: "display-sm", label: "Display SM", className: "display-sm" },
+      { value: "display-md", label: "Display MD", className: "display-md" },
+      { value: "display-lg", label: "Display LG", className: "display-lg" },
     ],
   },
   {
     key: "weight",
-    label: "Peso",
+    label: "Weight",
     options: [
       { value: "normal", label: "Normal", className: "font-normal" },
       { value: "medium", label: "Medium", className: "font-medium" },
@@ -48,16 +48,16 @@ export const TYPOGRAPHY_GROUPS: ClassGroup[] = [
   },
   {
     key: "align",
-    label: "Alinhamento",
+    label: "Alignment",
     options: [
-      { value: "left", label: "Esq.", className: "text-left" },
-      { value: "center", label: "Centro", className: "text-center" },
-      { value: "right", label: "Dir.", className: "text-right" },
+      { value: "left", label: "Left", className: "text-left" },
+      { value: "center", label: "Center", className: "text-center" },
+      { value: "right", label: "Right", className: "text-right" },
     ],
   },
 ]
 
-/** Valor atual de um grupo, lido da classList (ou null se nenhum). */
+/** Current value of a group, read from the classList (or null when none). */
 export function currentClassValue(el: Element, group: ClassGroup): string | null {
   for (const o of group.options) {
     if (o.className && el.classList.contains(o.className)) return o.value
@@ -65,8 +65,8 @@ export function currentClassValue(el: Element, group: ClassGroup): string | null
   return null
 }
 
-/** Payload de uma troca de classe: remove todas as classes do grupo, adiciona a
- *  escolhida. Self-contained (o applier não precisa do registro). */
+/** Payload of a class swap: remove every class in the group, add the chosen one.
+ *  Self-contained (the applier doesn't need the registry). */
 export function buildClassPayload(group: ClassGroup, value: string) {
   const chosen = group.options.find((o) => o.value === value)
   return {

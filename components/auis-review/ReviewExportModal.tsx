@@ -34,14 +34,14 @@ export function ReviewExportModal() {
     try {
       await navigator.clipboard.writeText(json)
       push({
-        title: "Copiado",
-        description: "JSON na área de transferência.",
+        title: "Copied",
+        description: "JSON is on the clipboard.",
         variant: "success",
       })
     } catch {
       push({
-        title: "Não consegui copiar",
-        description: "Selecione o texto manualmente.",
+        title: "Could not copy",
+        description: "Select the text manually.",
         variant: "error",
       })
     }
@@ -61,7 +61,7 @@ export function ReviewExportModal() {
     a.remove()
     URL.revokeObjectURL(url)
     push({
-      title: "Arquivo baixado",
+      title: "File downloaded",
       description: a.download,
       variant: "success",
     })
@@ -74,18 +74,18 @@ export function ReviewExportModal() {
       open={open}
       onClose={() => setExportOpen(false)}
       zIndex={REVIEW_Z.modal}
-      title="Exportar comentários"
+      title="Export comments"
       footer={
         <div
           {...{ [OVERLAY_DATA_ATTR]: "" }}
           className="flex items-center justify-between gap-2 w-full"
         >
           <span className="body-xs text-(--fg-tertiary)">
-            {count} {count === 1 ? "comentário" : "comentários"}
+            {count} {count === 1 ? "comment" : "comments"}
           </span>
           <div className="flex items-center gap-2">
             <AuButton variant="ghost" onClick={() => setExportOpen(false)}>
-              Fechar
+              Close
             </AuButton>
             <AuButton
               variant="secondary"
@@ -93,7 +93,7 @@ export function ReviewExportModal() {
               onClick={copy}
               disabled={!json}
             >
-              Copiar
+              Copy
             </AuButton>
             <AuButton
               variant="primary"
@@ -101,7 +101,7 @@ export function ReviewExportModal() {
               onClick={download}
               disabled={!json}
             >
-              Baixar .json
+              Download .json
             </AuButton>
           </div>
         </div>
@@ -118,12 +118,12 @@ export function ReviewExportModal() {
             className="text-(--fg-tertiary) mt-0.5"
           />
           <span>
-            Esses dados ficam só no seu navegador. Compartilhe o JSON
-            manualmente até subirmos a v2 do servidor local.
+            This data stays in your browser only. Share the JSON by hand until
+            the local server v2 ships.
           </span>
         </p>
         <pre className="rounded-sm bg-(--bg-muted) border border-(--border-subtle) p-3 max-h-[40vh] overflow-auto body-xs mono text-(--fg-primary) whitespace-pre">
-          {json || "Carregando…"}
+          {json || "Loading…"}
         </pre>
       </div>
     </AuModal>

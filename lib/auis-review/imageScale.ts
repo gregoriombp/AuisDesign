@@ -1,8 +1,9 @@
-// Anexos do Review Mode são guardados como data URL base64 DENTRO do comentário,
-// que trafega no review-bridge (JSON/SSE) e, no modo local, cai no localStorage
-// (~5MB no total). Mantemos resolução ALTA, mas com um teto no maior lado pra um
-// screenshot 4K/Retina não estourar o storage. Imagens já dentro do teto passam
-// intactas (sem reencode), preservando a nitidez de texto.
+// Review Mode attachments are stored as base64 data URLs INSIDE the comment,
+// which travels through the review-bridge (JSON/SSE) and, in local mode, lands
+// in localStorage (~5MB total). We keep the resolution HIGH but cap the longest
+// side so a 4K/Retina screenshot doesn't blow past the storage budget. Images
+// already under the cap pass through untouched (no re-encode), preserving the
+// sharpness of text.
 const MAX_DIM = 2400
 const JPEG_QUALITY = 0.92
 
@@ -25,8 +26,8 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Lê o arquivo em alta resolução; só redimensiona se o maior lado passar de
- * MAX_DIM (mantendo proporção). Abaixo disso devolve o original intacto.
+ * Reads the file at full resolution; only resizes when the longest side exceeds
+ * MAX_DIM (keeping the aspect ratio). Below that it returns the original intact.
  */
 export async function fileToHighResDataUrl(file: File): Promise<string> {
   const original = await fileToDataUrl(file)

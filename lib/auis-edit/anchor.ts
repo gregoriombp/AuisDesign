@@ -17,7 +17,7 @@ function readComponent(el: Element): string | undefined {
   return owner?.getAttribute("data-au-component") || undefined
 }
 
-/** Captura a âncora de um elemento selecionado, ou null se não der pra ancorar. */
+/** Capture the anchor of a selected element, or null when it can't be anchored. */
 export function captureEditAnchor(el: Element): PageEditAnchor | null {
   const selector = cssPath(el)
   if (!selector) return null
@@ -30,16 +30,17 @@ export function captureEditAnchor(el: Element): PageEditAnchor | null {
   }
 }
 
-/** Re-resolve o elemento de uma âncora (seletor + fallback de fingerprint). */
+/** Re-resolve an anchor's element (selector + fingerprint fallback). */
 export function resolveEditElement(anchor: PageEditAnchor): Element | null {
   return resolveElementBySelector(anchor.selector, anchor.fingerprint)
 }
 
 // ── Text-leaf walk ──────────────────────────────────────────────────────────
-// `el.textContent = …` apaga TODOS os filhos. Só é seguro num nó cujo conteúdo
-// é texto puro. Dado um elemento selecionado, descemos por cadeias de wrapper
-// de filho único até o nó-folha de texto; recusamos quando há texto direto
-// MISTURADO com elementos, ou vários filhos-elemento (container ambíguo).
+// `el.textContent = …` wipes out ALL children. It's only safe on a node whose
+// content is pure text. Starting from the selected element, we descend through
+// single-child wrapper chains down to the text leaf; we refuse when direct text
+// is MIXED with elements, or when there are several element children (ambiguous
+// container).
 
 function directText(el: Element): string {
   let t = ""
@@ -49,7 +50,7 @@ function directText(el: Element): string {
   return t.trim()
 }
 
-/** Acha o nó-folha de texto editável dentro do elemento, ou null se ambíguo. */
+/** Find the editable text leaf inside the element, or null when it's ambiguous. */
 export function findEditableTextLeaf(el: Element): Element | null {
   let node: Element = el
   for (let depth = 0; depth < 8; depth++) {
@@ -58,13 +59,13 @@ export function findEditableTextLeaf(el: Element): Element | null {
     if (kids.length === 0) {
       return node.textContent && node.textContent.trim() ? node : null
     }
-    // Texto direto + filhos-elemento → setTextContent destruiria os filhos.
+    // Direct text + element children → setTextContent would destroy the children.
     if (dt) return null
     if (kids.length === 1) {
       node = kids[0]
       continue
     }
-    // Vários filhos-elemento, sem texto direto → container, não folha.
+    // Several element children, no direct text → a container, not a leaf.
     return null
   }
   return null

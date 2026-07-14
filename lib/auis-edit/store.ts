@@ -44,6 +44,16 @@ async function apiCreate(input: {
   }
 }
 
+/** Whoever the user said they are in the Review identity modal. Edit Mode and
+ *  Review Mode attribute to the same person; falls back to a neutral actor when
+ *  the identity hasn't been set yet. */
+function currentActor(): { kind: "user"; id: string; name: string } {
+  const identity = useReviewStore.getState().identity
+  return identity
+    ? { kind: "user", id: identity.id, name: identity.name }
+    : { kind: "user", id: "user", name: "You" }
+}
+
 async function apiTransition(
   route: string,
   id: string,
@@ -56,7 +66,7 @@ async function apiTransition(
       body: JSON.stringify({
         route,
         transition,
-        actor: { kind: "user", id: "greg", name: "Greg" },
+        actor: currentActor(),
       }),
     })
   } catch {

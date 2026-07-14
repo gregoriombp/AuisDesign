@@ -6,11 +6,12 @@ import type {
 } from "@/components/auis-review/types";
 
 /**
- * Fila efêmera de buscas no Mobbin — porta do review-bridge/src/mobbin.ts pro
- * serverless. Vive só em memória do processo (o dev server): nasce `pending`, o
- * agente devolve resultados (`done`) ou erro (`error`), o app anexa a imagem
- * escolhida e segue. Não persiste, não migra, não toca os JSON de comentários.
- * Um reset eventual no HMR é inofensivo (buscas são descartáveis).
+ * Ephemeral Mobbin search queue — the serverless port of
+ * review-bridge/src/mobbin.ts. Lives only in the process's memory (the dev
+ * server): a search starts `pending`, the agent posts back results (`done`) or a
+ * failure (`error`), the app attaches the chosen image and moves on. Never
+ * persisted, never migrated, never touches the comment JSON. An occasional reset
+ * on HMR is harmless (searches are disposable).
  */
 const MAX_SEARCHES = 50;
 const searches = new Map<string, MobbinSearch>();

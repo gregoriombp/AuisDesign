@@ -39,7 +39,7 @@ interface ReviewMobbinPanelProps {
   anchorY: number
 }
 
-/** Prefill: o texto/rótulo do elemento; senão, a última parte da rota. */
+/** Prefill: the element's text/label; failing that, the last part of the route. */
 function buildDefaultQuery(
   el: ReviewElementContext | null,
   page: string
@@ -95,7 +95,7 @@ export function ReviewMobbinPanel({
     }
   }, [])
 
-  // Ao abrir: prefill + foco. Ao fechar: cancela qualquer espera pendente.
+  // On open: prefill + focus. On close: cancel any pending wait.
   React.useEffect(() => {
     if (open) {
       setQuery((prev) => prev || buildDefaultQuery(element, page))
@@ -113,7 +113,7 @@ export function ReviewMobbinPanel({
     if (!mobbinBridgeReady()) {
       setPhase("error")
       setErrorMsg(
-        "A busca no Mobbin precisa do review-bridge ligado. Rode `npm run dev`."
+        "Mobbin search needs the review bridge running. Run `npm run dev`."
       )
       return
     }
@@ -132,14 +132,14 @@ export function ReviewMobbinPanel({
           if (resolved.status === "error") {
             setPhase("error")
             setErrorMsg(
-              resolved.error || "O agente não conseguiu buscar agora."
+              resolved.error || "The agent could not run the search. Try again."
             )
             return
           }
           setResults(resolved.results)
           if (resolved.results.length === 0) {
             setPhase("error")
-            setErrorMsg("Nenhum design parecido encontrado. Refine a busca.")
+            setErrorMsg("No similar designs found. Refine the search.")
           } else {
             setPhase("results")
           }
@@ -148,13 +148,13 @@ export function ReviewMobbinPanel({
           cancelPending()
           setPhase("error")
           setErrorMsg(
-            "A busca demorou demais. O agente está conectado a este review?"
+            "The search timed out. Check that the agent is connected to this review."
           )
         }, SEARCH_TIMEOUT_MS)
       })
       .catch(() => {
         setPhase("error")
-        setErrorMsg("Não consegui enfileirar a busca no review-bridge.")
+        setErrorMsg("Could not reach the review bridge. Check that it is running and try again.")
       })
   }, [query, phase, element, page, cancelPending])
 
@@ -168,7 +168,7 @@ export function ReviewMobbinPanel({
           setAttachedIds((prev) => new Set(prev).add(result.id))
         })
         .catch(() => {
-          setErrorMsg("Não consegui anexar essa imagem. Tente outra.")
+          setErrorMsg("Could not attach that image. Try another one.")
         })
         .finally(() => setAttachingId(null))
     },
@@ -177,13 +177,13 @@ export function ReviewMobbinPanel({
 
   if (!open || typeof document === "undefined") return null
 
-  // Horizontal: à direita do composer; sem espaço, à esquerda; senão, encosta.
+  // Horizontal: to the right of the composer; no room, to the left; otherwise flush.
   let left = anchorCenterX + anchorWidth / 2 + GAP
   if (left + PANEL_WIDTH > window.innerWidth - 8) {
     const leftSide = anchorCenterX - anchorWidth / 2 - GAP - PANEL_WIDTH
     left = leftSide >= 8 ? leftSide : Math.max(8, window.innerWidth - 8 - PANEL_WIDTH)
   }
-  // Vertical: perto do pino, garantindo um mínimo visível; rola por dentro.
+  // Vertical: near the pin, keeping a minimum visible; it scrolls internally.
   let top = Math.max(8, anchorY - 180)
   top = Math.min(top, Math.max(8, window.innerHeight - 8 - MIN_PANEL_HEIGHT))
   const maxHeight = window.innerHeight - top - 8
@@ -195,7 +195,7 @@ export function ReviewMobbinPanel({
       {...{ [OVERLAY_DATA_ATTR]: "" }}
       ref={stopDismiss}
       role="dialog"
-      aria-label="Buscar designs parecidos no Mobbin"
+      aria-label="Find similar designs on Mobbin"
       className="fixed pointer-events-auto rounded-lg bg-(--bg-raised) border border-(--border-subtle) shadow-lg flex flex-col overflow-hidden"
       style={{ zIndex: REVIEW_Z.modal, left, top, width: PANEL_WIDTH, maxHeight }}
       onKeyDown={(e) => {
@@ -205,24 +205,24 @@ export function ReviewMobbinPanel({
         }
       }}
     >
-      {/* Cabeçalho */}
+      {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-(--border-subtle)">
         <Icon name="image_search" size={16} className="text-(--fg-secondary)" />
         <span className="body-sm font-medium text-(--fg-primary)">
-          Designs parecidos
+          Similar designs
         </span>
-        <span className="body-xs text-(--fg-tertiary)">no Mobbin</span>
+        <span className="body-xs text-(--fg-tertiary)">on Mobbin</span>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar"
+          aria-label="Close"
           className="ml-auto h-6 w-6 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
         >
           <Icon name="close" size={14} />
         </button>
       </div>
 
-      {/* Busca */}
+      {/* Search */}
       <div className="px-3 pt-2.5 pb-2 flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <input
@@ -235,7 +235,7 @@ export function ReviewMobbinPanel({
                 runSearch()
               }
             }}
-            placeholder="Descreva a tela parecida…"
+            placeholder="Describe the screen you are after…"
             className="flex-1 min-w-0 rounded-sm border border-(--border-default) bg-(--bg-canvas) px-2.5 py-1.5 body-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:outline-hidden focus:border-(--border-strong)"
           />
           <AuButton
@@ -245,21 +245,21 @@ export function ReviewMobbinPanel({
             onClick={runSearch}
             disabled={query.trim().length === 0 || phase === "searching"}
           >
-            Buscar
+            Search
           </AuButton>
         </div>
         {hint && (
           <p className="body-xs text-(--fg-tertiary) truncate">
-            Parecido com: {hint}
+            Similar to: {hint}
           </p>
         )}
       </div>
 
-      {/* Corpo */}
+      {/* Body */}
       <div className="flex-1 min-h-0 overflow-y-auto px-3 pb-3">
         {phase === "idle" && (
           <p className="body-xs text-(--fg-tertiary) py-6 text-center">
-            Refine a descrição e toque em Buscar para ver telas parecidas do
+            Refine the description and hit Search to see similar screens from
             Mobbin.
           </p>
         )}
@@ -272,7 +272,7 @@ export function ReviewMobbinPanel({
               className="animate-spin text-(--fg-secondary)"
             />
             <p className="body-xs text-(--fg-secondary)">
-              Procurando designs parecidos no Mobbin…
+              Looking for similar designs on Mobbin…
             </p>
             <button
               type="button"
@@ -282,7 +282,7 @@ export function ReviewMobbinPanel({
               }}
               className="body-xs text-(--fg-tertiary) hover:text-(--fg-primary) underline underline-offset-2"
             >
-              Cancelar
+              Cancel
             </button>
           </div>
         )}
@@ -296,7 +296,7 @@ export function ReviewMobbinPanel({
               onClick={runSearch}
               className="body-xs text-(--fg-secondary) hover:text-(--fg-primary) underline underline-offset-2"
             >
-              Tentar de novo
+              Try again
             </button>
           </div>
         )}
@@ -305,7 +305,7 @@ export function ReviewMobbinPanel({
           <>
             {!canAttachMore && (
               <p className="body-xs text-(--accent-warning) pb-2">
-                Limite de imagens atingido. Remova uma para anexar outra.
+                Image limit reached. Remove one to attach another.
               </p>
             )}
             <div className="grid grid-cols-2 gap-2">
@@ -324,10 +324,10 @@ export function ReviewMobbinPanel({
                       disabled={disabled}
                       title={
                         attached
-                          ? "Imagem anexada"
+                          ? "Image attached"
                           : canAttachMore
-                            ? "Anexar ao comentário"
-                            : "Limite de imagens atingido"
+                            ? "Attach to the comment"
+                            : "Image limit reached"
                       }
                       className="block w-full text-left disabled:cursor-default"
                     >
@@ -356,11 +356,11 @@ export function ReviewMobbinPanel({
                           />
                         ) : attached ? (
                           <span className="inline-flex items-center gap-1 body-xs font-medium text-(--fg-primary)">
-                            <Icon name="check" size={13} /> Anexada
+                            <Icon name="check" size={13} /> Attached
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 body-xs font-medium text-(--fg-primary)">
-                            <Icon name="add_photo_alternate" size={13} /> Anexar
+                            <Icon name="add_photo_alternate" size={13} /> Attach
                           </span>
                         )}
                       </span>
@@ -375,8 +375,8 @@ export function ReviewMobbinPanel({
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        aria-label="Abrir no Mobbin"
-                        title="Abrir no Mobbin"
+                        aria-label="Open in Mobbin"
+                        title="Open in Mobbin"
                         className="ml-auto shrink-0 h-5 w-5 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
                       >
                         <Icon name="open_in_new" size={12} />

@@ -16,7 +16,7 @@ export type IconProps = {
    *  it as a still line (dense lists, perf-sensitive surfaces). Default `true`. */
   animated?: boolean
   /** Only the agent glyph (`name="agent"`) reads this — set `true` to stroke
-   *  the gesture with the brand iridescent gradient (azul → lavanda → pêssego)
+   *  the gesture with the brand iridescent gradient (blue → lavender → peach)
    *  instead of `currentColor`. For heros / agent hero moments. Default `false`. */
   gradient?: boolean
   className?: string
@@ -90,16 +90,17 @@ export function resolveIconOptics({
 }
 
 function defaultIconWeight(size: number, fill: IconProps["fill"] = 0): number {
-  // Compensação óptica: glifos pequenos precisam de mais traço pra não virar
-  // fio (somem em cor de baixo contraste); glifos grandes podem afinar. Contínuo
-  // no eixo wght do Material Symbols (100–700). 12→~480, 20→~420, 32→~340, 48→~250.
+  // Optical compensation: small glyphs need more stroke so they don't turn into
+  // hairlines (they vanish in low-contrast colors); large glyphs can thin out.
+  // Continuous on the Material Symbols wght axis (100–700).
+  // 12→~480, 20→~420, 32→~340, 48→~250.
   const base = Math.max(250, Math.min(520, Math.round((560 - size * 7) / 10) * 10))
   return fill ? Math.min(600, base + 40) : base
 }
 
 function defaultIconGrade(size: number): number {
-  // GRAD engrossa o traço SEM mudar o footprint do glifo — reforço extra de
-  // legibilidade nos tamanhos pequenos / cores fracas.
+  // GRAD thickens the stroke WITHOUT changing the glyph footprint — extra
+  // legibility at small sizes / weak colors.
   if (size <= 16) return 200
   if (size <= 20) return 50
   return 0

@@ -29,7 +29,7 @@ const TYPES: PageEditOpType[] = [
 export async function GET(request: NextRequest) {
   const route = request.nextUrl.searchParams.get("route");
   if (!route) {
-    return NextResponse.json({ error: "route é obrigatório." }, { status: 400 });
+    return NextResponse.json({ error: "route is required." }, { status: 400 });
   }
   const statusParam = request.nextUrl.searchParams.get("status");
   const status = STATUSES.includes(statusParam as PageEditStatus)
@@ -50,24 +50,24 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Corpo inválido." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid body." }, { status: 400 });
   }
 
   if (typeof body.route !== "string") {
-    return NextResponse.json({ error: "route é obrigatório." }, { status: 400 });
+    return NextResponse.json({ error: "route is required." }, { status: 400 });
   }
   if (!TYPES.includes(body.type as PageEditOpType)) {
-    return NextResponse.json({ error: "type inválido." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid type." }, { status: 400 });
   }
   const anchor = body.anchor as PageEditAnchor | undefined;
   if (!anchor || typeof anchor.selector !== "string") {
     return NextResponse.json(
-      { error: "anchor.selector é obrigatório." },
+      { error: "anchor.selector is required." },
       { status: 400 },
     );
   }
   if (!body.payload || typeof body.payload !== "object") {
-    return NextResponse.json({ error: "payload é obrigatório." }, { status: 400 });
+    return NextResponse.json({ error: "payload is required." }, { status: 400 });
   }
 
   const op = await createOrUpdateOp({

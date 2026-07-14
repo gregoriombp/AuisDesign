@@ -17,11 +17,11 @@ import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewPinMarker } from "./ReviewPinMarker"
 import type { ReviewDrawPath, ReviewPoint } from "./types"
 
-// Converte o evento de ponteiro pra doc-coords usando a MESMA base de scroll
-// que o render usa (o container de conteúdo principal). Antes usava o scroll
-// por-elemento do alvo, que divergia do render quando um modal/sidebar mudava
-// o scroll-chain — e o pino caía fora. Compartilhar a base garante captura e
-// render coincidirem.
+// Converts the pointer event to doc coords using the SAME scroll base the render
+// uses (the main content container). It used to use the target's per-element
+// scroll, which diverged from the render whenever a modal/sidebar changed the
+// scroll chain — and the pin landed in the wrong place. Sharing the base
+// guarantees capture and render agree.
 function pointFromEvent(
   e: PointerEvent | React.PointerEvent,
   scroll: ReviewPoint,
@@ -93,25 +93,26 @@ export function ReviewCanvas() {
     scrollRef.current = scroll
   }, [scroll])
 
-  // Posições renderizadas, em coords do grupo (que já é transladado por
-  // -scroll). Quando a âncora de elemento resolve, pins e traços seguem o
-  // reflow horizontal (sidebars) e o zoom do browser (o box escala junto);
-  // senão, caímos nas coords absolutas salvas. `layoutVersion` força recálculo
-  // quando o layout muda sem scroll/resize.
-  //   `pins`  — ponto do marcador de cada comentário (pin ou centroide do traço)
-  //   `draws` — pontos da polyline de cada marcação livre
-  //   `hidden`— comentários ancorados a um elemento que NÃO existe mais (ex.: um
-  //             modal fechou). Some o marcador em vez de cair na coord absoluta
-  //             velha — senão o dot fica "fantasma" sobre o conteúdo/sidebar. Se
-  //             o elemento voltar (modal reabre), o seletor resolve e ele volta.
+  // Rendered positions, in group coords (the group is already translated by
+  // -scroll). When the element anchor resolves, pins and strokes follow the
+  // horizontal reflow (sidebars) and browser zoom (the box scales with it);
+  // otherwise we fall back to the saved absolute coords. `layoutVersion` forces a
+  // recompute when the layout changes without a scroll/resize.
+  //   `pins`   — marker point of each comment (pin, or the stroke's centroid)
+  //   `draws`  — polyline points of each freehand mark
+  //   `hidden` — comments anchored to an element that NO LONGER exists (e.g. a
+  //              modal closed). Drop the marker instead of falling back to the
+  //              old absolute coord — otherwise the dot "ghosts" over the
+  //              content/sidebar. If the element comes back (the modal reopens),
+  //              the selector resolves and so does the marker.
   const rendered = React.useMemo(() => {
     void layoutVersion
     const pins = new Map<string, ReviewPoint>()
     const draws = new Map<string, ReviewPoint[]>()
     const hidden = new Set<string>()
     for (const c of comments) {
-      // ux-flow vive no canvas do diagrama; backlog ("ideia futura") é avulso —
-      // nenhum dos dois vira pino aqui.
+      // ux-flow lives on the diagram canvas; backlog ("future idea") is
+      // standalone — neither one becomes a pin here.
       if (c.origin === "ux-flow" || c.status === "backlog") continue
       if (c.anchor.kind === "pin") {
         const vp = c.anchor.el ? resolveElementPoint(c.anchor.el) : null
@@ -173,9 +174,10 @@ export function ReviewCanvas() {
         s.startDraw(pointFromEvent(e, scrollRef.current), s.identity.colorToken)
         ;(e.target as Element).setPointerCapture?.(e.pointerId)
       } else if (s.mode === "pin" || s.mode === "magic") {
-        // No modo mágico o pino ancora ao elemento sob o cursor — o mesmo que o
-        // realce destaca (ambos via elementBelowOverlayAt) — então fica grudado
-        // ao elemento e acompanha o reflow, em vez de cair num x/y solto.
+        // In magic mode the pin anchors to the element under the cursor — the
+        // same one the highlight picks out (both go through elementBelowOverlayAt)
+        // — so it sticks to the element and follows reflow, instead of landing on
+        // a loose x/y.
         const el = captureElementAnchor(e.clientX, e.clientY)
         s.placePin(pointFromEvent(e, scrollRef.current), el ?? undefined)
       }
@@ -202,9 +204,9 @@ export function ReviewCanvas() {
         s.appendDrawPoint(pendingPointRef.current)
         pendingPointRef.current = null
       }
-      // Ancora o traço ao elemento sob o centroide (em coords de viewport) pra
-      // que sobreviva a zoom e reflow das sidebars, como os pins. Os pontos
-      // salvos estão em doc coords; tira o scroll atual pra voltar ao viewport.
+      // Anchor the stroke to the element under its centroid (in viewport coords)
+      // so it survives zoom and sidebar reflow, like the pins do. The saved points
+      // are in doc coords; subtract the current scroll to get back to viewport.
       const path = useReviewStore.getState().drawingPath
       const sc = scrollRef.current
       const el = path

@@ -18,12 +18,13 @@ import type {
 } from "./types"
 
 /**
- * Backend serverless do Review Mode: fala com as rotas same-origin
- * `/api/review-bridge/*` (sem token, sem env) que persistem nos MESMOS arquivos
- * `review-bridge/data/*.json`. Substitui o RemoteBridgeReview (servidor Express
- * avulso na 9878) como padrão — `next dev` sozinho já serve tudo. Sem SSE: usa
- * polling leve do `/version` (mtime dos arquivos) pra captar escritas externas
- * (ex.: a skill de solve do agente) sem re-render à toa.
+ * Serverless backend for Review Mode: talks to the same-origin
+ * `/api/review-bridge/*` routes (no token, no env) that persist to the SAME
+ * `review-bridge/data/*.json` files. It replaces RemoteBridgeReview (the
+ * standalone Express server on 9878) as the default — `next dev` alone already
+ * serves everything. No SSE: it lightly polls `/version` (the files' mtime) to
+ * pick up external writes (e.g. the agent's solve skill) without re-rendering
+ * for nothing.
  */
 const BASE = "/api/review-bridge"
 const POLL_MS = 4000
@@ -152,8 +153,9 @@ export class ServerlessReview implements ReviewStorage {
     return (await res.json()) as { added: number; skipped: number }
   }
 
-  // Sem SSE: poll do /version (mtime dos arquivos). Dispara onChange só quando a
-  // assinatura muda — capta writes externos (skill do agente) sem re-render à toa.
+  // No SSE: poll /version (the files' mtime). Fires onChange only when the
+  // signature changes — picks up external writes (the agent's skill) without
+  // re-rendering for nothing.
   subscribe(onChange: () => void): () => void {
     if (typeof window === "undefined") return () => {}
     let last: string | null = null
@@ -166,7 +168,7 @@ export class ServerlessReview implements ReviewStorage {
         if (last !== null && signature !== last) onChange()
         last = signature
       } catch {
-        /* offline/transitório — ignora */
+        /* offline/transient — ignore */
       }
     }
     void tick()

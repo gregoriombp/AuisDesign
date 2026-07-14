@@ -1,7 +1,7 @@
-// Conjunto curado de Material Symbols (o sistema de ícones do Auis) pro
-// seletor de ícone do Live Edit. Não dá pra listar os milhares disponíveis;
-// estes cobrem o uso comum de produto. O usuário também pode digitar a ligadura
-// exata pra qualquer ícone fora da lista.
+// Curated set of Material Symbols (the Auis icon system) for the Live Edit icon
+// picker. Listing the thousands available isn't practical; these cover common
+// product usage. You can also type the exact ligature for any icon outside the
+// list.
 
 export interface IconGroup {
   label: string
@@ -10,7 +10,7 @@ export interface IconGroup {
 
 export const ICON_GROUPS: IconGroup[] = [
   {
-    label: "Ações",
+    label: "Actions",
     icons: [
       "add",
       "edit",
@@ -35,7 +35,7 @@ export const ICON_GROUPS: IconGroup[] = [
     ],
   },
   {
-    label: "Navegação",
+    label: "Navigation",
     icons: [
       "home",
       "dashboard",
@@ -54,7 +54,7 @@ export const ICON_GROUPS: IconGroup[] = [
     ],
   },
   {
-    label: "Objetos",
+    label: "Objects",
     icons: [
       "folder",
       "description",
@@ -79,7 +79,7 @@ export const ICON_GROUPS: IconGroup[] = [
     ],
   },
   {
-    label: "Pessoas & status",
+    label: "People & status",
     icons: [
       "person",
       "group",

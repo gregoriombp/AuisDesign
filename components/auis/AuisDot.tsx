@@ -35,11 +35,12 @@ export function AuisDot() {
 
   const go = (href: string) => router.push(href);
 
-  // Painel de controle dos agentes — Live Response / Auto Construct por agente.
-  // Toggles ficam abertos (closeOnSelect: false) pra flipar vários de uma vez.
+  // Agent control panel — Live Response / Auto Construct per agent.
+  // Toggles keep the menu open (closeOnSelect: false) so you can flip several
+  // of them in one go.
   const agentItems: AuDropdownItem[] = [
     { id: "sep-agents", separator: true },
-    { id: "label-agents", isLabel: true, label: "Agentes" },
+    { id: "label-agents", isLabel: true, label: "Agents" },
     ...REVIEW_AGENTS.flatMap((agent): AuDropdownItem[] => {
       const s = agentSettingsOf(agentSettings, agent.id);
       return agent.capabilities.map((cap): AuDropdownItem => ({
@@ -79,19 +80,19 @@ export function AuisDot() {
       isLabel: true,
       label:
         backend === "bridge"
-          ? "Review · bridge local"
-          : "Review · local (este navegador)",
+          ? "Review · local bridge"
+          : "Review · local (this browser)",
     },
     {
       id: "review",
-      label: reviewActive ? "Sair do Review Mode" : "Entrar no Review Mode",
+      label: reviewActive ? "Exit Review Mode" : "Enter Review Mode",
       icon: reviewActive ? "rate_review" : "comment",
       checked: reviewActive,
       onSelect: () => toggleReview(),
     },
     {
       id: "edit",
-      label: editActive ? "Sair do modo de edição" : "Entrar no modo de edição",
+      label: editActive ? "Exit Edit Mode" : "Enter Edit Mode",
       icon: editActive ? "edit_off" : "edit",
       checked: editActive,
       onSelect: () => toggleEdit(),
@@ -100,7 +101,7 @@ export function AuisDot() {
     { id: "sep-hide", separator: true },
     {
       id: "hide",
-      label: "Ocultar até atualizar",
+      label: "Hide until refresh",
       icon: "close",
       onSelect: () => setVisible(false),
     },
@@ -112,11 +113,11 @@ export function AuisDot() {
         align="end"
         side="top"
         sideOffset={8}
-        aria-label="Atalhos do Auis"
+        aria-label="Auis shortcuts"
         trigger={
           <button
             type="button"
-            aria-label="Atalhos do Auis"
+            aria-label="Auis shortcuts"
             className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-(--bg-inverse) text-(--fg-on-inverse) shadow-(--shadow-md) outline-hidden transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-(--ring-focus) focus-visible:ring-offset-2 focus-visible:ring-offset-(--bg-canvas)"
           >
             <AuLogo variant="mark" height={14} aria-label="Auis" />

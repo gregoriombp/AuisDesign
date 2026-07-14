@@ -25,16 +25,16 @@ export interface NavSection {
 // Keep links pointing only to pages that actually exist, or the sidebar 404s.
 export const navigation: NavSection[] = [
   {
-    title: "Introdução",
+    title: "Introduction",
     items: [
-      { name: "Visão geral", href: "/auis/styleguide" },
+      { name: "Overview", href: "/auis/styleguide" },
     ],
   },
   {
     group: "Auis",
     title: "Review Mode",
     items: [
-      { name: "Sobre o Review Mode", href: "/auis/styleguide/foundation/review-mode" },
+      { name: "About Review Mode", href: "/auis/styleguide/foundation/review-mode" },
       { name: "Inbox", href: "/auis/styleguide/review" },
     ],
   },
@@ -46,15 +46,15 @@ export const navigation: NavSection[] = [
   //   group: "Base",
   //   title: "Foundations",
   //   items: [
-  //     { name: "Cor", href: "/auis/styleguide/foundation/color" },
-  //     { name: "Tipografia", href: "/auis/styleguide/foundation/typography" },
+  //     { name: "Color", href: "/auis/styleguide/foundation/color" },
+  //     { name: "Typography", href: "/auis/styleguide/foundation/typography" },
   //   ],
   // },
   //
   // Components (each `auis-component` run appends one entry):
   // {
   //   group: "Design System",
-  //   title: "Componentes",
+  //   title: "Components",
   //   items: [
   //     { name: "Button", href: "/auis/styleguide/components/au-button" },
   //   ],

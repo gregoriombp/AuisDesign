@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 
-// Proxy server-side da transcrição de voz da OpenAI pro Review Mode. A chave
-// vive em OPENAI_API_KEY no .env.local e NUNCA é exposta ao cliente — mesmo
-// padrão do app/api/copilot/chat. O card grava o áudio com MediaRecorder e
-// posta aqui; devolvemos só o texto.
+// Server-side proxy to OpenAI's voice transcription for Review Mode. The key
+// lives in OPENAI_API_KEY in .env.local and is NEVER exposed to the client —
+// same pattern as app/api/copilot/chat. The card records the audio with
+// MediaRecorder and posts it here; we return only the text.
 const OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions"
 const MODEL = "gpt-4o-mini-transcribe"
-const MAX_AUDIO_BYTES = 25 * 1024 * 1024 // limite do endpoint da OpenAI
+const MAX_AUDIO_BYTES = 25 * 1024 * 1024 // OpenAI endpoint limit
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Chave da OpenAI não encontrada. Defina OPENAI_API_KEY em .env.local na raiz do projeto e reinicie o servidor (npm run dev).",
+          "OpenAI key not found. Set OPENAI_API_KEY in .env.local at the project root and restart the server (npm run dev).",
       },
       { status: 503 }
     )
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     form = await request.formData()
   } catch {
     return NextResponse.json(
-      { error: "Envie o áudio como multipart/form-data." },
+      { error: "Send the audio as multipart/form-data." },
       { status: 400 }
     )
   }
@@ -33,26 +33,25 @@ export async function POST(request: NextRequest) {
   const audio = form.get("audio")
   if (!(audio instanceof Blob) || audio.size === 0) {
     return NextResponse.json(
-      { error: "Áudio ausente ou vazio." },
+      { error: "The recording is empty. Record again." },
       { status: 400 }
     )
   }
   if (audio.size > MAX_AUDIO_BYTES) {
     return NextResponse.json(
-      { error: "Áudio muito longo (máx. ~25MB). Grave um trecho mais curto." },
+      { error: "Audio too long (max. ~25MB). Record a shorter clip." },
       { status: 413 }
     )
   }
 
-  // A OpenAI detecta o formato pela extensão do filename — preserva o que o
-  // cliente mandou (webm no Chrome, mp4 no Safari).
+  // OpenAI detects the format from the filename extension — keep whatever the
+  // client sent (webm on Chrome, mp4 on Safari).
   const filename =
     audio instanceof File && audio.name ? audio.name : "audio.webm"
 
   const upstream = new FormData()
   upstream.append("file", audio, filename)
   upstream.append("model", MODEL)
-  upstream.append("language", "pt")
   upstream.append("response_format", "json")
 
   try {
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
       const detail = await res.text().catch(() => "")
       console.error("[review/transcribe] OpenAI error", res.status, detail)
       return NextResponse.json(
-        { error: `Falha na transcrição (${res.status}).` },
+        { error: `OpenAI returned an error (${res.status}). Try again, or check OPENAI_API_KEY.` },
         { status: 502 }
       )
     }
@@ -73,13 +72,16 @@ export async function POST(request: NextRequest) {
     const text = data.text?.trim()
     if (!text) {
       return NextResponse.json(
-        { error: "Não consegui entender o áudio. Tente de novo." },
+        { error: "Could not make out any speech. Record again, closer to the mic." },
         { status: 422 }
       )
     }
     return NextResponse.json({ text })
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erro ao transcrever."
+    const message =
+      err instanceof Error
+        ? err.message
+        : "Could not reach OpenAI. Check your connection and try again."
     console.error("[review/transcribe]", err)
     return NextResponse.json({ error: message }, { status: 500 })
   }

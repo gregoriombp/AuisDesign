@@ -10,7 +10,7 @@ import { FLOW_GROUPS, FLOW_META, type FlowGroup } from "./_data/flow-meta"
 
 export const metadata: Metadata = {
   title: "UX Flow",
-  description: "Todos os fluxos navegáveis do produto, estilo Figma prototype.",
+  description: "Every navigable flow in the product, Figma-prototype style.",
 }
 
 function formatDate(iso: string): string {
@@ -33,21 +33,21 @@ export default function UxFlowIndex() {
 
         <header className="mt-6 mb-10">
           <p className="au-eyebrow mb-3">UX Flow</p>
-          <h1 className="text-5xl font-semibold tracking-tight mb-3">Fluxos</h1>
+          <h1 className="text-5xl font-semibold tracking-tight mb-3">Flows</h1>
           <p className="text-lg text-(--fg-secondary) max-w-2xl">
-            Cada fluxo conecta as telas do produto num mapa navegável, estilo Figma
-            prototype. Abra um pra explorar, comentar ou sugerir mudanças.
+            Each flow connects the product&apos;s screens into a navigable map,
+            Figma-prototype style. Open one to explore it, comment or suggest changes.
           </p>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
-          <AuStatCard icon="account_tree" label="Fluxos" value={FLOW_META.length} />
-          <AuStatCard icon="web_asset" label="Telas mapeadas" value={totalScreens} />
+          <AuStatCard icon="account_tree" label="Flows" value={FLOW_META.length} />
+          <AuStatCard icon="web_asset" label="Screens mapped" value={totalScreens} />
           <AuStatCard
             icon="palette"
-            label="Fonte"
+            label="Source"
             value="Styleguide"
-            hint="Mesmos NODES/EDGES do design system"
+            hint="The same NODES/EDGES as the design system"
           />
         </div>
 
@@ -70,7 +70,9 @@ export default function UxFlowIndex() {
                       >
                         <Icon name="account_tree" size={24} />
                       </span>
-                      <AuPill variant="neutral">{f.screens} telas</AuPill>
+                      <AuPill variant="neutral">
+                        {f.screens} {f.screens === 1 ? "screen" : "screens"}
+                      </AuPill>
                     </div>
                     <div className="flex flex-col gap-1">
                       <h3 className="text-xl font-semibold">{f.title}</h3>
@@ -81,14 +83,14 @@ export default function UxFlowIndex() {
                     <div className="mt-auto pt-2 flex items-center justify-between gap-3">
                       <span className="inline-flex items-center gap-1.5 text-[11px] text-(--fg-tertiary)">
                         <Icon name="schedule" size={13} />
-                        Atualizado em {formatDate(f.updatedAt)}
+                        Updated on {formatDate(f.updatedAt)}
                       </span>
                       <Link
                         href={`/auis/ux-flow/${f.slug}`}
                         className="no-underline"
                       >
                         <AuButton variant="primary" iconRight="arrow_forward">
-                          Abrir
+                          Open
                         </AuButton>
                       </Link>
                     </div>

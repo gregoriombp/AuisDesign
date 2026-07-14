@@ -64,7 +64,7 @@ export async function PUT(
   }
   if (!body) return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
 
-  // Caminho de transição: { transition, actor } tem precedência sobre o upsert.
+  // Transition path: { transition, actor } takes precedence over the upsert.
   const transition = body.transition;
   if (typeof transition === "string") {
     const actor = body.actor;
@@ -99,7 +99,7 @@ export async function PUT(
     return NextResponse.json({ error: "unknown_transition" }, { status: 400 });
   }
 
-  // Upsert (criar/editar comentário inteiro).
+  // Upsert (create/replace the whole comment).
   if (!isValidComment(body)) return NextResponse.json({ error: "invalid_comment" }, { status: 400 });
   if (body.id !== id) return NextResponse.json({ error: "id_mismatch" }, { status: 400 });
   const comment: ReviewComment = { ...(body as unknown as ReviewComment), schemaVersion: SCHEMA };

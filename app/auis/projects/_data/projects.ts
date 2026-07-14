@@ -1,11 +1,11 @@
 /**
- * Projetos — flows importados (ex.: do Figma) como projetos navegáveis tela-a-tela (ZEROED).
+ * Projects — flows imported (e.g. from Figma) as screen-by-screen navigable projects (ZEROED).
  *
- * Os projetos de exemplo do produto de origem foram removidos. Esta é a API do
- * engine com a lista vazia — o skill `auis-import-figma-flow` popula `PROJECTS`
- * (manifest estático) e grava os screenshots em /public/projects/<slug>/.
- * As ações por tela gravam pedidos em /api/project-builds; `auis-project-build-solve`
- * atualiza `status`/`builtRoute` aqui ao aplicar.
+ * The origin product's sample projects were removed. This is the engine's API
+ * with an empty list — the `auis-import-figma-flow` skill populates `PROJECTS`
+ * (a static manifest) and writes the screenshots to /public/projects/<slug>/.
+ * The per-screen actions write requests to /api/project-builds; `auis-project-build-solve`
+ * updates `status`/`builtRoute` here when it applies them.
  */
 
 export type ScreenStatus = "imported" | "restyled" | "built"
@@ -55,7 +55,7 @@ export function getScreen(slug: string, screenId: string): ProjectScreen | undef
 
 export type ProjectSection = { section: string; screens: ProjectScreen[] }
 
-/** Agrupa as telas por seção, preservando a ordem (`order`) de primeira aparição. */
+/** Groups the screens by section, preserving the (`order`) of first appearance. */
 export function getProjectSections(project: Project): ProjectSection[] {
   const order: string[] = []
   const map = new Map<string, ProjectScreen[]>()

@@ -36,21 +36,21 @@ export function ReviewIdentityModal() {
       open={open}
       onClose={closeIdentityModal}
       zIndex={REVIEW_Z.modal}
-      title={identity ? "Editar revisor" : "Quem está revisando?"}
+      title={identity ? "Edit reviewer" : "Who is reviewing?"}
       footer={
         <div
           {...{ [OVERLAY_DATA_ATTR]: "" }}
           className="flex items-center justify-end gap-2"
         >
           <AuButton variant="ghost" onClick={closeIdentityModal}>
-            Cancelar
+            Cancel
           </AuButton>
           <AuButton
             variant="primary"
             onClick={submit}
             disabled={!name.trim()}
           >
-            {identity ? "Salvar" : "Começar"}
+            {identity ? "Save" : "Start"}
           </AuButton>
         </div>
       }
@@ -61,18 +61,18 @@ export function ReviewIdentityModal() {
         className="flex flex-col gap-5"
       >
         <p className="body-sm text-(--fg-secondary) leading-relaxed">
-          Seu nome aparece em cada comentário e nas respostas do agente. Fica
-          salvo só no seu navegador.
+          Your name shows up on every comment and in the agent replies. It is
+          stored only in your browser.
         </p>
 
         <label className="flex flex-col gap-2">
           <span className="body-xs font-medium text-(--fg-secondary)">
-            Nome
+            Name
           </span>
           <AuInput
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Ex.: Greg"
+            placeholder="e.g. Alex"
             autoFocus
             maxLength={40}
           />
@@ -80,7 +80,7 @@ export function ReviewIdentityModal() {
 
         <fieldset className="flex flex-col gap-2">
           <legend className="body-xs font-medium text-(--fg-secondary) mb-1">
-            Cor do seu marcador
+            Your marker color
           </legend>
           <div className="flex flex-wrap gap-2">
             {REVIEW_PALETTE.map((c) => {

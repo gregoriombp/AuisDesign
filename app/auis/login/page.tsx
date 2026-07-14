@@ -42,19 +42,19 @@ export default function AuisLogin() {
       <div className="auis-login-content">
         <header className="auis-login-header">
           <p className="au-eyebrow">Product Builder Platform</p>
-          <h1 className="auis-login-title">Entre na plataforma</h1>
+          <h1 className="auis-login-title">Sign in to the platform</h1>
           <p className="auis-login-subtitle">
-            Acesse seus projetos, page builder e design system.
+            Access your projects, page builder and design system.
           </p>
         </header>
 
         <AuCard className="p-6">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <AuField variant="framed" label="E-mail" htmlFor="email">
+            <AuField variant="framed" label="Email" htmlFor="email">
               <AuInput
                 id="email"
                 type="email"
-                placeholder="voce@example.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
@@ -63,7 +63,7 @@ export default function AuisLogin() {
             </AuField>
 
             <div className="flex flex-col gap-1.5">
-              <AuField variant="framed" label="Senha" htmlFor="password">
+              <AuField variant="framed" label="Password" htmlFor="password">
                 <AuInput
                   id="password"
                   type="password"
@@ -78,7 +78,7 @@ export default function AuisLogin() {
                 href="#"
                 className="self-end text-xs text-(--fg-secondary) hover:text-(--fg-primary) no-underline"
               >
-                Esqueci a senha
+                Forgot password
               </Link>
             </div>
 
@@ -89,15 +89,15 @@ export default function AuisLogin() {
               disabled={loading}
               className="mt-2"
             >
-              {loading ? "Entrando…" : "Entrar"}
+              {loading ? "Signing in…" : "Sign in"}
             </AuButton>
           </form>
         </AuCard>
 
         <p className="auis-login-foot">
-          Não tem acesso?{" "}
+          Don&apos;t have access?{" "}
           <Link href="/primeiro-acesso" className="auis-login-foot-link">
-            Criar conta
+            Create account
           </Link>
         </p>
       </div>

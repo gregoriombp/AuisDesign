@@ -12,9 +12,9 @@ function extFor(mime: string): string {
 }
 
 /**
- * Gravação de voz → texto pro card de comentário. Grava com MediaRecorder e
- * posta o áudio em /api/review/transcribe (proxy server-side da OpenAI). O
- * texto reconhecido volta via `onText`. A chave nunca toca o cliente.
+ * Voice recording → text for the comment card. Records with MediaRecorder and
+ * posts the audio to /api/review/transcribe (a server-side OpenAI proxy). The
+ * recognized text comes back through `onText`. The key never touches the client.
  */
 export function useVoiceTranscription(onText: (text: string) => void) {
   const [status, setStatus] = React.useState<VoiceStatus>("idle")
@@ -22,8 +22,9 @@ export function useVoiceTranscription(onText: (text: string) => void) {
   const recorderRef = React.useRef<MediaRecorder | null>(null)
   const chunksRef = React.useRef<Blob[]>([])
   const streamRef = React.useRef<MediaStream | null>(null)
-  // Quando true, o próximo `onstop` DESCARTA o áudio (não transcreve) — é o
-  // "interrompido": sair/clicar fora cancela a fala sem virar texto.
+  // When true, the next `onstop` DISCARDS the audio (no transcription) — this is
+  // the "interrupted" path: leaving/clicking outside cancels the speech without
+  // turning it into text.
   const discardRef = React.useRef(false)
 
   const cleanupStream = React.useCallback(() => {
@@ -45,12 +46,12 @@ export function useVoiceTranscription(onText: (text: string) => void) {
         })
         const data = await res.json().catch(() => ({}))
         if (!res.ok) {
-          setError(data?.error || "Falha ao transcrever.")
+          setError(data?.error || "Could not transcribe the audio. Record again.")
           return
         }
         if (data?.text) onText(data.text)
       } catch {
-        setError("Falha de rede ao transcrever.")
+        setError("Lost connection while transcribing. Try again.")
       } finally {
         setStatus("idle")
       }
@@ -66,14 +67,14 @@ export function useVoiceTranscription(onText: (text: string) => void) {
       !navigator.mediaDevices?.getUserMedia ||
       typeof MediaRecorder === "undefined"
     ) {
-      setError("Gravação de voz indisponível neste navegador.")
+      setError("This browser does not support voice recording. Try another browser.")
       return
     }
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch {
-      setError("Permita o acesso ao microfone para ditar.")
+      setError("Microphone access denied. Allow it in your browser to dictate.")
       return
     }
     streamRef.current = stream
@@ -107,7 +108,7 @@ export function useVoiceTranscription(onText: (text: string) => void) {
     if (recorder && recorder.state !== "inactive") recorder.stop()
   }, [])
 
-  // Interrompe sem transcrever (descarta o áudio). Pro caso de sair/clicar fora.
+  // Stop without transcribing (discards the audio). For leaving/clicking outside.
   const cancel = React.useCallback(() => {
     const recorder = recorderRef.current
     if (recorder && recorder.state !== "inactive") {

@@ -25,22 +25,22 @@ import { matchOrder, orderMatches, reorderDom } from "./reorder"
 
 const DISPLAY = "display"
 
-/** Texto normalizado de um elemento — espelha o fpText do anchor/resolver. */
+/** Normalized text of an element — mirrors fpText in the anchor/resolver. */
 function fpText(el: Element): string {
   return (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 60)
 }
 
 /**
- * Um alvo de `hide` só é válido se ainda casar o fingerprint capturado.
+ * A `hide` target is only valid while it still matches the captured fingerprint.
  *
- * O resolver (resolveElement) devolve um elemento "best-effort" pelo seletor
- * mesmo quando o fingerprint NÃO bate — os pins precisam disso pra grudar em
- * texto volátil. Mas pra ESCONDER isso é destrutivo: assim que uma op de hide
- * vira código (materializada), o elemento some e o seletor nth-of-type velho
- * passa a cair no vizinho que deslizou pra aquela posição — esconder o vizinho
- * apaga conteúdo inocente. Então, se o texto não casa mais o fingerprint,
- * tratamos o alvo como inexistente e não fazemos nada. Sem fingerprint de texto
- * (alvo sem texto), não há como verificar → mantém o comportamento legado.
+ * The resolver (resolveElement) returns a "best-effort" element by selector even
+ * when the fingerprint does NOT match — pins need that to stay stuck to volatile
+ * text. But for HIDING that is destructive: as soon as a hide op becomes code
+ * (materialized), the element is gone and the old nth-of-type selector starts
+ * landing on the sibling that slid into that position — hiding that sibling
+ * erases innocent content. So when the text no longer matches the fingerprint we
+ * treat the target as nonexistent and do nothing. With no text fingerprint (a
+ * target with no text) there is nothing to check → keep the legacy behavior.
  */
 function hideTargetMatches(el: Element, anchor: PageEditOp["anchor"]): boolean {
   const want = anchor.fingerprint?.text
@@ -49,12 +49,12 @@ function hideTargetMatches(el: Element, anchor: PageEditOp["anchor"]): boolean {
 }
 
 /**
- * Chave de CONFLITO de escrita: ops que escrevem no MESMO elemento e no MESMO
- * alvo — mesma prop de estilo, mesmo eixo de variante, ou o elemento inteiro
- * (text/icon/hide). Dois observers no mesmo (elemento, alvo) com valores
- * diferentes se re-disparam pra sempre (cada um desfaz o do outro) e travam a
- * aba — o guard de "valor já igual" não salva, porque cada op tem um alvo
- * diferente e os dois nunca repousam juntos.
+ * Write-CONFLICT key: ops that write to the SAME element and the SAME target —
+ * same style prop, same variant axis, or the whole element (text/icon/hide). Two
+ * observers on the same (element, target) with different values re-trigger each
+ * other forever (each one undoes the other) and freeze the tab — the "already
+ * equal" guard doesn't save you, because each op has a different target and the
+ * two never come to rest together.
  */
 function writeTargetKey(op: PageEditOp): string {
   const p = op.payload
@@ -71,10 +71,10 @@ function writeTargetKey(op: PageEditOp): string {
   return `${op.anchor.selector}::${target}`
 }
 
-/** Last-writer-wins por (elemento, alvo): de cada chave de conflito mantém só a
- *  op mais recente (updatedAt), pra dois observers nunca brigarem pelo mesmo
- *  atributo. As perdedoras seguem no store (o usuário resolve no inbox); só não
- *  são aplicadas pelo overlay. */
+/** Last-writer-wins per (element, target): for each conflict key keep only the
+ *  most recent op (updatedAt), so two observers never fight over the same
+ *  attribute. The losers stay in the store (you resolve them in the inbox); they
+ *  are simply not applied by the overlay. */
 function dedupeConflicts(ops: PageEditOp[]): PageEditOp[] {
   const winner = new Map<string, PageEditOp>()
   for (const op of ops) {
@@ -115,9 +115,9 @@ export class OverlayApplier {
   /** Reconcile the live op set: revert dropped ops, (re)apply the rest. */
   setOps(ops: PageEditOp[]): void {
     if (typeof document === "undefined") return
-    // Colapsa ops conflitantes (mesmo elemento + mesmo alvo de escrita) ANTES de
-    // observar: dois observers brigando pelo mesmo atributo com valores
-    // diferentes entram em ping-pong infinito e travam a aba. Ver writeTargetKey.
+    // Collapse conflicting ops (same element + same write target) BEFORE
+    // observing: two observers fighting over the same attribute with different
+    // values ping-pong forever and freeze the tab. See writeTargetKey.
     const live = dedupeConflicts(ops)
     const next = new Set(live.map((o) => o.id))
     for (const [id, entry] of this.entries) {
@@ -151,7 +151,7 @@ export class OverlayApplier {
     // change, React replaced it).
     const el =
       entry.op.payload.kind === "token"
-        ? document.documentElement // token edits live on :root, não num elemento
+        ? document.documentElement // token edits live on :root, not on an element
         : entry.el && entry.el.isConnected
           ? entry.el
           : resolveEditElement(entry.op.anchor)
@@ -160,9 +160,9 @@ export class OverlayApplier {
       entry.el = null
       return
     }
-    // Op de `hide` materializada (elemento removido do código) não pode cair no
-    // fallback do seletor e esconder o vizinho que ocupou a posição. Se o alvo
-    // não casa mais o fingerprint, trata como inexistente e não aplica.
+    // A materialized `hide` op (element already removed from the code) must not
+    // fall back to the selector and hide the sibling that took its place. If the
+    // target no longer matches the fingerprint, treat it as gone and skip it.
     if (entry.op.payload.kind === "hide" && !hideTargetMatches(el, entry.op.anchor)) {
       this.detach(entry)
       entry.el = null

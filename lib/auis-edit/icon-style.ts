@@ -1,7 +1,7 @@
-// Override das axes ópticas de um ícone Material Symbols no Live Edit. O <Icon>
-// escreve `font-variation-settings: 'FILL' f, 'wght' w, 'GRAD' g, 'opsz' o`
-// inline; a op `iconStyle` reescreve essa string. Parse/build ficam aqui pra o
-// applier e o inspetor falarem a mesma língua.
+// Overrides the optical axes of a Material Symbols icon in Live Edit. <Icon>
+// writes `font-variation-settings: 'FILL' f, 'wght' w, 'GRAD' g, 'opsz' o`
+// inline; the `iconStyle` op rewrites that string. Parse/build live here so the
+// applier and the inspector speak the same language.
 
 export type IconVariation = {
   fill: number
@@ -17,7 +17,7 @@ const AXIS_BY_TAG: Record<string, keyof IconVariation> = {
   opsz: "opticalSize",
 }
 
-/** Lê as axes de uma string `font-variation-settings`. Campos ausentes ficam de fora. */
+/** Read the axes from a `font-variation-settings` string. Missing fields are left out. */
 export function parseIconVariationString(raw: string): Partial<IconVariation> {
   const out: Partial<IconVariation> = {}
   for (const m of raw.matchAll(/['"](FILL|wght|GRAD|opsz)['"]\s+(-?\d+(?:\.\d+)?)/g)) {
@@ -27,7 +27,7 @@ export function parseIconVariationString(raw: string): Partial<IconVariation> {
   return out
 }
 
-/** Variação atual de um ícone no DOM, com defaults sãos (FILL 0, opsz pelo font-size). */
+/** Current variation of an icon in the DOM, with sane defaults (FILL 0, opsz from font-size). */
 export function readIconVariation(el: Element): IconVariation {
   const html = el as HTMLElement
   const fontSize = parseFloat(html.style.fontSize) || 20
@@ -40,12 +40,12 @@ export function readIconVariation(el: Element): IconVariation {
   return { ...base, ...parseIconVariationString(html.style.fontVariationSettings || "") }
 }
 
-/** Monta a string `font-variation-settings` a partir das 4 axes. */
+/** Build the `font-variation-settings` string from the 4 axes. */
 export function buildIconVariation(v: IconVariation): string {
   return `'FILL' ${v.fill}, 'wght' ${v.weight}, 'GRAD' ${v.grade}, 'opsz' ${v.opticalSize}`
 }
 
-/** Igualdade por axes (robusta a aspas/espaços que o browser normaliza). */
+/** Axis-wise equality (robust to the quotes/spaces the browser normalizes). */
 export function iconVariationMatches(raw: string, v: IconVariation): boolean {
   const cur = parseIconVariationString(raw)
   return (
@@ -56,10 +56,10 @@ export function iconVariationMatches(raw: string, v: IconVariation): boolean {
   )
 }
 
-// Escalas oferecidas no inspetor.
+// Scales offered in the inspector.
 export const ICON_WEIGHTS = [200, 300, 400, 500, 600, 700] as const
 export const ICON_GRADES: { value: number; label: string }[] = [
-  { value: -25, label: "Baixo" },
+  { value: -25, label: "Low" },
   { value: 0, label: "Normal" },
-  { value: 200, label: "Alto" },
+  { value: 200, label: "High" },
 ]

@@ -34,8 +34,8 @@ export function ReviewModeProvider() {
   const permalinkHandledRef = React.useRef<string | null>(null)
   const pathname = usePathname()
 
-  // Cada nova tela pode ter seu próprio ?reviewCommentId — libera o permalink
-  // pra ser reprocessado quando o pathname muda (navegação client-side).
+  // Every new screen can carry its own ?reviewCommentId — release the permalink
+  // so it gets reprocessed when the pathname changes (client-side navigation).
   React.useEffect(() => {
     permalinkHandledRef.current = null
   }, [pathname])
@@ -80,12 +80,12 @@ export function ReviewModeProvider() {
     requestAnimationFrame(scroll)
   }, [comments, pathname, setActive, setSheetOpen, selectComment])
 
-  // A Radix Dialog (AuModal/AuSheet) com `modal` mantém um focus trap que puxa
-  // o foco de volta pra dentro dele sempre que algo de fora ganha foco. Isso
-  // impediria digitar no popover de comentário enquanto se revisa um modal.
-  // Interceptamos focusin/focusout na FASE DE CAPTURA: quando o alvo (ou o
-  // related) é uma superfície do review, paramos o evento antes que o handler
-  // de bubble do Radix o veja — o foco em si não é afetado, só a "puxada".
+  // A Radix Dialog (AuModal/AuSheet) with `modal` keeps a focus trap that pulls
+  // focus back inside itself whenever something outside gains focus. That would
+  // make it impossible to type in the comment popover while reviewing a modal.
+  // We intercept focusin/focusout in the CAPTURE PHASE: when the target (or the
+  // related target) is a review surface, we stop the event before Radix's bubble
+  // handler sees it — focus itself is untouched, only the "pull back".
   React.useEffect(() => {
     if (!active || typeof document === "undefined") return
     const within = (n: EventTarget | null) =>

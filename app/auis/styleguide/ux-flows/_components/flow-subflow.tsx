@@ -4,7 +4,7 @@ import { MarkerType, type Edge, type Node, type NodeProps } from "@xyflow/react"
 
 /* ─────────────────────────────────────────────────────────────────────
  * Inline sub-flow expansion. Instead of navigating away, clicking a purple
- * "outro fluxo" diamond expands the referenced flow's cards INLINE, inside a
+ * "other flow" diamond expands the referenced flow's cards INLINE, inside a
  * framed group (like a FigJam frame). Click again to collapse. The expanded
  * cards are a display-only overlay — never part of a saved suggestion.
  * ──────────────────────────────────────────────────────────────────── */
@@ -61,16 +61,16 @@ export function SubflowGroupNode({ data }: NodeProps<Node<SubflowGroupData>>) {
           onClick={(e) => { e.stopPropagation(); data.onOpen() }}
           onPointerDown={(e) => e.stopPropagation()}
           className="text-[10px] font-medium text-white/80 hover:text-white"
-          title="Abrir o fluxo completo numa página"
+          title="Open the full flow on its own page"
         >
-          abrir fluxo →
+          open flow →
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); data.onCollapse() }}
           onPointerDown={(e) => e.stopPropagation()}
           className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-white/80 hover:bg-white/20 hover:text-white"
-          aria-label="Encolher"
-          title="Encolher"
+          aria-label="Collapse"
+          title="Collapse"
         >
           <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M4 4l8 8M12 4l-8 8" />
@@ -149,7 +149,8 @@ export function buildExpansion(
     selectable: false,
   }))
 
-  // Bridge: diamond → the sub-flow's entry node ("entrada" by convention).
+  // Bridge: diamond → the sub-flow's entry node (id "entrada" by convention —
+  // a node id, i.e. data authored in the flow page, not UI copy).
   const entryId = src.some((n) => n.id === "entrada")
     ? prefix + "entrada"
     : children[0]?.id

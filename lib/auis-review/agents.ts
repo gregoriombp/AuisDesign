@@ -52,7 +52,7 @@ export const REVIEW_AGENTS: readonly ReviewAgent[] = [
     id: "claude",
     name: "Claude",
     handle: "Claude",
-    blurb: "Responde e executa ajustes na interface.",
+    blurb: "Answers, and applies changes to the interface.",
     tone: "purple",
     accentVar: "var(--au-purple-600)",
     icon: "agent",
@@ -60,14 +60,14 @@ export const REVIEW_AGENTS: readonly ReviewAgent[] = [
       {
         key: "liveResponse",
         label: "Live Response",
-        description: "Quando mencionado, responde no thread em tempo real.",
+        description: "When mentioned, replies in the thread in real time.",
         icon: "forum",
       },
       {
         key: "autoConstruct",
         label: "Auto Design",
         description:
-          "Com #now, executa o ajuste, mostra o resultado e manda pra revisão.",
+          "With #now, makes the change, shows the result and sends it to review.",
         icon: "auto_fix_high",
       },
     ],
@@ -81,7 +81,7 @@ export const REVIEW_AGENTS: readonly ReviewAgent[] = [
     id: "germano",
     name: "Germano Faccio",
     handle: "Germano",
-    blurb: "Análise crítica e diagnóstico de UI/UX.",
+    blurb: "Critical analysis and UI/UX diagnosis.",
     tone: "blue",
     accentVar: "var(--au-blue-600)",
     icon: "agent",
@@ -89,14 +89,14 @@ export const REVIEW_AGENTS: readonly ReviewAgent[] = [
       {
         key: "liveResponse",
         label: "Live Response",
-        description: "Quando mencionado, responde com análise e opinião de UX.",
+        description: "When mentioned, replies with UX analysis and an opinion.",
         icon: "forum",
       },
       {
         key: "autoConstruct",
         label: "Auto Review",
         description:
-          "Com #now, explora a página inteira e analisa com as 2 skills dele.",
+          "With #now, explores the whole page and analyzes it with both of his skills.",
         icon: "travel_explore",
       },
     ],

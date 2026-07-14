@@ -1,12 +1,12 @@
 /**
- * Metadados leves dos UX flows do styleguide (ZEROED).
+ * Lightweight metadata for the styleguide's UX flows (ZEROED).
  *
- * Os flows de exemplo do produto de origem foram removidos. Esta é a API do
- * engine com a lista vazia — popule conforme criar flows (ex.: via
- * `auis-create-ux-flow` / `auis-pg-create-flow`), adicionando uma entrada aqui
- * e a flow-data em `[slug]/flow-data.ts`.
+ * The origin product's sample flows were removed. This is the engine's API with
+ * an empty list — populate it as you create flows (e.g. via
+ * `auis-create-ux-flow` / `auis-pg-create-flow`), adding an entry here and the
+ * flow-data in `[slug]/flow-data.ts`.
  *
- * `screens` = contagem de telas (nós "screen"); `updatedAt` = última atualização.
+ * `screens` = screen count ("screen" nodes); `updatedAt` = last update.
  */
 
 export type FlowGroup = string
@@ -16,11 +16,11 @@ export type FlowMeta = {
   title: string
   description: string
   group: FlowGroup
-  /** Altura do canvas usada na página do styleguide — reaproveitada no viewer. */
+  /** Canvas height used on the styleguide page — reused in the viewer. */
   height: number
-  /** Telas (nós "screen") no flow. */
+  /** Screens ("screen" nodes) in the flow. */
   screens: number
-  /** Última atualização registrada no `updates[]` da página. */
+  /** Last update recorded in the page's `updates[]`. */
   updatedAt: string
 }
 

@@ -41,8 +41,8 @@ export type AuToggleRowProps = {
   disabled?: boolean
   className?: string
   /**
-   * "card" (padrão) — cada linha é um cartão com borda e fundo.
-   * "plain" — sem chrome de cartão, para listas separadas por divisores.
+   * "card" (default) — each row is a card with a border and a background.
+   * "plain" — no card chrome, for lists separated by dividers.
    */
   variant?: "card" | "plain"
 }

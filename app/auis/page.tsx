@@ -15,9 +15,9 @@ type HubSection = {
 
 const sections: HubSection[] = [
   {
-    title: "Projetos",
+    title: "Projects",
     description:
-      "Flows importados do Figma — navegue tela por tela, peça uma atualização pro design system e mande construir no repo.",
+      "Flows imported from Figma — browse screen by screen, restyle them with the design system and have them built in the repo.",
     icon: "folder_open",
     href: "/auis/projects",
     status: "ready",
@@ -25,7 +25,7 @@ const sections: HubSection[] = [
   {
     title: "Review Bridge",
     description:
-      "Pendências a resolver — comentários do Review Mode e sugestões de UX Flow num só painel.",
+      "Everything waiting on a decision — Review Mode comments and UX Flow suggestions in a single panel.",
     icon: "rate_review",
     href: "/auis/review-bridge",
     status: "ready",
@@ -33,7 +33,7 @@ const sections: HubSection[] = [
   {
     title: "Styleguide",
     description:
-      "Tokens, foundations e componentes Au* — a fonte da verdade do design system.",
+      "Tokens, foundations and Au* components — the design system's source of truth.",
     icon: "palette",
     href: "/auis/styleguide",
     status: "ready",
@@ -41,7 +41,7 @@ const sections: HubSection[] = [
   {
     title: "Design System Tweaks",
     description:
-      "Ajuste foundations visualmente, valide o impacto nos componentes e exporte um patch de tokens.",
+      "Tune foundations visually, check the impact on components and export a token patch.",
     icon: "tune",
     href: "/auis/design-system-tweaks",
     status: "ready",
@@ -49,7 +49,7 @@ const sections: HubSection[] = [
   {
     title: "UX Flow",
     description:
-      "Conecte páginas em fluxos navegáveis, estilo Figma prototype.",
+      "Connect pages into navigable flows, Figma-prototype style.",
     icon: "account_tree",
     href: "/auis/ux-flow",
     status: "ready",
@@ -66,13 +66,13 @@ export default function AuisHub() {
             Auis
           </h1>
           <p className="text-lg text-(--fg-secondary) max-w-2xl">
-            Crie páginas e flows direto no código, reutilizando o design system
-            — sem passar pelo Figma.
+            Build pages and flows straight in code, reusing the design system —
+            without going through Figma.
           </p>
         </header>
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold tracking-tight mb-3">Seus projetos</h2>
+          <h2 className="text-xl font-semibold tracking-tight mb-3">Your projects</h2>
           <AuCard
             interactive
             className="p-6 flex flex-col gap-4 border-transparent"
@@ -98,12 +98,12 @@ export default function AuisHub() {
                     Auis
                   </h2>
                   <p className="text-sm text-white/70 leading-relaxed max-w-xl">
-                    Plataforma de vendas com agentes — abra o produto para explorar
-                    dashboard, conversas, canais e configurações.
+                    Agent-powered sales platform — open the product to explore the
+                    dashboard, conversations, channels and settings.
                   </p>
                 </div>
               </div>
-              <AuPill variant="live">Ativo</AuPill>
+              <AuPill variant="live">Active</AuPill>
             </div>
             <div className="mt-2">
               <Link href="/auis/login" className="no-underline">
@@ -112,7 +112,7 @@ export default function AuisHub() {
                   iconRight="arrow_forward"
                   style={{ background: "var(--au-white)", color: "var(--au-gray-1200)" }}
                 >
-                  Abrir projeto
+                  Open project
                 </AuButton>
               </Link>
             </div>
@@ -120,7 +120,7 @@ export default function AuisHub() {
         </section>
 
         <h2 className="text-xl font-semibold tracking-tight mb-3">
-          Ferramentas Auis
+          Auis tools
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sections.map((s) => {
@@ -139,7 +139,7 @@ export default function AuisHub() {
                   >
                     <Icon name={s.icon} size={24} />
                   </span>
-                  {!ready && <AuPill variant="draft">Em breve</AuPill>}
+                  {!ready && <AuPill variant="draft">Coming soon</AuPill>}
                 </div>
                 <div className="flex flex-col gap-1">
                   <h2 className="text-xl font-semibold">{s.title}</h2>
@@ -151,12 +151,12 @@ export default function AuisHub() {
                   {ready ? (
                     <Link href={s.href} className="no-underline">
                       <AuButton variant="primary" iconRight="arrow_forward">
-                        Abrir
+                        Open
                       </AuButton>
                     </Link>
                   ) : (
                     <AuButton variant="ghost" disabled iconRight="lock">
-                      Indisponível
+                      Unavailable
                     </AuButton>
                   )}
                 </div>

@@ -205,11 +205,11 @@ export function AuCopilotSynthesis({
   hueSpeed = 0,
   backgroundColor = "#000000",
 }: AuCopilotSynthesisProps) {
-  // Cada Canvas é um contexto WebGL, e o navegador só mantém ~16 vivos. Em
-  // páginas com muitos orbs (styleguide, listas) os mais antigos eram
-  // descartados e o preview ficava preto ("bugado"). Solução: só montar o
-  // Canvas quando o orb está perto da viewport — fora dela fica só o fundo,
-  // sem segurar contexto. Mantém a contagem de contextos ativos sob controle.
+  // Every Canvas is a WebGL context, and the browser only keeps ~16 alive. On
+  // pages with many orbs (styleguide, lists) the oldest ones were dropped and
+  // the preview went black (looked "broken"). Fix: only mount the Canvas when
+  // the orb is near the viewport — outside it, just the background renders and
+  // no context is held. Keeps the live context count under control.
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
 

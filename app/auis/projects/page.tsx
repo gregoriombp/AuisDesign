@@ -15,9 +15,9 @@ import { Icon } from "@/components/ui/Icon"
 import { PROJECTS } from "./_data/projects"
 
 export const metadata: Metadata = {
-  title: "Projetos",
+  title: "Projects",
   description:
-    "Flows importados do Figma — navegue tela por tela e reconstrua no design system.",
+    "Flows imported from Figma — browse screen by screen and rebuild them in the design system.",
 }
 
 function formatDate(iso: string): string {
@@ -39,12 +39,12 @@ export default function ProjectsIndex() {
         </Link>
 
         <header className="mt-6 mb-10">
-          <p className="au-eyebrow mb-3">Projetos</p>
-          <h1 className="text-5xl font-semibold tracking-tight mb-3">Projetos</h1>
+          <p className="au-eyebrow mb-3">Projects</p>
+          <h1 className="text-5xl font-semibold tracking-tight mb-3">Projects</h1>
           <p className="text-lg text-(--fg-secondary) max-w-2xl">
-            Flows importados do Figma viram projetos navegáveis. Abra um pra ver
-            tela por tela, pedir uma atualização pro design system atual ou mandar
-            construir a página no repo.
+            Flows imported from Figma become navigable projects. Open one to go
+            screen by screen, restyle a screen with the current design system or
+            have the page built in the repo.
           </p>
         </header>
 
@@ -54,10 +54,10 @@ export default function ProjectsIndex() {
               <AuEmptyMedia variant="icon">
                 <Icon name="dashboard_customize" size={28} />
               </AuEmptyMedia>
-              <AuEmptyTitle>Nenhum projeto importado ainda</AuEmptyTitle>
+              <AuEmptyTitle>No projects imported yet</AuEmptyTitle>
               <AuEmptyDescription>
-                Rode o skill <code>auis-import-figma-flow</code> com a URL de
-                um flow do Figma pra trazer as telas pra cá.
+                Run the <code>auis-import-figma-flow</code> skill with the URL of
+                a Figma flow to bring its screens in here.
               </AuEmptyDescription>
             </AuEmptyHeader>
           </AuEmpty>
@@ -66,19 +66,19 @@ export default function ProjectsIndex() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
               <AuStatCard
                 icon="dashboard"
-                label="Projetos"
+                label="Projects"
                 value={PROJECTS.length}
               />
               <AuStatCard
                 icon="web_asset"
-                label="Telas importadas"
+                label="Screens imported"
                 value={totalScreens}
               />
               <AuStatCard
                 icon="design_services"
-                label="Fonte"
+                label="Source"
                 value="Figma"
-                hint="Screenshots renderizados via Figma MCP"
+                hint="Screenshots rendered via Figma MCP"
               />
             </div>
 
@@ -96,7 +96,9 @@ export default function ProjectsIndex() {
                     >
                       <Icon name="dashboard" size={24} />
                     </span>
-                    <AuPill variant="neutral">{p.screens.length} telas</AuPill>
+                    <AuPill variant="neutral">
+                      {p.screens.length} {p.screens.length === 1 ? "screen" : "screens"}
+                    </AuPill>
                   </div>
                   <div className="flex flex-col gap-1">
                     <h3 className="text-xl font-semibold">{p.title}</h3>
@@ -107,14 +109,14 @@ export default function ProjectsIndex() {
                   <div className="mt-auto pt-2 flex items-center justify-between gap-3">
                     <span className="inline-flex items-center gap-1.5 text-[11px] text-(--fg-tertiary)">
                       <Icon name="schedule" size={13} />
-                      Importado em {formatDate(p.importedAt)}
+                      Imported on {formatDate(p.importedAt)}
                     </span>
                     <Link
                       href={`/auis/projects/${p.slug}`}
                       className="no-underline"
                     >
                       <AuButton variant="primary" iconRight="arrow_forward">
-                        Abrir
+                        Open
                       </AuButton>
                     </Link>
                   </div>

@@ -5,12 +5,14 @@ import { navigation } from "./navigation"
 import { AuPill } from "@/components/ui/AuPill"
 
 /**
- * Selo "você está aqui": deriva a camada da página atual a partir da seção do
- * `navigation` que contém a rota. Renderiza só nas 4 camadas de componente —
- * Foundations/Brand/Intro/Playground/UX Flows não recebem selo. Sem campo extra
- * em NavItem: a seção JÁ é a fonte de verdade da camada.
+ * "You are here" badge: derives the current page's layer from the `navigation`
+ * section that contains the route. Renders only on the 4 component layers —
+ * Foundations/Brand/Intro/Playground/UX Flows get no badge. No extra field on
+ * NavItem: the section IS the source of truth for the layer.
+ *
+ * These must match the `title` of the sections you create in navigation.ts.
  */
-const LAYER_TITLES = new Set(["Primitivos", "Componentes", "Padrões", "Domínio"])
+const LAYER_TITLES = new Set(["Primitives", "Components", "Patterns", "Domain"])
 
 export function LayerBadge() {
   const pathname = usePathname()

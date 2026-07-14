@@ -233,7 +233,7 @@ export class LocalStorageReview implements ReviewStorage {
       exportedAt: Date.now(),
       exportedBy: identity ?? {
         id: "anonymous",
-        name: "Anônimo",
+        name: "Anonymous",
         colorToken: "var(--fg-tertiary)",
         createdAt: 0,
       },

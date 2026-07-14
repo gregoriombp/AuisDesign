@@ -317,7 +317,7 @@ const BRANDS: Record<string, Brand> = {
     ),
   },
   pipedrive: {
-    // Verde oficial Pipedrive + "P" de bojo circular, mais limpo e fiel à marca.
+    // Official Pipedrive green + the round-bowl "P" — cleaner and truer to the brand.
     bg: "#017737",
     mark: ({ fg }) => (
       <svg viewBox="0 0 24 24" width="60%" height="60%" aria-hidden="true">
@@ -392,9 +392,9 @@ const BRANDS: Record<string, Brand> = {
     ),
   },
   /* ------------------------------------------------------------------
-   * Apps & integrações — marcas oficiais do Iconify `logos`, curadas em
-   * /public (SVG transparente, centrado no tile). Para adicionar outra,
-   * ver AGENTS.md §4 (Icons): curar de api.iconify.design/logos/<nome>.svg.
+   * Apps & integrations — official marks from Iconify `logos`, curated into
+   * /public (transparent SVG, centered on the tile). To add another one, see
+   * AGENTS.md §4 (Icons): curate it from api.iconify.design/logos/<name>.svg.
    * ------------------------------------------------------------------ */
   google: {
     bg: "#FFFFFF",
@@ -402,9 +402,9 @@ const BRANDS: Record<string, Brand> = {
     markSrc: `${ICONIFY_BASE}/google.svg`,
   },
   "google-authenticator": {
-    // Asterisco oficial do Google Authenticator na versão colorida (rebrand
-    // 2023) — gradiente azul→teal→verde sobre tile branco. Mantemos o mark
-    // monocromático em google-authenticator.svg para usos que precisem herdar
+    // Official Google Authenticator asterisk in its color version (2023
+    // rebrand) — blue→teal→green gradient on a white tile. We keep the
+    // monochrome mark in google-authenticator.svg for uses that need to inherit
     // currentColor.
     bg: "#FFFFFF",
     bordered: true,
@@ -446,20 +446,20 @@ const BRANDS: Record<string, Brand> = {
     markSrc: `${ICONIFY_BASE}/zoom.svg`,
   },
   trello: {
-    // trello.svg já é um tile arredondado full-bleed (rect 256×256) → cover, não markSrc.
+    // trello.svg is already a full-bleed rounded tile (rect 256×256) → cover, not markSrc.
     bg: "#FFFFFF",
     iconSrc: `${ICONIFY_BASE}/trello.svg`,
   },
   /* ------------------------------------------------------------------
-   * 2FA / autenticadores — citados na UI de segurança (perfil/senha,
-   * convite, login-auth). Authy é colorido; 1Password e Bitwarden vêm
-   * monocromáticos (simple-icons) em branco sobre o tile da marca.
+   * 2FA / authenticators — referenced in the security UI (profile/password,
+   * invite, login-auth). Authy is in color; 1Password and Bitwarden come in
+   * monochrome (simple-icons), white on the brand tile.
    * ------------------------------------------------------------------ */
   authy: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/authy.svg` },
   "1password": { bg: "#1868DB", markSrc: `${ICONIFY_BASE}/1password.svg` },
   bitwarden: { bg: "#175DDC", markSrc: `${ICONIFY_BASE}/bitwarden.svg` },
   /* ------------------------------------------------------------------
-   * Provedores de IA (além de claude / chatgpt / deepseek)
+   * AI providers (beyond claude / chatgpt / deepseek)
    * ------------------------------------------------------------------ */
   gemini: {
     bg: "linear-gradient(135deg, #4285F4 0%, #9B72CB 50%, #D96570 100%)",
@@ -468,14 +468,14 @@ const BRANDS: Record<string, Brand> = {
   mistral: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/mistral.svg` },
   perplexity: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/perplexity.svg` },
   /* ------------------------------------------------------------------
-   * Canais e reuniões
+   * Channels and meetings
    * ------------------------------------------------------------------ */
   telegram: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/telegram.svg` },
   discord: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/discord.svg` },
   teams: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/teams.svg` },
   googlemeet: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/googlemeet.svg` },
   /* ------------------------------------------------------------------
-   * CRM / suporte / automação
+   * CRM / support / automation
    * ------------------------------------------------------------------ */
   salesforce: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/salesforce.svg` },
   zendesk: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/zendesk.svg` },
@@ -490,18 +490,18 @@ const BRANDS: Record<string, Brand> = {
   dropbox: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/dropbox.svg` },
   apple: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/apple.svg` },
   /* ------------------------------------------------------------------
-   * Pagamentos
+   * Payments
    * ------------------------------------------------------------------ */
   paypal: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/paypal.svg` },
   mercadopago: { bg: "#009EE3", markSrc: `${ICONIFY_BASE}/mercadopago.svg` },
   /* ------------------------------------------------------------------
-   * Identidade / SSO enterprise + e-mail/storage Microsoft
+   * Identity / enterprise SSO + Microsoft email/storage
    * ------------------------------------------------------------------ */
   okta: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/okta.svg` },
   outlook: { bg: "#0078D4", markSrc: `${ICONIFY_BASE}/outlook.svg` },
   onedrive: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/onedrive.svg` },
   /* ------------------------------------------------------------------
-   * Social & ads — lead-gen e campanhas
+   * Social & ads — lead-gen and campaigns
    * ------------------------------------------------------------------ */
   facebook: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/facebook.svg` },
   linkedin: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/linkedin.svg` },
@@ -512,7 +512,7 @@ const BRANDS: Record<string, Brand> = {
   googleads: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/googleads.svg` },
   googleanalytics: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/googleanalytics.svg` },
   /* ------------------------------------------------------------------
-   * Produtividade / gestão, dev e comms API
+   * Productivity / management, dev and comms APIs
    * ------------------------------------------------------------------ */
   asana: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/asana.svg` },
   jira: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/jira.svg` },
@@ -521,7 +521,7 @@ const BRANDS: Record<string, Brand> = {
   twilio: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/twilio.svg` },
   huggingface: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/huggingface.svg` },
   /* ------------------------------------------------------------------
-   * Pagamentos (BR) — monocromáticas em branco sobre o tile da marca
+   * Payments (BR) — monochrome, white on the brand tile
    * ------------------------------------------------------------------ */
   pagseguro: { bg: "#00A868", markSrc: `${ICONIFY_BASE}/pagseguro.svg` },
   picpay: { bg: "#21C25E", markSrc: `${ICONIFY_BASE}/picpay.svg` },

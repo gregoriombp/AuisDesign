@@ -20,16 +20,16 @@ export async function PUT(
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Corpo inválido." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid body." }, { status: 400 });
   }
   const transition = body.transition as Transition | undefined;
   if (!transition || !TRANSITIONS.includes(transition)) {
-    return NextResponse.json({ error: "transition inválida." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid transition." }, { status: 400 });
   }
   const actor = body.actor as FlowActor | undefined;
   const suggestion = await transitionSuggestion(id, transition, actor);
   if (!suggestion) {
-    return NextResponse.json({ error: "Sugestão não encontrada." }, { status: 404 });
+    return NextResponse.json({ error: "Suggestion not found." }, { status: 404 });
   }
   return NextResponse.json({ suggestion });
 }

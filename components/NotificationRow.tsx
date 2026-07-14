@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import type { AppNotification, NotificationKind } from "@/lib/notifications";
 
-/** Ícone por tipo de notificação. O tom é sempre neutro (cinza) — o feed não
- * usa cor semântica nos ícones; o que sinaliza "novo" é o dot azul. */
+/** Icon per notification kind. The tone is always neutral (gray) — the feed does
+ * not use semantic color on icons; the blue dot is what signals "new". */
 const NEUTRAL = { bg: "var(--bg-muted)", fg: "var(--fg-tertiary)" } as const;
 const KIND_META: Record<
   NotificationKind,
@@ -20,7 +20,7 @@ const KIND_META: Record<
 
 export type NotificationRowProps = {
   notification: AppNotification;
-  /** Quando definido, o clique chama o handler em vez de navegar direto. */
+  /** When set, the click calls the handler instead of navigating directly. */
   onActivate?: (n: AppNotification) => void;
 };
 
@@ -80,14 +80,14 @@ export function NotificationRow({
     </>
   );
 
-  // Se o pai passou onActivate, ele controla a navegação (geralmente via modal
-  // de confirmação). Caso contrário, mantém o comportamento legado de Link.
+  // If the parent passed onActivate, it owns navigation (usually through a
+  // confirmation modal). Otherwise, keep the legacy Link behavior.
   if (onActivate) {
     return (
       <button
         type="button"
         onClick={() => onActivate(notification)}
-        aria-label={`Abrir notificação: ${notification.title}`}
+        aria-label={`Open notification: ${notification.title}`}
         className={`${base} hover:bg-(--bg-muted)`}
       >
         {inner}

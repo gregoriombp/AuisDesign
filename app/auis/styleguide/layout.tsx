@@ -31,7 +31,7 @@ export default function StyleguideLayout({
       <aside className="au-sg-sidebar w-64 border-r border-(--border-subtle) p-6 flex flex-col gap-8 fixed top-0 left-0 h-screen overflow-y-auto">
         <Link
           href="/auis/styleguide"
-          aria-label="Auis Design System — voltar ao índice"
+          aria-label="Auis Design System — back to index"
           className="inline-flex flex-col items-start no-underline"
           style={{ color: "var(--fg-primary)" }}
         >
@@ -73,7 +73,7 @@ export default function StyleguideLayout({
                 <ul className="flex flex-col gap-1">
                   {section.items.length === 0 && (
                     <li className="text-xs text-(--fg-tertiary) italic px-3 py-2">
-                      — em breve —
+                      — coming soon —
                     </li>
                   )}
                   {section.items.map((item) => {

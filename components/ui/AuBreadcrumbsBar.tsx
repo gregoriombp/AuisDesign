@@ -12,11 +12,11 @@ export interface BreadcrumbItem {
 export type BreadcrumbsItems = (string | BreadcrumbItem)[];
 
 /**
- * Trilha de navegação da plataforma. Delega a renderização ao primitivo do
- * design system `AuBreadcrumb` (styleguide/components/au-breadcrumb) — a barra
- * abaixo só fornece o chrome (faixa + padding). Itens com `icon` compõem o
- * ícone dentro do label (que é ReactNode no primitivo). O separador é o chevron
- * do DS pra manter a leitura de trilha.
+ * The platform's navigation trail. Rendering is delegated to the design-system
+ * primitive `AuBreadcrumb` (styleguide/components/au-breadcrumb) — the bar below
+ * only supplies the chrome (strip + padding). Items with an `icon` compose the
+ * icon into the label (which is a ReactNode in the primitive). The separator is
+ * the DS chevron, so the trail still reads as a trail.
  */
 export function AuBreadcrumbs({ items }: { items: BreadcrumbsItems }) {
   if (!items || items.length === 0) return null;

@@ -3,9 +3,9 @@
 import * as React from "react"
 import type { ClassGroup } from "@/lib/auis-edit/typography-registry"
 
-// Controles de classe de tipografia (frente 2): escala / peso / alinhamento.
-// Mesma UI segmentada das variantes, mas vale pra qualquer elemento de texto —
-// troca via classList, só classes que existem no DS.
+// Typography class controls (track 2): scale / weight / alignment. Same
+// segmented UI as the variants, but it applies to any text element — swapped
+// through classList, only classes that exist in the DS.
 
 export function ClassControls({
   groups,

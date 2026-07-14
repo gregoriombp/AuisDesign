@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     template: "%s · Auis",
   },
   description:
-    "Product Builder — design system, page builder e UX flow builder em um só lugar.",
+    "Product Builder — design system, page builder and UX flow builder in one place.",
 }
 
 export default function AuisLayout({
