@@ -8,23 +8,23 @@ import { NotificationRow } from "@/components/NotificationRow"
 import { NOTIFICATIONS, type AppNotification } from "@/lib/notifications"
 
 /**
- * Painel de notificações da plataforma (sino da topbar). Feed simples de itens
- * recentes — SEM abas/toggle — reusando o NotificationRow do design system.
- * A única ação de navegação fica no rodapé: "Ver todas as notificações".
+ * The platform's notifications panel (the topbar bell). A simple feed of recent
+ * items — NO tabs/toggle — reusing the design system's NotificationRow.
+ * The only navigation action lives in the footer: "See all notifications".
  *
- * É um produto-componente (não um primitivo): compõe header + lista + rodapé.
- * Posiciona-se ancorado ao gatilho (canto superior direito), igual a um popover.
+ * This is a product component (not a primitive): it composes header + list +
+ * footer, anchored to its trigger (top right corner), like a popover.
  */
 export type AuNotificationsPanelProps = {
   isOpen: boolean
   onClose: () => void
-  /** Feed a exibir. Default = fixture NOTIFICATIONS. */
+  /** Feed to render. Default = the NOTIFICATIONS fixture. */
   notifications?: AppNotification[]
-  /** Quantos itens mostrar antes do "Ver todas". Default 6. */
+  /** How many items to show before "See all". Default 6. */
   limit?: number
-  /** Rota da página com todas as notificações. */
+  /** Route of the page listing every notification. */
   seeAllHref?: string
-  /** Classe extra no wrapper posicionado. */
+  /** Extra class on the positioned wrapper. */
   className?: string
 }
 
@@ -64,19 +64,19 @@ export function AuNotificationsPanel({
     <div
       className={["absolute right-0 top-[calc(100%+14px)] z-50", className ?? ""].join(" ")}
     >
-      {/* Caret apontando pro sino */}
+      {/* Caret pointing at the bell */}
       <div className="absolute -top-2 right-9 h-4 w-4 rotate-45 border-l border-t border-(--border-subtle) bg-(--bg-raised)" />
 
       <div
         role="dialog"
-        aria-label="Notificações"
+        aria-label="Notifications"
         className="w-[420px] max-w-[calc(100vw-32px)] overflow-hidden rounded-xl border border-(--border-subtle) bg-(--bg-raised) shadow-(--shadow-lg)"
       >
-        {/* Header — sem abas/toggle, só título + contagem + marcar todas */}
+        {/* Header — no tabs/toggle, just title + count + mark all */}
         <div className="flex items-center justify-between gap-2 border-b border-(--border-subtle) px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="body-md font-semibold text-(--fg-primary)">
-              Notificações
+              Notifications
             </span>
             {unread > 0 && (
               <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-(--au-blue-100) px-1.5 body-xs font-semibold tabular-nums text-(--au-blue-700)">
@@ -91,7 +91,7 @@ export function AuNotificationsPanel({
               className="inline-flex items-center gap-1 rounded-sm px-2 py-1 body-xs font-medium text-(--fg-tertiary) transition-colors hover:bg-(--bg-muted) hover:text-(--fg-primary)"
             >
               <Icon name="done_all" size={14} />
-              Marcar todas como lidas
+              Mark all as read
             </button>
           )}
         </div>
@@ -103,7 +103,7 @@ export function AuNotificationsPanel({
               <Icon name="notifications" size={20} />
             </span>
             <p className="m-0 body-sm text-fg-secondary">
-              Tudo em dia — nenhuma notificação por aqui.
+              All caught up — no notifications here.
             </p>
           </div>
         ) : (
@@ -116,13 +116,13 @@ export function AuNotificationsPanel({
           </ul>
         )}
 
-        {/* Rodapé — única entrada pra "ver todas" */}
+        {/* Footer — the only entry point to "see all" */}
         <Link
           href={seeAllHref}
           onClick={onClose}
           className="flex items-center justify-center gap-1 border-t border-(--border-subtle) px-4 py-3 body-sm font-medium text-(--fg-secondary) transition-colors hover:bg-(--bg-muted) hover:text-(--fg-primary)"
         >
-          Ver todas as notificações
+          See all notifications
           <Icon name="arrow_forward" size={14} />
         </Link>
       </div>

@@ -15,7 +15,7 @@ description: >
 
 The suggestion flow of the UX flows (`/auis/styleguide/ux-flows/*`)
 **no longer depends on a separate server**. Cutover done: the
-"Sugerir edição" button is **always active** and "Salvar" writes straight through a
+"Suggest edit" button is **always active** and "Save" writes straight through a
 route in Next itself.
 
 - **Route:** `app/api/flow-suggestions/` (GET/POST/PUT/DELETE), same origin
@@ -24,7 +24,7 @@ route in Next itself.
   `suggestions.archive.json`) — the same files as before, so the
   history carries over and the `auis-flow-bridge-solve` skill keeps reading
   from there.
-- **"Copiar prompt"** remains a 100% client-side fallback (paste it into the chat).
+- **"Copy prompt"** remains a 100% client-side fallback (paste it into the chat).
 
 ## What to do when they call you
 
@@ -33,7 +33,7 @@ If the user asks to "start the flow-bridge":
 1. Explain that it is **no longer needed** — the editor is serverless now.
 2. Confirm that the team's dev server (`npm run dev`) is up — that is where the
    `/api/flow-suggestions` route lives. If it is, everything is ready: open
-   any `/auis/styleguide/ux-flows/*` and use "Sugerir edição".
+   any `/auis/styleguide/ux-flows/*` and use "Suggest edit".
 3. To apply suggestions that already came in, point to
    `auis-flow-bridge-solve`.
 

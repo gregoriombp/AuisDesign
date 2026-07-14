@@ -159,7 +159,7 @@ export function ApiTable({ children }: { children: React.ReactNode }) {
 }
 
 export function CodeExample({
-  label = "exemplo",
+  label = "example",
   lang = "tsx",
   children,
 }: {
@@ -207,14 +207,14 @@ export function DoDont({
 }
 
 /* ─────────────────────────────────────────────────────────────────────
- * Primitivos novos do padrão canônico (2026-05).
- * Documentação: docs/styleguide-page-structure.md
+ * New primitives from the canonical pattern (2026-05).
+ * Docs: docs/styleguide-page-structure.md
  * ──────────────────────────────────────────────────────────────────── */
 
 /**
- * Tldr — bloco no topo da página, logo após PageHero, dizendo em duas
- * colunas "quando usar" vs "quando não usar". Encurta o tempo até a
- * decisão do dev. Use sempre, exceto em páginas de foundation curtas.
+ * Tldr — block at the top of the page, right after PageHero, saying in two
+ * columns "when to use" vs "when not to use". Shortens the time to a decision
+ * for the developer. Always use it, except on short foundation pages.
  */
 export function Tldr({
   use,
@@ -227,7 +227,7 @@ export function Tldr({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="rounded-lg border border-(--au-blue-200) bg-(--au-blue-100) p-5">
         <div className="au-eyebrow mb-2 text-(--au-blue-800)">
-          quando usar
+          when to use
         </div>
         <ul className="body-sm m-0 pl-4 list-disc flex flex-col gap-1 text-(--au-blue-900)">
           {use.map((d, i) => (
@@ -237,7 +237,7 @@ export function Tldr({
       </div>
       <div className="rounded-lg border border-(--border-default) bg-(--bg-surface) p-5">
         <div className="au-eyebrow mb-2 text-(--fg-secondary)">
-          quando não usar
+          when not to use
         </div>
         <ul className="body-sm m-0 pl-4 list-disc flex flex-col gap-1 text-(--fg-primary)">
           {dontUse.map((d, i) => (
@@ -260,9 +260,9 @@ export type StateName =
   | "selected"
 
 /**
- * StatesMatrix — grid com label automático por estado. Cada célula recebe
- * uma demo já no estado descrito (use props/classes do componente real
- * pra forçar o estado; não invente CSS).
+ * StatesMatrix — grid with an automatic label per state. Each cell gets a demo
+ * already in the described state (use the real component's props/classes to
+ * force the state; don't invent CSS).
  */
 export function StatesMatrix({
   states,
@@ -307,9 +307,9 @@ export function StatesMatrix({
 }
 
 /**
- * TokensConsumed — lista dos design tokens (CSS vars) que o componente
- * lê do contexto. Cada linha: token, role (pra que serve dentro do
- * componente), default (o valor atual ou alias).
+ * TokensConsumed — list of the design tokens (CSS vars) the component reads from
+ * context. Each row: token, role (what it does inside the component), default
+ * (the current value or alias).
  */
 export function TokensConsumed({
   tokens,
@@ -350,8 +350,8 @@ export function TokensConsumed({
 }
 
 /**
- * ResponsiveStage — três viewports lado a lado (mobile · tablet · desktop)
- * pra mostrar como o componente reflua. Cada frame tem chrome com largura.
+ * ResponsiveStage — three viewports side by side (mobile · tablet · desktop) to
+ * show how the component reflows. Each frame has chrome with its width.
  */
 export function ResponsiveStage({
   mobile,
@@ -406,8 +406,8 @@ export function ResponsiveStage({
 }
 
 /**
- * KeyboardTable — atalhos de teclado suportados pelo componente.
- * Use na seção Accessibility. Tecla à esquerda como `kbd`, ação à direita.
+ * KeyboardTable — keyboard shortcuts the component supports. Use it in the
+ * Accessibility section. Key on the left as a `kbd`, action on the right.
  */
 export function KeyboardTable({
   rows,
@@ -419,8 +419,8 @@ export function KeyboardTable({
       <table className="w-full text-left">
         <thead>
           <tr className="border-b border-(--border-subtle)">
-            <th className="pb-2 au-eyebrow w-1/3">tecla</th>
-            <th className="pb-2 au-eyebrow">ação</th>
+            <th className="pb-2 au-eyebrow w-1/3">key</th>
+            <th className="pb-2 au-eyebrow">action</th>
           </tr>
         </thead>
         <tbody>
@@ -453,8 +453,8 @@ export function KeyboardTable({
 }
 
 /**
- * RelatedLinks — grid de cards no fim da página linkando pra outros
- * componentes ou foundations relacionadas. Fecha a navegação contextual.
+ * RelatedLinks — grid of cards at the end of the page linking to other related
+ * components or foundations. Closes the contextual navigation loop.
  */
 export function RelatedLinks({
   items,
@@ -483,8 +483,8 @@ export function RelatedLinks({
 }
 
 /**
- * Toc — sumário inline com os ids das sections. Use em páginas longas
- * (>400 linhas) logo após PageHero/Tldr. Cada item é um anchor.
+ * Toc — inline table of contents built from the section ids. Use it on long
+ * pages (>400 lines), right after PageHero/Tldr. Each item is an anchor.
  */
 export function Toc({
   items,
@@ -493,10 +493,10 @@ export function Toc({
 }) {
   return (
     <nav
-      aria-label="Sumário"
+      aria-label="Table of contents"
       className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5"
     >
-      <div className="au-eyebrow mb-3">nesta página</div>
+      <div className="au-eyebrow mb-3">on this page</div>
       <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 list-decimal pl-5 text-sm text-(--fg-secondary)">
         {items.map((i) => (
           <li key={i.id}>

@@ -38,7 +38,7 @@ function Section({
 }: {
   title: string
   icon: string
-  /** Conteúdo alinhado à direita do título (ex.: valor atual, "limpar"). */
+  /** Content aligned to the right of the title (e.g. current value, "clear"). */
   aside?: React.ReactNode
   children: React.ReactNode
 }) {
@@ -100,7 +100,7 @@ export function EditInspector({
     const el = resolveEditElement(anchor)
     if (!el) {
       return {
-        label: anchor.component ?? "Elemento",
+        label: anchor.component ?? "Element",
         canEditText: false,
         isIcon: false,
         currentIcon: "",
@@ -195,7 +195,7 @@ export function EditInspector({
   const offSpecActive =
     info.isComponentRoot && Object.keys(activeStyle).length > 0
 
-  // Token quebrado: existe alguma op de estilo custom (valor cru) neste elemento.
+  // Broken token: there is a custom style op (raw value) on this element.
   const customActive = React.useMemo(
     () =>
       ops.some(
@@ -207,7 +207,7 @@ export function EditInspector({
     [ops, anchor.selector],
   )
 
-  // Quantas edições já existem neste elemento (pro footer).
+  // How many edits already exist on this element (for the footer).
   const elementEditCount = React.useMemo(
     () =>
       ops.filter(
@@ -235,7 +235,7 @@ export function EditInspector({
             {(offSpecActive || customActive) && (
               <span
                 aria-hidden
-                title="Quebra de token / off-spec"
+                title="Outside the token system"
                 className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-(--accent-warning) ring-2 ring-(--bg-raised)"
               />
             )}
@@ -246,7 +246,7 @@ export function EditInspector({
             </span>
             <span className="flex items-center gap-1 truncate text-2xs text-(--fg-tertiary)">
               <span>
-                {info.comp ? "Componente" : info.isIcon ? "Ícone" : "Elemento"}
+                {info.comp ? "Component" : info.isIcon ? "Icon" : "Element"}
               </span>
               {info.tag && !info.isIcon && (
                 <>
@@ -260,7 +260,7 @@ export function EditInspector({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar inspetor"
+          aria-label="Close inspector"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-(--fg-tertiary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
         >
           <Icon name="close" size={16} />
@@ -271,12 +271,12 @@ export function EditInspector({
         <div className="border-b border-(--border-subtle) px-4 py-3">
           <AuAlert variant="warning">
             <span className="body-xs text-(--fg-secondary)">
-              Você está estilizando direto o{" "}
+              You are styling the{" "}
               <strong className="font-semibold text-(--fg-primary)">
                 {info.label}
               </strong>{" "}
-              — isso foge da variante do componente e vai destoar do padrão.
-              Quando der, prefira uma variante.
+              directly — this bypasses the component variant and will drift from
+              the standard. Prefer a variant when you can.
             </span>
           </AuAlert>
         </div>
@@ -286,19 +286,19 @@ export function EditInspector({
         <div className="border-b border-(--border-subtle) px-4 py-3">
           <AuAlert variant="warning">
             <span className="body-xs text-(--fg-secondary)">
-              Você quebrou um token: essa cor é um valor{" "}
+              You broke a token: this color is a{" "}
               <strong className="font-semibold text-(--fg-primary)">custom</strong>{" "}
-              fora da paleta. No ship ela vira um token{" "}
-              <code className="font-mono">--custom-*</code>.
+              value outside the palette. On ship it becomes a{" "}
+              <code className="font-mono">--custom-*</code> token.
             </span>
           </AuAlert>
         </div>
       )}
 
       <div className="flex flex-1 flex-col overflow-y-auto">
-        {/* Conteúdo / texto */}
+        {/* Content / text */}
         {!info.isIcon && (
-          <Section title="Conteúdo" icon="text_fields">
+          <Section title="Content" icon="text_fields">
             <button
               type="button"
               disabled={!info.canEditText}
@@ -306,14 +306,14 @@ export function EditInspector({
               className="flex items-center gap-2 rounded-(--radius-md) border border-(--border-default) px-3 py-2 text-left body-sm text-(--fg-primary) transition-colors hover:bg-(--bg-hover) disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Icon name="edit" size={16} className="text-(--fg-secondary)" />
-              {info.canEditText ? "Editar texto" : "Sem texto editável aqui"}
+              {info.canEditText ? "Edit text" : "No editable text here"}
             </button>
           </Section>
         )}
 
-        {/* Variantes */}
+        {/* Variants */}
         {info.comp && info.rootAnchor && (
-          <Section title={`Variantes · ${info.comp.spec.label}`} icon="tune">
+          <Section title={`Variants · ${info.comp.spec.label}`} icon="tune">
             <VariantControls
               spec={info.comp.spec}
               current={variantCurrent}
@@ -322,9 +322,9 @@ export function EditInspector({
           </Section>
         )}
 
-        {/* Tipografia — vale pra qualquer elemento de texto, não só componentes */}
+        {/* Typography — applies to any text element, not only components */}
         {!info.isIcon && (
-          <Section title="Tipografia" icon="format_size">
+          <Section title="Typography" icon="format_size">
             <ClassControls
               groups={TYPOGRAPHY_GROUPS}
               current={classCurrent}
@@ -335,9 +335,9 @@ export function EditInspector({
           </Section>
         )}
 
-        {/* Ícone */}
+        {/* Icon */}
         {info.isIcon && (
-          <Section title="Ícone" icon="emoji_symbols">
+          <Section title="Icon" icon="emoji_symbols">
             <IconPicker
               current={info.currentIcon}
               onPick={(name) => onPickIcon(anchor, name, info.currentIcon)}
@@ -349,14 +349,15 @@ export function EditInspector({
               />
             )}
             <p className="text-2xs text-(--fg-tertiary)">
-              A cor do ícone fica na seção{" "}
-              <strong className="font-medium text-(--fg-secondary)">Cor</strong>.
+              The icon color lives in the{" "}
+              <strong className="font-medium text-(--fg-secondary)">Color</strong>{" "}
+              section.
             </p>
           </Section>
         )}
 
-        {/* Estilo (tokens) — Cor / Forma / Espaçamento, cada um flat na sua seção */}
-        <Section title="Cor" icon="palette">
+        {/* Style (tokens) — Color / Shape / Spacing, each one flat in its section */}
+        <Section title="Color" icon="palette">
           <StyleSection
             only={["color"]}
             activeStyle={activeStyle}
@@ -367,7 +368,7 @@ export function EditInspector({
           />
         </Section>
 
-        <Section title="Forma" icon="rounded_corner">
+        <Section title="Shape" icon="rounded_corner">
           <StyleSection
             only={["radius", "shadow"]}
             activeStyle={activeStyle}
@@ -376,7 +377,7 @@ export function EditInspector({
           />
         </Section>
 
-        <Section title="Espaçamento" icon="padding">
+        <Section title="Spacing" icon="padding">
           <StyleSection
             only={["spacing"]}
             activeStyle={activeStyle}
@@ -385,8 +386,8 @@ export function EditInspector({
           />
         </Section>
 
-        {/* Visibilidade */}
-        <Section title="Visibilidade" icon="visibility">
+        {/* Visibility */}
+        <Section title="Visibility" icon="visibility">
           <div className="flex gap-2">
             <button
               type="button"
@@ -394,7 +395,7 @@ export function EditInspector({
               className="flex flex-1 items-center justify-center gap-2 rounded-(--radius-md) border border-(--border-default) px-3 py-2 body-sm text-(--fg-primary) transition-colors hover:bg-(--bg-hover)"
             >
               <Icon name="visibility_off" size={16} className="text-(--fg-secondary)" />
-              Ocultar
+              Hide
             </button>
             <button
               type="button"
@@ -402,7 +403,7 @@ export function EditInspector({
               className="flex flex-1 items-center justify-center gap-2 rounded-(--radius-md) border border-(--border-default) px-3 py-2 body-sm text-(--accent-danger) transition-colors hover:bg-(--bg-hover)"
             >
               <Icon name="delete" size={16} />
-              Deletar
+              Delete
             </button>
           </div>
         </Section>
@@ -411,8 +412,8 @@ export function EditInspector({
       <footer className="flex items-center justify-between gap-2 border-t border-(--border-subtle) px-4 py-2.5">
         <span className="text-2xs text-(--fg-tertiary)">
           {elementEditCount > 0
-            ? `${elementEditCount} ediç${elementEditCount === 1 ? "ão" : "ões"} aqui`
-            : "Sem edições aqui"}
+            ? `${elementEditCount} edit${elementEditCount === 1 ? "" : "s"} here`
+            : "No edits here"}
         </span>
         <button
           type="button"

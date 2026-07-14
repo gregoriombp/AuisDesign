@@ -456,12 +456,12 @@ setInterval(broadcastHeartbeat, HEARTBEAT_INTERVAL_MS).unref()
 
 app.listen(PORT, HOST, () => {
   const tokenMsg = tokenConfigured()
-    ? "✓ Token configurado"
-    : "✗ Token NÃO configurado — bridge não vai aceitar requests"
+    ? "✓ Token configured"
+    : "✗ Token NOT configured — the bridge will reject every request"
   console.log(
     [
       `auis-review-bridge ${VERSION}`,
-      `→ ouvindo em http://${HOST}:${PORT}`,
+      `→ listening on http://${HOST}:${PORT}`,
       `→ data file: ${getDataFilePath()}`,
       `→ archive file: ${getArchiveFilePath()}`,
       `→ schema: v${REVIEW_SCHEMA_VERSION}`,

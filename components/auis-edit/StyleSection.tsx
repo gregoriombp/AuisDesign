@@ -9,9 +9,9 @@ import {
   type TokenSwatch,
 } from "@/lib/auis-edit/token-manifest"
 
-// Seção "Estilo" do inspetor. SÓ tokens: atalhos semânticos no topo + a paleta
-// completa (todas as rampas) expansível pras cores; chips de escala pra raio e
-// sombra. Cada swatch é um token; nada de valor cru.
+// The inspector's "Style" section. TOKENS ONLY: semantic shortcuts up top + the
+// full palette (every ramp), expandable for colors; scale chips for radius and
+// shadow. Every swatch is a token; no raw values.
 
 function Swatch({
   swatch,
@@ -38,8 +38,8 @@ function Swatch({
   )
 }
 
-/** Converte um valor de cor CSS (#hex / rgb()) pro #rrggbb que o <input
- *  type="color"> exige. Best-effort: cai em preto se não reconhecer. */
+/** Converts a CSS color value (#hex / rgb()) into the #rrggbb that <input
+ *  type="color"> requires. Best-effort: falls back to black if unrecognized. */
 function toHex(css: string): string {
   const c = css.trim()
   if (c.startsWith("#")) {
@@ -57,8 +57,8 @@ function toHex(css: string): string {
   return "#000000"
 }
 
-/** Editar o VALOR de um token (afeta todas as instâncias). Marcado em âmbar pra
- *  diferenciar do override só-neste-elemento (os swatches acima). */
+/** Edits the VALUE of a token (affects every instance). Marked in amber to set it
+ *  apart from the this-element-only override (the swatches above). */
 function TokenEditRow({
   token,
   onPick,
@@ -76,17 +76,17 @@ function TokenEditRow({
     <div className="mt-1 flex items-center justify-between gap-2 rounded-(--radius-md) border border-(--au-amber-300) bg-(--au-amber-100) px-2.5 py-2">
       <div className="flex min-w-0 flex-col">
         <span className="body-xs font-medium text-(--au-amber-900)">
-          Editar o token
+          Edit the token
         </span>
         <span className="truncate font-mono text-2xs text-(--au-amber-800)">
-          {token} · todas as instâncias
+          {token} · every instance
         </span>
       </div>
       <input
         type="color"
         defaultValue={initial}
         onChange={(e) => onPick(e.target.value)}
-        aria-label={`Nova cor de ${token}`}
+        aria-label={`New color for ${token}`}
         className="h-7 w-9 shrink-0 cursor-pointer rounded-(--radius-sm) border border-(--border-default) bg-transparent"
       />
     </div>
@@ -147,7 +147,7 @@ function ColorField({
               className="inline-block transition-transform"
               style={{ transform: openRamps ? "rotate(90deg)" : "none" }}
             />
-            Paleta completa
+            Full palette
           </button>
           {openRamps && (
             <div className="flex flex-col gap-1.5 rounded-(--radius-md) bg-(--bg-canvas) p-2">
@@ -182,16 +182,16 @@ function ColorField({
         <div className="mt-1 flex items-center justify-between gap-2 rounded-(--radius-md) border border-dashed border-(--border-default) px-2.5 py-2">
           <div className="flex min-w-0 flex-col">
             <span className="body-xs font-medium text-(--fg-secondary)">
-              Cor custom
+              Custom color
             </span>
             <span className="truncate text-2xs text-(--fg-tertiary)">
-              fora da paleta · quebra o token
+              outside the palette · breaks the token
             </span>
           </div>
           <input
             type="color"
             onChange={(e) => onPickCustom(property.prop, e.target.value)}
-            aria-label={`Cor custom de ${property.label}`}
+            aria-label={`Custom color for ${property.label}`}
             className="h-7 w-9 shrink-0 cursor-pointer rounded-(--radius-sm) border border-(--border-default) bg-transparent"
           />
         </div>
@@ -268,7 +268,7 @@ function FieldHeader({
           onClick={onClear}
           className="body-xs text-(--fg-tertiary) hover:text-(--fg-primary)"
         >
-          limpar
+          clear
         </button>
       )}
     </div>
@@ -286,12 +286,12 @@ export function StyleSection({
   activeStyle: Record<string, string>
   onPick: (prop: string, cssValue: string) => void
   onClear: (prop: string) => void
-  /** Editar o valor de um token (cor global) — só faz sentido pras props de cor. */
+  /** Edit the value of a token (global color) — only meaningful for color props. */
   onPickToken?: (token: string, value: string) => void
-  /** Aplicar um valor cru fora da paleta (quebra o token) — só pras cores. */
+  /** Apply a raw value outside the palette (breaks the token) — colors only. */
   onPickCustom?: (prop: string, value: string) => void
-  /** Restrict to these property kinds (lets the inspector split Cor / Forma /
-   *  Espaçamento into their own flat sections). Omit = all. */
+  /** Restrict to these property kinds (lets the inspector split Color / Shape /
+   *  Spacing into their own flat sections). Omit = all. */
   only?: StyleProperty["kind"][]
 }) {
   const properties = only

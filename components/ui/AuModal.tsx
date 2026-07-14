@@ -11,7 +11,7 @@ export type AuModalProps = {
   open: boolean
   onClose: () => void
   title?: string
-  /** Adorno opcional renderizado à direita do título (ex.: um pill de status). */
+  /** Optional adornment rendered to the right of the title (e.g. a status pill). */
   titleAdornment?: React.ReactNode
   children: React.ReactNode
   footer?: React.ReactNode
@@ -20,9 +20,10 @@ export type AuModalProps = {
   /** Override the default stacking (content `1001`, scrim `1000`). The scrim
    * is placed one below. Used by Review Mode to sit above app-level modals. */
   zIndex?: number
-  /** Para modais sequenciais (wizard): troque `stepKey` a cada passo. O corpo
-   * é remontado e re-anima (`au-wizard-step-in`), dando a transição de avanço
-   * sem o caller precisar pedir. Sem `stepKey`, comportamento inalterado. */
+  /** For sequential (wizard) modals: change `stepKey` on every step. The body is
+   * remounted and re-animates (`au-wizard-step-in`), giving you the forward
+   * transition without the caller asking for it. Without `stepKey`, behavior is
+   * unchanged. */
   stepKey?: string | number
 }
 
@@ -79,7 +80,7 @@ export function AuModal({
                 </div>
                 <DialogPrimitive.Close
                   className="au-modal__close"
-                  aria-label="Fechar"
+                  aria-label="Close"
                 >
                   <Icon name="close" size={18} />
                 </DialogPrimitive.Close>

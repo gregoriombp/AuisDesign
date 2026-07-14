@@ -48,9 +48,9 @@ const categoryTabs = FOUNDATION_TWEAK_CATEGORIES.map((category) => ({
 type PreviewSurface = "product" | "forms" | "data" | "chrome"
 
 const previewTabs = [
-  { value: "product", label: "Produto" },
+  { value: "product", label: "Product" },
   { value: "forms", label: "Form" },
-  { value: "data", label: "Dados" },
+  { value: "data", label: "Data" },
   { value: "chrome", label: "Chrome" },
 ]
 
@@ -118,9 +118,10 @@ function createDraftId() {
 
 function formatDraftDate(value: string) {
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "Sem data"
+  if (Number.isNaN(date.getTime())) return "No date"
 
-  return new Intl.DateTimeFormat("pt-BR", {
+  // en-GB keeps the day-before-month ordering used across the app.
+  return new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -189,7 +190,7 @@ export function DesignSystemTweaksClient() {
     React.useState<PreviewSurface>("product")
   const [drafts, setDrafts] = React.useState<FoundationTweakDraft[]>([])
   const [activeDraftId, setActiveDraftId] = React.useState<string | null>(null)
-  const [draftName, setDraftName] = React.useState("Exploração sem título")
+  const [draftName, setDraftName] = React.useState("Untitled exploration")
   const [draftStatus, setDraftStatus] = React.useState<
     "idle" | "saved" | "loaded" | "deleted"
   >("idle")
@@ -246,7 +247,7 @@ export function DesignSystemTweaksClient() {
   }
 
   function saveDraft(options: { forceNew?: boolean } = {}) {
-    const name = draftName.trim() || "Exploração sem título"
+    const name = draftName.trim() || "Untitled exploration"
     const now = new Date().toISOString()
     const id = options.forceNew || !activeDraftId ? createDraftId() : activeDraftId
     const nextDraft: FoundationTweakDraft = {
@@ -295,7 +296,7 @@ export function DesignSystemTweaksClient() {
   }
 
   async function copyPatch() {
-    const patch = changedCss || "/* Sem alterações em relação a globals.css. */"
+    const patch = changedCss || "/* No changes compared to globals.css. */"
     await window.navigator.clipboard.writeText(patch)
     setCopied(true)
   }
@@ -329,25 +330,25 @@ export function DesignSystemTweaksClient() {
               </div>
             </div>
             <p className="mt-4 max-w-2xl text-(--body-lg-size) leading-relaxed text-(--fg-secondary)">
-              Ajuste tokens existentes, valide o impacto em componentes reais e
-              exporte um patch para consolidar no design system.
+              Tweak existing tokens, check the impact on real components and export a
+              patch to fold back into the design system.
             </p>
           </div>
           <div className="flex items-center gap-3">
             <AuPill variant={changeCount > 0 ? "warning" : "neutral"}>
-              {changeCount} alterações
+              {changeCount} {changeCount === 1 ? "change" : "changes"}
             </AuPill>
-            <AuPill variant="beta">Preview local</AuPill>
+            <AuPill variant="beta">Local preview</AuPill>
           </div>
         </header>
 
         <AuAlert
           variant="info"
-          title="Os overrides ficam no navegador."
+          title="The overrides live in your browser."
           className="mb-6"
         >
-          Tokens novos continuam fora desta tela; o patch gerado altera apenas
-          variáveis já existentes em <code className="mono">globals.css</code>.
+          New tokens stay out of this screen; the generated patch only changes
+          variables that already exist in <code className="mono">globals.css</code>.
         </AuAlert>
 
         <div className="grid grid-cols-3 gap-6 items-start">
@@ -358,9 +359,9 @@ export function DesignSystemTweaksClient() {
             >
               <div className="flex items-start justify-between gap-6 mb-5">
                 <div>
-                  <p className="au-eyebrow mb-2">Edição</p>
+                  <p className="au-eyebrow mb-2">Editing</p>
                   <h2 className="m-0 text-(--h4-size)">
-                    Tokens por foundation
+                    Tokens by foundation
                   </h2>
                 </div>
                 <AuTabs
@@ -368,7 +369,7 @@ export function DesignSystemTweaksClient() {
                   value={mode}
                   onChange={(next) => setMode(next as FoundationTweakMode)}
                   variant="segmented"
-                  aria-label="Modo"
+                  aria-label="Mode"
                 />
               </div>
 
@@ -410,12 +411,12 @@ export function DesignSystemTweaksClient() {
             >
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
-                  <p className="au-eyebrow mb-2">Rascunhos</p>
-                  <h2 className="m-0 text-(--h5-size)">Explorações salvas</h2>
+                  <p className="au-eyebrow mb-2">Drafts</p>
+                  <h2 className="m-0 text-(--h5-size)">Saved explorations</h2>
                 </div>
                 <Icon name="bookmark" size={22} />
               </div>
-              <AuField label="Nome do rascunho">
+              <AuField label="Draft name">
                 <AuInput
                   dense
                   value={draftName}
@@ -431,27 +432,27 @@ export function DesignSystemTweaksClient() {
                   iconLeft="save"
                   onClick={() => saveDraft()}
                 >
-                  Salvar
+                  Save
                 </AuButton>
                 <AuButton
                   variant="secondary"
                   iconLeft="add"
                   onClick={() => saveDraft({ forceNew: true })}
                 >
-                  Novo
+                  New
                 </AuButton>
               </div>
               {draftStatus !== "idle" && (
                 <p className="mt-3 text-sm text-(--fg-secondary)">
-                  {draftStatus === "saved" && "Rascunho salvo."}
-                  {draftStatus === "loaded" && "Rascunho carregado."}
-                  {draftStatus === "deleted" && "Rascunho apagado."}
+                  {draftStatus === "saved" && "Draft saved."}
+                  {draftStatus === "loaded" && "Draft loaded."}
+                  {draftStatus === "deleted" && "Draft deleted."}
                 </p>
               )}
               <div className="mt-5 flex flex-col gap-2">
                 {drafts.length === 0 ? (
                   <div className="rounded-lg border border-(--border-subtle) bg-(--bg-surface) p-4 text-sm text-(--fg-secondary)">
-                    Nenhum rascunho salvo ainda.
+                    No drafts saved yet.
                   </div>
                 ) : (
                   drafts.map((draft) => {
@@ -472,13 +473,13 @@ export function DesignSystemTweaksClient() {
                               {draft.name}
                             </span>
                             <span className="mt-1 block text-xs text-(--fg-tertiary)">
-                              {formatDraftDate(draft.updatedAt)} ·{" "}
-                              {draftChanges} alterações
+                              {formatDraftDate(draft.updatedAt)} · {draftChanges}{" "}
+                              {draftChanges === 1 ? "change" : "changes"}
                             </span>
                           </button>
                           <button
                             type="button"
-                            aria-label={`Apagar ${draft.name}`}
+                            aria-label={`Delete ${draft.name}`}
                             onClick={() => deleteDraft(draft.id)}
                             className="inline-flex items-center justify-center rounded-md text-(--fg-tertiary) hover:text-(--fg-primary) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ring-focus)"
                             style={{
@@ -491,7 +492,7 @@ export function DesignSystemTweaksClient() {
                         </div>
                         {selected && (
                           <div className="mt-2">
-                            <AuPill variant="live">Em edição</AuPill>
+                            <AuPill variant="live">Editing</AuPill>
                           </div>
                         )}
                       </div>
@@ -508,12 +509,12 @@ export function DesignSystemTweaksClient() {
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                   <p className="au-eyebrow mb-2">Patch</p>
-                  <h2 className="m-0 text-(--h5-size)">CSS exportável</h2>
+                  <h2 className="m-0 text-(--h5-size)">Exportable CSS</h2>
                 </div>
                 <Icon name="data_object" size={22} />
               </div>
               <pre className="mono text-xs whitespace-pre-wrap overflow-auto max-h-80 rounded-lg border border-(--border-subtle) bg-(--bg-surface) p-4 text-(--fg-secondary)">
-                {changedCss || "/* Sem alterações em relação a globals.css. */"}
+                {changedCss || "/* No changes compared to globals.css. */"}
               </pre>
               <div className="mt-4 flex flex-col gap-3">
                 <AuButton
@@ -523,7 +524,7 @@ export function DesignSystemTweaksClient() {
                   disabled={changeCount === 0}
                   block
                 >
-                  {copied ? "Patch copiado" : "Copiar patch"}
+                  {copied ? "Patch copied" : "Copy patch"}
                 </AuButton>
                 <AuButton
                   variant="secondary"
@@ -532,14 +533,14 @@ export function DesignSystemTweaksClient() {
                   disabled={changeCount === 0}
                   block
                 >
-                  Resetar tweaks
+                  Reset tweaks
                 </AuButton>
                 <Link
                   href="/auis/styleguide"
                   className="no-underline block"
                 >
                   <AuButton variant="ghost" iconRight="arrow_forward" block>
-                    Ver styleguide
+                    View styleguide
                   </AuButton>
                 </Link>
               </div>
@@ -549,19 +550,19 @@ export function DesignSystemTweaksClient() {
               className="p-5 bg-(--bg-raised)"
               style={{ borderRadius: "var(--radius-2xl)" }}
             >
-              <p className="au-eyebrow mb-3">Escopo</p>
+              <p className="au-eyebrow mb-3">Scope</p>
               <div className="flex flex-col gap-3 text-sm text-(--fg-secondary)">
                 <div className="flex items-start gap-3">
                   <Icon name="check_circle" size={18} />
-                  <span>Preview global salvo neste navegador.</span>
+                  <span>Global preview saved in this browser.</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <Icon name="lock" size={18} />
-                  <span>Sem criação automática de novos tokens.</span>
+                  <span>No automatic creation of new tokens.</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <Icon name="terminal" size={18} />
-                  <span>Patch enxuto, pronto para revisão no código.</span>
+                  <span>A lean patch, ready for review in code.</span>
                 </div>
               </div>
             </AuCard>
@@ -677,7 +678,7 @@ function TokenControl({
         }
       />
       <div className="mt-3">
-        <AuField label="Valor" htmlFor={`${mode}-${control.token}`}>
+        <AuField label="Value" htmlFor={`${mode}-${control.token}`}>
           <AuInput
             id={`${mode}-${control.token}`}
             dense
@@ -744,10 +745,10 @@ function getControlPreviewText(control: FoundationTweakControl) {
   if (control.cssProperty === "letter-spacing") return "Letter spacing sample"
   if (control.cssProperty === "font-weight") return "Weight sample"
   if (control.cssProperty === "line-height") {
-    return "Linha de texto para avaliar altura de linha em leitura padrão."
+    return "A line of text to judge line height at normal reading size."
   }
   if (control.type === "color") return control.token
-  if (control.type === "shadow") return "Preview da elevação"
+  if (control.type === "shadow") return "Elevation preview"
   if (control.category === "radius") return "Radius preview"
   if (control.category === "spacing" || control.category === "layout") {
     return "Spacing preview"
@@ -819,7 +820,7 @@ function PreviewPanel({
       <div className="border-b border-(--border-subtle) px-5 py-4 flex items-center justify-between">
         <div>
           <p className="au-eyebrow mb-2">Preview</p>
-          <h2 className="m-0 text-(--h5-size)">Componentes em contexto</h2>
+          <h2 className="m-0 text-(--h5-size)">Components in context</h2>
         </div>
         <div className="flex items-center gap-3">
           <AuTabs
@@ -861,23 +862,23 @@ function ProductPreview() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="au-eyebrow mb-2">Preview</p>
-              <h3 className="m-0">Orquestração de agentes</h3>
+              <h3 className="m-0">Agent orchestration</h3>
             </div>
             <AuPill variant="ai">Beta</AuPill>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-(--fg-secondary)">
-            Simule como as foundations reagem em superfícies, texto, bordas,
-            ações, estados e elevação.
+            Simulate how the foundations react across surfaces, text, borders,
+            actions, states and elevation.
           </p>
           <div className="mt-5 flex items-center gap-3">
             <AuButton variant="primary" iconRight="arrow_forward">
-              Salvar ajuste
+              Save tweak
             </AuButton>
             <AuButton variant="secondary" iconLeft="visibility">
-              Revisar
+              Review
             </AuButton>
             <AuButton variant="ghost" iconLeft="more_horiz">
-              Mais
+              More
             </AuButton>
           </div>
         </div>
@@ -892,26 +893,26 @@ function ProductPreview() {
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="au-eyebrow mb-2">Pipeline</p>
-              <h3 className="m-0">Qualidade do setup</h3>
+              <h3 className="m-0">Setup quality</h3>
             </div>
             <Icon name="settings" size={22} />
           </div>
           <div className="flex flex-col gap-4">
             <AuProgress
               value={72}
-              label="Cobertura"
+              label="Coverage"
               valueLabel="72%"
               variant="success"
             />
             <AuProgress
               value={38}
-              label="Pendências"
-              valueLabel="3 itens"
+              label="Pending"
+              valueLabel="3 items"
               variant="warning"
             />
             <AuToggleRow
-              title="Preview ativo"
-              description="Override local aplicado na sessão atual."
+              title="Preview on"
+              description="Local override applied to the current session."
               checked
             />
           </div>
@@ -934,43 +935,42 @@ function FormPreview() {
         }}
       >
         <p className="au-eyebrow mb-2">Form</p>
-        <h3 className="m-0">Configuração de foundation</h3>
+        <h3 className="m-0">Foundation configuration</h3>
         <div className="mt-5 flex flex-col gap-4">
           <AuField label="Token">
             <AuInput placeholder="--accent-brand" iconLeft="search" />
           </AuField>
-          <AuField label="Descrição">
-            <AuInput placeholder="Ação primária e acento institucional" />
+          <AuField label="Description">
+            <AuInput placeholder="Primary action and institutional accent" />
           </AuField>
           <div className="flex items-center gap-3">
-            <AuCheckbox checked label="Aprovado para revisão" />
+            <AuCheckbox checked label="Approved for review" />
             <span className="text-sm text-(--fg-secondary)">
-              Aprovado para revisão
+              Approved for review
             </span>
           </div>
           <AuToggleRow
-            title="Aplicar preview global"
-            description="Mantém os overrides entre reloads."
+            title="Apply global preview"
+            description="Keeps the overrides across reloads."
             checked
           />
           <div className="flex items-center gap-3">
             <AuButton variant="primary" iconLeft="save">
-              Salvar draft
+              Save draft
             </AuButton>
             <AuButton variant="danger" iconLeft="delete">
-              Descartar
+              Discard
             </AuButton>
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-4">
-        <AuAlert variant="success" title="Patch pronto">
-          O conjunto atual pode ser consolidado como revisão de foundation.
+        <AuAlert variant="success" title="Patch ready">
+          The current set can be folded back in as a foundation revision.
         </AuAlert>
-        <AuAlert variant="warning" title="Verifique contraste">
-          Alterações de texto e surface devem passar por leitura em light e
-          dark.
+        <AuAlert variant="warning" title="Check the contrast">
+          Text and surface changes must be read-tested in both light and dark.
         </AuAlert>
         <div
           className="border border-(--border-subtle) bg-(--bg-surface) p-5"
@@ -981,10 +981,10 @@ function FormPreview() {
         >
           <p className="au-eyebrow mb-2">States</p>
           <div className="flex flex-wrap gap-2">
-            <AuPill variant="live">Ativo</AuPill>
+            <AuPill variant="live">Active</AuPill>
             <AuPill variant="draft">Draft</AuPill>
-            <AuPill variant="warning">Revisão</AuPill>
-            <AuPill variant="error">Erro</AuPill>
+            <AuPill variant="warning">Review</AuPill>
+            <AuPill variant="error">Error</AuPill>
           </div>
         </div>
       </div>
@@ -997,9 +997,9 @@ function DataPreview() {
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-3 gap-4">
         {[
-          ["Tokens alterados", "12", "var(--accent-brand)"],
-          ["Componentes afetados", "34", "var(--accent-success)"],
-          ["Contraste mínimo", "AA", "var(--accent-warning)"],
+          ["Tokens changed", "12", "var(--accent-brand)"],
+          ["Components affected", "34", "var(--accent-success)"],
+          ["Minimum contrast", "AA", "var(--accent-warning)"],
         ].map(([label, value, token]) => (
           <div
             key={label}
@@ -1032,26 +1032,26 @@ function DataPreview() {
       >
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <p className="au-eyebrow mb-2">Tabela</p>
-            <h3 className="m-0">Impacto por token</h3>
+            <p className="au-eyebrow mb-2">Table</p>
+            <h3 className="m-0">Impact by token</h3>
           </div>
           <AuButton variant="secondary" iconLeft="filter_list">
-            Filtrar
+            Filter
           </AuButton>
         </div>
         <AuTable>
           <thead>
             <tr>
               <th>Token</th>
-              <th>Uso</th>
-              <th>Estado</th>
+              <th>Usage</th>
+              <th>State</th>
             </tr>
           </thead>
           <tbody>
             {[
-              ["--accent-brand", "Botões primários", "Alterado"],
-              ["--bg-raised", "Cards e painéis", "Estável"],
-              ["--shadow-sm", "Cards sutis", "Revisar"],
+              ["--accent-brand", "Primary buttons", "Changed"],
+              ["--bg-raised", "Cards and panels", "Stable"],
+              ["--shadow-sm", "Subtle cards", "Review"],
             ].map(([token, use, status]) => (
               <tr key={token}>
                 <td className="mono">{token}</td>
@@ -1059,9 +1059,9 @@ function DataPreview() {
                 <td>
                   <AuPill
                     variant={
-                      status === "Alterado"
+                      status === "Changed"
                         ? "warning"
-                        : status === "Revisar"
+                        : status === "Review"
                           ? "draft"
                           : "neutral"
                     }
@@ -1147,21 +1147,21 @@ function ChromePreview() {
             Dark chrome
           </p>
           <h3 className="m-0" style={{ color: "var(--dark-fg-primary)" }}>
-            Navegação e superfícies escuras
+            Dark navigation and surfaces
           </h3>
           <p
             className="mt-3 text-sm leading-relaxed"
             style={{ color: "var(--dark-fg-secondary)" }}
           >
-            Esta área mostra tokens específicos do shell escuro, separados dos
-            tokens semânticos light/dark do conteúdo.
+            This area shows tokens specific to the dark shell, separate from the
+            content&apos;s light/dark semantic tokens.
           </p>
           <div className="mt-5 flex items-center gap-3">
             <AuButton variant="secondary" iconLeft="visibility">
               Preview
             </AuButton>
             <AuButton variant="ghost" iconLeft="tune">
-              Ajustar
+              Tune
             </AuButton>
           </div>
         </div>

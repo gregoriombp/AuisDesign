@@ -207,8 +207,8 @@ npm run typecheck
 
 Visual:
 
-- The "Atualizado em <data>" badge updated.
-- The "Histórico de atualizações" section lists the new entry at the top
+- The "Updated on <date>" badge updated.
+- The "Update history" section lists the new entry at the top
   with the correct tags (colored pills).
 - The diagram reflects the new structure.
 - The cards of the new screens show the right href.

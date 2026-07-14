@@ -16,9 +16,9 @@ export interface UseTableSortOptions<
   initialSort?: { by: K; direction: SortDirection }
   /**
    * Override the value used to compare rows for a given column.
-   * Default: `row[key]`. Use when the rendered cell value (ex.: "há 2 horas",
+   * Default: `row[key]`. Use when the rendered cell value (e.g. "2 hours ago",
    * "v12.4") doesn't sort the way the user expects and you have a better
-   * primitive (ex.: an ISO timestamp, a numeric version).
+   * primitive (e.g. an ISO timestamp, a numeric version).
    */
   getSortValue?: (
     row: T,
@@ -34,9 +34,8 @@ export interface SortableHeaderProps {
 
 /**
  * Tri-state sort cycle (none → asc → desc → none) for plain <table> usage.
- * Pair with the `au-th-sort` markup pattern documented in the Tabela
- * styleguide page — this hook supplies the props/icon, the markup stays
- * yours.
+ * Pair with the `au-th-sort` markup pattern documented in the Table styleguide
+ * page — this hook supplies the props/icon, the markup stays yours.
  */
 export function useTableSort<
   T extends Record<string, unknown>,

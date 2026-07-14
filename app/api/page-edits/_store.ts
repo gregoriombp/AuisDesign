@@ -7,7 +7,7 @@ import { randomUUID } from "node:crypto";
  * serverless store in `app/api/flow-suggestions/_store.ts`). The page editor
  * posts non-destructive edit "ops" here (same-origin, no token); they live as a
  * staging OVERLAY that the EditModeProvider re-applies on every load, until the
- * materialization skill turns them into real TSX and Greg approves them.
+ * materialization skill turns them into real TSX and you approve them.
  *
  * One JSON file PER ROUTE (`page-editor/data/<encoded-route>.json` + archive) so
  * the materialization skill can open exactly the route it's fixing. A route's
@@ -151,15 +151,15 @@ async function writeDb(file: string, db: Db): Promise<void> {
   await fs.rename(tmp, file);
 }
 
-// Serializa o read-modify-write por rota. É um único processo Node (o dev
-// server), mas a UI dispara POSTs em rajada (clicar vários swatches rápido) —
-// sem isso, dois read-modify-write concorrentes no mesmo arquivo perdem ops
-// (lost update). Encadeia as escritas da mesma rota; rotas diferentes não se
-// bloqueiam.
+// Serializes the read-modify-write per route. It's a single Node process (the
+// dev server), but the UI fires POSTs in bursts (clicking several swatches
+// fast) — without this, two concurrent read-modify-writes on the same file lose
+// ops (lost update). Chains the writes for a given route; different routes never
+// block each other.
 const locks = new Map<string, Promise<unknown>>();
 function withLock<T>(key: string, fn: () => Promise<T>): Promise<T> {
   const prev = locks.get(key) ?? Promise.resolve();
-  const run = prev.then(fn, fn); // roda fn após o anterior assentar (ok ou erro)
+  const run = prev.then(fn, fn); // run fn after the previous one settles (ok or error)
   locks.set(
     key,
     run.catch(() => {}),
@@ -178,19 +178,17 @@ function summarize(
   kind: "applied" | "discarded" | "claimed",
 ): string {
   const verb =
-    kind === "applied" ? "Aplicada" : kind === "discarded" ? "Descartada" : "Em revisão por";
+    kind === "applied" ? "Applied" : kind === "discarded" ? "Discarded" : "In review";
   const d = new Date(at);
-  const stamp = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} às ${pad2(
+  const stamp = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} at ${pad2(
     d.getHours(),
   )}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-  return kind === "claimed"
-    ? `${verb} ${actor.name} em ${stamp}.`
-    : `${verb} por ${actor.name} em ${stamp}.`;
+  return `${verb} by ${actor.name} on ${stamp}.`;
 }
 
-/** Discriminador pra distinguir ops do mesmo tipo no mesmo elemento: a
- *  propriedade (style) ou o eixo (variant). Sem isso, mudar `variante` e
- *  `tamanho` (ambos type "variant") colidiriam no upsert. */
+/** Discriminator that tells apart ops of the same type on the same element: the
+ *  property (style) or the axis (variant). Without it, changing `variant` and
+ *  `size` (both type "variant") would collide on upsert. */
 function payloadDisc(payload: PageEditPayload): string {
   if (payload.kind === "style") return payload.prop;
   if (payload.kind === "variant") return payload.axis;
@@ -199,10 +197,10 @@ function payloadDisc(payload: PageEditPayload): string {
   return "";
 }
 
-/** Identidade estável de uma op: tipo + seletor + discriminador. Editar a mesma
- *  (elemento, tipo, disc) de novo atualiza a op aberta em vez de empilhar —
- *  assim o overlay tem no máximo uma op aberta por chave e o apply é
- *  determinístico. */
+/** Stable identity of an op: type + selector + discriminator. Editing the same
+ *  (element, type, disc) again updates the open op instead of stacking a new one
+ *  — so the overlay holds at most one open op per key and apply is
+ *  deterministic. */
 function opKey(type: PageEditOpType, selector: string, disc: string): string {
   return `${type}::${selector}::${disc}`;
 }
@@ -276,7 +274,7 @@ export async function transitionOp(
   if (idx === -1) return null;
   const op = main.ops[idx];
   const at = Date.now();
-  const who: PageEditActor = actor ?? { kind: "user", id: "user", name: "Usuário" };
+  const who: PageEditActor = actor ?? { kind: "user", id: "user", name: "User" };
 
   if (transition === "in_review") {
     if (op.status === "open") {

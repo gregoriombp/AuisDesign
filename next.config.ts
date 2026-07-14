@@ -2,11 +2,10 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
-  // Per-user build cache. This repo is one shared folder used by two macOS
-  // accounts (gregorio + the shared-Claude "germano" user). A single .next
-  // gets cross-user permission errors ("Operation not permitted") and crashes
-  // the dev server, so each account points NEXT_DIST_DIR at its own dir via
-  // its shell profile (germano -> .next-germano). Default stays .next.
+  // Per-user build cache. If two OS accounts share one checkout, a single .next
+  // hits cross-user permission errors ("Operation not permitted") and crashes the
+  // dev server. Point NEXT_DIST_DIR at a per-account dir from each shell profile
+  // to avoid it. Default stays .next.
   distDir: process.env.NEXT_DIST_DIR || '.next',
   // Pin the workspace root so Turbopack doesn't pick up the stray
   // ~/package-lock.json (left behind by global `shadcn` install).

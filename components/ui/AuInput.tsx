@@ -7,8 +7,8 @@ export type AuInputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   invalid?: boolean
   dense?: boolean
   iconLeft?: string
-  /** Quando o input é type="password", mostra um botão de revelar (olhinho)
-   *  que alterna entre password e text. */
+  /** When the input is type="password", shows a reveal button (the eye) that
+   *  toggles between password and text. */
   revealable?: boolean
 }
 
@@ -97,7 +97,7 @@ export const AuInput = React.forwardRef<HTMLInputElement, AuInputProps>(
           <button
             type="button"
             className="au-input__clear"
-            aria-label="Limpar busca"
+            aria-label="Clear search"
             tabIndex={-1}
             onClick={clearValue}
           >
@@ -108,7 +108,7 @@ export const AuInput = React.forwardRef<HTMLInputElement, AuInputProps>(
           <button
             type="button"
             className="au-input__reveal"
-            aria-label={revealed ? "Ocultar senha" : "Mostrar senha"}
+            aria-label={revealed ? "Hide password" : "Show password"}
             aria-pressed={revealed}
             tabIndex={-1}
             onClick={() => setRevealed((r) => !r)}

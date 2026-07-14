@@ -1,10 +1,11 @@
 /**
- * Carregador de nós/arestas dos flows — ZEROED.
+ * Node/edge loader for the flows — ZEROED.
  *
- * Cada página de flow no styleguide (`/auis/styleguide/ux-flows/<slug>/page.tsx`)
- * exporta `NODES`/`EDGES`. Os flows de exemplo do produto de origem foram removidos;
- * registre aqui `slug → { nodes, edges }` conforme criar flows (ex.: via
- * `auis-create-ux-flow`). Só esta rota importa daqui, então só ela bundla o @xyflow/react.
+ * Every flow page in the styleguide (`/auis/styleguide/ux-flows/<slug>/page.tsx`)
+ * exports `NODES`/`EDGES`. The origin product's sample flows were removed;
+ * register `slug → { nodes, edges }` here as you create flows (e.g. via
+ * `auis-create-ux-flow`). Only this route imports from here, so only it bundles
+ * @xyflow/react.
  */
 import type { Edge, Node } from "@xyflow/react"
 

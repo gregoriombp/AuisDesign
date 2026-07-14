@@ -8,12 +8,13 @@ export default function StyleguideHome() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col justify-center px-8 py-24">
       <p className="text-sm uppercase tracking-wide opacity-60">Auis · Styleguide</p>
-      <h1 className="mt-3 text-4xl font-light">Design system zerado</h1>
+      <h1 className="mt-3 text-4xl font-light">Empty design system</h1>
       <p className="mt-4 text-lg opacity-80">
-        Este styleguide está vazio de propósito — o catálogo do produto de origem não
-        foi trazido. Comece o seu: rode <code>auis-foundation</code> para as foundations
-        (cor, tipografia, spacing) e <code>auis-component</code> para cada componente,
-        que já cria o showcase e registra a entrada na navegação.
+        This styleguide is empty on purpose — the origin product&apos;s catalog was
+        not carried over. Start your own: run <code>auis-foundation</code> for the
+        foundations (color, typography, spacing) and <code>auis-component</code> for
+        each component — it creates the showcase and registers the navigation entry
+        for you.
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
         <AuButton asChild variant="primary" iconLeft="dashboard">

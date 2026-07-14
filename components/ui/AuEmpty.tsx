@@ -8,8 +8,8 @@ import * as React from "react"
  * <AuEmpty>
  *   <AuEmptyHeader>
  *     <AuEmptyMedia variant="icon"><Icon name="search_off" /></AuEmptyMedia>
- *     <AuEmptyTitle>Nenhuma integração encontrada</AuEmptyTitle>
- *     <AuEmptyDescription>Tente outro termo.</AuEmptyDescription>
+ *     <AuEmptyTitle>No integrations found</AuEmptyTitle>
+ *     <AuEmptyDescription>Try another term.</AuEmptyDescription>
  *   </AuEmptyHeader>
  *   <AuEmptyContent>...buttons...</AuEmptyContent>
  * </AuEmpty>

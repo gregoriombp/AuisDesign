@@ -247,12 +247,12 @@ export function FlowCommentComposer({
       <div className="flex items-center gap-2 border-b border-(--border-subtle) px-3 py-2">
         <Icon name="comment" size={13} className="text-(--au-purple-600)" />
         <span className="text-xs font-medium text-(--fg-primary)">
-          {target.nodeLabel ? `Comentar em "${target.nodeLabel}"` : "Novo comentário"}
+          {target.nodeLabel ? `Comment on "${target.nodeLabel}"` : "New comment"}
         </span>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar"
+          aria-label="Close"
           className="ml-auto text-(--fg-tertiary) hover:text-(--fg-primary)"
         >
           <Icon name="close" size={14} />
@@ -263,7 +263,7 @@ export function FlowCommentComposer({
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Seu nome (aparece no review)"
+            placeholder="Your name (shows up in the review)"
             className="rounded-sm border border-(--border-default) bg-(--bg-canvas) px-2.5 py-1.5 text-xs text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:border-(--au-purple-400) focus:outline-hidden"
           />
         )}
@@ -281,7 +281,7 @@ export function FlowCommentComposer({
             }
           }}
           rows={3}
-          placeholder="O que muda aqui? Ex: falta a tela de confirmação…"
+          placeholder="What changes here? E.g. the confirmation screen is missing…"
           className="resize-none rounded-sm border border-(--border-default) bg-(--bg-canvas) px-2.5 py-1.5 text-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:border-(--au-purple-400) focus:outline-hidden"
         />
         <div className="flex items-center justify-end gap-2">
@@ -290,7 +290,7 @@ export function FlowCommentComposer({
             onClick={onClose}
             className="rounded-sm px-2.5 py-1 text-xs font-medium text-(--fg-secondary) hover:bg-(--bg-muted)"
           >
-            Cancelar
+            Cancel
           </button>
           <button
             type="button"
@@ -298,7 +298,7 @@ export function FlowCommentComposer({
             disabled={!text.trim() || busy || (!identity && !name.trim())}
             className="rounded-sm bg-(--au-purple-600) px-2.5 py-1 text-xs font-medium text-white hover:bg-(--au-purple-700) disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? "Salvando…" : "Comentar"}
+            {busy ? "Saving…" : "Comment"}
           </button>
         </div>
       </div>
@@ -356,7 +356,7 @@ export function FlowCommentThread({
     try {
       const actor = identity
         ? { kind: "user" as const, id: identity.id, name: identity.name }
-        : { kind: "user" as const, id: "anonymous", name: "Anônimo" }
+        : { kind: "user" as const, id: "anonymous", name: "Anonymous" }
       await storage.transitionComment(comment.id, "resolve_direct", actor)
       onChanged()
       onClose()
@@ -388,13 +388,13 @@ export function FlowCommentThread({
         </span>
         {comment.status === "in_review" && (
           <span className="rounded-xs bg-(--au-amber-100) px-1.5 py-0.5 text-[10px] font-medium text-(--au-amber-800)">
-            em revisão
+            in review
           </span>
         )}
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar"
+          aria-label="Close"
           className="ml-auto text-(--fg-tertiary) hover:text-(--fg-primary)"
         >
           <Icon name="close" size={14} />
@@ -422,7 +422,7 @@ export function FlowCommentThread({
                     </span>
                     {r.authorKind === "agent" && (
                       <span className="rounded-xs bg-(--bg-muted) px-1 text-[10px] text-(--fg-tertiary)">
-                        agente
+                        agent
                       </span>
                     )}
                     <span className="text-[10px] text-(--fg-tertiary)">
@@ -451,14 +451,14 @@ export function FlowCommentThread({
               }
             }}
             rows={1}
-            placeholder="Responder…"
+            placeholder="Reply…"
             className="max-h-20 flex-1 resize-none rounded-sm border border-(--border-default) bg-(--bg-canvas) px-2.5 py-1.5 text-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:border-(--au-purple-400) focus:outline-hidden"
           />
           <button
             type="button"
             onClick={() => void sendReply()}
             disabled={!reply.trim() || busy}
-            aria-label="Enviar"
+            aria-label="Send"
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--au-purple-600) text-white hover:bg-(--au-purple-700) disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Icon name="arrow_upward" size={14} />
@@ -471,7 +471,7 @@ export function FlowCommentThread({
             className="inline-flex items-center gap-1 text-(--fg-tertiary) hover:text-(--fg-primary)"
           >
             <Icon name="open_in_full" size={11} />
-            Ver no review
+            View in review
           </button>
           <button
             type="button"
@@ -480,7 +480,7 @@ export function FlowCommentThread({
             className="inline-flex items-center gap-1 text-(--fg-secondary) hover:text-(--accent-success) disabled:opacity-40"
           >
             <Icon name="check_circle" size={12} />
-            Resolver
+            Resolve
           </button>
         </div>
       </div>

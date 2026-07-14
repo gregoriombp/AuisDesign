@@ -54,11 +54,11 @@ export function AuHeader({
   };
 
   const dateOptions = [
-    { value: "today", label: "Hoje" },
-    { value: "yesterday", label: "Ontem" },
-    { value: "week", label: "Últimos 7 dias" },
-    { value: "month", label: "Últimos 30 dias" },
-    { value: "custom", label: "Personalizado" },
+    { value: "today", label: "Today" },
+    { value: "yesterday", label: "Yesterday" },
+    { value: "week", label: "Last 7 days" },
+    { value: "month", label: "Last 30 days" },
+    { value: "custom", label: "Custom" },
   ];
 
   const renderBreadcrumb = (item: string | BreadcrumbItem, index: number, array: (string | BreadcrumbItem)[]) => {
@@ -130,10 +130,10 @@ export function AuHeader({
       >
         <AuInput
           ref={searchInputRef}
-          placeholder="Buscar..."
+          placeholder="Search…"
           iconLeft="search"
           dense
-          aria-label="Busca"
+          aria-label="Search"
           className={`w-[240px] transition-colors duration-200 ${
             isSearchOpen ? "" : "border-transparent! bg-transparent!"
           }`}
@@ -146,7 +146,7 @@ export function AuHeader({
         {!isSearchOpen && (
           <button
             type="button"
-            aria-label="Abrir busca"
+            aria-label="Open search"
             onClick={openSearch}
             className="absolute inset-0 cursor-pointer rounded-full hover:bg-(--bg-surface) transition-colors"
           />
@@ -158,7 +158,7 @@ export function AuHeader({
         variant="ghost"
         size="sm"
         iconOnly="notifications"
-        aria-label="Notificações"
+        aria-label="Notifications"
         aria-expanded={isNotificationsOpen}
         onClick={() => setIsNotificationsOpen((v) => !v)}
       />
@@ -172,7 +172,7 @@ export function AuHeader({
 
       <button
         type="button"
-        aria-label={isCopilotOpen ? "Fechar Auis Copilot" : "Abrir Auis Copilot"}
+        aria-label={isCopilotOpen ? "Close Auis Copilot" : "Open Auis Copilot"}
         className="cursor-pointer rounded-full ml-1 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-(--fg-primary) focus-visible:ring-offset-2"
         onClick={() => onCopilotOpen?.(!isCopilotOpen)}
       >

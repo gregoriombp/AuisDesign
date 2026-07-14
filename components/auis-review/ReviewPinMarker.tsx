@@ -16,8 +16,8 @@ function initialOf(name: string): string {
   return trimmed.charAt(0).toUpperCase()
 }
 
-/** Germano assina com o monograma "GF" (igual ao ReviewAvatar). Comments não
- *  carregam authorKind, então casamos pelo id/name estáveis do agente. */
+/** Germano signs with the "GF" monogram (same as ReviewAvatar). Comments do not
+ *  carry authorKind, so we match on the agent's stable id/name. */
 function isGermano(authorId: string | undefined, authorName: string): boolean {
   return authorId === "germano" || authorName.trim().toLowerCase().startsWith("germano")
 }

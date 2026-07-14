@@ -9,9 +9,9 @@ import { useReviewCommandAutocomplete } from "@/lib/auis-review/useReviewCommand
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
 
 /**
- * Compositor de resposta com anexo de imagem (colar ou botão), reusado pelo card
- * do drawer e pelo thread popover ancorado — pra não duplicar a lógica de voz/
- * paste/thumbs. Texto OU imagem habilita o envio; ⌘↵ envia.
+ * Reply composer with image attachments (paste or button), reused by the drawer
+ * card and the anchored thread popover — so the paste/thumbnail logic is not
+ * duplicated. Text OR an image enables sending; ⌘↵ sends.
  */
 export function ReplyComposer({
   commentId,
@@ -60,7 +60,7 @@ export function ReplyComposer({
         value={text}
         onChange={(e) => setText(e.target.value)}
         onPaste={img.onPaste}
-        placeholder="Escreva uma resposta… cole uma imagem"
+        placeholder="Write a reply… or paste an image"
         rows={2}
         className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
         onKeyDown={(e) => {
@@ -86,7 +86,7 @@ export function ReplyComposer({
               <button
                 type="button"
                 onClick={() => img.remove(idx)}
-                aria-label="Remover imagem"
+                aria-label="Remove image"
                 className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
               >
                 <Icon name="close" size={9} />
@@ -101,8 +101,8 @@ export function ReplyComposer({
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={!img.canAddMore}
-          aria-label="Anexar imagem"
-          title="Anexar imagem (ou cole com ⌘V)"
+          aria-label="Attach image"
+          title="Attach image (or paste with ⌘V)"
           className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors disabled:opacity-40"
         >
           <Icon name="image" size={14} weight={600} />
@@ -117,7 +117,7 @@ export function ReplyComposer({
               onDone?.()
             }}
           >
-            Cancelar
+            Cancel
           </AuButton>
           <AuButton
             variant="primary"
@@ -126,7 +126,7 @@ export function ReplyComposer({
             disabled={!canSubmit}
             onClick={() => void submit()}
           >
-            Responder
+            Reply
           </AuButton>
         </div>
       </div>

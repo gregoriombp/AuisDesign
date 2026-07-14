@@ -21,7 +21,7 @@ export function requireToken(
   if (!tokenConfigured()) {
     res.status(503).json({
       error: "no_token_configured",
-      hint: "Defina AUIS_REVIEW_TOKEN no .env do review-bridge.",
+      hint: "Set AUIS_REVIEW_TOKEN in the review-bridge .env file.",
     })
     return
   }

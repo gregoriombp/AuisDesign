@@ -7,31 +7,32 @@ import { ScreenGrid } from "./ScreenGrid"
 import { ProjectFlow } from "./ProjectFlow"
 
 /**
- * Alterna entre as duas vistas do projeto: "Telas" (galeria agrupada por seção)
- * e "Fluxo" (diagrama ReactFlow com as telas ligadas pelas setas inferidas dos
- * conectores do Figma). O toggle de Fluxo só aparece se o projeto tem `edges`.
+ * Switches between the project's two views: "Screens" (gallery grouped by
+ * section) and "Flow" (a ReactFlow diagram wiring the screens together with the
+ * arrows inferred from the Figma connectors). The Flow toggle only shows up when
+ * the project has `edges`.
  */
 export function ProjectViews({ project }: { project: Project }) {
   const hasFlow = (project.edges?.length ?? 0) > 0
-  const [view, setView] = React.useState<"telas" | "fluxo">("telas")
+  const [view, setView] = React.useState<"screens" | "flow">("screens")
   const sections = getProjectSections(project)
-  const showFlow = hasFlow && view === "fluxo"
+  const showFlow = hasFlow && view === "flow"
 
   return (
     <>
       {hasFlow && (
         <div className="mb-8 inline-flex rounded-full border border-(--border-default) p-1">
           <ViewToggle
-            active={view === "telas"}
-            onClick={() => setView("telas")}
+            active={view === "screens"}
+            onClick={() => setView("screens")}
             icon="grid_view"
-            label="Telas"
+            label="Screens"
           />
           <ViewToggle
-            active={view === "fluxo"}
-            onClick={() => setView("fluxo")}
+            active={view === "flow"}
+            onClick={() => setView("flow")}
             icon="account_tree"
-            label="Fluxo"
+            label="Flow"
           />
         </div>
       )}
@@ -44,7 +45,7 @@ export function ProjectViews({ project }: { project: Project }) {
             <div className="mb-4 flex items-baseline gap-3 border-b border-(--border-subtle) pb-2">
               <h2 className="text-lg font-semibold tracking-tight">{section}</h2>
               <span className="text-xs text-(--fg-tertiary)">
-                {screens.length} {screens.length === 1 ? "tela" : "telas"}
+                {screens.length} {screens.length === 1 ? "screen" : "screens"}
               </span>
             </div>
             <ScreenGrid

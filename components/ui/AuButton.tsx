@@ -69,9 +69,9 @@ export const AuButton = React.forwardRef<HTMLButtonElement, AuButtonProps>(
     )
 
     if (asChild) {
-      // Slot precisa de um único child. Clonamos o elemento passado
-      // (geralmente um <Link>) e injetamos o label dele DENTRO,
-      // cercado pelos ícones — assim o markup final tem 1 root só.
+      // Slot needs a single child. We clone the element that was passed
+      // (usually a <Link>) and inject its label INSIDE it, wrapped by the
+      // icons — that way the final markup has exactly one root.
       const child = React.Children.only(
         children as React.ReactElement<{ children?: React.ReactNode }>,
       )

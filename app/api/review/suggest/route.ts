@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 
-// Proxy server-side do OpenAI Chat pro Review Mode. Dois modos:
-//  - "complete": autocomplete inline (ghost text estilo Cursor) — devolve só a
-//    CONTINUAÇÃO do que o revisor está digitando.
-//  - "rewrite":  varinha mágica — reescreve o comentário inteiro.
-// Em ambos, o alvo é um AGENTE DE IA que vai implementar a mudança, então a
-// saída precisa ser específica e acionável. Chave em OPENAI_API_KEY (.env.local),
-// nunca no cliente.
+// Server-side proxy to the OpenAI Chat API for Review Mode. Two modes:
+//  - "complete": inline autocomplete (Cursor-style ghost text) — returns only
+//    the CONTINUATION of what the reviewer is typing.
+//  - "rewrite":  magic wand — rewrites the whole comment.
+// In both, the reader is an AI AGENT that will implement the change, so the
+// output has to be specific and actionable. The key lives in OPENAI_API_KEY
+// (.env.local), never in the client.
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
 const MODEL = "gpt-4o-mini"
 
@@ -25,22 +25,22 @@ interface SuggestBody {
   page?: string
 }
 
-const SYSTEM_COMPLETE = `Você completa, em tempo real, o comentário que um revisor de UI/UX está digitando.
-O comentário será LIDO POR UM AGENTE DE IA que vai implementar a mudança — então a continuação deve deixar o pedido específico e acionável (o quê, onde, e o resultado esperado).
-Regras:
-- Português do Brasil.
-- Devolva APENAS a continuação do texto: o que vem DEPOIS do que já foi escrito, sem repetir nada.
-- Curtíssimo: de algumas palavras a no máximo uma frase.
-- Continue naturalmente a partir do último caractere (inclusive no meio de uma palavra/frase).
-- Nada de aspas, rótulos ou explicação.`
+const SYSTEM_COMPLETE = `You complete, in real time, the comment a UI/UX reviewer is typing.
+The comment will be READ BY AN AI AGENT that implements the change — so the continuation must make the request specific and actionable (what, where, and the expected result).
+Rules:
+- Write in the same language as the comment you are given.
+- Return ONLY the continuation: what comes AFTER what is already written, repeating nothing.
+- Very short: a few words, one sentence at most.
+- Continue naturally from the last character (mid-word or mid-sentence is fine).
+- No quotes, no labels, no explanation.`
 
-const SYSTEM_REWRITE = `Você reescreve o comentário de um revisor de UI/UX para um AGENTE DE IA que vai implementar a mudança no produto.
-Deixe específico, sem ambiguidade e acionável: o quê, onde (referenciando o elemento selecionado quando houver) e o resultado esperado.
-Regras:
-- Português do Brasil.
-- 1 a 3 frases, direto ao ponto. Sem saudação, sem preâmbulo, sem aspas em volta.
-- Preserve a intenção do rascunho; não invente requisitos.
-- Devolva APENAS o comentário reescrito.`
+const SYSTEM_REWRITE = `You rewrite a UI/UX reviewer's comment for an AI AGENT that will implement the change in the product.
+Make it specific, unambiguous and actionable: what, where (referencing the selected element when there is one) and the expected result.
+Rules:
+- Write in the same language as the comment you are given.
+- 1 to 3 sentences, straight to the point. No greeting, no preamble, no surrounding quotes.
+- Preserve the draft's intent; do not invent requirements.
+- Return ONLY the rewritten comment.`
 
 export async function POST(request: NextRequest) {
   const apiKey = process.env.OPENAI_API_KEY
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "Chave da OpenAI não encontrada. Defina OPENAI_API_KEY em .env.local e reinicie o servidor (npm run dev).",
+          "OpenAI key not found. Set OPENAI_API_KEY in .env.local and restart the server (npm run dev).",
       },
       { status: 503 }
     )
@@ -58,13 +58,13 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: "Corpo inválido." }, { status: 400 })
+    return NextResponse.json({ error: "Invalid body." }, { status: 400 })
   }
 
   const draft = body.draft?.trim()
   if (!draft) {
     return NextResponse.json(
-      { error: "Envie o rascunho do comentário." },
+      { error: "The comment draft is empty. Type something before asking for a suggestion." },
       { status: 400 }
     )
   }
@@ -74,25 +74,25 @@ export async function POST(request: NextRequest) {
   const elementCtx = el
     ? [
         el.tag ? `tag: ${el.tag}` : null,
-        el.role ? `papel: ${el.role}` : null,
-        el.label ? `rótulo acessível: ${el.label}` : null,
-        el.text ? `texto visível: "${el.text}"` : null,
+        el.role ? `role: ${el.role}` : null,
+        el.label ? `accessible label: ${el.label}` : null,
+        el.text ? `visible text: "${el.text}"` : null,
       ]
         .filter(Boolean)
         .join("; ")
     : ""
 
   const elementLine = elementCtx
-    ? `Elemento selecionado na tela — ${elementCtx}.`
-    : "Sem elemento específico selecionado."
-  const pageLine = body.page ? `Tela: ${body.page}.` : null
+    ? `Element selected on screen — ${elementCtx}.`
+    : "No specific element selected."
+  const pageLine = body.page ? `Screen: ${body.page}.` : null
 
   const userMsg =
     mode === "complete"
-      ? [elementLine, pageLine, `Texto até agora: "${body.draft}"`, "Continue."]
+      ? [elementLine, pageLine, `Text so far: "${body.draft}"`, "Continue."]
           .filter(Boolean)
           .join("\n")
-      : [elementLine, pageLine, `Rascunho do revisor: "${draft}"`, "Reescreva o comentário."]
+      : [elementLine, pageLine, `Reviewer's draft: "${draft}"`, "Rewrite the comment."]
           .filter(Boolean)
           .join("\n")
 
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       const detail = await res.text().catch(() => "")
       console.error("[review/suggest] OpenAI error", res.status, detail)
       return NextResponse.json(
-        { error: `Falha na sugestão (${res.status}).` },
+        { error: `OpenAI returned an error (${res.status}). Try again, or check OPENAI_API_KEY.` },
         { status: 502 }
       )
     }
@@ -129,11 +129,17 @@ export async function POST(request: NextRequest) {
     }
     const suggestion = data.choices?.[0]?.message?.content?.trim()
     if (!suggestion) {
-      return NextResponse.json({ error: "Sem sugestão." }, { status: 422 })
+      return NextResponse.json(
+        { error: "The model returned an empty suggestion. Try again." },
+        { status: 422 }
+      )
     }
     return NextResponse.json({ suggestion })
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erro ao sugerir."
+    const message =
+      err instanceof Error
+        ? err.message
+        : "Could not reach OpenAI. Check your connection and try again."
     console.error("[review/suggest]", err)
     return NextResponse.json({ error: message }, { status: 500 })
   }

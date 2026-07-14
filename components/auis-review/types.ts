@@ -19,12 +19,13 @@ export interface ReviewDrawPath {
 }
 
 /**
- * Pista de identidade do elemento ancorado: tag + um trecho do texto. Quando o
- * `selector` estrutural (nth-of-type) desloca — sidebar colapsável montando, ou
- * render condicional por breakpoint que muda os índices dos irmãos — ele pode
- * resolver o elemento ERRADO (ou nenhum). O fingerprint recupera o alvo: se o
- * seletor falhar ou divergir, procura-se um elemento da mesma tag com o mesmo
- * texto. Opcional/aditivo — âncoras antigas sem ele seguem só pelo seletor.
+ * Identity hint for the anchored element: tag + a slice of its text. When the
+ * structural `selector` (nth-of-type) shifts — a collapsible sidebar mounting,
+ * or a breakpoint-conditional render that changes the sibling indices — it can
+ * resolve the WRONG element (or none). The fingerprint recovers the target: if
+ * the selector fails or diverges, we look for an element with the same tag and
+ * the same text. Optional/additive — older anchors without it still rely on the
+ * selector alone.
  */
 export interface ReviewAnchorFingerprint {
   tag: string
@@ -110,8 +111,9 @@ export interface ReviewCommentContext {
   nearbyText?: string[]
 }
 
-// "backlog" = "ideia futura": item avulso (sem pino) ou comentário movido pra
-// um backlog. Não vira pino no canvas nem conta como "aberto"; vive na sua aba.
+// "backlog" = "future idea": a standalone item (no pin) or a comment moved into
+// a backlog. It never becomes a pin on the canvas and never counts as "open";
+// it lives in its own tab.
 export type ReviewCommentStatus = "open" | "in_review" | "resolved" | "backlog"
 
 export type ReviewActorKind = "agent" | "user"
@@ -152,7 +154,7 @@ export interface ReviewReply {
   authorName: string
   authorColorToken: string
   text: string
-  /** Optional/additive — anexos de imagem (data URLs) na resposta. */
+  /** Optional/additive — image attachments (data URLs) on the reply. */
   images?: string[]
   createdAt: number
 }
@@ -210,10 +212,11 @@ export interface ReviewExportPayload {
   archivedComments?: ReviewComment[]
 }
 
-// ── Mobbin search (mirror de review-bridge/src/types.ts) ─────────────────────
-// "Buscar designs parecidos no Mobbin" no composer. O pedido vai pro bridge, o
-// agente resolve via MCP e devolve. Efêmero — nunca entra num ReviewComment; só
-// a IMAGEM escolhida vira anexo (images[]).
+// ── Mobbin search (mirror of review-bridge/src/types.ts) ─────────────────────
+// "Find similar designs on Mobbin" in the composer. The request goes to the
+// bridge, the agent resolves it through MCP and sends it back. Ephemeral — it
+// never lands in a ReviewComment; only the CHOSEN image becomes an attachment
+// (images[]).
 export type MobbinPlatform = "ios" | "web"
 
 export interface MobbinScreenResult {

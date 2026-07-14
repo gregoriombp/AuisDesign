@@ -1,11 +1,11 @@
 import * as React from "react"
 import { OVERLAY_DATA_ATTR } from "@/components/auis-review/constants"
 
-// Em apps SPA o scroll real costuma estar num container interno (overflow-y
-// auto/scroll), não no `window`. Pra que os pins/desenhos do review-mode
-// fiquem ancorados ao conteúdo — e não ao viewport — somamos o scroll do
-// `window` mais o `scrollTop`/`scrollLeft` de todos os ancestors scrollable
-// do elemento de referência.
+// In SPAs the real scroll usually lives in an inner container (overflow-y
+// auto/scroll), not on `window`. So that review-mode pins/strokes stay anchored
+// to the CONTENT — not to the viewport — we add the `window` scroll plus the
+// `scrollTop`/`scrollLeft` of every scrollable ancestor of the reference
+// element.
 
 function isScrollable(el: HTMLElement): boolean {
   const style = window.getComputedStyle(el)
@@ -34,9 +34,9 @@ export function cumulativeScrollFromElement(
   return { x, y }
 }
 
-// Pega o elemento sob o ponto, pulando elementos do próprio review overlay
-// (pin, popover, toolbar) — caso contrário o "alvo" seria o SVG do canvas
-// e o caminho de ancestors não passaria pelo container scrollable real.
+// Get the element under the point, skipping the review overlay's own elements
+// (pin, popover, toolbar) — otherwise the "target" would be the canvas SVG and
+// the ancestor chain would never pass through the real scrollable container.
 export function elementBelowOverlayAt(
   clientX: number,
   clientY: number,
@@ -50,13 +50,14 @@ export function elementBelowOverlayAt(
   return null
 }
 
-// O scroll que ancora todo o overlay vem do CONTAINER de conteúdo principal (o
-// maior scrollable da página), não de um probe de ponto único no centro do
-// viewport. O probe de ponto era frágil: quando um modal/drawer fixo cobre o
-// centro, ele "troca" pro scroll-chain do modal (tipicamente 0) enquanto o
-// conteúdo atrás segue rolado — aí captura (por-elemento) e render (probe)
-// divergem e o pino/popover caem no lugar errado. O container principal é
-// imune a isso porque o modal é menor que o conteúdo.
+// The scroll that anchors the whole overlay comes from the PRIMARY content
+// container (the page's largest scrollable), not from a single-point probe at
+// the center of the viewport. The point probe was fragile: when a fixed
+// modal/drawer covers the center, it "switches" to the modal's scroll chain
+// (typically 0) while the content behind stays scrolled — then capture
+// (per-element) and render (probe) diverge and the pin/popover land in the wrong
+// place. The primary container is immune to that because the modal is smaller
+// than the content.
 let primaryCache: HTMLElement | null = null
 
 function qualifiesAsPrimary(el: HTMLElement | null): el is HTMLElement {
@@ -74,13 +75,13 @@ function primaryScrollContainer(): HTMLElement | null {
   return primaryCache
 }
 
-/** Invalida o cache do container principal (route change, reflow grande). */
+/** Invalidate the primary-container cache (route change, large reflow). */
 export function invalidatePrimaryScrollCache(): void {
   primaryCache = null
 }
 
-/** Scroll cumulativo (window + container de conteúdo principal). Base única
- *  e estável usada tanto na captura quanto no render, pra que coincidam. */
+/** Cumulative scroll (window + primary content container). The single, stable
+ *  basis used by both capture and render, so the two agree. */
 export function getContentScroll(): { x: number; y: number } {
   if (typeof window === "undefined") return { x: 0, y: 0 }
   let x = window.scrollX
@@ -123,11 +124,11 @@ export function useCumulativeScrollOffset() {
   return offset
 }
 
-// Re-renderiza quando o layout reflui SEM scroll nem resize de window — caso
-// do Copilot/sidebars, que mudam a largura do `<main>` via flex. O
-// `useCumulativeScrollOffset` só ouve scroll/resize, então pins ancorados a
-// elemento não re-resolveriam. Um ResizeObserver no container principal (+ body)
-// cobre esse caso.
+// Re-renders when the layout reflows WITHOUT a scroll or a window resize — the
+// Copilot/sidebar case, which changes `<main>`'s width via flex.
+// `useCumulativeScrollOffset` only listens to scroll/resize, so element-anchored
+// pins would never re-resolve. A ResizeObserver on the primary container
+// (+ body) covers that case.
 export function useLayoutVersion(): number {
   const [version, setVersion] = React.useState(0)
   React.useEffect(() => {
@@ -138,9 +139,9 @@ export function useLayoutVersion(): number {
       if (raf !== null) return
       raf = requestAnimationFrame(() => {
         raf = null
-        // O reflow pode ter trocado o container de conteúdo (ex.: ir pra
-        // /settings, onde o scroll deixa de ser o <main> e passa a ser um div
-        // interno) — re-resolve na próxima leitura de scroll.
+        // The reflow may have swapped the content container (e.g. navigating to
+        // /settings, where the scroll moves from <main> to an inner div) —
+        // re-resolve it on the next scroll read.
         invalidatePrimaryScrollCache()
         setVersion((n) => n + 1)
       })
@@ -157,8 +158,8 @@ export function useLayoutVersion(): number {
   return version
 }
 
-// Encontra o container scrollable que cobre a maior área da viewport —
-// usado pra programmatic scroll (navegar até um comentário).
+// Finds the scrollable container covering the largest viewport area — used for
+// programmatic scrolling (navigating to a comment).
 export function findPrimaryScrollContainer(): HTMLElement | null {
   if (typeof document === "undefined") return null
   let bestEl: HTMLElement | null = null

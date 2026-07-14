@@ -7,9 +7,9 @@ import {
   type IconVariation,
 } from "@/lib/auis-edit/icon-style"
 
-// Controles das axes ópticas de um ícone (frente 4): espessura (wght),
-// preenchimento (FILL) e grade (GRAD). A cor sai pela seção Cor (o span do ícone
-// é o próprio elemento selecionado). Cada clique grava a variação inteira.
+// Controls for an icon's optical axes (track 4): weight (wght), fill (FILL) and
+// grade (GRAD). Color goes through the Color section (the icon's span IS the
+// selected element). Every click records the whole variation.
 
 function Chip({
   active,
@@ -55,7 +55,7 @@ export function IconStyleControls({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <Row label="Espessura">
+      <Row label="Weight">
         {ICON_WEIGHTS.map((w) => (
           <Chip
             key={w}
@@ -66,12 +66,12 @@ export function IconStyleControls({
           </Chip>
         ))}
       </Row>
-      <Row label="Preenchimento">
+      <Row label="Fill">
         <Chip active={current.fill === 0} onClick={() => onPick({ ...current, fill: 0 })}>
-          Contorno
+          Outlined
         </Chip>
         <Chip active={current.fill === 1} onClick={() => onPick({ ...current, fill: 1 })}>
-          Preenchido
+          Filled
         </Chip>
       </Row>
       <Row label="Grade">

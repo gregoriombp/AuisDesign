@@ -1,18 +1,18 @@
-// Registro de variantes do Live Edit. Os componentes Au* que têm variante
-// expõem o estado por uma CLASSE-RAIZ no padrão BEM `au-{x}--{valor}`
-// (ex.: au-btn--primary, au-btn--lg). Então NÃO instrumentamos componente
-// nenhum: detectamos o componente pela classe-raiz e trocamos a variante via
-// classList. Cada eixo (variante, tamanho) carrega suas próprias opções, então
-// trocar "variante" nunca mexe em "tamanho".
+// Live Edit variant registry. The Au* components that have variants expose the
+// state through a ROOT CLASS in the BEM pattern `au-{x}--{value}`
+// (e.g. au-btn--primary, au-btn--lg). So we instrument NO component at all: we
+// detect the component from its root class and swap the variant via classList.
+// Each axis (variant, size) carries its own options, so switching "variant"
+// never touches "size".
 //
-// Curado à mão a partir das union types de cada componente + das famílias de
-// classe no globals.css. A skill auis-design-system-audit pode sinalizar
-// drift entre este registro e o CSS.
+// Hand-curated from each component's union types + the class families in
+// globals.css. The auis-design-system-audit skill can flag drift between this
+// registry and the CSS.
 
 export interface VariantOption {
   value: string
   label: string
-  /** Classe aplicada; "" = opção default (remove as outras, não adiciona nada). */
+  /** Class applied; "" = the default option (removes the others, adds nothing). */
   className: string
 }
 
@@ -24,7 +24,7 @@ export interface VariantAxis {
 
 export interface ComponentSpec {
   component: string
-  /** Classe-raiz que identifica uma instância no DOM. */
+  /** Root class that identifies an instance in the DOM. */
   rootClass: string
   label: string
   axes: VariantAxis[]
@@ -34,8 +34,8 @@ function opt(prefix: string, value: string, label: string): VariantOption {
   return { value, label, className: value === "default" ? "" : `${prefix}${value}` }
 }
 
-// Opção que é o default do componente e NÃO carrega classe modificadora, mas
-// cujo valor de prop é real (ex.: AuAvatar size="md" → sem `au-avatar--md`).
+// An option that is the component's default and carries NO modifier class, but
+// whose prop value is real (e.g. AuAvatar size="md" → no `au-avatar--md`).
 function bare(value: string, label: string): VariantOption {
   return { value, label, className: "" }
 }
@@ -57,11 +57,11 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
   {
     component: "AuButton",
     rootClass: "au-btn",
-    label: "Botão",
+    label: "Button",
     axes: [
       {
         key: "variant",
-        label: "Variante",
+        label: "Variant",
         options: [
           opt(AU_BTN, "primary", "Primary"),
           opt(AU_BTN, "secondary", "Secondary"),
@@ -75,7 +75,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
       },
       {
         key: "size",
-        label: "Tamanho",
+        label: "Size",
         options: [opt(AU_BTN, "sm", "SM"), opt(AU_BTN, "md", "MD"), opt(AU_BTN, "lg", "LG")],
       },
     ],
@@ -87,9 +87,9 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "variant",
-        label: "Variante",
+        label: "Variant",
         options: [
-          opt(AU_CARD, "default", "Padrão"),
+          opt(AU_CARD, "default", "Default"),
           opt(AU_CARD, "ai", "AI"),
           opt(AU_CARD, "ai-warm", "AI warm"),
           opt(AU_CARD, "ai-copilot", "AI copilot"),
@@ -104,7 +104,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "variant",
-        label: "Variante",
+        label: "Variant",
         options: [
           opt(AU_PILL, "neutral", "Neutral"),
           opt(AU_PILL, "ai", "AI"),
@@ -124,7 +124,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "variant",
-        label: "Variante",
+        label: "Variant",
         options: [
           opt(AU_ALERT, "info", "Info"),
           opt(AU_ALERT, "success", "Success"),
@@ -141,9 +141,9 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "size",
-        label: "Tamanho",
-        // AuAvatarSize = "sm" | "md" | "lg"; "md" é o default e não tem classe
-        // (`size !== "md" && au-avatar--${size}`).
+        label: "Size",
+        // AuAvatarSize = "sm" | "md" | "lg"; "md" is the default and has no
+        // class (`size !== "md" && au-avatar--${size}`).
         options: [opt(AU_AVATAR, "sm", "SM"), bare("md", "MD"), opt(AU_AVATAR, "lg", "LG")],
       },
     ],
@@ -155,9 +155,9 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "variant",
-        label: "Variante",
+        label: "Variant",
         options: [
-          opt(AU_PROGRESS, "default", "Padrão"),
+          opt(AU_PROGRESS, "default", "Default"),
           opt(AU_PROGRESS, "success", "Success"),
           opt(AU_PROGRESS, "warning", "Warning"),
           opt(AU_PROGRESS, "danger", "Danger"),
@@ -172,7 +172,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "variant",
-        label: "Variante",
+        label: "Variant",
         options: [
           opt(AU_TABS, "segmented", "Segmented"),
           opt(AU_TABS, "standalone", "Standalone"),
@@ -188,9 +188,9 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "variant",
-        label: "Variante",
+        label: "Variant",
         options: [
-          bare("default", "Padrão"),
+          bare("default", "Default"),
           opt(AU_TOAST, "warning", "Warning"),
           opt(AU_TOAST, "error", "Error"),
           opt(AU_TOAST, "ai", "AI"),
@@ -205,21 +205,21 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "density",
-        label: "Densidade",
-        options: [bare("default", "Padrão"), opt(AU_INPUT, "dense", "Dense")],
+        label: "Density",
+        options: [bare("default", "Default"), opt(AU_INPUT, "dense", "Dense")],
       },
       {
         key: "mode",
-        label: "Modo",
-        options: [bare("default", "Padrão"), opt(AU_INPUT, "search", "Busca")],
+        label: "Mode",
+        options: [bare("default", "Default"), opt(AU_INPUT, "search", "Search")],
       },
       {
         key: "state",
-        label: "Estado",
+        label: "State",
         options: [
           bare("default", "Normal"),
-          opt(AU_INPUT, "invalid", "Inválido"),
-          opt(AU_INPUT, "disabled", "Desabilitado"),
+          opt(AU_INPUT, "invalid", "Invalid"),
+          opt(AU_INPUT, "disabled", "Disabled"),
         ],
       },
     ],
@@ -231,9 +231,9 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "size",
-        label: "Tamanho",
+        label: "Size",
         options: [
-          bare("default", "Padrão"),
+          bare("default", "Default"),
           opt(AU_SHEET, "wide", "Wide"),
           opt(AU_SHEET, "xwide", "XWide"),
         ],
@@ -247,7 +247,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "size",
-        label: "Tamanho",
+        label: "Size",
         options: [bare("md", "MD"), opt(AU_MODAL, "cockpit", "Cockpit")],
       },
     ],
@@ -259,10 +259,10 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
     axes: [
       {
         key: "author",
-        label: "Autor",
+        label: "Author",
         options: [
-          opt(AU_CHAT, "agent", "Agente"),
-          opt(AU_CHAT, "user", "Usuário"),
+          opt(AU_CHAT, "agent", "Agent"),
+          opt(AU_CHAT, "user", "User"),
         ],
       },
     ],
@@ -271,7 +271,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
 
 const BY_ROOT = new Map(COMPONENT_REGISTRY.map((s) => [s.rootClass, s]))
 
-/** Sobe do elemento até achar a instância de componente Au* mais próxima. */
+/** Walk up from the element to the nearest Au* component instance. */
 export function detectComponent(
   el: Element,
 ): { spec: ComponentSpec; rootEl: Element } | null {
@@ -286,7 +286,7 @@ export function detectComponent(
   return null
 }
 
-/** Valor atual de um eixo, lido da classList do root (ou a opção default). */
+/** Current value of an axis, read from the root's classList (or the default). */
 export function currentAxisValue(rootEl: Element, axis: VariantAxis): string | null {
   for (const o of axis.options) {
     if (o.className && rootEl.classList.contains(o.className)) return o.value
@@ -295,8 +295,8 @@ export function currentAxisValue(rootEl: Element, axis: VariantAxis): string | n
   return def ? def.value : null
 }
 
-/** Monta o payload de uma troca de variante: remove todas as classes do eixo,
- *  adiciona a escolhida. Self-contained (o applier não precisa do registro). */
+/** Build the payload of a variant swap: remove every class in the axis, add the
+ *  chosen one. Self-contained (the applier doesn't need the registry). */
 export function buildVariantPayload(axis: VariantAxis, value: string) {
   const chosen = axis.options.find((o) => o.value === value)
   return {

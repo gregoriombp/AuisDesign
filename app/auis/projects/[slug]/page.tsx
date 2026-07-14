@@ -21,7 +21,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const project = getProject(slug)
-  return { title: project ? `${project.title} · Projetos` : "Projetos" }
+  return { title: project ? `${project.title} · Projects` : "Projects" }
 }
 
 function formatDate(iso: string): string {
@@ -46,29 +46,30 @@ export default async function ProjectViewer({
       <div className="max-w-[1400px] mx-auto px-8 py-12">
         <Link href="/auis/projects" className="no-underline">
           <AuButton variant="ghost" size="sm" iconLeft="arrow_back">
-            Projetos
+            Projects
           </AuButton>
         </Link>
 
         <header className="mt-6 mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="au-eyebrow mb-2">{project.title}</p>
-            <h1 className="text-4xl font-semibold tracking-tight">Telas</h1>
+            <h1 className="text-4xl font-semibold tracking-tight">Screens</h1>
             <p className="mt-2 max-w-2xl leading-relaxed text-(--fg-secondary)">
               {project.description}
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-(--fg-tertiary)">
               <span className="inline-flex items-center gap-1.5">
                 <Icon name="web_asset" size={13} />
-                {project.screens.length} telas
+                {project.screens.length}{" "}
+                {project.screens.length === 1 ? "screen" : "screens"}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Icon name="account_tree" size={13} />
-                {sections.length} seções
+                {sections.length} {sections.length === 1 ? "section" : "sections"}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Icon name="schedule" size={13} />
-                Importado em {formatDate(project.importedAt)}
+                Imported on {formatDate(project.importedAt)}
               </span>
             </div>
           </div>
@@ -79,7 +80,7 @@ export default async function ProjectViewer({
             className="no-underline shrink-0"
           >
             <AuButton variant="ghost" size="sm" iconRight="open_in_new">
-              Ver no Figma
+              View in Figma
             </AuButton>
           </a>
         </header>

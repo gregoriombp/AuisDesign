@@ -17,8 +17,8 @@ export type CopilotPreset = {
   flowFrequency: number;
   contrast: number;
   bg: string;
-  /** Rotação de hue (varredura de cor). Só `thinking` usa — a textura muda
-   *  de matiz enquanto o Copilot pensa. 0 = desligado. */
+  /** Hue rotation (color sweep). Only `thinking` uses it — the texture shifts
+   *  hue while the Copilot thinks. 0 = off. */
   hueSpeed?: number;
 };
 
@@ -49,9 +49,9 @@ export const COPILOT_STATE_PRESETS: Record<CopilotState, CopilotPreset> = {
     contrast: 1.0,
     bg: "#05080f",
   },
-  // Thinking mantém os MESMOS controles de listening; o que muda é o shape
-  // (morfa entre formas geométricas, via .au-copilot-think) e a variação de
-  // hue na textura (hueSpeed).
+  // Thinking keeps the SAME controls as listening; what changes is the shape
+  // (it morphs between geometric forms, via .au-copilot-think) and the hue
+  // variation in the texture (hueSpeed).
   thinking: {
     speed: 0.16,
     color1: "#ffffff",

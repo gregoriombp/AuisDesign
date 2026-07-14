@@ -40,9 +40,9 @@ function ModeButton({ mode, icon, label, shortcut }: ModeButtonProps) {
   )
 }
 
-// Ponteiro mágico: localiza elementos/divs no hover (ver ReviewMagicCursor) e
-// ancora o pino ao elemento, reduzindo o drift. Estado ativo ganha um gradiente
-// AI (tokens Auis) pra se distinguir dos modos comuns.
+// Magic pointer: finds elements/divs on hover (see ReviewMagicCursor) and
+// anchors the pin to the element, cutting down drift. The active state gets an AI
+// gradient (Auis tokens) so it stands apart from the plain modes.
 function MagicModeButton() {
   const active = useReviewStore((s) => s.mode === "magic")
   const setMode = useReviewStore((s) => s.setMode)
@@ -50,9 +50,9 @@ function MagicModeButton() {
     <button
       type="button"
       onClick={() => setMode("magic")}
-      aria-label="Ponteiro mágico"
+      aria-label="Magic pointer"
       aria-pressed={active}
-      title="Ponteiro mágico · localiza elementos"
+      title="Magic pointer · finds elements"
       className={[
         "h-8 w-8 inline-flex items-center justify-center rounded-full transition-colors",
         active
@@ -99,7 +99,7 @@ export function ReviewToolbar() {
         <button
           type="button"
           onClick={toggleActive}
-          aria-label="Abrir Review Mode (⌘⇧Y)"
+          aria-label="Open Review Mode (⌘⇧Y)"
           title="Review Mode · ⌘⇧Y"
           className="pointer-events-auto inline-flex items-center gap-2 px-3 py-2 rounded-full bg-(--bg-inverse) text-(--fg-on-inverse) shadow-lg hover:opacity-90 body-xs font-medium"
         >
@@ -128,7 +128,7 @@ export function ReviewToolbar() {
             authorName={identity.name}
             colorToken={identity.colorToken}
             size={28}
-            title={`Revisor: ${identity.name}`}
+            title={`Reviewer: ${identity.name}`}
             className="mr-0.5"
           />
         )}
@@ -143,10 +143,10 @@ export function ReviewToolbar() {
         <ModeButton
           mode="draw"
           icon="draw"
-          label="Marcação livre"
+          label="Freehand mark"
           shortcut="⌘⇧K"
         />
-        <ModeButton mode="pin" icon="location_on" label="Pino" />
+        <ModeButton mode="pin" icon="location_on" label="Pin" />
         <MagicModeButton />
 
         <span className="h-5 w-px bg-(--border-subtle)" />
@@ -156,14 +156,14 @@ export function ReviewToolbar() {
           onClick={toggleSheet}
           aria-label={
             inReviewCount > 0
-              ? `Comentários · ${inReviewCount} em revisão`
-              : "Comentários desta tela"
+              ? `Comments · ${inReviewCount} in review`
+              : "Comments on this screen"
           }
           aria-pressed={sheetOpen}
           title={
             inReviewCount > 0
-              ? `Comentários · ${inReviewCount} em revisão`
-              : "Comentários desta tela"
+              ? `Comments · ${inReviewCount} in review`
+              : "Comments on this screen"
           }
           className={[
             "relative h-8 inline-flex items-center gap-1 px-2 rounded-full transition-colors",
@@ -191,8 +191,8 @@ export function ReviewToolbar() {
         <button
           type="button"
           onClick={() => setExportOpen(true)}
-          aria-label="Exportar comentários"
-          title="Exportar JSON"
+          aria-label="Export comments"
+          title="Export JSON"
           className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
         >
           <Icon name="ios_share" size={16} />
@@ -203,8 +203,8 @@ export function ReviewToolbar() {
         <button
           type="button"
           onClick={toggleActive}
-          aria-label="Fechar Review Mode"
-          title="Fechar (⌘⇧Y)"
+          aria-label="Close Review Mode"
+          title="Close (⌘⇧Y)"
           className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
         >
           <Icon name="close" size={16} />

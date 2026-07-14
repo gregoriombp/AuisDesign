@@ -58,7 +58,7 @@ export function ReviewCommentPopover() {
   const scroll = useCumulativeScrollOffset()
   const stopDismiss = useStopDismiss<HTMLDivElement>()
 
-  // Voz → texto: anexa o reconhecido ao que já estiver escrito.
+  // Voice → text: appends what was recognized to whatever is already written.
   const voice = useVoiceTranscription(
     React.useCallback((spoken: string) => {
       setText((prev) => (prev ? `${prev.trimEnd()} ${spoken}` : spoken))
@@ -66,9 +66,9 @@ export function ReviewCommentPopover() {
     }, [])
   )
 
-  // Refs estáveis pra encerrar a voz no unmount / clique-fora sem re-disparar
-  // effects a cada render (o objeto do hook muda de identidade por render).
-  // Sincronizados num effect — não se escreve ref durante o render.
+  // Stable refs so we can stop voice capture on unmount / outside-click without
+  // re-firing effects on every render (the hook object changes identity per
+  // render). Synced in an effect — never write a ref during render.
   const voiceStatusRef = React.useRef(voice.status)
   const voiceCancelRef = React.useRef(voice.cancel)
   const pendingSubmitRef = React.useRef(false)
@@ -77,16 +77,16 @@ export function ReviewCommentPopover() {
     voiceCancelRef.current = voice.cancel
   })
 
-  // Autocomplete de comandos (@agente, /skill, #now) — caixinha estilo Figma.
+  // Command autocomplete (@agent, /skill, #now) — Figma-style little menu.
   const commands = useReviewCommandAutocomplete({
     textareaRef,
     value: text,
     setValue: setText,
   })
 
-  // Autocomplete inline (ghost text). Só ativa com o cursor no fim do texto —
-  // a continuação se cola no fim, como no Cursor. Cede a vez ao menu de
-  // comandos pra não competirem pela mesma tecla (Tab/Enter).
+  // Inline autocomplete (ghost text). Only active with the caret at the end of
+  // the text — the continuation is appended at the end, like in Cursor. It yields
+  // to the command menu so they don't fight over the same key (Tab/Enter).
   const { ghost, clear: clearGhost } = useInlineCompletion(
     text,
     elementCtx,
@@ -118,7 +118,7 @@ export function ReviewCommentPopover() {
     })
   }, [ghost, text, clearGhost, syncScroll])
 
-  // Varinha mágica: reescreve o comentário inteiro (com desfazer).
+  // Magic wand: rewrites the whole comment (with undo).
   const handleRewrite = React.useCallback(async () => {
     if (rewriting || text.trim().length === 0) return
     setAssistError(null)
@@ -127,11 +127,11 @@ export function ReviewCommentPopover() {
     const r = await fetchRewrite({ draft: text, element: elementCtx })
     setRewriting(false)
     if (r.status === 503) {
-      setAssistError("Configure OPENAI_API_KEY para usar a varinha.")
+      setAssistError("Set OPENAI_API_KEY to use the magic wand.")
       return
     }
     if (!r.ok || !r.text) {
-      setAssistError("Não consegui melhorar agora. Tente de novo.")
+      setAssistError("Could not improve the comment. Try again.")
       return
     }
     setUndoText(text)
@@ -162,14 +162,14 @@ export function ReviewCommentPopover() {
       setUndoText(null)
       setAssistError(null)
       clearGhost()
-      // Contexto do elemento ancorado — identidade estável pro hook de assist.
+      // Context of the anchored element — stable identity for the assist hook.
       setElementCtx(describeAnchorElement(pendingAnchor))
       requestAnimationFrame(() => textareaRef.current?.focus())
     }
   }, [pendingAnchor, clearGhost])
 
-  // #3 Salvar com voz ativa: encerra a gravação primeiro e só salva de fato
-  // quando o texto transcrito assenta (status volta a "idle").
+  // #3 Saving while voice is on: stop the recording first and only actually save
+  // once the transcribed text settles (status goes back to "idle").
   React.useEffect(() => {
     if (!pendingSubmitRef.current || voice.status !== "idle") return
     pendingSubmitRef.current = false
@@ -179,9 +179,9 @@ export function ReviewCommentPopover() {
     })()
   }, [voice.status, text, images, saveComment])
 
-  // #4 Sair/clicar fora interrompe a voz (descarta). Unmount cobre Salvar/
-  // Cancelar/Esc (fecham o popover); o pointerdown cobre clique fora de
-  // qualquer superfície de review enquanto grava.
+  // #4 Leaving/clicking outside stops the voice capture (discards it). Unmount
+  // covers Save/Cancel/Esc (they close the popover); the pointerdown covers a
+  // click outside any review surface while recording.
   React.useEffect(() => () => voiceCancelRef.current(), [])
   React.useEffect(() => {
     if (typeof document === "undefined") return
@@ -250,7 +250,7 @@ export function ReviewCommentPopover() {
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault()
     if (submitting) return
-    // #3 Voz ativa: encerra primeiro; o effect salva quando o texto assenta.
+    // #3 Voice is on: stop it first; the effect saves once the text settles.
     if (voice.status === "recording" || voice.status === "transcribing") {
       setSubmitting(true)
       pendingSubmitRef.current = true
@@ -294,14 +294,15 @@ export function ReviewCommentPopover() {
             {identity.name}
           </span>
           <span className="body-xs text-(--fg-tertiary) ml-auto">
-            {pendingAnchor.kind === "draw" ? "Marcação livre" : "Pino"}
+            {pendingAnchor.kind === "draw" ? "Freehand mark" : "Pin"}
           </span>
         </div>
 
-        {/* Textarea + camada-espelho que desenha o ghost text à frente do
-            cursor. O espelho fica ATRÁS (texto transparente só pra empurrar o
-            ghost pra posição certa); o textarea, com fundo transparente, mostra
-            o texto real por cima. Métricas idênticas mantêm tudo alinhado. */}
+        {/* Textarea + a mirror layer that paints the ghost text ahead of the
+            caret. The mirror sits BEHIND (transparent text, only there to push
+            the ghost into the right spot); the textarea, with a transparent
+            background, shows the real text on top. Identical metrics keep
+            everything aligned. */}
         <div className="relative">
           <div
             ref={mirrorRef}
@@ -347,10 +348,10 @@ export function ReviewCommentPopover() {
                   e.stopPropagation()
                   clearGhost()
                 }
-                // sem ghost: deixa o provider tratar (cancela o pending)
+                // no ghost: let the provider handle it (cancels the pending)
               }
             }}
-            placeholder="Escreva o feedback… cole uma imagem, ou dite por voz"
+            placeholder="Write your feedback… paste an image, or dictate it"
             rows={3}
             className="relative w-full resize-none px-3 py-2 bg-transparent body-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:outline-hidden"
             style={{ zIndex: 1 }}
@@ -382,7 +383,7 @@ export function ReviewCommentPopover() {
                   type="button"
                   onClick={() => removeImage(idx)}
                   className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
-                  aria-label="Remover imagem"
+                  aria-label="Remove image"
                 >
                   <Icon name="close" size={9} />
                 </button>
@@ -393,7 +394,7 @@ export function ReviewCommentPopover() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="h-16 w-16 rounded-sm border border-dashed border-(--border-default) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) hover:border-(--border-strong) transition-colors"
-                aria-label="Adicionar imagem"
+                aria-label="Attach image"
               >
                 <Icon name="add" size={16} />
               </button>
@@ -407,8 +408,8 @@ export function ReviewCommentPopover() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
-              aria-label="Anexar imagem"
-              title="Anexar imagem (ou cole com ⌘V)"
+              aria-label="Attach image"
+              title="Attach image (or paste with ⌘V)"
               disabled={images.length >= MAX_IMAGES}
             >
               <Icon name="image" size={14} weight={600} />
@@ -417,9 +418,9 @@ export function ReviewCommentPopover() {
               type="button"
               onClick={voice.toggle}
               disabled={transcribing}
-              aria-label={recording ? "Parar gravação" : "Ditar por voz"}
+              aria-label={recording ? "Stop recording" : "Dictate"}
               aria-pressed={recording}
-              title={recording ? "Parar gravação" : "Ditar por voz"}
+              title={recording ? "Stop recording" : "Dictate"}
               className={[
                 "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors disabled:opacity-60",
                 recording
@@ -441,8 +442,8 @@ export function ReviewCommentPopover() {
               type="button"
               onClick={handleRewrite}
               disabled={rewriting || text.trim().length === 0}
-              aria-label="Melhorar o comentário"
-              title="Melhorar o comentário (varinha mágica)"
+              aria-label="Improve the comment"
+              title="Improve the comment (magic wand)"
               className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors disabled:opacity-50"
             >
               <Icon
@@ -455,9 +456,9 @@ export function ReviewCommentPopover() {
             <button
               type="button"
               onClick={() => setMobbinOpen((v) => !v)}
-              aria-label="Buscar designs parecidos no Mobbin"
+              aria-label="Find similar designs on Mobbin"
               aria-pressed={mobbinOpen}
-              title="Buscar designs parecidos no Mobbin"
+              title="Find similar designs on Mobbin"
               className={[
                 "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors",
                 mobbinOpen
@@ -471,25 +472,25 @@ export function ReviewCommentPopover() {
             {recording ? (
               <span className="body-xs text-(--accent-danger) flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-(--accent-danger) animate-pulse" />
-                Gravando
+                Recording
               </span>
             ) : transcribing ? (
               <span className="body-xs text-(--fg-tertiary) truncate min-w-0">
-                Transcrevendo…
+                Transcribing…
               </span>
             ) : rewriting ? (
-              <span className="body-xs text-(--fg-tertiary) truncate min-w-0">Melhorando…</span>
+              <span className="body-xs text-(--fg-tertiary) truncate min-w-0">Improving…</span>
             ) : undoText !== null ? (
               <button
                 type="button"
                 onClick={undoRewrite}
                 className="body-xs text-(--fg-secondary) hover:text-(--fg-primary) underline underline-offset-2"
               >
-                Desfazer
+                Undo
               </button>
             ) : ghost ? (
               <span className="body-xs text-(--fg-tertiary) truncate min-w-0">
-                Tab para completar
+                Tab to complete
               </span>
             ) : (
               <span className="body-xs text-(--fg-tertiary) flex items-center gap-1">
@@ -505,7 +506,7 @@ export function ReviewCommentPopover() {
               size="sm"
               onClick={cancelPending}
             >
-              Cancelar
+              Cancel
             </AuButton>
             <AuButton
               type="submit"
@@ -514,7 +515,7 @@ export function ReviewCommentPopover() {
               disabled={!canSubmit && !recording && !transcribing}
               loading={submitting}
             >
-              Salvar
+              Save
             </AuButton>
           </div>
         </div>

@@ -105,7 +105,7 @@ export function AuSheet({
                 </div>
                 <DialogPrimitive.Close
                   className="au-sheet__close"
-                  aria-label="Fechar"
+                  aria-label="Close"
                 >
                   <Icon name="close" size={18} />
                 </DialogPrimitive.Close>

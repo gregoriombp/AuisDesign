@@ -22,7 +22,7 @@ export function formatResolutionSummary(actor: ReviewActor, at: number): string 
   const hours = pad2(d.getHours())
   const minutes = pad2(d.getMinutes())
   const seconds = pad2(d.getSeconds())
-  return `Resolvido por ${actor.name} em ${day}/${month}/${year} às ${hours}:${minutes}:${seconds}.`
+  return `Resolved by ${actor.name} on ${day}/${month}/${year} at ${hours}:${minutes}:${seconds}.`
 }
 
 export function isReviewComment(value: unknown): value is ReviewComment {
@@ -82,7 +82,7 @@ export function safeParseExport(
       (parsed.schemaVersion !== SCHEMA_VERSION && parsed.schemaVersion !== 2) ||
       !Array.isArray(parsed.comments)
     ) {
-      return { error: "Payload inválido (schema desconhecido)." }
+      return { error: "This is not a valid review export. Pick another file." }
     }
     const comments: ReviewComment[] = parsed.comments
       .filter(isReviewComment)
@@ -97,6 +97,11 @@ export function safeParseExport(
       ...(archivedComments ? { archivedComments } : {}),
     }
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "JSON inválido." }
+    return {
+      error:
+        e instanceof Error
+          ? e.message
+          : "This file is not valid JSON. Pick another file.",
+    }
   }
 }

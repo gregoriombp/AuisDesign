@@ -6,9 +6,9 @@ import type {
   ReviewElementContext,
 } from "@/components/auis-review/types"
 
-// Contexto enxuto do elemento sob o comentário — alimenta a sugestão de prompt
-// (/api/review/suggest) e o rótulo do ponteiro mágico. Só texto/atributos, nunca
-// o DOM inteiro.
+// A lean context of the element under the comment — feeds the prompt suggestion
+// (/api/review/suggest) and the magic pointer's label. Text/attributes only,
+// never the whole DOM.
 export type { ReviewElementContext }
 
 function snippet(el: Element, max: number): string {
@@ -64,7 +64,7 @@ function nearbyText(el: Element): string[] | undefined {
   return chunks.length > 0 ? chunks : undefined
 }
 
-/** Descreve um elemento do DOM (tag + papel + rótulo acessível + texto). */
+/** Describe a DOM element (tag + role + accessible label + text). */
 export function describeElement(el: Element): ReviewElementContext {
   const tag = el.tagName.toLowerCase()
   const role = el.getAttribute("role") || undefined
@@ -77,7 +77,7 @@ export function describeElement(el: Element): ReviewElementContext {
   return { tag, role, label, text }
 }
 
-/** Resolve o elemento ancorado num comentário e o descreve, ou null. */
+/** Resolve the element a comment is anchored to and describe it, or null. */
 export function describeAnchorElement(
   anchor: ReviewAnchor | null,
 ): ReviewElementContext | null {
@@ -89,8 +89,8 @@ export function describeAnchorElement(
   return { ...describeElement(el), selector }
 }
 
-/** Snapshot persistido no comentário para agentes resolverem feedback curto
- *  ("remove isso", "troca esse label") sem depender só de coordenadas. */
+/** Snapshot persisted on the comment so agents can act on terse feedback
+ *  ("remove this", "change this label") without relying on coordinates alone. */
 export function buildReviewCommentContext(anchor: ReviewAnchor | null): ReviewCommentContext {
   const pageUrl =
     typeof window === "undefined"
@@ -127,7 +127,7 @@ export function buildReviewCommentContext(anchor: ReviewAnchor | null): ReviewCo
   }
 }
 
-/** Rótulo curto pro chip do ponteiro mágico (ex.: `button · Salvar`). */
+/** Short label for the magic pointer's chip (e.g. `button · Save`). */
 export function shortLabelFor(el: Element): string {
   const tag = el.tagName.toLowerCase()
   const aria = el.getAttribute("aria-label") || el.getAttribute("title")

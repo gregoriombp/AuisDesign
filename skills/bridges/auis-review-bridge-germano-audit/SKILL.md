@@ -171,8 +171,8 @@ Build both sides before judging:
   `context.nearbyText` — the real target of short requests ("remove this", "change
   this text").
 - The thread (`comment.replies`) — may contain back-and-forth that refines the request.
-- `comment.resolution.summary` — who claimed to resolve it and when ("Resolvido por
-  Claude em DD/MM/YYYY…").
+- `comment.resolution.summary` — who claimed to resolve it and when ("Resolved by
+  Claude on DD/MM/YYYY…").
 
 **b) What was delivered** (the delivery that is under review)
 - **Visual (preferred — you are a visual critic):** if a browser/preview is
@@ -313,10 +313,10 @@ and the interface's logic.
 ```
 this is outside today's list, but it bothered me:
 
-the export drawer still says "A Auis é operadora dos dados" — old brand text,
-after the rebrand to Auis.
-I think it should be changed to "Auis", because the old brand leaks trust and is
-inconsistent with the header. (It shows up in /settings/organizacao/auditoria.)
+the empty state still says "No flows imported yet" — leftover copy from when this
+section was called "flows".
+Everything else on the screen says "project", so it reads like a bug: it should say
+"No projects imported yet". (It shows up in /auis/projects, with no projects.)
 ```
 
 ---

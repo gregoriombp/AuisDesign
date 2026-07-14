@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 
-// Proxy same-origin pra imagem de um resultado do Mobbin. O navegador não
-// consegue transformar a imagem cross-origin em base64 (CORS / canvas taint),
-// então o servidor busca os bytes e devolve aqui, já same-origin. Só aceita
-// URLs https do mobbin.com — nada de virar um proxy aberto.
+// Same-origin proxy for a Mobbin result's image. The browser can't turn a
+// cross-origin image into base64 (CORS / canvas taint), so the server fetches
+// the bytes and serves them from here, same-origin. Only https URLs on
+// mobbin.com are accepted — this must never become an open proxy.
 const ALLOWED_HOSTS = new Set(["mobbin.com", "www.mobbin.com"])
 
 export async function GET(request: NextRequest) {

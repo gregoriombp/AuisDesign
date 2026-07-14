@@ -4,8 +4,9 @@ import * as React from "react"
 import { Icon } from "@/components/ui/Icon"
 import { ICON_GROUPS } from "@/lib/auis-edit/icon-presets"
 
-// Seletor de ícone (Material Symbols). Grade de presets comuns + busca/ligadura
-// livre pra qualquer ícone fora da lista. `current` é a ligadura atual.
+// Icon picker (Material Symbols). A grid of common presets + free
+// search/ligature for any icon outside the list. `current` is the current
+// ligature.
 
 export function IconPicker({
   current,
@@ -25,7 +26,7 @@ export function IconPicker({
     })).filter((g) => g.icons.length > 0)
   }, [q])
 
-  // Permite aplicar uma ligadura digitada que não está nos presets.
+  // Lets you apply a typed ligature that is not in the presets.
   const customName = q.replace(/\s+/g, "_")
   const showCustom = q.length > 0 && groups.every((g) => !g.icons.includes(customName))
 
@@ -34,7 +35,7 @@ export function IconPicker({
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Buscar ícone (ex.: rocket_launch)"
+        placeholder="Search icons (e.g. rocket_launch)"
         className="w-full rounded-(--radius-sm) border border-(--border-default) bg-(--bg-canvas) px-2.5 py-1.5 body-sm text-(--fg-primary) outline-hidden placeholder:text-(--fg-tertiary) focus:border-(--accent-brand)"
       />
       <div className="flex max-h-[220px] flex-col gap-2 overflow-y-auto">
@@ -45,7 +46,7 @@ export function IconPicker({
             className="flex items-center gap-2 rounded-(--radius-sm) border border-dashed border-(--border-default) px-2 py-1.5 text-left body-xs text-(--fg-secondary) hover:bg-(--bg-hover)"
           >
             <Icon name={customName} size={18} />
-            Usar &quot;{customName}&quot;
+            Use &quot;{customName}&quot;
           </button>
         )}
         {groups.map((g) => (

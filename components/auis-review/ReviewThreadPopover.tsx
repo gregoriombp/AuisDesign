@@ -76,7 +76,7 @@ export function ReviewThreadPopover() {
     archivedComments.find((c) => c.id === threadCommentId) ??
     null
 
-  // Sai do modo de edição ao trocar de comentário.
+  // Leave edit mode when switching comments.
   React.useEffect(() => {
     setEditing(false)
   }, [threadCommentId])
@@ -102,8 +102,8 @@ export function ReviewThreadPopover() {
   // While composing a new comment, the compose popover takes over.
   if (!comment || pendingAnchor || typeof window === "undefined") return null
 
-  // Acompanha o marcador quando ele segue o reflow/zoom (âncora resolvida):
-  // pin → ponto do elemento; traço → centroide dos pontos re-resolvidos.
+  // Follow the marker when it tracks reflow/zoom (a resolved anchor):
+  // pin → the element's point; stroke → the centroid of the re-resolved points.
   void layoutVersion
   const anchorEl = comment.anchor.el
   let elPoint: ReviewPoint | null = null
@@ -117,9 +117,9 @@ export function ReviewThreadPopover() {
       elPoint = { x: cx, y: cy }
     }
   }
-  // Comentário ancorado a um elemento que não existe mais (modal fechou): o
-  // marcador some no canvas, então a thread também não deve flutuar solta sobre
-  // o conteúdo/sidebar. Volta quando o elemento reaparece.
+  // Comment anchored to an element that no longer exists (a modal closed): the
+  // marker disappears from the canvas, so the thread must not float loose over
+  // the content/sidebar either. It comes back when the element reappears.
   if (anchorEl && !elPoint) return null
   const point = elPoint
     ? { x: elPoint.x + scroll.x, y: elPoint.y + scroll.y }
@@ -175,18 +175,18 @@ export function ReviewThreadPopover() {
   }
 
   const dropdownItems: AuDropdownItem[] = [
-    { id: "edit", label: "Editar", icon: "edit", onSelect: startEdit },
-    { id: "copy-link", label: "Copiar link", icon: "link", onSelect: copyPermalink },
+    { id: "edit", label: "Edit", icon: "edit", onSelect: startEdit },
+    { id: "copy-link", label: "Copy link", icon: "link", onSelect: copyPermalink },
     isInReview
       ? {
           id: "reject",
-          label: "Reabrir (rejeitar revisão)",
+          label: "Reopen (reject review)",
           icon: "refresh",
           onSelect: () => void rejectComment(comment.id),
         }
       : {
           id: "archive",
-          label: "Marcar como resolvido",
+          label: "Mark as resolved",
           icon: "check_circle",
           onSelect: () => void archiveDirect(comment.id),
         },
@@ -194,7 +194,7 @@ export function ReviewThreadPopover() {
       ? [
           {
             id: "to-backlog",
-            label: "Mover pra ideias futuras",
+            label: "Move to future ideas",
             icon: "lightbulb",
             onSelect: () => void moveToBacklog(comment.id),
           } as AuDropdownItem,
@@ -203,7 +203,7 @@ export function ReviewThreadPopover() {
     { id: "sep", separator: true },
     {
       id: "delete",
-      label: "Excluir",
+      label: "Delete",
       icon: "delete",
       danger: true,
       onSelect: () => void deleteComment(comment.id),
@@ -239,22 +239,22 @@ export function ReviewThreadPopover() {
           {comment.origin === "ux-flow" && <UxFlowChip flowRef={comment.flowRef} />}
 
           <div className="ml-auto flex items-center gap-0.5">
-            {isInReview && <AuPill variant="beta">Em revisão</AuPill>}
+            {isInReview && <AuPill variant="beta">In review</AuPill>}
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
               className="inline-flex items-center gap-1 px-1.5 h-7 rounded-sm body-xs text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
-              title="Abrir no painel lateral"
+              title="Open in the side panel"
             >
               <Icon name="open_in_full" size={11} />
-              Ver mais
+              See more
             </button>
             {!isResolved && !isInReview && (
               <button
                 type="button"
                 onClick={() => void archiveDirect(comment.id)}
-                aria-label="Marcar como resolvido"
-                title="Marcar como resolvido"
+                aria-label="Mark as resolved"
+                title="Mark as resolved"
                 className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--accent-success) hover:bg-(--bg-hover) transition-colors"
               >
                 <Icon name="check_circle" size={15} />
@@ -265,7 +265,7 @@ export function ReviewThreadPopover() {
               trigger={
                 <button
                   type="button"
-                  aria-label="Ações"
+                  aria-label="Actions"
                   className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
                 >
                   <Icon name="more_horiz" size={15} />
@@ -276,7 +276,7 @@ export function ReviewThreadPopover() {
             <button
               type="button"
               onClick={closeThread}
-              aria-label="Fechar"
+              aria-label="Close"
               className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
             >
               <Icon name="close" size={15} />
@@ -294,7 +294,7 @@ export function ReviewThreadPopover() {
                 onPaste={editImg.onPaste}
                 rows={3}
                 autoFocus
-                placeholder="Edite o comentário…"
+                placeholder="Edit the comment…"
                 className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void saveEdit()
@@ -314,7 +314,7 @@ export function ReviewThreadPopover() {
                       <button
                         type="button"
                         onClick={() => editImg.remove(idx)}
-                        aria-label="Remover imagem"
+                        aria-label="Remove image"
                         className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/ethumb:opacity-100 transition-opacity"
                       >
                         <Icon name="close" size={9} />
@@ -325,7 +325,7 @@ export function ReviewThreadPopover() {
               )}
               <div className="flex items-center justify-end gap-1">
                 <AuButton variant="ghost" size="sm" onClick={() => setEditing(false)}>
-                  Cancelar
+                  Cancel
                 </AuButton>
                 <AuButton
                   variant="primary"
@@ -337,7 +337,7 @@ export function ReviewThreadPopover() {
                   }
                   onClick={() => void saveEdit()}
                 >
-                  Salvar
+                  Save
                 </AuButton>
               </div>
             </div>
@@ -363,7 +363,7 @@ export function ReviewThreadPopover() {
                       type="button"
                       onClick={() => window.open(src, "_blank", "noopener")}
                       className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
-                      aria-label={`Ver imagem ${idx + 1}`}
+                      aria-label={`View image ${idx + 1}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={src} alt="" className="h-24 w-24 object-cover" />
@@ -406,7 +406,7 @@ export function ReviewThreadPopover() {
                 iconLeft="check_circle"
                 onClick={() => void approveComment(comment.id)}
               >
-                Aprovar
+                Approve
               </AuButton>
               <AuButton
                 variant="ghost"
@@ -414,7 +414,7 @@ export function ReviewThreadPopover() {
                 iconLeft="undo"
                 onClick={() => void rejectComment(comment.id)}
               >
-                Rejeitar
+                Reject
               </AuButton>
             </div>
           )}

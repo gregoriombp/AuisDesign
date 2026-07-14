@@ -5,7 +5,7 @@ import { fileToHighResDataUrl } from "@/lib/auis-review/imageScale"
 
 export const MAX_ATTACH_IMAGES = 4
 
-/** Extrai os arquivos de imagem de um clipboard (colar Cmd+V). */
+/** Extract the image files from a clipboard payload (Cmd+V paste). */
 export function extractImagesFromClipboard(items: DataTransferItemList): File[] {
   const files: File[] = []
   for (const item of Array.from(items)) {
@@ -18,9 +18,9 @@ export function extractImagesFromClipboard(items: DataTransferItemList): File[] 
 }
 
 /**
- * Estado + handlers de anexo de imagem (data URLs), reusado pelo compositor de
- * resposta, pela edição de comentário e pelo card de ideia futura. Converte no
- * mesmo data URL base64 do seletor de arquivos do composer principal.
+ * Image-attachment state + handlers (data URLs), shared by the reply composer,
+ * the comment editor and the future-idea card. Converts to the same base64 data
+ * URL the main composer's file picker produces.
  */
 export function useImageAttach(initial: string[] = [], max = MAX_ATTACH_IMAGES) {
   const [images, setImages] = React.useState<string[]>(initial)

@@ -7,17 +7,18 @@ import type {
   ReviewElementContext,
 } from "@/components/auis-review/types"
 
-// Cliente do Review Mode pro Mobbin. O app NÃO fala com o Mobbin direto — o MCP
-// vive no ambiente do agente. Então: enfileira o pedido no review-bridge (mesmo
-// canal dos comentários), espera o agente devolver, e converte a imagem
-// escolhida no mesmo data URL base64 que o seletor de arquivos já produz.
-// Bridge serverless embutido — rotas same-origin /api/review-bridge/*. Sem
-// token, sem env (substitui o servidor Express avulso na 9878).
+// Review Mode's Mobbin client. The app does NOT talk to Mobbin directly — the
+// MCP lives in the agent's environment. So: queue the request on the
+// review-bridge (the same channel comments use), wait for the agent to post
+// back, then convert the chosen image into the same base64 data URL the file
+// picker already produces. The bridge is the embedded serverless one —
+// same-origin /api/review-bridge/* routes, no token, no env (it replaces the
+// standalone Express server on port 9878).
 const BRIDGE_URL = "/api/review-bridge"
 
 const POLL_INTERVAL_MS = 1500
 
-/** Sempre disponível agora que o bridge é serverless (rotas same-origin). */
+/** Always available now that the bridge is serverless (same-origin routes). */
 export function mobbinBridgeReady(): boolean {
   return true
 }
@@ -64,10 +65,10 @@ export async function getMobbinSearch(
 }
 
 /**
- * Aguarda o agente resolver a busca. Ouve o SSE do bridge (`mobbin.resolved`) e
- * faz polling de reforço — cobre o caso de o evento se perder ou de o agente ter
- * resolvido antes de a gente assinar. `onResolved` recebe a busca já `done` ou
- * `error` (o painel decide o que mostrar). Retorna um cleanup.
+ * Waits for the agent to resolve the search. Polls the bridge — which covers the
+ * case where the agent resolved it before we started watching. `onResolved` gets
+ * the search already `done` or `error` (the panel decides what to show). Returns
+ * a cleanup function.
  */
 export function waitForMobbinResults(
   id: string,
@@ -90,7 +91,7 @@ export function waitForMobbinResults(
     onResolved(search)
   }
 
-  // Sem SSE no bridge serverless — o polling de reforço cobre a resolução.
+  // No SSE on the serverless bridge — polling covers the resolution.
   pollTimer = setInterval(() => {
     if (settled) return
     void getMobbinSearch(id)
@@ -98,7 +99,7 @@ export function waitForMobbinResults(
         if (search && search.status !== "pending") finish(search)
       })
       .catch(() => {
-        // transitório — segue tentando
+        // transient — keep trying
       })
   }, POLL_INTERVAL_MS)
 
@@ -106,9 +107,9 @@ export function waitForMobbinResults(
 }
 
 /**
- * Busca a imagem do Mobbin pelo proxy same-origin (driblando CORS / canvas
- * taint) e converte no mesmo data URL base64 do seletor de arquivos — pronto pra
- * cair no `images[]` do comentário.
+ * Fetches the Mobbin image through the same-origin proxy (dodging CORS / canvas
+ * taint) and converts it into the same base64 data URL the file picker produces
+ * — ready to drop into the comment's `images[]`.
  */
 export async function attachMobbinImage(imageUrl: string): Promise<string> {
   const res = await fetch(

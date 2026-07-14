@@ -67,7 +67,7 @@ export function AuNavRail({
                 className="au-nav-rail__toggle"
                 onClick={onToggleCollapsed}
                 aria-label={
-                  collapsed ? "Expandir navegação" : "Recolher navegação"
+                  collapsed ? "Expand navigation" : "Collapse navigation"
                 }
                 aria-expanded={!collapsed}
               >
@@ -231,7 +231,7 @@ export function AuNavRailOrgSwitcher({
   organizations,
   onSelect,
   manageHref,
-  manageLabel = "Gerenciar organizações",
+  manageLabel = "Manage organizations",
   className,
 }: AuNavRailOrgSwitcherProps) {
   const [open, setOpen] = React.useState(false)
@@ -248,7 +248,7 @@ export function AuNavRailOrgSwitcher({
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Organização: ${organization.name}`}
+        aria-label={`Organization: ${organization.name}`}
       >
         <OrgIcon src={organization.icon} name={organization.name} />
         <div className="au-nav-rail__switcher-text">
@@ -384,7 +384,7 @@ export function AuNavRailUserSwitcher({
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Usuário: ${user.name}`}
+        aria-label={`User: ${user.name}`}
       >
         <UserAvatar user={user} />
         <div className="au-nav-rail__switcher-text">

@@ -64,8 +64,9 @@ export function AuCopilotOrb({
   const autoComplexity = preset.complexity - calm * 4;
   const autoDistortion = preset.distortion - calm * 0.4;
 
-  // Thinking morfa a forma (clip-path animado) em vez do hex fixo, e a textura
-  // varia de hue (hueSpeed do preset). Os demais estados seguem na máscara hex.
+  // Thinking morphs the shape (animated clip-path) instead of the fixed hex, and
+  // the texture shifts hue (hueSpeed from the preset). The other states stay on
+  // the hex mask.
   const thinking = state === "thinking";
 
   return (
@@ -110,14 +111,14 @@ export function AuCopilotOrb({
 }
 
 const FALLBACK_REPLIES = [
-  "Olá! Recebi sua mensagem. Em que posso ajudar você hoje?",
-  "A API do Gemini não está configurada. Adicione GEMINI_API_KEY no .env.local para usar o assistente com IA.",
-  "Estou online. Configure GEMINI_API_KEY em .env.local para respostas inteligentes.",
+  "Got your message. What can I help you with today?",
+  "The Gemini API is not configured. Add GEMINI_API_KEY to .env.local to use the AI assistant.",
+  "I'm online. Set GEMINI_API_KEY in .env.local for real answers.",
 ];
 
 function getFallbackReply(error?: boolean) {
   return error
-    ? "Não consegui responder agora. Verifique se GEMINI_API_KEY está em .env.local e tente novamente."
+    ? "Could not get a reply. Check that GEMINI_API_KEY is set in .env.local and try again."
     : FALLBACK_REPLIES[Math.floor(Math.random() * FALLBACK_REPLIES.length)];
 }
 
@@ -132,13 +133,15 @@ async function fetchGeminiReply(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const message =
-      typeof data?.error === "string" ? data.error : `Erro ao conectar (${res.status}).`;
+      typeof data?.error === "string"
+        ? data.error
+        : `The copilot request failed (${res.status}). Try again.`;
     return { error: message };
   }
   if (typeof data?.text === "string") {
     return { text: data.text };
   }
-  return { error: "Resposta inválida da API." };
+  return { error: "The copilot returned no text. Try again." };
 }
 
 export function AuCopilotDrawer({
@@ -220,7 +223,7 @@ export function AuCopilotDrawer({
             type="button"
             className="rounded-full p-2 text-(--fg-tertiary) hover:bg-(--bg-hover) hover:text-(--fg-primary) transition-colors"
             onClick={onClose}
-            aria-label="Fechar"
+            aria-label="Close"
           >
             <Close24 />
           </button>
@@ -234,7 +237,7 @@ export function AuCopilotDrawer({
                 <AuCopilotOrb size={119} />
               </div>
               <div className="body-xl font-semibold text-(--fg-primary)">
-                Olá! Como posso te ajudar?
+                How can I help?
               </div>
             </div>
           ) : (
@@ -325,14 +328,14 @@ export function AuCopilotDrawer({
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
               className="w-full bg-transparent body-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:outline-hidden"
-              placeholder="Pergunte qualquer coisa..."
+              placeholder="Ask anything…"
             />
 
             <div className="ml-2 flex items-center gap-1">
               <button
                 type="button"
                 className="h-7 w-7 rounded-full grid place-items-center text-(--fg-tertiary) hover:bg-(--bg-raised) hover:text-(--fg-primary) transition-colors"
-                aria-label="Anexar"
+                aria-label="Attach"
               >
                 <Icon name="attach_file" size={18} />
               </button>
@@ -346,7 +349,7 @@ export function AuCopilotDrawer({
               <button
                 type="button"
                 className="h-7 w-7 rounded-full bg-(--fg-primary) text-(--fg-on-inverse) grid place-items-center disabled:opacity-50 ml-0.5"
-                aria-label="Enviar"
+                aria-label="Send"
                 onClick={sendMessage}
                 disabled={!message.trim() || isTyping}
               >
@@ -356,7 +359,7 @@ export function AuCopilotDrawer({
           </div>
 
           <div className="body-xs text-(--fg-tertiary) text-center">
-            Copilot pode cometer erros. Verifique informações importantes.
+            Copilot can make mistakes. Double-check important information.
           </div>
         </div>
       </div>
@@ -374,7 +377,7 @@ export function AuCopilotDrawer({
     >
       <button
         type="button"
-        aria-label="Fechar Copilot"
+        aria-label="Close Copilot"
         className={`absolute inset-0 h-full w-full bg-black/0 transition-opacity ${
           isOpen ? "opacity-100" : "opacity-0"
         }`}

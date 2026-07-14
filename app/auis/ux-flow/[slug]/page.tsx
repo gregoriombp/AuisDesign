@@ -42,7 +42,7 @@ export default async function UxFlowViewer({
       <div className="max-w-[1400px] mx-auto px-8 py-12">
         <Link href="/auis/ux-flow" className="no-underline">
           <AuButton variant="ghost" size="sm" iconLeft="arrow_back">
-            Fluxos
+            Flows
           </AuButton>
         </Link>
 
@@ -56,11 +56,11 @@ export default async function UxFlowViewer({
             <div className="mt-3 flex items-center gap-4 text-[11px] text-(--fg-tertiary)">
               <span className="inline-flex items-center gap-1.5">
                 <Icon name="web_asset" size={13} />
-                {meta.screens} telas
+                {meta.screens} {meta.screens === 1 ? "screen" : "screens"}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Icon name="schedule" size={13} />
-                Atualizado em {formatDate(meta.updatedAt)}
+                Updated on {formatDate(meta.updatedAt)}
               </span>
             </div>
           </div>
@@ -69,7 +69,7 @@ export default async function UxFlowViewer({
             className="no-underline shrink-0"
           >
             <AuButton variant="ghost" size="sm" iconRight="open_in_new">
-              Ver no styleguide
+              View in the styleguide
             </AuButton>
           </Link>
         </header>

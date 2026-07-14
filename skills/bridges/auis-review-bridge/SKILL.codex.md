@@ -131,8 +131,7 @@ Final message to the user, concise, with:
   curl -s -H "X-Review-Token: $TOKEN" "http://127.0.0.1:9878/comments/archive?limit=1"     | python3 -c "import sys,json;d=json.load(sys.stdin);print('next_archive_cursor:',d.get('nextCursor'))"
   ```
 - Review Mode is **always mounted** (no env flag): just open the floating button →
-  "Entrar no Review Mode" (or `⌘⇧Y`). A "X comentários no localStorage" toast
-  appears if there is old data to import.
+  "Open Review Mode" (or `⌘⇧Y`).
 - How to stop the server: `pkill -f "tsx src/index.ts"` or use TaskStop
   on the PID returned by Bash.
 - To start **resolving** the comments in bulk, invoke the

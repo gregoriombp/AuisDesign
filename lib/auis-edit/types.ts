@@ -44,8 +44,9 @@ export type PageEditPayload =
       prevToken?: string
       offSpec?: boolean
       offSpecComponent?: string
-      // Valor CRU fora da paleta (quebra o token). `token` guarda o valor literal
-      // (ex.: "#ff5500"). No ship a materialização promove pra um --custom-*.
+      // RAW value outside the palette (breaks the token). `token` holds the
+      // literal value (e.g. "#ff5500"). On ship, materialization promotes it to
+      // a --custom-* token.
       custom?: boolean
     }
   | { kind: "hide"; mode: "hide" | "remove" }
@@ -58,8 +59,8 @@ export type PageEditPayload =
       remove: string[]
       add: string
     }
-  // Troca de classe utilitária curada (tipografia: escala/peso/alinhamento) em
-  // QUALQUER elemento — não preso a um componente. Mesma mecânica do variant.
+  // Curated utility-class swap (typography: scale/weight/alignment) on ANY
+  // element — not bound to a component. Same mechanics as variant.
   | {
       kind: "class"
       group: string
@@ -69,8 +70,8 @@ export type PageEditPayload =
     }
   // Material Symbol ligature swap on an icon span.
   | { kind: "icon"; name: string; prevName?: string }
-  // Override das axes ópticas de um ícone (font-variation-settings). Materializa
-  // em props do <Icon>: weight / fill / grade / opticalSize.
+  // Override of an icon's optical axes (font-variation-settings). Materializes
+  // into <Icon> props: weight / fill / grade / opticalSize.
   | {
       kind: "iconStyle"
       fill: number
@@ -78,9 +79,9 @@ export type PageEditPayload =
       grade: number
       opticalSize: number
     }
-  // Edição GLOBAL do valor de um token (ex.: --accent-brand). Aplicada no :root
-  // ao vivo (todas as instâncias mudam); no ship a materialização reescreve o
-  // token no globals.css + grava um backup pra reverter. anchor.selector = ":root".
+  // GLOBAL edit of a token's value (e.g. --accent-brand). Applied live on :root
+  // (every instance changes); on ship, materialization rewrites the token in
+  // globals.css and stores a backup to revert. anchor.selector = ":root".
   | { kind: "token"; token: string; value: string; prevValue?: string }
   // Sibling reorder: anchor is the PARENT container; `order` is the desired
   // child sequence by stable fingerprint key ("<tag>::<text>"). One move op per

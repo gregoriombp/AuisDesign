@@ -48,7 +48,7 @@
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-handoff` | 🟣🟠🌐 | cowork | ⭐ | Converts a Claude Design (or Cloud Design) handoff into production code by remapping the generated output onto Auis/styleguide components first and sh |
-| `auis-project-build-solve` | 🟣🟠 | repo | ◐ | Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the "Atualizar pro design system" button (kind `restyle`) and  |
+| `auis-project-build-solve` | 🟣🟠 | repo | ◐ | Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the "Restyle with the design system" button (kind `restyle`) a |
 
 ## Content / UX Writing (2)
 

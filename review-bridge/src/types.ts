@@ -116,7 +116,7 @@ export interface ReviewReply {
   authorName: string
   authorColorToken: string
   text: string
-  /** Optional/additive — anexos de imagem (data URLs) na resposta. */
+  /** Optional/additive — image attachments (data URLs) on the reply. */
   images?: string[]
   createdAt: number
 }
@@ -168,10 +168,11 @@ export interface ReviewExportPayload {
 }
 
 // ── Mobbin search (transient, in-memory) ─────────────────────────────────────
-// "Buscar designs parecidos no Mobbin" do composer do Review Mode. O app não
-// alcança o Mobbin (o MCP vive no ambiente do agente), então enfileira um pedido
-// aqui; o agente lê, roda o search via MCP e devolve os resultados. Nada disso
-// entra no store de comentários — é efêmero, só vive em memória no bridge.
+// Backs "Find similar designs on Mobbin" in the Review Mode composer. The app
+// can't reach Mobbin (the MCP lives in the agent's environment), so it queues a
+// request here; the agent reads it, runs the search over MCP and posts the
+// results back. None of this touches the comment store — it's ephemeral and
+// lives only in the bridge's memory.
 export type MobbinPlatform = "ios" | "web"
 
 export interface MobbinScreenResult {
@@ -222,6 +223,9 @@ function pad2(n: number): string {
 /**
  * Server timezone. The summary string is meant to be human-readable inside
  * the team — DD/MM/YYYY, hour-of-day from server clock. Documented in README.
+ *
+ * Byte-identical to components/auis-review/storage/utils.ts and
+ * app/api/review-bridge/_store.ts — the three code paths write the SAME string.
  */
 export function formatResolutionSummary(actor: ReviewActor, at: number): string {
   const d = new Date(at)
@@ -231,5 +235,5 @@ export function formatResolutionSummary(actor: ReviewActor, at: number): string 
   const hours = pad2(d.getHours())
   const minutes = pad2(d.getMinutes())
   const seconds = pad2(d.getSeconds())
-  return `Resolvido por ${actor.name} em ${day}/${month}/${year} às ${hours}:${minutes}:${seconds}.`
+  return `Resolved by ${actor.name} on ${day}/${month}/${year} at ${hours}:${minutes}:${seconds}.`
 }

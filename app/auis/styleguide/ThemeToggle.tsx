@@ -35,8 +35,8 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={toggle}
-      aria-label={`Ativar modo ${theme === "dark" ? "claro" : "escuro"}`}
-      title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      title={theme === "dark" ? "Light mode" : "Dark mode"}
       className="au-theme-toggle"
       suppressHydrationWarning
     >

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { listComments } from "../_store";
 import type { ReviewCommentStatus } from "@/components/auis-review/types";
 
-// Toca o filesystem (review-bridge/data/*.json) — Node, nunca cacheado.
+// Touches the filesystem (review-bridge/data/*.json) — Node only, never cached.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 

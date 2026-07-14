@@ -22,10 +22,10 @@ type Tab = "open" | "in_review" | "backlog" | "archive"
 type Scope = "page" | "all"
 
 const TAB_LABEL: Record<Tab, string> = {
-  open: "Abertos",
-  in_review: "Em revisão",
-  backlog: "Ideias futuras",
-  archive: "Arquivados",
+  open: "Open",
+  in_review: "In review",
+  backlog: "Future ideas",
+  archive: "Archived",
 }
 
 export function ReviewCommentSheet() {
@@ -73,7 +73,7 @@ export function ReviewCommentSheet() {
         : tab === "in_review"
         ? sourceMain.filter((c) => c.status === "in_review")
         : tab === "backlog"
-        ? // Ideia futura é global (não fixada numa tela) — ignora o scope.
+        ? // A future idea is global (not pinned to a screen) — ignore the scope.
           allComments.filter((c) => c.status === "backlog")
         : sourceArchive
     const q = query.trim().toLowerCase()
@@ -129,14 +129,14 @@ export function ReviewCommentSheet() {
       open={open}
       onClose={() => setSheetOpen(false)}
       zIndex={REVIEW_Z.sheet}
-      title="Comentários"
+      title="Comments"
       meta={
         <span className="body-xs text-(--fg-tertiary)">
           {tab === "backlog"
-            ? "Ideias futuras"
+            ? "Future ideas"
             : scope === "page"
-            ? "Nesta tela"
-            : "Em todas as telas"}{" "}
+            ? "On this screen"
+            : "On every screen"}{" "}
           · {visible.length}
         </span>
       }
@@ -157,7 +157,7 @@ export function ReviewCommentSheet() {
               setExportOpen(true)
             }}
           >
-            Exportar
+            Export
           </AuButton>
         </div>
       }
@@ -174,14 +174,14 @@ export function ReviewCommentSheet() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar comentário…"
+            placeholder="Search comments…"
             className="w-full h-9 pl-8 pr-8 rounded-full bg-(--bg-muted) border border-transparent focus:border-(--border-default) focus:bg-(--bg-raised) outline-none body-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) transition-colors"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              aria-label="Limpar busca"
+              aria-label="Clear search"
               className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 inline-flex items-center justify-center rounded-full text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
             >
               <Icon name="close" size={14} />
@@ -203,7 +203,7 @@ export function ReviewCommentSheet() {
                     : "text-(--fg-secondary) hover:text-(--fg-primary)",
                 ].join(" ")}
               >
-                {s === "page" ? "Esta tela" : "Tudo"}
+                {s === "page" ? "This screen" : "Everything"}
               </button>
             ))}
           </div>
@@ -242,7 +242,7 @@ export function ReviewCommentSheet() {
         {showBulkBar && (
           <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-sm bg-(--bg-muted) body-xs">
             <span className="text-(--fg-secondary)">
-              {selectedIds.size} selecionado{selectedIds.size === 1 ? "" : "s"}
+              {selectedIds.size} selected
             </span>
             <div className="flex items-center gap-1">
               <AuButton
@@ -253,7 +253,7 @@ export function ReviewCommentSheet() {
                 disabled={bulkBusy}
                 onClick={() => void bulkApprove()}
               >
-                Aprovar
+                Approve
               </AuButton>
               <AuButton
                 variant="ghost"
@@ -262,7 +262,7 @@ export function ReviewCommentSheet() {
                 disabled={bulkBusy}
                 onClick={() => void bulkReject()}
               >
-                Rejeitar
+                Reject
               </AuButton>
             </div>
           </div>
@@ -279,21 +279,21 @@ export function ReviewCommentSheet() {
                 </AuEmptyMedia>
                 <AuEmptyTitle>
                   {query.trim()
-                    ? "Nada encontrado pra essa busca"
+                    ? "Nothing matches that search"
                     : tab === "archive"
-                    ? "Nenhum arquivado aqui"
+                    ? "Nothing archived here"
                     : tab === "in_review"
-                    ? "Nada esperando revisão"
+                    ? "Nothing waiting for review"
                     : tab === "backlog"
-                    ? "Nenhuma ideia futura ainda"
+                    ? "No future ideas yet"
                     : scope === "page"
-                    ? "Nenhum comentário nesta tela"
-                    : "Sem comentários abertos"}
+                    ? "No comments on this screen"
+                    : "No open comments"}
                 </AuEmptyTitle>
                 {tab === "open" && scope === "page" && (
                   <AuEmptyDescription>
-                    Use a marcação livre ou o pino na barra inferior pra
-                    deixar o primeiro comentário.
+                    Use the freehand mark or the pin in the bottom bar to leave
+                    the first comment.
                   </AuEmptyDescription>
                 )}
               </AuEmptyHeader>
@@ -317,7 +317,7 @@ export function ReviewCommentSheet() {
                   onClick={() => void loadArchivePage(false)}
                   className="mt-2 body-xs text-(--accent-brand) hover:underline self-center"
                 >
-                  Carregar mais arquivados
+                  Load more archived
                 </button>
               )}
             </div>

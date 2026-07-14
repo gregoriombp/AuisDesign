@@ -3,21 +3,21 @@ import fs from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 
 /**
- * Fila de pedidos das ações por tela em /auis/projects — "Atualizar pro
- * design system" (kind "restyle") e "Construir no repo" (kind "build"). Mesma
- * mecânica serverless do flow-suggestions/_store.ts: grava em arquivo JSON
- * (flow-bridge/data/project-builds.json) que o skill `auis-project-build-solve`
- * lê depois pra cumprir os pedidos.
+ * Request queue for the per-screen actions in /auis/projects — "Restyle with
+ * the design system" (kind "restyle") and "Build in repo" (kind "build"). Same
+ * serverless mechanics as flow-suggestions/_store.ts: writes to a JSON file
+ * (flow-bridge/data/project-builds.json) that the `auis-project-build-solve`
+ * skill reads later to fulfil the requests.
  *
- * Ciclo (igual flow-suggestions):
- *   open ──in_review──► in_review ──apply──► applied   (→ archive, seta builtRoute)
+ * Lifecycle (same as flow-suggestions):
+ *   open ──in_review──► in_review ──apply──► applied   (→ archive, sets builtRoute)
  *    │                      │      ──discard─► discarded (→ archive)
  *    │                      └──reject──► open
  *    └──discard──► discarded (→ archive)
  *
- * Importante: este store é a FILA. O estado durável de cada tela (status /
- * builtRoute) vive no manifest TS (app/auis/projects/_data/projects.ts) e
- * é escrito pelo skill ao aplicar — não por esta API.
+ * Important: this store is the QUEUE. The durable state of each screen (status /
+ * builtRoute) lives in the TS manifest (app/auis/projects/_data/projects.ts) and
+ * is written by the skill on apply — not by this API.
  */
 
 export type ProjectBuildStatus = "open" | "in_review" | "applied" | "discarded";
@@ -43,7 +43,7 @@ export type ProjectBuild = {
   updatedAt: number;
   status: ProjectBuildStatus;
   resolution?: BuildResolution;
-  /** Setado no apply de um "build" — a rota da página gerada. */
+  /** Set when a "build" is applied — the route of the generated page. */
   builtRoute?: string;
 };
 
@@ -78,20 +78,19 @@ function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n);
 }
 
+// Same human-readable stamp the review-bridge / flow-bridge use.
 function summarize(
   actor: BuildActor,
   at: number,
   kind: "applied" | "discarded" | "claimed",
 ): string {
   const verb =
-    kind === "applied" ? "Aplicado" : kind === "discarded" ? "Descartado" : "Em revisão por";
+    kind === "applied" ? "Applied" : kind === "discarded" ? "Discarded" : "In review";
   const d = new Date(at);
-  const stamp = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} às ${pad2(
+  const stamp = `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()} at ${pad2(
     d.getHours(),
   )}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-  return kind === "claimed"
-    ? `${verb} ${actor.name} em ${stamp}.`
-    : `${verb} por ${actor.name} em ${stamp}.`;
+  return `${verb} by ${actor.name} on ${stamp}.`;
 }
 
 export type BuildFilter = {
@@ -154,7 +153,7 @@ export async function transitionBuild(
   if (idx === -1) return null;
   const build = main.builds[idx];
   const at = Date.now();
-  const who: BuildActor = actor ?? { kind: "user", id: "user", name: "Usuário" };
+  const who: BuildActor = actor ?? { kind: "user", id: "user", name: "User" };
 
   if (transition === "in_review") {
     if (build.status === "open") {

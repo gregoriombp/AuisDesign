@@ -16,9 +16,9 @@ const STATUS_PILL: Record<
   ScreenStatus,
   { variant: AuPillVariant; label: string }
 > = {
-  imported: { variant: "neutral", label: "Importada" },
-  restyled: { variant: "beta", label: "No DS" },
-  built: { variant: "live", label: "No repo" },
+  imported: { variant: "neutral", label: "Imported" },
+  restyled: { variant: "beta", label: "In DS" },
+  built: { variant: "live", label: "In repo" },
 }
 
 function figmaDeepLink(fileKey: string, nodeId: string): string {
@@ -26,10 +26,10 @@ function figmaDeepLink(fileKey: string, nodeId: string): string {
 }
 
 /**
- * Grade de telas de UMA seção. Cliente porque (1) abre o preview em tamanho
- * grande (AuSheet com paginação ↑/↓) e (2) dispara os pedidos de ação por tela
- * pro /api/project-builds. O feedback é inline (sem toast — evita depender do
- * AuToastProvider no shell do Auis).
+ * Screen grid for ONE section. Client-side because it (1) opens the large
+ * preview (an AuSheet with ↑/↓ pagination) and (2) fires the per-screen action
+ * requests to /api/project-builds. Feedback is inline (no toast — that would
+ * mean depending on AuToastProvider in the Auis shell).
  */
 export function ScreenGrid({
   projectSlug,
@@ -84,7 +84,7 @@ export function ScreenGrid({
                 type="button"
                 onClick={() => setOpenIndex(i)}
                 className="group relative aspect-video w-full overflow-hidden rounded-lg border border-(--border-subtle) bg-(--bg-surface) cursor-pointer"
-                aria-label={`Ver ${s.name} em tamanho grande`}
+                aria-label={`View ${s.name} at full size`}
               >
                 <Image
                   src={s.thumbnail}
@@ -95,7 +95,7 @@ export function ScreenGrid({
                 />
                 <span className="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/20">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-(--bg-inverse) px-3 py-1.5 text-xs text-(--fg-on-inverse) opacity-0 transition group-hover:opacity-100">
-                    <Icon name="fullscreen" size={16} /> Ampliar
+                    <Icon name="fullscreen" size={16} /> Enlarge
                   </span>
                 </span>
               </button>
@@ -118,21 +118,21 @@ export function ScreenGrid({
                 <ActionButton
                   variant="ai"
                   icon="auto_fix_high"
-                  label="Atualizar pro design system"
+                  label="Restyle with the design system"
                   state={req[`${s.id}:restyle`] ?? "idle"}
                   onClick={() => requestAction(s, "restyle")}
                 />
                 {isBuilt ? (
                   <Link href={s.builtRoute!} className="no-underline">
                     <AuButton variant="secondary" block iconRight="open_in_new">
-                      Ver no repo
+                      View in repo
                     </AuButton>
                   </Link>
                 ) : (
                   <ActionButton
                     variant="primary"
                     icon="terminal"
-                    label="Construir no repo"
+                    label="Build in repo"
                     state={req[`${s.id}:build`] ?? "idle"}
                     onClick={() => requestAction(s, "build")}
                   />
@@ -173,7 +173,7 @@ export function ScreenGrid({
             </div>
             <div className="flex items-center justify-between gap-3 text-xs text-(--fg-tertiary)">
               <span>
-                Tela {openIndex! + 1} de {screens.length} · use ↑ / ↓ pra navegar
+                Screen {openIndex! + 1} of {screens.length} · use ↑ / ↓ to navigate
               </span>
               <a
                 href={figmaDeepLink(figmaFileKey, current.figmaNodeId)}
@@ -181,7 +181,7 @@ export function ScreenGrid({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-(--fg-secondary) no-underline hover:text-(--fg-primary)"
               >
-                Ver no Figma <Icon name="open_in_new" size={14} />
+                View in Figma <Icon name="open_in_new" size={14} />
               </a>
             </div>
           </div>
@@ -207,7 +207,7 @@ function ActionButton({
   if (state === "sent") {
     return (
       <AuButton variant="subtle" block iconLeft="check" disabled>
-        Pedido enviado
+        Request sent
       </AuButton>
     )
   }
@@ -219,7 +219,7 @@ function ActionButton({
       loading={state === "loading"}
       onClick={onClick}
     >
-      {state === "error" ? "Falhou — tentar de novo" : label}
+      {state === "error" ? "Request failed — try again" : label}
     </AuButton>
   )
 }

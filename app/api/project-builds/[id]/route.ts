@@ -20,17 +20,17 @@ export async function PUT(
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Corpo inválido." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid body." }, { status: 400 });
   }
   const transition = body.transition as Transition | undefined;
   if (!transition || !TRANSITIONS.includes(transition)) {
-    return NextResponse.json({ error: "transition inválida." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid transition." }, { status: 400 });
   }
   const actor = body.actor as BuildActor | undefined;
   const builtRoute = typeof body.builtRoute === "string" ? body.builtRoute : undefined;
   const build = await transitionBuild(id, transition, actor, builtRoute);
   if (!build) {
-    return NextResponse.json({ error: "Pedido não encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "Request not found." }, { status: 404 });
   }
   return NextResponse.json({ build });
 }

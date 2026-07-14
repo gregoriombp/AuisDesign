@@ -34,11 +34,11 @@ export const STALE_DOCUMENT_HEIGHT_THRESHOLD = 0.2
 export const DEFAULT_STROKE_WIDTH = 3
 
 export const REVIEW_PALETTE: { token: string; label: string }[] = [
-  { token: "var(--au-blue-600)", label: "Azul" },
-  { token: "var(--au-emerald-600)", label: "Verde" },
-  { token: "var(--au-red-600)", label: "Vermelho" },
-  { token: "var(--au-purple-600)", label: "Roxo" },
-  { token: "var(--au-amber-500)", label: "Âmbar" },
-  { token: "var(--au-pink-600)", label: "Rosa" },
+  { token: "var(--au-blue-600)", label: "Blue" },
+  { token: "var(--au-emerald-600)", label: "Green" },
+  { token: "var(--au-red-600)", label: "Red" },
+  { token: "var(--au-purple-600)", label: "Purple" },
+  { token: "var(--au-amber-500)", label: "Amber" },
+  { token: "var(--au-pink-600)", label: "Pink" },
   { token: "var(--au-teal-600)", label: "Teal" },
 ]

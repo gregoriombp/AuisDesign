@@ -11,9 +11,9 @@ export type FlowUpdateTag =
 export type FlowUpdate = {
   /** ISO date `YYYY-MM-DD`. Local timezone — never parsed as UTC. */
   date: string
-  /** Optional time-of-day label shown next to the date (e.g. "16:37 BRT"). */
+  /** Optional time-of-day label shown next to the date (e.g. "16:37 UTC"). */
   time?: string
-  /** One sentence in PT-BR describing the structural change. */
+  /** One sentence describing the structural change. */
   summary: string
   tags: FlowUpdateTag[]
 }
@@ -26,31 +26,31 @@ const TAG_STYLE: Record<
     bg: "var(--au-blue-100)",
     fg: "var(--au-blue-900)",
     border: "var(--au-blue-200)",
-    label: "nova tela",
+    label: "new screen",
   },
   "removed-page": {
     bg: "var(--au-red-100)",
     fg: "var(--au-red-900)",
     border: "var(--au-red-300)",
-    label: "tela removida",
+    label: "screen removed",
   },
   "new-branch": {
     bg: "var(--au-amber-100)",
     fg: "var(--au-amber-900)",
     border: "var(--au-amber-300)",
-    label: "novo branch",
+    label: "new branch",
   },
   "flow-rework": {
     bg: "var(--au-amber-100)",
     fg: "var(--au-amber-900)",
     border: "var(--au-amber-300)",
-    label: "reorganização",
+    label: "rework",
   },
   "integration": {
     bg: "var(--au-emerald-100)",
     fg: "var(--au-emerald-900)",
     border: "var(--au-emerald-300)",
-    label: "integração",
+    label: "integration",
   },
 }
 
@@ -59,15 +59,16 @@ function parseLocalDate(iso: string): Date {
   return new Date(y, (m ?? 1) - 1, d ?? 1)
 }
 
+// en-GB keeps the day-before-month ordering used across the app.
 function formatShort(iso: string): string {
-  return parseLocalDate(iso).toLocaleDateString("pt-BR", {
+  return parseLocalDate(iso).toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
   }).replace(".", "")
 }
 
 function formatLong(iso: string): string {
-  return parseLocalDate(iso).toLocaleDateString("pt-BR", {
+  return parseLocalDate(iso).toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -100,7 +101,7 @@ export function FlowUpdatesBadge({ updates }: { updates: FlowUpdate[] }) {
         className="inline-block w-1.5 h-1.5 rounded-full"
         style={{ background: "var(--au-amber-500)" }}
       />
-      Atualizado em {formatShort(latest.date)}
+      Updated on {formatShort(latest.date)}
     </span>
   )
 }
@@ -115,8 +116,8 @@ export function FlowUpdatesHistorySection({ updates }: { updates: FlowUpdate[] }
   return (
     <Section
       id="updates"
-      title="Histórico de atualizações"
-      lead="Mudanças estruturais no fluxo desde que esta página foi criada. Não inclui ajustes de texto ou estilo."
+      title="Update history"
+      lead="Structural changes to the flow since this page was created. Text and style tweaks are not included."
     >
       <ol className="m-0 p-0 list-none flex flex-col gap-3">
         {sorted.map((u, i) => (

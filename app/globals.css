@@ -14,21 +14,22 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/* v4 auto-detecta sources no projeto inteiro (a v3 só varria pages/components/app).
- * .claude/ tem exemplos de className em markdown que virariam utilitários-lixo
- * (ex.: var(--content/contentPrimary), que quebra o parser). Fora do scan. */
+/* v4 auto-detects sources across the whole project (v3 only scanned
+ * pages/components/app). .claude/ holds markdown className examples that would
+ * become junk utilities (e.g. var(--content/contentPrimary), which breaks the
+ * parser). Kept out of the scan. */
 @source not "../.claude";
 
 @custom-variant dark (&:is(.dark *));
 
 /* ──────────────────────────────────────────────────────────────────────────
- * COLOR — canal UTILITY. Os --color-au-* aqui no @theme fazem o Tailwind v4
- * gerar as classes utilitárias (bg-au-gray-100, text-au-emerald-700, …) —
- * ~337 usos no app. Os MESMOS valores também existem como --au-* no :root
- * abaixo, pro canal var() (bg-(--au-gray-100), var(--au-blue-700), …) — ~810
- * usos. NÃO é duplicação acidental: são dois caminhos de consumo do v4, um por
- * classe e outro por var(). Mantenha os dois em sincronia; remover um quebra
- * centenas de chamadas. Fonte de verdade do VALOR: este bloco.
+ * COLOR — UTILITY channel. The --color-au-* here in @theme are what make
+ * Tailwind v4 generate the utility classes (bg-au-gray-100, text-au-emerald-700,
+ * …) — ~337 uses in the app. The SAME values also exist as --au-* in the :root
+ * below, for the var() channel (bg-(--au-gray-100), var(--au-blue-700), …) —
+ * ~810 uses. NOT accidental duplication: they are the two v4 consumption paths,
+ * one by class and one by var(). Keep both in sync; dropping either breaks
+ * hundreds of call sites. Source of truth for the VALUE: this block.
  * ────────────────────────────────────────────────────────────────────────── */
 @theme {
   --color-au-gray-25: #fefefe;
@@ -198,21 +199,21 @@
   --font-display: Geist, ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: Geist Mono, ui-monospace, SF Mono, Menlo, monospace;
 
-  /* TYPE — degraus finos que faltavam na rampa pequena. O produto usa muito
-   * 10/11px em labels densos, mas a escala parava em text-xs (12px) do Tailwind,
-   * então o código caía em text-[10px]/[11px]. Estes tokens preenchem o buraco;
-   * os demais tamanhos (12..30) já existem como text-xs..3xl. Mantidos pela skill
-   * auis-foundation-update. */
+  /* TYPE — the fine steps missing from the small end of the ramp. The product
+   * leans on 10/11px for dense labels, but the scale stopped at Tailwind's
+   * text-xs (12px), so the code fell back to text-[10px]/[11px]. These tokens
+   * fill the gap; the remaining sizes (12..30) already exist as text-xs..3xl.
+   * Maintained by the auis-foundation-update skill. */
   --text-2xs: 11px;
   --text-3xs: 10px;
 
-  /* TRACKING — letter-spacing nomeado. Tokeniza os tracking-[...] arbitrários
-   * recorrentes do produto (eyebrows uppercase, títulos apertados) com os
-   * MESMOS valores, então trocar arbitrário por token é zero mudança visual.
-   * Nomes próprios de propósito: coexistem com a escala default do Tailwind
-   * (tracking-tight/normal/wide/wider/widest, usada em alguns lugares) sem
-   * sobrescrevê-la. Canal utility só — letter-spacing não varia por tema nem
-   * tem consumidor via var(). Mantidos pela skill auis-foundation-update. */
+  /* TRACKING — named letter-spacing. Tokenizes the product's recurring
+   * arbitrary tracking-[...] values (uppercase eyebrows, tight titles) at the
+   * SAME values, so swapping arbitrary for token is zero visual change.
+   * Distinct names on purpose: they coexist with Tailwind's default scale
+   * (tracking-tight/normal/wide/wider/widest, used in a few places) without
+   * overriding it. Utility channel only — letter-spacing neither varies by theme
+   * nor has a var() consumer. Maintained by the auis-foundation-update skill. */
   --tracking-heading-tighter: -0.02em;
   --tracking-heading-tight: -0.015em;
   --tracking-heading: -0.01em;
@@ -299,9 +300,9 @@
 }
 
 @utility display-xxl {
-  /* Display — voz cinemática. Peso fino (300/Light) carrega a presença,
-   * tamanho carrega a hierarquia. Tracking aperta forte porque caracteres
-   * gigantes deixam espaço visual demais por padrão. */
+  /* Display — cinematic voice. The light weight (300/Light) carries the
+   * presence, size carries the hierarchy. Tracking pulls in hard because giant
+   * characters leave far too much visual space by default. */
   font-family: var(--font-display);
   font-weight: 300;
   letter-spacing: -0.025em;
@@ -347,9 +348,8 @@
 }
 
 @utility body-xl {
-  /* Body — Geist Regular (400). Cada degrau define a sua altura de linha:
-   * leituras compactas (xs/sm) ficam mais apertadas, leitura corrida
-   * (md/lg) respira. */
+  /* Body — Geist Regular (400). Each step sets its own line-height: compact
+   * reads (xs/sm) sit tighter, running text (md/lg) breathes. */
   font-family: var(--font-body);
   font-size: var(--body-xl-size);
   line-height: 1.45;
@@ -426,12 +426,12 @@
  * Geometric minimalism: grayscale primitives + blue-origin AI gradient.
  * ============================================================ */
   :root {
-    /* COLOR — canal VAR. Os --au-* abaixo espelham os --color-au-* do @theme
-     * (topo do arquivo) e existem pro consumo por var(): bg-(--au-gray-100),
-     * var(--au-blue-700), etc. (~810 usos). O @theme cobre o consumo por
-     * classe utilitária (bg-au-*, ~337 usos). Dois canais, um valor —
-     * mantenha em sincronia com o @theme; este bloco também ancora os tokens
-     * semânticos (--bg-*, --fg-*, --accent-*) que referenciam estes primitivos. */
+    /* COLOR — VAR channel. The --au-* below mirror the --color-au-* in @theme
+     * (top of the file) and exist for consumption via var(): bg-(--au-gray-100),
+     * var(--au-blue-700), etc. (~810 uses). @theme covers consumption by
+     * utility class (bg-au-*, ~337 uses). Two channels, one value —
+     * keep in sync with @theme; this block also anchors the semantic tokens
+     * (--bg-*, --fg-*, --accent-*) that reference these primitives. */
 
     /* Neutral anchors */
     --au-black: #000000;
@@ -653,7 +653,7 @@
     /* Layout — content container intents.
    * A page picks ONE intent based on what it holds, not on viewport size.
    * Above the max, the canvas centers — it does not stretch. */
-    --content-narrow: 720px; /* single-column reading: forms, perfil, onboarding */
+    --content-narrow: 720px; /* single-column reading: forms, profile, onboarding */
     --content-default: 1200px; /* mixed content: docs, catalog, billing overview */
     --content-wide: 1440px; /* data dense: dashboards, editors, big tables */
     --content-px: 40px; /* horizontal padding inside the container */
@@ -892,7 +892,7 @@
   }
 }
 
-/* Integration icon – feixe em gradiente PERCORRENDO a borda (como sangue nas veias), sem rotação */
+/* Integration icon – gradient beam TRAVELLING along the border (like blood through veins), no rotation */
 @property --integration-beam-angle {
   syntax: "<angle>";
   initial-value: 0deg;
@@ -948,8 +948,8 @@
   }
 }
 
-/* Pop de confirmação — usado nos checks de sucesso (modais confirmatórios).
- * Escala com um leve overshoot pra dar vida ao "deu certo". */
+/* Confirmation pop — used on success checks (confirmation modals).
+ * Scales with a slight overshoot so the "it worked" lands with some life. */
 @keyframes au-success-pop {
   0% { opacity: 0; transform: scale(0.5); }
   60% { opacity: 1; transform: scale(1.08); }
@@ -1047,7 +1047,7 @@
   }
 }
 
-/* Step 4 – Timeline com ramificações (eixo principal + ramos + nós) */
+/* Step 4 – Branching timeline (main spine + branches + nodes) */
 .step4-timeline-spine {
   stroke-dasharray: 420;
   stroke-dashoffset: 420;
@@ -1219,7 +1219,7 @@
   stroke-dasharray: 1 1;
 }
 /* Gradient variant — <Icon name="agent" gradient />. Brand iridescent stroke
- * (azul → lavanda → pêssego) instead of currentColor. The <linearGradient>
+ * (blue → lavender → peach) instead of currentColor. The <linearGradient>
  * ships inside the glyph SVG; this overrides the currentColor rule above. */
 .au-agent-glyph.is-gradient path {
   stroke: url(#au-agent-gradient);
@@ -1239,11 +1239,11 @@
   }
 }
 
-/* "Gasto total no período" (settings/consumo-e-custos) — hover de série.
- * As linhas não-focadas somem suavemente (transição em stroke/fill-opacity)
- * e a linha em foco mantém a própria cor. O brilho vem de uma segunda Area
- * por cima: um gradiente neutro (#strokeGastoComet), transparente nas pontas,
- * que varre a curva e só clareia a série base via mix-blend-mode. */
+/* Total spend over time (usage & costs settings) — per-series hover.
+ * Unfocused lines fade out softly (transition on stroke/fill-opacity) while the
+ * focused line keeps its own color. The glow comes from a second Area layered
+ * on top: a neutral gradient (#strokeGastoComet), transparent at both ends,
+ * that sweeps the curve and only lightens the base series via mix-blend-mode. */
 .au-gasto-total-chart .recharts-area path {
   transition:
     stroke-opacity var(--transition-duration-au-base) var(--ease-out),
@@ -1933,9 +1933,9 @@
     ) border-box;
   border: 1px solid transparent;
 }
-/* Animated iridescent — estado "em execução"/active de superfícies de IA.
-   Deriva de cor suave (~2s) sobre o gradient da marca, alternando ida/volta.
-   Respeita prefers-reduced-motion. */
+/* Animated iridescent — the "running"/active state of AI surfaces.
+   Gentle color drift (~2s) over the brand gradient, alternating back and forth.
+   Respects prefers-reduced-motion. */
 @keyframes au-iridescent-drift {
   from { background-position: 0% 50%; }
   to   { background-position: 100% 50%; }
@@ -1952,8 +1952,8 @@
 @media (prefers-reduced-motion: reduce) {
   .au-gradient-iridescent-animated { animation: none; }
 }
-/* Spinner com gradiente da marca — o "spin" do estado active é, ele próprio,
-   um anel iridescente que gira (azul→lavanda→pêssego). Mask vira anel. */
+/* Brand-gradient spinner — the active state's "spin" is itself an iridescent
+   ring that rotates (blue→lavender→peach). The mask turns it into a ring. */
 @keyframes au-spin { to { transform: rotate(360deg); } }
 .au-spinner-gradient { position: relative; }
 .au-spinner-gradient::before {
@@ -2252,8 +2252,8 @@
   outline: 2px solid var(--au-blue-500);
   outline-offset: 2px;
 }
-/* Reveal (olhinho) — toggle de mostrar/ocultar senha; mesmo formato do clear,
- * fica dentro da borda arredondada do input. */
+/* Reveal (eye) — show/hide password toggle; same shape as the clear button,
+ * stays inside the input's rounded boundary. */
 .au-input__reveal {
   display: inline-flex;
   align-items: center;
@@ -2508,7 +2508,7 @@
   padding: 24px;
   animation: au-scrim-in 180ms var(--ease-out);
 }
-/* Saída suave: Radix mantém o scrim montado até a animação de [closed] terminar. */
+/* Soft exit: Radix keeps the scrim mounted until the [closed] animation ends. */
 .au-modal-scrim[data-state="closed"] {
   animation: au-scrim-out 150ms var(--ease-out) forwards;
 }
@@ -2532,7 +2532,7 @@
   gap: 16px;
   animation: au-modal-in 180ms var(--ease-out);
 }
-/* Fechar / Voltar / Cancelar deixam de ser abruptos — o conteúdo recua e some. */
+/* Close / Back / Cancel stop feeling abrupt — the content recedes and fades. */
 .au-modal[data-state="closed"] {
   animation: au-modal-out 150ms var(--ease-out) forwards;
 }
@@ -3131,8 +3131,8 @@
 .au-progress__fill {
   height: 100%;
   border-radius: inherit;
-  /* Progresso é neutro: dark/gray em vez de azul/verde/laranja/vermelho.
-   * As variantes mantêm distinção só pelo tom de cinza, sem matiz. */
+  /* Progress is neutral: dark/gray instead of blue/green/orange/red.
+   * The variants stay distinct by gray tone alone, no hue. */
   background: var(--fg-primary);
   transition: width var(--dur-slow) var(--ease-out);
 }
@@ -3984,7 +3984,7 @@
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  /* --au-slider-progress (0%–100%) é definido inline pelo componente. */
+  /* --au-slider-progress (0%–100%) is set inline by the component. */
   background: linear-gradient(
     to right,
     var(--bg-inverse) 0% var(--au-slider-progress, 0%),
@@ -4100,8 +4100,8 @@
   border-color: var(--fg-primary);
   color: var(--bg-raised);
 }
-/* Hover no tab ativo (bg escuro): mantém o texto claro — senão a regra
- * genérica de hover pinta a fonte de --fg-primary e some no fundo preto. */
+/* Hover on the active tab (dark bg): keep the text light — otherwise the
+ * generic hover rule paints it --fg-primary and it disappears on black. */
 .au-tabs--standalone .au-tabs__tab--active:hover:not([disabled]) {
   color: var(--bg-raised);
   border-color: var(--fg-primary);
@@ -4342,8 +4342,8 @@
  * it reads as "chrome" without needing a heavy border. In dark mode stays
  * flat with the canvas (canvas is already dark). */
 .au-sg-sidebar {
-  /* Sidebar branca em light, superfície escura em dark (bg-raised cobre os
-     dois) — pedido de review: bg white com stroke direito bem claro. */
+  /* White sidebar in light, dark surface in dark (bg-raised covers both) —
+     review ask: white bg with a very light right-hand stroke. */
   background: var(--bg-raised);
 }
 .au-sg-sidebar__subtitle {
@@ -4355,9 +4355,9 @@
   margin-top: 6px;
 }
 
-/* Section labels in the styleguide sidebar — heading font, maior e com
- * tracking negativo (em vez do eyebrow uppercase). Lê como uma categoria
- * proper, não como um eyebrow decorativo. Scoped no nav. */
+/* Section labels in the styleguide sidebar — heading font, larger and with
+ * negative tracking (instead of the uppercase eyebrow). Reads as a proper
+ * category, not as a decorative eyebrow. Scoped to the nav. */
 .au-sg-sidebar nav .au-eyebrow {
   font-family: var(--font-heading);
   font-size: 14px;
@@ -4428,9 +4428,9 @@
   background: var(--dark-bg);
   color: var(--dark-fg-primary);
   border-bottom: 1px solid var(--dark-border);
-  /* Sem padding horizontal aqui: o alinhamento do texto vem do __inner, que
-   * espelha o container do conteúdo (max-width 1200 + px-10) pra o cabeçalho
-   * casar com a coluna de baixo. */
+  /* No horizontal padding here: the text alignment comes from __inner, which
+   * mirrors the content container (max-width 1200 + px-10) so the header lines
+   * up with the column below. */
   padding: 64px 0 56px;
   margin: 0 0 56px 0;
 }
@@ -4861,8 +4861,8 @@
 }
 
 /* ============================================================
- * AuCollapsible — disclosure leve. Anima a altura via a var do
- * Radix collapsible (--radix-collapsible-content-height).
+ * AuCollapsible — lightweight disclosure. Animates height via the
+ * Radix collapsible var (--radix-collapsible-content-height).
  * ============================================================ */
 .au-collapsible-content {
   overflow: hidden;
@@ -5420,9 +5420,9 @@
   will-change: border-radius, transform;
 }
 
-/* Copilot pensando: o hex morfa por formas geométricas (hex → círculo →
-   quadrado → triângulo) via clip-path. Pontos equidistantes (12) em cada
-   forma pra o CSS interpolar suave. Combina com hueSpeed na textura. */
+/* Copilot thinking: the hex morphs through geometric shapes (hex → circle →
+   square → triangle) via clip-path. Equidistant points (12) on every shape so
+   CSS can interpolate smoothly. Pairs with hueSpeed on the texture. */
 @keyframes au-copilot-think-morph {
   0%, 100% {
     clip-path: polygon(50.0% 0.0%, 74.1% 12.1%, 98.2% 24.1%, 100.0% 50.0%, 98.2% 75.9%, 74.1% 87.9%, 50.0% 100.0%, 25.9% 87.9%, 1.8% 75.9%, 0.0% 50.0%, 1.8% 24.1%, 25.9% 12.1%);

@@ -102,7 +102,7 @@ export function SidebarSearch() {
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           onKeyDown={handleKeyDown}
-          placeholder="Buscar…"
+          placeholder="Search…"
           className="flex-1 min-w-0 bg-transparent outline-hidden border-0 text-[13px] text-(--fg-primary) placeholder:text-(--fg-tertiary)"
         />
         {query && (
@@ -155,7 +155,7 @@ export function SidebarSearch() {
 
       {open && query.trim().length > 0 && hits.length === 0 && (
         <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 rounded-lg border border-(--border-default) bg-(--bg-raised) shadow-(--shadow-md) px-3 py-4 text-center">
-          <p className="text-[12px] text-(--fg-tertiary)">Nenhum resultado para &ldquo;{query}&rdquo;</p>
+          <p className="text-[12px] text-(--fg-tertiary)">No results for &ldquo;{query}&rdquo;</p>
         </div>
       )}
     </div>

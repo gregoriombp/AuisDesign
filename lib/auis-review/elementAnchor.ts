@@ -7,38 +7,39 @@ import type {
   ReviewPoint,
 } from "@/components/auis-review/types"
 
-// Pins guardam uma posição absoluta (doc coords), mas quando um painel lateral
-// abre/fecha (Copilot, sidebars) o `<main>` muda de largura e o conteúdo reflui
-// horizontalmente — aí o pin preso a um x fixo "desgruda" do elemento.
+// Pins store an absolute position (doc coords), but when a side panel opens or
+// closes (Copilot, sidebars) `<main>` changes width and the content reflows
+// horizontally — and a pin nailed to a fixed x "comes unstuck" from its element.
 //
-// Pra resolver isso, além da coord absoluta, ancoramos o pin ao ELEMENTO sob
-// ele: um seletor resolvível + a fração (fx, fy) de onde o clique caiu dentro
-// da bounding box. No render, re-resolvemos o elemento e posicionamos o pin
-// sobre ele de novo — então o pin acompanha o reflow. Se o seletor não resolver
-// (página mudou, elemento sumiu), caímos de volta na coord absoluta.
+// To fix that, on top of the absolute coord we anchor the pin to the ELEMENT
+// under it: a resolvable selector + the fraction (fx, fy) of where the click
+// landed inside its bounding box. On render we re-resolve the element and place
+// the pin over it again — so the pin follows the reflow. If the selector doesn't
+// resolve (page changed, element gone), we fall back to the absolute coord.
 
 function clamp01(n: number): number {
   return n < 0 ? 0 : n > 1 ? 1 : n
 }
 
-/** Texto normalizado de um elemento, recortado — base do fingerprint. */
+/** An element's normalized, truncated text — the basis of the fingerprint. */
 function fpText(el: Element): string {
   return (el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 60)
 }
 
-/** Pista de identidade (tag + texto) pra recuperar o elemento quando o seletor
- *  estrutural deslocar. */
+/** Identity hint (tag + text) used to recover the element when the structural
+ *  selector shifts. */
 function fingerprintOf(el: Element): ReviewAnchorFingerprint {
   const text = fpText(el)
   return { tag: el.tagName.toLowerCase(), text: text || undefined }
 }
 
 /**
- * Re-resolve o elemento de uma âncora. Tenta o seletor estrutural; se ele
- * falhar ou divergir do fingerprint (índices nth-of-type deslocam quando uma
- * sidebar monta/desmonta ou um breakpoint muda o DOM), recupera por um único
- * elemento da mesma tag com o mesmo texto. Em caso ambíguo (vários iguais) ou
- * texto volátil (contador ao vivo), fica com o resultado do seletor.
+ * Re-resolve an anchor's element. Tries the structural selector first; when that
+ * fails or diverges from the fingerprint (nth-of-type indices shift when a
+ * sidebar mounts/unmounts or a breakpoint changes the DOM), it recovers by
+ * finding a single element with the same tag and the same text. When that is
+ * ambiguous (several identical) or the text is volatile (a live counter), it
+ * keeps the selector's result.
  */
 function resolveElement(
   selector: string,
@@ -50,11 +51,11 @@ function resolveElement(
   } catch {
     bySelector = null
   }
-  // Sem fingerprint (âncoras antigas) → comportamento legado: confia no seletor.
+  // No fingerprint (older anchors) → legacy behavior: trust the selector.
   if (!fingerprint?.text) return bySelector
-  // Seletor resolveu E o texto bate → melhor caso, sem ambiguidade.
+  // Selector resolved AND the text matches → best case, no ambiguity.
   if (bySelector && fpText(bySelector) === fingerprint.text) return bySelector
-  // Seletor falhou ou casou outro elemento: tenta recuperar pelo fingerprint.
+  // Selector failed or matched another element: try to recover by fingerprint.
   const matches = Array.from(document.querySelectorAll(fingerprint.tag)).filter(
     (c) => fpText(c) === fingerprint.text,
   )
@@ -62,16 +63,16 @@ function resolveElement(
   return bySelector
 }
 
-/** Resolve o elemento alvo de uma âncora usando o mesmo fallback de fingerprint
- *  que mantém pins/traços presos ao elemento certo no render. */
+/** Resolve an anchor's target element with the same fingerprint fallback that
+ *  keeps pins/strokes attached to the right element on render. */
 export function resolveAnchoredElement(anchor: ReviewAnchor | null): Element | null {
   if (typeof document === "undefined" || !anchor?.el?.selector) return null
   return resolveElement(anchor.el.selector, anchor.el.fingerprint)
 }
 
-/** Mesma resolução (seletor + fallback de fingerprint), exposta pra consumidores
- *  que guardam só `selector`/`fingerprint` soltos (ex.: Live Edit Mode), sem o
- *  embrulho `anchor.el`. */
+/** The same resolution (selector + fingerprint fallback), exposed for consumers
+ *  that only keep a loose `selector`/`fingerprint` pair (e.g. Live Edit Mode),
+ *  without the `anchor.el` wrapper. */
 export function resolveElementBySelector(
   selector: string,
   fingerprint?: ReviewAnchorFingerprint,
@@ -80,9 +81,9 @@ export function resolveElementBySelector(
   return resolveElement(selector, fingerprint)
 }
 
-// Caminho `body > tag:nth-of-type(n) > …` estável entre toggles de layout (o
-// DOM é o mesmo; só a largura muda). Usa nth-of-type (não ids) porque ids do
-// Radix carregam `:` e quebram o querySelector.
+// A `body > tag:nth-of-type(n) > …` path, stable across layout toggles (the DOM
+// is the same; only the width changes). Uses nth-of-type (not ids) because Radix
+// ids contain `:` and break querySelector.
 export function cssPath(start: Element): string | null {
   if (typeof document === "undefined") return null
   const parts: string[] = []
@@ -107,7 +108,7 @@ export function cssPath(start: Element): string | null {
   return `body > ${parts.join(" > ")}`
 }
 
-/** Captura a âncora-de-elemento sob um ponto de viewport, ou null. */
+/** Capture the element anchor under a viewport point, or null. */
 export function captureElementAnchor(
   clientX: number,
   clientY: number,
@@ -126,7 +127,7 @@ export function captureElementAnchor(
   }
 }
 
-/** Re-resolve a âncora pro ponto de viewport atual, ou null se não achar. */
+/** Re-resolve an anchor to its current viewport point, or null when not found. */
 export function resolveElementPoint(
   anchor: ReviewElementAnchor,
 ): ReviewPoint | null {
@@ -142,10 +143,10 @@ export function resolveElementPoint(
 }
 
 /**
- * Captura a âncora-de-elemento de uma marcação livre. Recebe os pontos JÁ em
- * coords de viewport, escolhe o elemento sob o centroide como referência e
- * guarda, pra cada ponto, sua fração (fx, fy) dentro do box desse elemento.
- * Frações NÃO são clampeadas: o traço pode (e costuma) extrapolar o box.
+ * Capture the element anchor of a freehand stroke. Takes points ALREADY in
+ * viewport coords, picks the element under the centroid as the reference, and
+ * stores, for each point, its fraction (fx, fy) inside that element's box.
+ * Fractions are NOT clamped: a stroke can (and usually does) spill past the box.
  */
 export function captureDrawAnchor(
   viewportPoints: ReviewPoint[],
@@ -175,7 +176,7 @@ export function captureDrawAnchor(
   }
 }
 
-/** Re-resolve a marcação livre pros pontos de viewport atuais, ou null. */
+/** Re-resolve a freehand stroke to its current viewport points, or null. */
 export function resolveDrawPoints(
   anchor: ReviewDrawAnchor,
 ): ReviewPoint[] | null {

@@ -147,7 +147,7 @@ export function useReviewCommandAutocomplete({
         items: agents.map((a) => ({ key: a.id, token: `@${a.handle}` })),
         sections: [
           {
-            label: "Agentes",
+            label: "Agents",
             entries: agents.map((a) => ({
               key: a.id,
               label: a.name,
@@ -155,7 +155,7 @@ export function useReviewCommandAutocomplete({
             })),
           },
         ],
-        ariaLabel: "Sugestões de agentes",
+        ariaLabel: "Agent suggestions",
       }
     }
 
@@ -177,7 +177,7 @@ export function useReviewCommandAutocomplete({
             })),
           },
         ],
-        ariaLabel: "Sugestões de skills",
+        ariaLabel: "Skill suggestions",
       }
     }
 
@@ -188,11 +188,11 @@ export function useReviewCommandAutocomplete({
       sections: showNow
         ? [
             {
-              label: "Ação",
+              label: "Action",
               entries: [
                 {
                   key: "now",
-                  label: "now — libera a execução",
+                  label: "now — allow execution",
                   icon: "bolt",
                   accent: "purple" as const,
                 },
@@ -200,7 +200,7 @@ export function useReviewCommandAutocomplete({
             },
           ]
         : [],
-      ariaLabel: "Ação do comentário",
+      ariaLabel: "Comment action",
     }
   }, [trigger])
 

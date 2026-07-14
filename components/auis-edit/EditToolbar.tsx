@@ -5,10 +5,9 @@ import { Icon } from "@/components/ui/Icon"
 import { ModeFamilySwitch } from "@/components/auis/ModeFamilySwitch"
 import { EDIT_OVERLAY_DATA_ATTR, EDIT_Z } from "./constants"
 
-// Irmã da ReviewToolbar — MESMA pílula (rounded-full bg-raised border-subtle
-// shadow-lg px-1.5 py-1.5), MESMOS botões h-8 w-8 rounded-full, MESMAS
-// divisórias. Chrome de ferramenta coerente com o Review Mode (os dois nunca
-// aparecem juntos).
+// Sibling of ReviewToolbar — SAME pill (rounded-full bg-raised border-subtle
+// shadow-lg px-1.5 py-1.5), SAME h-8 w-8 rounded-full buttons, SAME dividers.
+// Tool chrome consistent with Review Mode (the two never show up together).
 
 export function EditToolbar({
   openCount,
@@ -30,16 +29,16 @@ export function EditToolbar({
       style={{ zIndex: EDIT_Z.toolbar }}
     >
       <div className="pointer-events-auto rounded-full bg-(--bg-raised) border border-(--border-subtle) shadow-lg px-1.5 py-1.5 flex items-center gap-1">
-        {/* Troca de modo (Review ↔ Edit) — mesma categoria da review toolbar. */}
+        {/* Mode switch (Review ↔ Edit) — same category as the review toolbar. */}
         <ModeFamilySwitch current="edit" />
 
         <span className="h-5 w-px bg-(--border-subtle)" />
 
-        {/* Modo seleção (único modo do MVP) — sempre ativo, igual aos ModeButton. */}
+        {/* Selection mode (the MVP's only mode) — always active, like the ModeButtons. */}
         <span
           aria-hidden
           className="h-8 w-8 inline-flex items-center justify-center rounded-full bg-(--bg-inverse) text-(--fg-on-inverse)"
-          title="Selecionar"
+          title="Select"
         >
           <Icon name="arrow_selector_tool" size={16} />
         </span>
@@ -52,13 +51,13 @@ export function EditToolbar({
           aria-pressed={inboxOpen}
           aria-label={
             inReviewCount > 0
-              ? `Edições · ${inReviewCount} em revisão`
-              : "Edições desta tela"
+              ? `Edits · ${inReviewCount} in review`
+              : "Edits on this screen"
           }
           title={
             inReviewCount > 0
-              ? `Edições · ${inReviewCount} em revisão`
-              : "Edições desta tela"
+              ? `Edits · ${inReviewCount} in review`
+              : "Edits on this screen"
           }
           className={[
             "relative h-8 inline-flex items-center gap-1 px-2 rounded-full transition-colors",
@@ -86,8 +85,8 @@ export function EditToolbar({
         <button
           type="button"
           onClick={onExit}
-          aria-label="Sair do modo de edição"
-          title="Sair (⌘⇧E)"
+          aria-label="Exit Edit Mode"
+          title="Exit (⌘⇧E)"
           className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
         >
           <Icon name="close" size={16} />

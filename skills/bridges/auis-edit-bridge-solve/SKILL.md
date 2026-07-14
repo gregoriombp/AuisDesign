@@ -149,7 +149,7 @@ for approval** (AskUserQuestion: "materialize everything" / "only high confidenc
 | `icon` | Swap the icon prop — `iconLeft`/`iconRight`/`iconOnly`/`name` — from `prevName` to `payload.name`. The component is the span's parent (e.g. `<AuButton iconLeft="add" …>`). |
 | `iconStyle` | Override of the optical axes → `<Icon>` props: `payload.weight`→`weight={N}`, `payload.fill`→`fill={0\|1}`, `payload.grade`→`grade={N}`, `payload.opticalSize`→`opticalSize={N}`. Emit **only** the axis/axes that differ from `Icon`'s per-size default (do not dump all 4). Target: the `<Icon>` parent of the `.material-symbols-rounded` span. |
 | `variant` | Swap the axis prop on the `<Au… >`: `payload.axis="variant"` → `variant="<value>"`; `payload.axis="size"` → `size="<value>"`. Do NOT touch className (the class is derived from the prop). |
-| `style` | **Read `payload.prop`** to know WHICH CSS property to tokenize, and `payload.token` (it already comes as `var(--token)`) for the value. Prefer the arbitrary Tailwind utility following the file's convention: `color`→`text-(--token)`, `background-color`→`bg-(--token)`, `border-color`→`border-(--token)` (+ make sure there is a border), `border-radius`→`rounded-(--token)`, `box-shadow`→`shadow-(--token)`, spacing (`padding`/`margin`/`gap`)→`p-(--token)`/`m-(--token)`/`gap-(--token)`; or `style={{ <prop> : "var(--token)" }}`. NEVER materialize a raw color/measurement. **If `payload.offSpec === true`** (override directly on the ROOT of the `offSpecComponent` component), flag it: ideally it should become a **variant** of the component, not a loose override — propose that or confirm before materializing it as a raw class/style. **If `payload.custom === true`** (raw color outside the palette — the "Cor custom" picker lets you break the token on purpose): do NOT inline the raw value; **promote it to a `--custom-*` token** (see §4b) and apply the class/var of that new token. |
+| `style` | **Read `payload.prop`** to know WHICH CSS property to tokenize, and `payload.token` (it already comes as `var(--token)`) for the value. Prefer the arbitrary Tailwind utility following the file's convention: `color`→`text-(--token)`, `background-color`→`bg-(--token)`, `border-color`→`border-(--token)` (+ make sure there is a border), `border-radius`→`rounded-(--token)`, `box-shadow`→`shadow-(--token)`, spacing (`padding`/`margin`/`gap`)→`p-(--token)`/`m-(--token)`/`gap-(--token)`; or `style={{ <prop> : "var(--token)" }}`. NEVER materialize a raw color/measurement. **If `payload.offSpec === true`** (override directly on the ROOT of the `offSpecComponent` component), flag it: ideally it should become a **variant** of the component, not a loose override — propose that or confirm before materializing it as a raw class/style. **If `payload.custom === true`** (raw color outside the palette — the "Custom color" picker lets you break the token on purpose): do NOT inline the raw value; **promote it to a `--custom-*` token** (see §4b) and apply the class/var of that new token. |
 | `token` | **GLOBAL edit of a token's value** (`anchor.selector === ":root"`): rewrites the value in `globals.css` **+ writes a backup first** (see §4b). `payload.token` = the token (e.g. `--accent-brand`), `payload.value` = the new color. Affects ALL instances — it does not touch any element/JSX. |
 | `hide` mode `hide` | Hide it idiomatically: remove the node OR wrap it in a condition. When in doubt, ask. |
 | `hide` mode `remove` | Remove the JSX subtree for good. |
@@ -197,7 +197,7 @@ curl -s -X PUT "$BASE/api/page-edits/$ID" \
   | python3 -m json.tool
 ```
 
-The response carries `resolution.summary` ("Em revisão por Claude em DD/MM/YYYY …").
+The response carries `resolution.summary` ("In review by Claude on DD/MM/YYYY …").
 Note the id+summary for the summary.
 
 ### 6. Final summary (one message)
@@ -220,8 +220,8 @@ Note the id+summary for the summary.
 
 - ❌ Do not use `transition: "apply"` or `"discard"` — only the user approves/discards.
 - ❌ Do not touch `in_review`/`applied`/`discarded` ops.
-- ⚠️ A raw color value is now INTENTIONAL when it comes with `custom: true` ("Cor
-  custom" picker) — **do not skip it**: promote it to a `--custom-*` (§4b). A raw
+- ⚠️ A raw color value is now INTENTIONAL when it comes with `custom: true` ("Custom
+  color" picker) — **do not skip it**: promote it to a `--custom-*` (§4b). A raw
   color/radius/shadow/spacing value **without** the `custom` flag is still an editor bug:
   skip and report it.
 - ✅ `token` (selector `:root`) rewrites the token in `globals.css` — always write the
@@ -240,7 +240,7 @@ Note the id+summary for the summary.
 
 | Symptom | Cause | Workaround |
 |---|---|---|
-| `400 route é obrigatório` | `route` was missing from the PUT body | always include `"route"` |
-| `404 Op não encontrada` | op already approved/rejected/deleted | skip it in the batch |
+| `400 route is required` | `route` was missing from the PUT body | always include `"route"` |
+| `404 Op not found` | op already approved/rejected/deleted | skip it in the batch |
 | GET returns `[]` | wrong route/wrongly encoded, or the ops are in `in_review`/archive | check the `ENC` and the `status` |
 | I cannot find the literal in the TSX | the text comes from data/`.map()` or from another component | follow `domText`+`component`; if it is data, edit the array |

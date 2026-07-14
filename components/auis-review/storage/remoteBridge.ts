@@ -234,13 +234,13 @@ export async function checkBridgeStatus(
       subscribers: number
     }
     if (!data.tokenRequired) {
-      return { ok: false, reason: "bridge sem token configurado" }
+      return { ok: false, reason: "bridge has no token configured" }
     }
     return { ok: true, subscribers: data.subscribers }
   } catch (e) {
     return {
       ok: false,
-      reason: e instanceof Error ? e.message : "erro de rede",
+      reason: e instanceof Error ? e.message : "network error",
     }
   }
 }

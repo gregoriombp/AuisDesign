@@ -1,8 +1,8 @@
 import type { ReviewElementContext } from "@/lib/auis-review/elementContext"
 
-// Chamadas ao /api/review/suggest. Dois modos: "complete" (autocomplete inline,
-// ghost text) e "rewrite" (varinha mágica). Os dois miram um agente de IA que
-// vai implementar a mudança, então a saída é específica e acionável.
+// Calls to /api/review/suggest. Two modes: "complete" (inline autocomplete,
+// ghost text) and "rewrite" (magic wand). Both target an AI agent that will
+// implement the change, so the output is specific and actionable.
 export interface AssistArgs {
   draft: string
   element: ReviewElementContext | null
@@ -11,7 +11,7 @@ export interface AssistArgs {
 
 export interface AssistResult {
   ok: boolean
-  /** 0 quando a requisição nem completou (abort/rede). */
+  /** 0 when the request never completed (abort/network). */
   status: number
   text?: string
 }
@@ -45,8 +45,8 @@ async function callAssist(
   }
 }
 
-/** Continuação inline (ghost text) do que o revisor está digitando. */
+/** Inline continuation (ghost text) of what the reviewer is typing. */
 export const fetchCompletion = (args: AssistArgs) => callAssist("complete", args)
 
-/** Reescrita completa do comentário (varinha mágica). */
+/** Full rewrite of the comment (magic wand). */
 export const fetchRewrite = (args: AssistArgs) => callAssist("rewrite", args)

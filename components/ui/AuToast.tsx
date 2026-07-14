@@ -82,7 +82,7 @@ export function AuToastProvider({ children }: { children: React.ReactNode }) {
         {children}
         <ToastPrimitives.Viewport
           className="au-toast-stack"
-          aria-label="Notificações"
+          aria-label="Notifications"
         >
           {visible.map((t) => (
             <ToastItem
@@ -149,7 +149,7 @@ function ToastItem({
       </div>
       <ToastPrimitives.Close
         className="au-toast__close"
-        aria-label="Fechar notificação"
+        aria-label="Close notification"
       >
         ×
       </ToastPrimitives.Close>

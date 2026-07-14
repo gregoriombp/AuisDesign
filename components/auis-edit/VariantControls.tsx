@@ -3,8 +3,8 @@
 import * as React from "react"
 import type { ComponentSpec, VariantAxis } from "@/lib/auis-edit/variant-registry"
 
-// Controles de variante de um componente Au* detectado. Um grupo segmentado por
-// eixo (Variante, Tamanho). Troca via classList — só valores que existem no
+// Variant controls for a detected Au* component. One segmented group per axis
+// (Variant, Size). Swapped through classList — only values that exist in the
 // design system.
 
 export function VariantControls({
@@ -13,7 +13,7 @@ export function VariantControls({
   onPick,
 }: {
   spec: ComponentSpec
-  /** Valor atual por eixo (lido da classList, sobrescrito por op aberta). */
+  /** Current value per axis (read from classList, overridden by an open op). */
   current: Record<string, string | null>
   onPick: (axis: VariantAxis, value: string) => void
 }) {

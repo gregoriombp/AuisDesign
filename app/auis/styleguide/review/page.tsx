@@ -37,13 +37,14 @@ function formatTimestamp(ts: number): string {
 function relative(ts: number): string {
   const diff = Date.now() - ts
   const m = Math.floor(diff / 60_000)
-  if (m < 1) return "agora"
+  if (m < 1) return "now"
   if (m < 60) return `${m}m`
   const h = Math.floor(m / 60)
   if (h < 24) return `${h}h`
   const d = Math.floor(h / 24)
   if (d < 7) return `${d}d`
-  return new Date(ts).toLocaleDateString("pt-BR")
+  // en-GB keeps the DD/MM/YYYY ordering used across the app.
+  return new Date(ts).toLocaleDateString("en-GB")
 }
 
 function SortHeader({
@@ -83,9 +84,9 @@ function SortHeader({
 }
 
 function StatusPill({ status }: { status: ReviewComment["status"] }) {
-  if (status === "in_review") return <AuPill variant="beta">Em revisão</AuPill>
-  if (status === "resolved") return <AuPill variant="live">Resolvido</AuPill>
-  return <AuPill variant="draft">Aberto</AuPill>
+  if (status === "in_review") return <AuPill variant="beta">In review</AuPill>
+  if (status === "resolved") return <AuPill variant="live">Resolved</AuPill>
+  return <AuPill variant="draft">Open</AuPill>
 }
 
 function CommentRow({
@@ -112,7 +113,7 @@ function CommentRow({
   const dropdownItems: AuDropdownItem[] = [
     {
       id: "open",
-      label: "Abrir tela",
+      label: "Open screen",
       icon: "open_in_new",
       onSelect: () => {
         selectComment(comment.id)
@@ -125,7 +126,7 @@ function CommentRow({
   if (archived) {
     dropdownItems.push({
       id: "reopen",
-      label: "Reabrir",
+      label: "Reopen",
       icon: "refresh",
       onSelect: () => void reopenFromArchive(comment.id),
     })
@@ -133,13 +134,13 @@ function CommentRow({
     dropdownItems.push(
       {
         id: "approve",
-        label: "Aprovar",
+        label: "Approve",
         icon: "check_circle",
         onSelect: () => void approveComment(comment.id),
       },
       {
         id: "reject",
-        label: "Rejeitar",
+        label: "Reject",
         icon: "undo",
         onSelect: () => void rejectComment(comment.id),
       }
@@ -147,7 +148,7 @@ function CommentRow({
   } else {
     dropdownItems.push({
       id: "archive",
-      label: "Marcar como resolvido",
+      label: "Mark as resolved",
       icon: "check_circle",
       onSelect: () => void archiveDirect(comment.id),
     })
@@ -157,7 +158,7 @@ function CommentRow({
     { id: "sep", separator: true },
     {
       id: "delete",
-      label: "Excluir",
+      label: "Delete",
       icon: "delete",
       danger: true,
       onSelect: () => void deleteComment(comment.id),
@@ -172,7 +173,7 @@ function CommentRow({
             type="checkbox"
             checked={selected}
             onChange={() => onToggleSelected?.()}
-            aria-label="Selecionar"
+            aria-label="Select"
             className="accent-(--accent-brand)"
           />
         </td>
@@ -229,7 +230,7 @@ function CommentRow({
           trigger={
             <button
               type="button"
-              aria-label="Ações"
+              aria-label="Actions"
               className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)"
             >
               <Icon name="more_horiz" size={14} />
@@ -418,7 +419,7 @@ export default function ReviewInboxPage() {
                       })
                     }
                   }}
-                  aria-label="Selecionar tudo"
+                  aria-label="Select all"
                   className="accent-(--accent-brand)"
                 />
               </th>
@@ -434,7 +435,7 @@ export default function ReviewInboxPage() {
             </th>
             <th className="px-3 py-2 text-left">
               <SortHeader
-                label="Tela"
+                label="Screen"
                 sortKey="url"
                 current={sortKey}
                 direction={sortDir}
@@ -443,7 +444,7 @@ export default function ReviewInboxPage() {
             </th>
             <th className="px-3 py-2 text-left">
               <SortHeader
-                label="Autor"
+                label="Author"
                 sortKey="author"
                 current={sortKey}
                 direction={sortDir}
@@ -452,12 +453,12 @@ export default function ReviewInboxPage() {
             </th>
             <th className="px-3 py-2 text-left">
               <span className="text-[11px] uppercase tracking-wide font-medium text-(--fg-tertiary)">
-                Comentário
+                Comment
               </span>
             </th>
             <th className="px-3 py-2 text-left">
               <SortHeader
-                label="Data"
+                label="Date"
                 sortKey="createdAt"
                 current={sortKey}
                 direction={sortDir}
@@ -486,21 +487,21 @@ export default function ReviewInboxPage() {
   return (
     <>
       <PageHero title="Review · Inbox">
-        Painel completo dos comentários do Review Mode. Filtra por autor,
-        status ou texto, agrupa por tela, aprova/rejeita em lote os que estão
-        em revisão. Lê do mesmo storage que o overlay (localStorage ou bridge local).
+        The full panel of Review Mode comments. Filter by author, status or text,
+        group by screen, and bulk-approve/reject the ones in review. Reads from the
+        same storage as the overlay (localStorage or the local bridge).
       </PageHero>
 
       <div className="max-w-[1200px] mx-auto px-10 pb-14 flex flex-col gap-8">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <AuStatCard
           icon="forum"
-          label="Total ativos"
+          label="Active total"
           value={comments.length}
         />
         <AuStatCard
           icon="pending"
-          label="Abertos"
+          label="Open"
           value={openCount}
           hint={
             comments.length > 0
@@ -510,12 +511,12 @@ export default function ReviewInboxPage() {
         />
         <AuStatCard
           icon="hourglass_top"
-          label="Em revisão"
+          label="In review"
           value={inReviewCount}
         />
         <AuStatCard
           icon="archive"
-          label="Arquivados"
+          label="Archived"
           value={archivedCount}
         />
       </div>
@@ -524,7 +525,7 @@ export default function ReviewInboxPage() {
         <div className="flex-1 min-w-[200px] max-w-md">
           <AuInput
             iconLeft="search"
-            placeholder="Buscar texto…"
+            placeholder="Search text…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -543,7 +544,7 @@ export default function ReviewInboxPage() {
                   : "text-(--fg-secondary) hover:text-(--fg-primary)",
               ].join(" ")}
             >
-              {t === "open" ? "Abertos" : t === "in_review" ? "Em revisão" : "Arquivados"}
+              {t === "open" ? "Open" : t === "in_review" ? "In review" : "Archived"}
               {t === "in_review" && inReviewCount > 0 && (
                 <span className="min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-[10px] font-semibold bg-(--au-amber-100) text-(--au-amber-700) tabular-nums">
                   {inReviewCount}
@@ -559,7 +560,7 @@ export default function ReviewInboxPage() {
             onChange={(e) => setAuthorId(e.target.value)}
             className="text-sm px-3 py-1.5 rounded-sm border border-(--border-subtle) bg-(--bg-raised) text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand)"
           >
-            <option value="all">Todos os autores</option>
+            <option value="all">All authors</option>
             {authors.map(([id, name]) => (
               <option key={id} value={id}>
                 {name}
@@ -575,7 +576,7 @@ export default function ReviewInboxPage() {
             onChange={(e) => setGroupByUrl(e.target.checked)}
             className="accent-(--accent-brand)"
           />
-          Agrupar por tela
+          Group by screen
         </label>
 
         <span className="ml-auto inline-flex items-center gap-2 text-[11px] text-(--fg-tertiary)">
@@ -583,7 +584,7 @@ export default function ReviewInboxPage() {
             name={backend === "bridge" ? "cloud_done" : "save"}
             size={13}
           />
-          {backend === "bridge" ? "Bridge local" : "localStorage"}
+          {backend === "bridge" ? "Local bridge" : "localStorage"}
         </span>
 
         <AuButton
@@ -595,21 +596,21 @@ export default function ReviewInboxPage() {
             void loadArchivePage(true)
           }}
         >
-          Atualizar
+          Refresh
         </AuButton>
       </div>
 
       {selectableTab && selectedIds.size > 0 && (
         <div className="flex items-center justify-between gap-3 px-4 py-2 rounded-md bg-(--bg-muted) border border-(--border-subtle)">
           <span className="text-sm text-(--fg-secondary)">
-            {selectedIds.size} selecionado{selectedIds.size === 1 ? "" : "s"}
+            {selectedIds.size} selected
           </span>
           <div className="flex items-center gap-2">
             <AuButton variant="ghost" size="sm" onClick={selectAllVisible}>
-              Selecionar visíveis
+              Select visible
             </AuButton>
             <AuButton variant="ghost" size="sm" onClick={clearSelection}>
-              Limpar
+              Clear
             </AuButton>
             <AuButton
               variant="primary"
@@ -619,7 +620,7 @@ export default function ReviewInboxPage() {
               disabled={bulkBusy}
               onClick={() => void bulkApprove()}
             >
-              Aprovar selecionados
+              Approve selected
             </AuButton>
             <AuButton
               variant="secondary"
@@ -628,7 +629,7 @@ export default function ReviewInboxPage() {
               disabled={bulkBusy}
               onClick={() => void bulkReject()}
             >
-              Rejeitar selecionados
+              Reject selected
             </AuButton>
           </div>
         </div>
@@ -642,21 +643,21 @@ export default function ReviewInboxPage() {
             </AuEmptyMedia>
             <AuEmptyTitle>
               {tab === "archive" && !archiveLoaded
-                ? "Carregando arquivados…"
+                ? "Loading archived…"
                 : tab === "in_review"
-                ? "Nada esperando revisão"
+                ? "Nothing waiting for review"
                 : tab === "archive"
-                ? "Nenhum arquivado ainda"
+                ? "Nothing archived yet"
                 : comments.length === 0
-                ? "Nenhum comentário ainda"
-                : "Nada com esses filtros"}
+                ? "No comments yet"
+                : "Nothing matches these filters"}
             </AuEmptyTitle>
             <AuEmptyDescription>
               {tab === "open" && comments.length === 0
-                ? "Ative o Review Mode (⌘⇧Y) em qualquer tela e desenhe o primeiro comentário."
+                ? "Turn on Review Mode (⌘⇧Y) on any screen and draw your first comment."
                 : tab === "in_review"
-                ? "Quando um agente marcar algo como resolvido, ele aparece aqui pra você aprovar ou rejeitar."
-                : "Tente afrouxar os filtros ou trocar o autor."}
+                ? "When an agent marks something as resolved, it shows up here for you to approve or reject."
+                : "Try loosening the filters or switching the author."}
             </AuEmptyDescription>
           </AuEmptyHeader>
         </AuEmpty>
@@ -680,8 +681,8 @@ export default function ReviewInboxPage() {
                       {url}
                     </Link>
                     <span className="text-xs text-(--fg-tertiary) shrink-0">
-                      {items.length} no total
-                      {tab === "open" ? ` · ${groupOpen} aberto${groupOpen === 1 ? "" : "s"}` : ""}
+                      {items.length} in total
+                      {tab === "open" ? ` · ${groupOpen} open` : ""}
                     </span>
                   </div>
                 </header>
@@ -702,7 +703,7 @@ export default function ReviewInboxPage() {
             iconLeft="expand_more"
             onClick={() => void loadArchivePage(false)}
           >
-            Carregar mais arquivados
+            Load more archived
           </AuButton>
         </div>
       )}

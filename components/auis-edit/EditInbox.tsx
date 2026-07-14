@@ -6,7 +6,7 @@ import type { PageEditOp } from "@/lib/auis-edit/types"
 import { EDIT_OVERLAY_DATA_ATTR, EDIT_Z } from "./constants"
 
 // Route-scoped list of overlay ops (open + in_review). Product pages have no
-// host to put an inbox in, so the provider renders this docked panel. Greg
+// host to put an inbox in, so the provider renders this docked panel. The user
 // removes open edits here; in_review edits (claimed by the materialization
 // agent) get an approve/reject pair — same lifecycle as Review Mode.
 
@@ -31,19 +31,19 @@ function describe(op: PageEditOp): string {
   }
   if (p.kind === "variant") return `${p.axis}: ${p.label ?? p.value}`
   if (p.kind === "class") return `${p.group}: ${p.label ?? p.add}`
-  if (p.kind === "icon") return `ícone: ${p.name}`
-  if (p.kind === "move") return `nova ordem · ${p.order.length} blocos`
+  if (p.kind === "icon") return `icon: ${p.name}`
+  if (p.kind === "move") return `new order · ${p.order.length} blocks`
   if (p.kind === "iconStyle")
-    return `ícone · wght ${p.weight}${p.fill ? " · fill" : ""}`
+    return `icon · wght ${p.weight}${p.fill ? " · fill" : ""}`
   if (p.kind === "token") return `token ${p.token}: ${p.value}`
-  return p.mode === "remove" ? "Deletado" : "Oculto"
+  return p.mode === "remove" ? "Deleted" : "Hidden"
 }
 
 const STATUS_LABEL: Record<PageEditOp["status"], string> = {
-  open: "aberta",
-  in_review: "em revisão",
-  applied: "aplicada",
-  discarded: "descartada",
+  open: "open",
+  in_review: "in review",
+  applied: "applied",
+  discarded: "discarded",
 }
 
 const STATUS_COLOR: Record<PageEditOp["status"], string> = {
@@ -80,19 +80,19 @@ export function EditInbox({
       <header className="flex items-start justify-between border-b border-(--border-subtle) px-4 py-3">
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="body-sm font-medium text-(--fg-primary)">
-            Edições desta página
+            Edits on this page
           </span>
           {offSpecCount > 0 && (
             <span className="flex items-center gap-1 text-2xs font-medium text-(--accent-warning)">
               <Icon name="warning" size={12} fill={1} />
-              {offSpecCount} fora de componente
+              {offSpecCount} outside a component
             </span>
           )}
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar"
+          aria-label="Close"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-(--radius-sm) text-(--fg-tertiary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
         >
           <Icon name="close" size={18} />
@@ -102,7 +102,7 @@ export function EditInbox({
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-3 py-3">
         {ops.length === 0 && (
           <p className="px-1 py-6 text-center body-sm text-(--fg-tertiary)">
-            Nenhuma edição ainda. Selecione um elemento e comece.
+            No edits yet. Select an element to start.
           </p>
         )}
         {ops.map((op) => (
@@ -127,10 +127,10 @@ export function EditInbox({
             {op.payload.kind === "style" && op.payload.offSpec && (
               <span className="inline-flex w-fit items-center gap-1 rounded-(--radius-full) border border-(--accent-warning) px-2 py-0.5 text-2xs font-medium text-(--accent-warning)">
                 <Icon name="warning" size={11} fill={1} />
-                fora{" "}
+                outside{" "}
                 {op.payload.offSpecComponent
-                  ? `do ${op.payload.offSpecComponent}`
-                  : "do componente"}
+                  ? `the ${op.payload.offSpecComponent}`
+                  : "the component"}
               </span>
             )}
             <div className="flex items-center justify-between">
@@ -152,14 +152,14 @@ export function EditInbox({
                       onClick={() => onApprove(op.id)}
                       className="rounded-(--radius-sm) px-2 py-1 body-xs text-(--accent-success) hover:bg-(--bg-hover)"
                     >
-                      Aprovar
+                      Approve
                     </button>
                     <button
                       type="button"
                       onClick={() => onReject(op.id)}
                       className="rounded-(--radius-sm) px-2 py-1 body-xs text-(--fg-secondary) hover:bg-(--bg-hover)"
                     >
-                      Rejeitar
+                      Reject
                     </button>
                   </>
                 ) : (
@@ -168,7 +168,7 @@ export function EditInbox({
                     onClick={() => onRemove(op.id)}
                     className="rounded-(--radius-sm) px-2 py-1 body-xs text-(--fg-secondary) hover:bg-(--bg-hover)"
                   >
-                    Remover
+                    Remove
                   </button>
                 )}
               </div>

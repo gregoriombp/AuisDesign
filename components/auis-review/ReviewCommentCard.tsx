@@ -21,7 +21,7 @@ import { CommentText } from "./CommentText"
 import { useImageAttach } from "@/lib/auis-review/useImageAttach"
 import type { ReviewComment, ReviewReply } from "./types"
 
-/** Monta a URL da tela do comentário com o permalink ?reviewCommentId=… */
+/** Builds the comment's screen URL with the ?reviewCommentId=… permalink. */
 function permalinkPath(comment: ReviewComment): string {
   const sep = comment.url.includes("?") ? "&" : "?"
   return `${comment.url}${sep}reviewCommentId=${encodeURIComponent(comment.id)}`
@@ -36,12 +36,12 @@ function isStale(comment: ReviewComment, currentDocHeight: number): boolean {
 }
 
 function StatusPill({ status }: { status: ReviewComment["status"] }) {
-  if (status === "in_review") return <AuPill variant="beta">Em revisão</AuPill>
-  if (status === "resolved") return <AuPill variant="live">Resolvido</AuPill>
+  if (status === "in_review") return <AuPill variant="beta">In review</AuPill>
+  if (status === "resolved") return <AuPill variant="live">Resolved</AuPill>
   if (status === "backlog")
     return (
       <AuPill variant="draft" dot={false}>
-        Ideia futura
+        Future idea
       </AuPill>
     )
   return null
@@ -73,7 +73,7 @@ export function ReplyRow({ reply }: { reply: ReviewReply }) {
           </span>
           {isAgent && (
             <span className="body-xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
-              agente
+              agent
             </span>
           )}
           <span className="body-xs text-(--fg-tertiary)">
@@ -102,7 +102,7 @@ export function ReplyRow({ reply }: { reply: ReviewReply }) {
                   window.open(src, "_blank", "noopener")
                 }}
                 className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
-                aria-label={`Ver imagem ${idx + 1}`}
+                aria-label={`View image ${idx + 1}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={src} alt="" className="h-16 w-16 object-cover" />
@@ -168,10 +168,10 @@ export function ReviewCommentCard({
 
   const navigateToAnchor = () => {
     selectComment(comment.id)
-    // Ideia futura é avulsa (sem pino) — só seleciona, não tenta rolar/navegar.
+    // A future idea is standalone (no pin) — just select it, don't scroll/navigate.
     if (comment.status === "backlog") return
-    // Mantém o review ativo e o drawer aberto enquanto leva pra outra tela —
-    // a navegação é client-side, então é fluido (sem reload).
+    // Keeps review active and the drawer open while moving to another screen —
+    // navigation is client-side, so it stays smooth (no reload).
     setActive(true)
     setSheetOpen(true)
     if (!isOnThisPage) {
@@ -220,40 +220,40 @@ export function ReviewCommentCard({
   const dropdownItems: AuDropdownItem[] = [
     {
       id: "edit",
-      label: "Editar",
+      label: "Edit",
       icon: "edit",
       onSelect: startEdit,
     },
     {
       id: "copy-link",
-      label: "Copiar link",
+      label: "Copy link",
       icon: "link",
       onSelect: copyPermalink,
     },
     isBacklog
       ? {
           id: "restore-backlog",
-          label: "Tirar do backlog",
+          label: "Remove from backlog",
           icon: "outbox",
           onSelect: () => void restoreFromBacklog(comment.id),
         }
       : archived
       ? {
           id: "reopen",
-          label: "Reabrir",
+          label: "Reopen",
           icon: "refresh",
           onSelect: () => void reopenFromArchive(comment.id),
         }
       : comment.status === "open"
       ? {
           id: "archive",
-          label: "Marcar como resolvido",
+          label: "Mark as resolved",
           icon: "check_circle",
           onSelect: () => void archiveDirect(comment.id),
         }
       : {
           id: "reject",
-          label: "Reabrir (rejeitar revisão)",
+          label: "Reopen (reject review)",
           icon: "refresh",
           onSelect: () => void rejectComment(comment.id),
         },
@@ -261,7 +261,7 @@ export function ReviewCommentCard({
       ? [
           {
             id: "to-backlog",
-            label: "Mover pra ideias futuras",
+            label: "Move to future ideas",
             icon: "lightbulb",
             onSelect: () => void moveToBacklog(comment.id),
           } as AuDropdownItem,
@@ -270,7 +270,7 @@ export function ReviewCommentCard({
     { id: "sep", separator: true },
     {
       id: "delete",
-      label: "Excluir",
+      label: "Delete",
       icon: "delete",
       danger: true,
       onSelect: () => void deleteComment(comment.id),
@@ -302,7 +302,7 @@ export function ReviewCommentCard({
               onToggleSelected?.()
             }}
             onClick={(e) => e.stopPropagation()}
-            aria-label="Selecionar"
+            aria-label="Select"
             className="accent-(--accent-brand) mr-0.5"
           />
         )}
@@ -336,7 +336,7 @@ export function ReviewCommentCard({
               <button
                 type="button"
                 onClick={(e) => e.stopPropagation()}
-                aria-label="Ações"
+                aria-label="Actions"
                 className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)"
               >
                 <Icon name="more_horiz" size={14} />
@@ -355,7 +355,7 @@ export function ReviewCommentCard({
             onPaste={editImg.onPaste}
             rows={3}
             autoFocus
-            placeholder="Edite o comentário…"
+            placeholder="Edit the comment…"
             className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void saveEdit()
@@ -375,7 +375,7 @@ export function ReviewCommentCard({
                   <button
                     type="button"
                     onClick={() => editImg.remove(idx)}
-                    aria-label="Remover imagem"
+                    aria-label="Remove image"
                     className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/ethumb:opacity-100 transition-opacity"
                   >
                     <Icon name="close" size={9} />
@@ -386,7 +386,7 @@ export function ReviewCommentCard({
           )}
           <div className="flex items-center justify-end gap-1">
             <AuButton variant="ghost" size="sm" onClick={() => setEditing(false)}>
-              Cancelar
+              Cancel
             </AuButton>
             <AuButton
               variant="primary"
@@ -398,7 +398,7 @@ export function ReviewCommentCard({
               }
               onClick={() => void saveEdit()}
             >
-              Salvar
+              Save
             </AuButton>
           </div>
         </div>
@@ -427,7 +427,7 @@ export function ReviewCommentCard({
                     window.open(src, "_blank", "noopener")
                   }}
                   className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
-                  aria-label={`Ver imagem ${idx + 1}`}
+                  aria-label={`View image ${idx + 1}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={src} alt="" className="h-20 w-20 object-cover" />
@@ -451,7 +451,7 @@ export function ReviewCommentCard({
           e.stopPropagation()
           navigateToAnchor()
         }}
-        title={`Ir para ${comment.url}`}
+        title={`Go to ${comment.url}`}
         className="mt-2 w-full body-xs text-(--fg-tertiary) flex items-center gap-1 rounded-xs hover:text-(--accent-brand) transition-colors text-left"
       >
         <Icon name="link" size={11} />
@@ -468,9 +468,9 @@ export function ReviewCommentCard({
           className="m-0 mt-2 body-xs text-(--fg-tertiary) italic"
           title={
             comment.resolution.approvedAt
-              ? `Aprovado em ${new Date(
+              ? `Approved on ${new Date(
                   comment.resolution.approvedAt
-                ).toLocaleString("pt-BR")}`
+                ).toLocaleString("en-GB")}`
               : undefined
           }
         >
@@ -497,7 +497,7 @@ export function ReviewCommentCard({
             iconLeft="check_circle"
             onClick={() => void approveComment(comment.id)}
           >
-            Aprovar
+            Approve
           </AuButton>
           <AuButton
             variant="ghost"
@@ -505,7 +505,7 @@ export function ReviewCommentCard({
             iconLeft="undo"
             onClick={() => void rejectComment(comment.id)}
           >
-            Rejeitar
+            Reject
           </AuButton>
         </div>
       )}
@@ -521,7 +521,7 @@ export function ReviewCommentCard({
             className="inline-flex items-center gap-1 text-(--fg-secondary) hover:text-(--fg-primary)"
           >
             <Icon name="reply" size={11} />
-            {replyOpen ? "Cancelar resposta" : "Responder"}
+            {replyOpen ? "Cancel reply" : "Reply"}
           </button>
           <button
             type="button"
@@ -530,7 +530,7 @@ export function ReviewCommentCard({
             aria-expanded={historyOpen}
           >
             <Icon name={historyOpen ? "expand_less" : "expand_more"} size={11} />
-            Histórico
+            History
           </button>
         </div>
       )}
@@ -551,35 +551,35 @@ export function ReviewCommentCard({
           className="mt-2 rounded-sm bg-(--bg-surface) border border-(--border-subtle) p-2 flex flex-col gap-1 body-xs text-(--fg-secondary)"
         >
           <div>
-            <span className="text-(--fg-primary)">Criado</span> ·{" "}
+            <span className="text-(--fg-primary)">Created</span> ·{" "}
             <span className="text-(--fg-tertiary)">
-              {formatFullTimestamp(comment.createdAt)} por {comment.authorName}
+              {formatFullTimestamp(comment.createdAt)} by {comment.authorName}
             </span>
           </div>
           {replies.map((r) => (
             <div key={r.id}>
-              <span className="text-(--fg-primary)">Resposta</span> ·{" "}
+              <span className="text-(--fg-primary)">Reply</span> ·{" "}
               <span className="text-(--fg-tertiary)">
-                {formatFullTimestamp(r.createdAt)} por {r.authorName}
-                {r.authorKind === "agent" ? " (agente)" : ""}
+                {formatFullTimestamp(r.createdAt)} by {r.authorName}
+                {r.authorKind === "agent" ? " (agent)" : ""}
               </span>
             </div>
           ))}
           {comment.resolution?.at && (
             <div>
-              <span className="text-(--fg-primary)">Em revisão</span> ·{" "}
+              <span className="text-(--fg-primary)">In review</span> ·{" "}
               <span className="text-(--fg-tertiary)">
-                {formatFullTimestamp(comment.resolution.at)} por{" "}
+                {formatFullTimestamp(comment.resolution.at)} by{" "}
                 {comment.resolution.actor.name}
-                {comment.resolution.actor.kind === "agent" ? " (agente)" : ""}
+                {comment.resolution.actor.kind === "agent" ? " (agent)" : ""}
               </span>
             </div>
           )}
           {comment.resolution?.approvedAt && comment.resolution.approvedBy && (
             <div>
-              <span className="text-(--fg-primary)">Aprovado</span> ·{" "}
+              <span className="text-(--fg-primary)">Approved</span> ·{" "}
               <span className="text-(--fg-tertiary)">
-                {formatFullTimestamp(comment.resolution.approvedAt)} por{" "}
+                {formatFullTimestamp(comment.resolution.approvedAt)} by{" "}
                 {comment.resolution.approvedBy.name}
               </span>
             </div>

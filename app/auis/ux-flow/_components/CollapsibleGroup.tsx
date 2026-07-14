@@ -4,9 +4,9 @@ import * as React from "react"
 import { Icon } from "@/components/ui/Icon"
 
 /**
- * Seção de grupo colapsável do índice de UX Flows. O label do grupo é um
- * heading de verdade (não eyebrow allcaps) e funciona como menu suspenso:
- * clica pra expandir/colapsar, com chevron. Começa aberto.
+ * Collapsible group section of the UX Flows index. The group label is a real
+ * heading (not an all-caps eyebrow) and behaves like a disclosure: click to
+ * expand/collapse, with a chevron. Starts open.
  */
 export function CollapsibleGroup({
   title,

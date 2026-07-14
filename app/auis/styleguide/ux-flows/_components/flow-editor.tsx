@@ -91,7 +91,7 @@ export type Suggestion = {
   edges: Edge[]
 }
 
-const USER_ACTOR: SuggestionActor = { kind: "user", id: "user", name: "Usuário" }
+const USER_ACTOR: SuggestionActor = { kind: "user", id: "user", name: "User" }
 
 /* ─────────────────────────────────────────────────────────────────────
  * Editor context — lets nodes know if we're in edit mode and how to
@@ -172,7 +172,7 @@ function InlineText({
       <span
         className={`${className} cursor-text rounded-xs -mx-1 px-1 hover:bg-(--au-blue-100)`}
         onDoubleClick={(e) => { e.stopPropagation(); startEditing() }}
-        title="Clique duplo pra editar"
+        title="Double-click to edit"
       >
         {value || <span className="italic text-(--fg-tertiary)">{placeholder ?? "…"}</span>}
       </span>
@@ -235,7 +235,7 @@ function LinkPopover({ href, onCommit }: { href: string; onCommit: (next: string
           type="button"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
-          title={linked ? `Link: ${href}` : "Definir link (rota do protótipo)"}
+          title={linked ? `Link: ${href}` : "Set link (prototype route)"}
           className={`nodrag absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-sm border bg-(--bg-raised) transition ${linked ? "border-(--au-blue-300) text-(--au-blue-700)" : "border-(--border-default) text-(--fg-tertiary) hover:border-(--au-blue-400) hover:text-(--au-blue-700)"}`}
         >
           <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -248,7 +248,7 @@ function LinkPopover({ href, onCommit }: { href: string; onCommit: (next: string
         className="w-64 p-2.5"
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <label className="text-[11px] font-medium text-(--fg-secondary)">Link (rota do protótipo)</label>
+        <label className="text-[11px] font-medium text-(--fg-secondary)">Link (prototype route)</label>
         <input
           value={val}
           onChange={(e) => setVal(e.target.value)}
@@ -257,7 +257,7 @@ function LinkPopover({ href, onCommit }: { href: string; onCommit: (next: string
             if (e.key === "Enter") { e.preventDefault(); onCommit(val.trim() || "#") }
             e.stopPropagation()
           }}
-          placeholder="/rota ou #"
+          placeholder="/route or #"
           className="nodrag mt-1 w-full rounded-sm border border-(--border-default) bg-(--bg-canvas) px-2 py-1 text-xs outline-hidden focus:border-(--au-blue-400)"
         />
       </PopoverContent>
@@ -277,14 +277,14 @@ export function ScreenNode({ id, data }: NodeProps<Node<ScreenData>>) {
     <div className={`relative block w-[200px] rounded-lg border border-(--border-default) bg-(--bg-raised) shadow-(--shadow-sm) hover:border-(--au-blue-400) hover:shadow-(--shadow-md) transition ${cursor}`}>
       <Handle type="target" position={Position.Top} className="bg-(--au-blue-500)! border-0! w-2! h-2!" />
       <div className="px-4 py-3 flex flex-col gap-1">
-        <InlineText value={data.step} mode={mode} onCommit={(v) => onUpdateNodeData(id, { step: v })} placeholder="etapa" className="au-eyebrow text-(--au-blue-700)" inputClassName="au-eyebrow text-(--au-blue-700)" />
-        <InlineText value={data.title} mode={mode} onCommit={(v) => onUpdateNodeData(id, { title: v })} placeholder="Título da tela" className="text-sm font-medium text-(--fg-primary) leading-tight" inputClassName="text-sm font-medium text-(--fg-primary)" autoEdit={autoEditId === id} />
+        <InlineText value={data.step} mode={mode} onCommit={(v) => onUpdateNodeData(id, { step: v })} placeholder="step" className="au-eyebrow text-(--au-blue-700)" inputClassName="au-eyebrow text-(--au-blue-700)" />
+        <InlineText value={data.title} mode={mode} onCommit={(v) => onUpdateNodeData(id, { title: v })} placeholder="Screen title" className="text-sm font-medium text-(--fg-primary) leading-tight" inputClassName="text-sm font-medium text-(--fg-primary)" autoEdit={autoEditId === id} />
         {(editing || data.note) && (
-          <InlineText value={data.note ?? ""} mode={mode} multiline onCommit={(v) => onUpdateNodeData(id, { note: v })} placeholder="Descrição…" className="caption text-(--fg-tertiary)" inputClassName="caption text-(--fg-tertiary)" />
+          <InlineText value={data.note ?? ""} mode={mode} multiline onCommit={(v) => onUpdateNodeData(id, { note: v })} placeholder="Description…" className="caption text-(--fg-tertiary)" inputClassName="caption text-(--fg-tertiary)" />
         )}
       </div>
       <Handle type="source" position={Position.Bottom} className="bg-(--au-blue-500)! border-0! w-2! h-2!" />
-      {/* Saídas laterais — invisíveis, só ancoram arestas que saem pro lado. */}
+      {/* Side outputs — invisible, they only anchor edges that leave sideways. */}
       <Handle id="left"  type="source" position={Position.Left}  style={{ opacity: 0 }} className="w-2! h-2! border-0!" />
       <Handle id="right" type="source" position={Position.Right} style={{ opacity: 0 }} className="w-2! h-2! border-0!" />
       {editing && <LinkPopover href={data.href} onCommit={(v) => onUpdateNodeData(id, { href: v })} />}
@@ -299,10 +299,10 @@ export function DecisionNode({ id, data }: NodeProps<Node<DecisionData>>) {
     <div className="relative w-[240px] rounded-lg border-2 border-dashed border-(--au-amber-400) bg-(--au-amber-100) px-4 py-3 flex flex-col gap-1">
       <Handle type="target" position={Position.Top} className={hCls} />
       <span className="au-eyebrow text-(--au-amber-800)">
-        decisão · <InlineText value={data.step} mode={mode} onCommit={(v) => onUpdateNodeData(id, { step: v })} placeholder="etapa" className="text-(--au-amber-800)" inputClassName="au-eyebrow text-(--au-amber-800)" />
+        decision · <InlineText value={data.step} mode={mode} onCommit={(v) => onUpdateNodeData(id, { step: v })} placeholder="step" className="text-(--au-amber-800)" inputClassName="au-eyebrow text-(--au-amber-800)" />
       </span>
-      <InlineText value={data.title} mode={mode} onCommit={(v) => onUpdateNodeData(id, { title: v })} placeholder="Título da decisão" className="text-sm font-medium text-(--au-amber-900) leading-tight" inputClassName="text-sm font-medium text-(--au-amber-900)" autoEdit={autoEditId === id} />
-      <InlineText value={data.question} mode={mode} multiline onCommit={(v) => onUpdateNodeData(id, { question: v })} placeholder="Qual condição o fluxo avalia aqui?" className="text-xs text-(--au-amber-800) leading-snug" inputClassName="text-xs text-(--au-amber-800)" />
+      <InlineText value={data.title} mode={mode} onCommit={(v) => onUpdateNodeData(id, { title: v })} placeholder="Decision title" className="text-sm font-medium text-(--au-amber-900) leading-tight" inputClassName="text-sm font-medium text-(--au-amber-900)" autoEdit={autoEditId === id} />
+      <InlineText value={data.question} mode={mode} multiline onCommit={(v) => onUpdateNodeData(id, { question: v })} placeholder="What condition does the flow evaluate here?" className="text-xs text-(--au-amber-800) leading-snug" inputClassName="text-xs text-(--au-amber-800)" />
       <Handle id="left"   type="source" position={Position.Left}   className={hCls} />
       <Handle id="bottom" type="source" position={Position.Bottom} className={hCls} />
       <Handle id="right"  type="source" position={Position.Right}  className={hCls} />
@@ -311,9 +311,9 @@ export function DecisionNode({ id, data }: NodeProps<Node<DecisionData>>) {
 }
 
 /**
- * CrossFlowNode — losango roxo que marca o salto pra OUTRO fluxo. Em view,
- * clicar EXPANDE esse fluxo inline (ver flow-subflow). Em edit, o título é
- * editável e o link (rota do fluxo alvo) fica no popover.
+ * CrossFlowNode — purple diamond marking the jump to ANOTHER flow. In view mode,
+ * clicking it EXPANDS that flow inline (see flow-subflow). In edit mode the title
+ * is editable and the link (the target flow's route) lives in the popover.
  */
 export function CrossFlowNode({ id, data }: NodeProps<Node<ScreenData>>) {
   const { mode, onUpdateNodeData, autoEditId } = useContext(FlowEditorContext)
@@ -328,9 +328,9 @@ export function CrossFlowNode({ id, data }: NodeProps<Node<ScreenData>>) {
           <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M3.5 12.5L12.5 3.5M12.5 3.5H6M12.5 3.5V10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          outro fluxo
+          other flow
         </span>
-        <InlineText value={data.title} mode={mode} onCommit={(v) => onUpdateNodeData(id, { title: v })} placeholder="Nome do fluxo" className="text-[13px] font-semibold leading-tight text-(--au-purple-900)" inputClassName="text-[13px] font-semibold text-(--au-purple-900) text-center" autoEdit={autoEditId === id} />
+        <InlineText value={data.title} mode={mode} onCommit={(v) => onUpdateNodeData(id, { title: v })} placeholder="Flow name" className="text-[13px] font-semibold leading-tight text-(--au-purple-900)" inputClassName="text-[13px] font-semibold text-(--au-purple-900) text-center" autoEdit={autoEditId === id} />
       </div>
       <Handle type="source" position={Position.Bottom} className="bg-(--au-purple-500)! border-0! w-2! h-2! z-20!" />
       {editing && <LinkPopover href={data.href} onCommit={(v) => onUpdateNodeData(id, { href: v })} />}
@@ -358,7 +358,7 @@ export const branchEdge: Partial<Edge> = {
   markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: "var(--au-amber-500)" },
 }
 
-// Aresta roxa, tracejada — sinaliza a transição pra outro fluxo (liga a/de um CrossFlowNode).
+// Purple dashed edge — marks the transition to another flow (connects to/from a CrossFlowNode).
 export const crossEdge: Partial<Edge> = {
   ...edgeBase,
   style: { stroke: "var(--au-purple-500)", strokeWidth: 1.5, strokeDasharray: "5 3" },
@@ -453,10 +453,10 @@ function useFlowSuggestions(flow: string) {
 
 function StatusPill({ status }: { status: SuggestionStatus }) {
   const map: Record<SuggestionStatus, { label: string; bg: string; fg: string; border: string }> = {
-    open: { label: "aberta", bg: "var(--au-amber-100)", fg: "var(--au-amber-900)", border: "var(--au-amber-300)" },
-    in_review: { label: "em revisão", bg: "var(--au-blue-100)", fg: "var(--au-blue-800)", border: "var(--au-blue-200)" },
-    applied: { label: "aplicada", bg: "var(--bg-muted)", fg: "var(--fg-secondary)", border: "var(--border-default)" },
-    discarded: { label: "descartada", bg: "var(--bg-muted)", fg: "var(--fg-tertiary)", border: "var(--border-default)" },
+    open: { label: "open", bg: "var(--au-amber-100)", fg: "var(--au-amber-900)", border: "var(--au-amber-300)" },
+    in_review: { label: "in review", bg: "var(--au-blue-100)", fg: "var(--au-blue-800)", border: "var(--au-blue-200)" },
+    applied: { label: "applied", bg: "var(--bg-muted)", fg: "var(--fg-secondary)", border: "var(--border-default)" },
+    discarded: { label: "discarded", bg: "var(--bg-muted)", fg: "var(--fg-tertiary)", border: "var(--border-default)" },
   }
   const s = map[status]
   return (
@@ -479,23 +479,23 @@ function nextNodeId() {
 }
 
 const NEW_SCREEN_DATA: ScreenData = {
-  step: "novo",
-  title: "Nova tela",
+  step: "new",
+  title: "New screen",
   href: "#",
-  note: "Descreva pra que essa tela serve.",
+  note: "Describe what this screen is for.",
 }
 
 const NEW_DECISION_DATA: DecisionData = {
   step: "?",
-  title: "Nova decisão",
-  question: "Qual condição o fluxo está avaliando aqui?",
+  title: "New decision",
+  question: "What condition does the flow evaluate here?",
 }
 
 const NEW_CROSSFLOW_DATA: ScreenData = {
-  step: "→ fluxo",
-  title: "Outro fluxo",
+  step: "→ flow",
+  title: "Other flow",
   href: "/auis/styleguide/ux-flows/",
-  note: "Salto pra outro fluxo do styleguide.",
+  note: "Jump to another flow in the styleguide.",
 }
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -605,8 +605,8 @@ export function FlowDiagram({
   const [editNodes, setEditNodes, onEditNodesChange] = useNodesState(canonicalNodes)
   const [editEdges, setEditEdges, onEditEdgesChange] = useEdgesState(canonicalEdges)
 
-  // View-mode dragging: estado separado pra qualquer um reorganizar os cards
-  // sem persistir — um refresh re-inicia dos nós canônicos (layout padrão).
+  // View-mode dragging: separate state so anyone can rearrange the cards without
+  // persisting — a refresh restarts from the canonical nodes (default layout).
   const [viewNodes, , onViewNodesChange] = useNodesState(canonicalNodes)
 
   const [editMode, setEditMode] = useState(false)
@@ -627,7 +627,7 @@ export function FlowDiagram({
   const skipPushRef = useRef(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // "Tela cheia" = a CSS overlay (NOT the native Fullscreen API). The native API
+  // "Fullscreen" = a CSS overlay (NOT the native Fullscreen API). The native API
   // hides everything outside the fullscreened element — including body-portaled
   // overlays (the screen-preview drawer) — which would break the toolbar,
   // comments and modals. A fixed inset-0 panel keeps the whole app working and
@@ -1018,7 +1018,7 @@ export function FlowDiagram({
 
   const errorMessage =
     error === "network"
-      ? "Não foi possível salvar a sugestão — confira se o servidor (npm run dev) está no ar."
+      ? "Could not save the suggestion — check that the server (npm run dev) is running."
       : null
 
   return (
@@ -1061,8 +1061,8 @@ export function FlowDiagram({
             <Controls showInteractive={false}>
               <ControlButton
                 onClick={toggleFullscreen}
-                title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
-                aria-label={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+                title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                aria-label={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
               >
                 {isFullscreen ? (
                   <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -1091,14 +1091,14 @@ export function FlowDiagram({
                   <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-(--au-amber-500) text-white text-[10px] font-bold">
                     {suggestions.length}
                   </span>
-                  {suggestions.length === 1 ? "sugestão" : "sugestões"}
+                  {suggestions.length === 1 ? "suggestion" : "suggestions"}
                 </button>
               </Panel>
             )}
 
             {/* FigJam-style central toolbar — lives inside the canvas so it also
                 shows in fullscreen. Lifted above the global Review dot, which
-                also docks bottom-center. Mover / Comentar / Sugerir edição. */}
+                also docks bottom-center. Move / Comment / Suggest edit. */}
             {!editMode && !previewSugg && (
               <Panel position="bottom-center" className="bottom-16!">
 
@@ -1106,7 +1106,7 @@ export function FlowDiagram({
                   <button
                     onClick={exitCommentMode}
                     aria-pressed={!commentMode}
-                    title="Mover / navegar"
+                    title="Move / navigate"
                     className={
                       !commentMode
                         ? "h-8 w-8 inline-flex items-center justify-center rounded-full bg-(--au-blue-100) text-(--au-blue-700) transition"
@@ -1120,7 +1120,7 @@ export function FlowDiagram({
                   <button
                     onClick={commentMode ? exitCommentMode : enterCommentMode}
                     aria-pressed={commentMode}
-                    title="Comentar (estilo FigJam) — vai pro review com chip UX Flow"
+                    title="Comment (FigJam style) — goes to the review with a UX Flow chip"
                     className={
                       commentMode
                         ? "h-8 w-8 inline-flex items-center justify-center rounded-full bg-(--au-purple-600) text-white transition"
@@ -1134,13 +1134,13 @@ export function FlowDiagram({
                   <span className="w-px h-5 bg-(--border-default) mx-0.5" />
                   <button
                     onClick={enterEdit}
-                    title="Sugerir edição"
+                    title="Suggest edit"
                     className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-medium text-(--fg-secondary) hover:bg-(--bg-muted) hover:text-(--au-blue-700) transition"
                   >
                     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z" />
                     </svg>
-                    Sugerir edição
+                    Suggest edit
                   </button>
                 </div>
               </Panel>
@@ -1150,23 +1150,23 @@ export function FlowDiagram({
               <Panel position="bottom-center" className="bottom-16!">
                 <div className="flex items-center gap-1.5 rounded-full border border-(--border-default) bg-(--bg-raised) px-2 py-1.5 text-xs shadow-(--shadow-md)">
                   <button onClick={() => addNode("screen")} className="rounded-full border border-(--au-blue-200) bg-(--au-blue-100) px-2.5 py-1 font-medium text-(--au-blue-800) transition hover:bg-(--au-blue-200)">
-                    + Tela
+                    + Screen
                   </button>
                   <button onClick={() => addNode("decision")} className="rounded-full border border-(--au-amber-300) bg-(--au-amber-100) px-2.5 py-1 font-medium text-(--au-amber-900) transition hover:bg-(--au-amber-200)">
-                    + Decisão
+                    + Decision
                   </button>
                   <button onClick={() => addNode("crossflow")} className="rounded-full border border-(--au-purple-200) bg-(--au-purple-100) px-2.5 py-1 font-medium text-(--au-purple-800) transition hover:bg-(--au-purple-150)">
-                    + Outro fluxo
+                    + Other flow
                   </button>
 
                   <span className="mx-0.5 h-4 w-px bg-(--border-default)" />
 
-                  <button onClick={undo} disabled={!canUndo} title="Desfazer (⌘Z)" aria-label="Desfazer" className="rounded-full px-2 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted) hover:text-(--fg-primary) disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent">↶</button>
-                  <button onClick={redo} disabled={!canRedo} title="Refazer (⌘⇧Z)" aria-label="Refazer" className="rounded-full px-2 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted) hover:text-(--fg-primary) disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent">↷</button>
+                  <button onClick={undo} disabled={!canUndo} title="Undo (⌘Z)" aria-label="Undo" className="rounded-full px-2 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted) hover:text-(--fg-primary) disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent">↶</button>
+                  <button onClick={redo} disabled={!canRedo} title="Redo (⌘⇧Z)" aria-label="Redo" className="rounded-full px-2 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted) hover:text-(--fg-primary) disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent">↷</button>
 
                   <button
                     onClick={() => setSnapEnabled((v) => !v)}
-                    title={snapEnabled ? "Snap ligado" : "Snap desligado"}
+                    title={snapEnabled ? "Snap on" : "Snap off"}
                     className={
                       snapEnabled
                         ? "rounded-full border border-(--au-blue-200) bg-(--au-blue-100) px-2 py-1 font-medium text-(--au-blue-800) transition"
@@ -1175,8 +1175,8 @@ export function FlowDiagram({
                   >
                     Snap
                   </button>
-                  <button onClick={applyAutoLayout} title="Reorganizar os cards em colunas" className="rounded-full border border-transparent px-2 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted) hover:text-(--fg-primary)">
-                    Organizar
+                  <button onClick={applyAutoLayout} title="Rearrange the cards into columns" className="rounded-full border border-transparent px-2 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted) hover:text-(--fg-primary)">
+                    Arrange
                   </button>
 
                   <span className="mx-0.5 h-4 w-px bg-(--border-default)" />
@@ -1184,24 +1184,24 @@ export function FlowDiagram({
                   <button
                     onClick={duplicateSelected}
                     disabled={selectedCount === 0}
-                    title="Duplicar selecionado (⌘D)"
+                    title="Duplicate selected (⌘D)"
                     className="rounded-full border border-transparent px-2 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted) hover:text-(--fg-primary) disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
                   >
-                    Duplicar
+                    Duplicate
                   </button>
                   <button
                     onClick={deleteSelected}
                     disabled={selectedCount === 0}
-                    title="Excluir selecionado (Delete)"
+                    title="Delete selected (Delete)"
                     className="rounded-full border border-transparent px-2 py-1 font-medium text-(--au-red-700) transition hover:bg-(--au-red-100) disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
                   >
-                    Excluir{selectedCount > 1 ? ` (${selectedCount})` : ""}
+                    Delete{selectedCount > 1 ? ` (${selectedCount})` : ""}
                   </button>
 
                   <span className="mx-0.5 h-4 w-px bg-(--border-default)" />
 
-                  <button onClick={cancelEdit} className="rounded-full px-2.5 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted)">Cancelar</button>
-                  <button onClick={() => setShowSave(true)} className="rounded-full bg-(--au-blue-600) px-3 py-1 font-medium text-white transition hover:bg-(--au-blue-700)">Salvar</button>
+                  <button onClick={cancelEdit} className="rounded-full px-2.5 py-1 text-(--fg-secondary) transition hover:bg-(--bg-muted)">Cancel</button>
+                  <button onClick={() => setShowSave(true)} className="rounded-full bg-(--au-blue-600) px-3 py-1 font-medium text-white transition hover:bg-(--au-blue-700)">Save</button>
                 </div>
               </Panel>
             )}
@@ -1209,12 +1209,12 @@ export function FlowDiagram({
             {previewSugg && (
               <Panel position="top-center">
                 <div className="flex items-center gap-3 bg-(--bg-raised) border border-(--border-default) rounded-md px-4 py-2 text-sm shadow-(--shadow-md)">
-                  <span className="text-(--fg-tertiary) text-xs uppercase tracking-wide font-medium">Sugestão</span>
+                  <span className="text-(--fg-tertiary) text-xs uppercase tracking-wide font-medium">Suggestion</span>
                   <code className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-(--bg-muted) text-(--fg-secondary)">{previewSugg.id}</code>
                   <StatusPill status={previewSugg.status} />
                   <span className="text-(--fg-primary) font-medium max-w-xs truncate">{previewSugg.description}</span>
                   <span className="text-(--fg-tertiary)">·</span>
-                  <button onClick={() => setPreviewSugg(null)} className="text-(--au-blue-700) font-medium hover:underline whitespace-nowrap">Voltar ao fluxo oficial</button>
+                  <button onClick={() => setPreviewSugg(null)} className="text-(--au-blue-700) font-medium hover:underline whitespace-nowrap">Back to the official flow</button>
                 </div>
               </Panel>
             )}
@@ -1230,12 +1230,12 @@ export function FlowDiagram({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => !saving && setShowSave(false)}>
           <div className="bg-(--bg-raised) rounded-lg border border-(--border-subtle) shadow-(--shadow-lg) w-full max-w-md mx-4 p-6 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
             <div>
-              <h2 className="text-base font-semibold text-(--fg-primary) m-0">Salvar sugestão</h2>
-              <p className="text-sm text-(--fg-secondary) mt-1 m-0">Descreva o que muda nesse fluxo. O Claude lê isso pra entender a intenção da edição.</p>
+              <h2 className="text-base font-semibold text-(--fg-primary) m-0">Save suggestion</h2>
+              <p className="text-sm text-(--fg-secondary) mt-1 m-0">Describe what changes in this flow. Claude reads this to understand the intent behind the edit.</p>
             </div>
             <textarea
               className="w-full rounded-md border border-(--border-default) bg-(--bg-canvas) px-3 py-2 text-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:outline-hidden focus:border-(--au-blue-400) resize-none"
-              placeholder="Ex: adicionei bloqueio de conta após 5 tentativas inválidas…"
+              placeholder="E.g. added an account lock after 5 invalid attempts…"
               rows={3} value={desc} onChange={(e) => setDesc(e.target.value)} autoFocus
             />
             <div className="flex items-center justify-between gap-2">
@@ -1244,12 +1244,12 @@ export function FlowDiagram({
                 disabled={saving}
                 className="text-xs font-medium text-(--fg-tertiary) underline-offset-2 hover:text-(--au-blue-700) hover:underline disabled:opacity-40"
               >
-                ou copiar prompt pro chat
+                or copy a prompt for the chat
               </button>
               <div className="flex gap-2">
-                <button onClick={() => setShowSave(false)} disabled={saving} className="px-4 py-2 rounded-md border border-(--border-default) text-sm font-medium text-(--fg-secondary) hover:bg-(--bg-muted) transition disabled:opacity-40">Cancelar</button>
+                <button onClick={() => setShowSave(false)} disabled={saving} className="px-4 py-2 rounded-md border border-(--border-default) text-sm font-medium text-(--fg-secondary) hover:bg-(--bg-muted) transition disabled:opacity-40">Cancel</button>
                 <button onClick={confirmSave} disabled={!desc.trim() || saving} className="px-4 py-2 rounded-md bg-(--au-blue-600) text-white text-sm font-medium hover:bg-(--au-blue-700) disabled:opacity-40 disabled:cursor-not-allowed transition">
-                  {saving ? "Salvando…" : "Salvar"}
+                  {saving ? "Saving…" : "Save"}
                 </button>
               </div>
             </div>
@@ -1262,13 +1262,13 @@ export function FlowDiagram({
           <div className="bg-(--bg-raised) rounded-lg border border-(--border-subtle) shadow-(--shadow-lg) w-full max-w-lg mx-4 p-6 flex flex-col gap-4 max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-(--fg-primary) m-0">
-                Sugestões
+                Suggestions
                 <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-(--au-amber-500) text-white text-[10px] font-bold align-middle">{suggestions.length}</span>
               </h2>
               <button onClick={() => setShowReview(false)} className="text-(--fg-tertiary) hover:text-(--fg-primary) text-lg leading-none">×</button>
             </div>
             <p className="text-xs text-(--fg-secondary) m-0 -mt-2">
-              Sugestões ficam salvas no repo (<code className="text-[10px] font-mono">flow-bridge/data/suggestions.json</code>). Mande o ID pro Claude no chat (<em>&quot;avalia a sugestão X do flow {flow}&quot;</em>) pra ele propor a aplicação. Aprovar arquiva, rejeitar volta pra aberta.
+              Suggestions are saved in the repo (<code className="text-[10px] font-mono">flow-bridge/data/suggestions.json</code>). Send the ID to Claude in the chat (<em>&quot;evaluate suggestion X of flow {flow}&quot;</em>) and it will propose how to apply it. Approving archives it; rejecting sends it back to open.
             </p>
             <ul className="flex flex-col gap-3 overflow-y-auto m-0 p-0 list-none">
               {suggestions.map((s) => (
@@ -1277,7 +1277,8 @@ export function FlowDiagram({
                     <code className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-(--bg-muted) text-(--fg-secondary)">{s.id}</code>
                     <StatusPill status={s.status} />
                     <span className="caption text-(--fg-tertiary)">
-                      {new Date(s.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      {/* en-GB keeps the day-before-month ordering used across the app. */}
+                      {new Date(s.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                   <p className="m-0 text-sm font-medium text-(--fg-primary) leading-snug">{s.description}</p>
@@ -1285,12 +1286,12 @@ export function FlowDiagram({
                     <p className="m-0 caption text-(--fg-tertiary) italic">{s.resolution.summary}</p>
                   )}
                   <div className="flex gap-2 mt-1 flex-wrap">
-                    <button onClick={() => viewSugg(s)} className="px-3 py-1.5 rounded-sm bg-(--au-blue-600) text-white text-xs font-medium hover:bg-(--au-blue-700) transition">Visualizar</button>
+                    <button onClick={() => viewSugg(s)} className="px-3 py-1.5 rounded-sm bg-(--au-blue-600) text-white text-xs font-medium hover:bg-(--au-blue-700) transition">View</button>
                     <button
-                      onClick={() => navigator.clipboard?.writeText(`avalia a sugestão ${s.id} do flow ${flow}`)}
+                      onClick={() => navigator.clipboard?.writeText(`evaluate suggestion ${s.id} of flow ${flow}`)}
                       className="px-3 py-1.5 rounded-sm border border-(--border-default) text-xs font-medium text-(--fg-secondary) hover:bg-(--bg-muted) transition"
                     >
-                      Copiar prompt
+                      Copy prompt
                     </button>
                     {s.status === "in_review" && (
                       <>
@@ -1298,13 +1299,13 @@ export function FlowDiagram({
                           onClick={() => void transition(s.id, "apply")}
                           className="px-3 py-1.5 rounded-sm bg-(--au-emerald-700) text-white text-xs font-medium hover:bg-(--au-emerald-800) transition"
                         >
-                          Aprovar
+                          Approve
                         </button>
                         <button
                           onClick={() => void transition(s.id, "reject")}
                           className="px-3 py-1.5 rounded-sm border border-(--border-default) text-xs font-medium text-(--fg-secondary) hover:bg-(--bg-muted) transition"
                         >
-                          Rejeitar
+                          Reject
                         </button>
                       </>
                     )}
@@ -1312,13 +1313,13 @@ export function FlowDiagram({
                       onClick={() => void transition(s.id, "discard")}
                       className="px-3 py-1.5 rounded-sm border border-(--border-default) text-xs font-medium text-(--fg-secondary) hover:bg-(--bg-muted) transition"
                     >
-                      Descartar
+                      Discard
                     </button>
                   </div>
                 </li>
               ))}
               {suggestions.length === 0 && (
-                <li className="text-sm text-(--fg-tertiary) text-center py-6">Nenhuma sugestão ativa.</li>
+                <li className="text-sm text-(--fg-tertiary) text-center py-6">No active suggestions.</li>
               )}
             </ul>
           </div>
@@ -1378,8 +1379,8 @@ export function FlowDiagram({
 }
 
 /* ─────────────────────────────────────────────────────────────────────
- * FlowConfirmModal — confirmação antes de pular pra outro fluxo. Abre ao
- * clicar num CrossFlowNode (losango roxo); confirmar navega pro outro fluxo.
+ * FlowConfirmModal — confirmation before jumping to another flow. Opens when you
+ * click a CrossFlowNode (purple diamond); confirming navigates to the other flow.
  * ──────────────────────────────────────────────────────────────────── */
 
 function FlowConfirmModal({
@@ -1404,10 +1405,11 @@ function FlowConfirmModal({
             </svg>
           </span>
           <div className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold text-(--fg-primary) m-0">Ir para outro fluxo?</h2>
+            <h2 className="text-base font-semibold text-(--fg-primary) m-0">Go to another flow?</h2>
             <p className="text-sm text-(--fg-secondary) m-0 leading-relaxed">
-              Você vai sair deste fluxo e abrir o fluxo{" "}
-              <b className="font-medium text-(--fg-primary)">{target.title}</b>. Dá pra voltar a qualquer momento.
+              You will leave this flow and open the{" "}
+              <b className="font-medium text-(--fg-primary)">{target.title}</b> flow.
+              You can come back at any time.
             </p>
           </div>
         </div>
@@ -1416,13 +1418,13 @@ function FlowConfirmModal({
             onClick={onCancel}
             className="px-4 py-2 rounded-md border border-(--border-default) text-sm font-medium text-(--fg-secondary) hover:bg-(--bg-muted) transition"
           >
-            Cancelar
+            Cancel
           </button>
           <button
             onClick={onConfirm}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-(--au-purple-600) text-white text-sm font-medium hover:bg-(--au-purple-700) transition"
           >
-            Ir para {target.title}
+            Go to {target.title}
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -1458,13 +1460,13 @@ function CopyPromptModal({
     const clean = cleanForPrompt(nodes, edges)
     if (mode === "flow-update") {
       return [
-        `Por favor, atualize o flow \`${flow}\` no styleguide com a estrutura abaixo.`,
+        `Please update the \`${flow}\` flow in the styleguide with the structure below.`,
         ``,
-        `Arquivo: \`app/auis/styleguide/ux-flows/${flow}/page.tsx\``,
-        `- Substitua os arrays \`NODES\` e \`EDGES\` pelos JSONs abaixo`,
-        `- Mantenha o resto da página (PageHero, Section, lista de screens, decisões de design)`,
-        `- Para arestas, decida entre \`edgeBase\` (linha cinza) e \`branchEdge\` (linha âmbar) pelo contexto — saídas de nó \`decision\` viram \`branchEdge\``,
-        `- Adicione uma entrada no topo do array \`updates\` descrevendo a mudança`,
+        `File: \`app/auis/styleguide/ux-flows/${flow}/page.tsx\``,
+        `- Replace the \`NODES\` and \`EDGES\` arrays with the JSON below`,
+        `- Keep the rest of the page (PageHero, Section, screen list, design decisions)`,
+        `- For edges, choose between \`edgeBase\` (gray line) and \`branchEdge\` (amber line) from context — outputs of a \`decision\` node become \`branchEdge\``,
+        `- Add an entry at the top of the \`updates\` array describing the change`,
         ``,
         `NODES:`,
         "```json",
@@ -1487,17 +1489,17 @@ function CopyPromptModal({
       .join("\n")
 
     return [
-      `Por favor, scaffold as rotas reais do produto baseadas no flow \`${flow}\`.`,
+      `Please scaffold the real product routes based on the \`${flow}\` flow.`,
       ``,
-      `Para cada nó "screen" com href começando com \`/\` (rota interna do produto):`,
-      `- Crie \`app/<href>/page.tsx\` com layout do app e título da tela`,
-      `- Reuse componentes existentes do styleguide; só crie componentes novos como último recurso`,
-      `- Não crie páginas para nós "decision" — são só pontos lógicos`,
+      `For every "screen" node whose href starts with \`/\` (an internal product route):`,
+      `- Create \`app/<href>/page.tsx\` with the app layout and the screen title`,
+      `- Reuse existing styleguide components; only create new components as a last resort`,
+      `- Don't create pages for "decision" nodes — they are logic points only`,
       ``,
-      `Screens a criar:`,
-      screenList || "(nenhuma screen com href interno encontrada)",
+      `Screens to create:`,
+      screenList || "(no screen with an internal href found)",
       ``,
-      `Flow completo (JSON pra contexto):`,
+      `Full flow (JSON for context):`,
       "```json",
       JSON.stringify({ flow, ...clean }, null, 2),
       "```",
@@ -1521,14 +1523,14 @@ function CopyPromptModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 pb-0 flex flex-col gap-1.5">
-          <h2 className="text-base font-semibold text-(--fg-primary) m-0">Copiar prompt pro Claude</h2>
+          <h2 className="text-base font-semibold text-(--fg-primary) m-0">Copy a prompt for Claude</h2>
           <p className="text-sm text-(--fg-secondary) m-0 leading-relaxed">
-            Cola no chat com o Claude. O JSON dos nós e arestas vai dentro do prompt.
+            Paste it into the chat with Claude. The node and edge JSON goes inside the prompt.
           </p>
         </div>
 
         <div className="px-6 pt-4 flex flex-col gap-2">
-          <span className="text-xs font-medium text-(--fg-secondary) uppercase tracking-wide">O que o Claude deve fazer?</span>
+          <span className="text-xs font-medium text-(--fg-secondary) uppercase tracking-wide">What should Claude do?</span>
           <div className="flex flex-col gap-1.5">
             <label
               className={
@@ -1544,9 +1546,9 @@ function CopyPromptModal({
                 className="mt-0.5"
               />
               <span className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-(--fg-primary)">Atualizar este flow no styleguide</span>
+                <span className="text-sm font-medium text-(--fg-primary)">Update this flow in the styleguide</span>
                 <span className="text-xs text-(--fg-secondary) leading-snug">
-                  Substitui <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">NODES</code> e <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">EDGES</code> no <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">page.tsx</code> deste flow e adiciona entrada em <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">updates</code>.
+                  Replaces <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">NODES</code> and <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">EDGES</code> in this flow&apos;s <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">page.tsx</code> and adds an entry to <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">updates</code>.
                 </span>
               </span>
             </label>
@@ -1565,9 +1567,9 @@ function CopyPromptModal({
                 className="mt-0.5"
               />
               <span className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium text-(--fg-primary)">Criar rotas do produto</span>
+                <span className="text-sm font-medium text-(--fg-primary)">Create the product routes</span>
                 <span className="text-xs text-(--fg-secondary) leading-snug">
-                  Scaffold <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">app/&lt;href&gt;/page.tsx</code> pra cada screen. Decisões não viram página.
+                  Scaffolds <code className="font-mono text-[10px] px-1 py-0.5 rounded bg-(--bg-muted)">app/&lt;href&gt;/page.tsx</code> for each screen. Decisions don&apos;t become pages.
                 </span>
               </span>
             </label>
@@ -1576,7 +1578,7 @@ function CopyPromptModal({
 
         <details className="px-6 pt-4">
           <summary className="cursor-pointer text-xs font-medium text-(--fg-secondary) hover:text-(--fg-primary) select-none">
-            Preview do prompt
+            Prompt preview
           </summary>
           <pre className="mt-2 text-[10px] leading-relaxed bg-(--bg-canvas) border border-(--border-subtle) rounded-sm p-3 max-h-48 overflow-auto whitespace-pre-wrap wrap-break-word font-mono text-(--fg-secondary)">
             {prompt}
@@ -1588,13 +1590,13 @@ function CopyPromptModal({
             onClick={onClose}
             className="px-4 py-2 rounded-md border border-(--border-default) text-sm font-medium text-(--fg-secondary) hover:bg-(--bg-muted) transition"
           >
-            Fechar
+            Close
           </button>
           <button
             onClick={copy}
             className="px-4 py-2 rounded-md bg-(--au-blue-600) text-white text-sm font-medium hover:bg-(--au-blue-700) transition"
           >
-            {copied ? "Copiado!" : "Copiar prompt"}
+            {copied ? "Copied" : "Copy prompt"}
           </button>
         </div>
       </div>
@@ -1605,7 +1607,7 @@ function CopyPromptModal({
 /* ─────────────────────────────────────────────────────────────────────
  * ScreenPreviewDrawer — opens the screen's href in an iframe inside an
  * AuSheet (wide). Clicking a screen card in the diagram opens this. For
- * empty hrefs ("#" or "") shows a "sem protótipo" message. External
+ * empty hrefs ("#" or "") it shows a "no prototype" message. External
  * URLs open in a new tab instead of the iframe.
  * ──────────────────────────────────────────────────────────────────── */
 
@@ -1643,7 +1645,7 @@ function ScreenPreviewDrawer({
                 href={href}
                 className="text-xs font-medium text-(--au-blue-700) hover:text-(--au-blue-800) no-underline hover:underline"
               >
-                Abrir em página inteira →
+                Open as a full page →
               </a>
             )}
           </span>
@@ -1652,17 +1654,18 @@ function ScreenPreviewDrawer({
     >
       {!hasPrototype ? (
         <div className="flex flex-col items-center justify-center text-center gap-2 py-12">
-          <p className="m-0 text-sm font-medium text-(--fg-primary)">Sem protótipo ainda</p>
+          <p className="m-0 text-sm font-medium text-(--fg-primary)">No prototype yet</p>
           <p className="m-0 text-sm text-(--fg-secondary) max-w-sm leading-relaxed">
-            Essa tela ainda não tem link pra um protótipo navegável. Adicione um href na
-            sugestão de edição quando o protótipo existir.
+            This screen has no link to a navigable prototype yet. Add an href in the
+            edit suggestion once the prototype exists.
           </p>
         </div>
       ) : external ? (
         <div className="flex flex-col items-center justify-center text-center gap-3 py-12">
-          <p className="m-0 text-sm font-medium text-(--fg-primary)">Link externo</p>
+          <p className="m-0 text-sm font-medium text-(--fg-primary)">External link</p>
           <p className="m-0 text-sm text-(--fg-secondary) max-w-sm leading-relaxed">
-            Esse passo aponta pra um endereço fora da plataforma. Abra em uma nova aba pra ver.
+            This step points to an address outside the platform. Open it in a new tab to
+            see it.
           </p>
           <a
             href={href}
@@ -1670,7 +1673,7 @@ function ScreenPreviewDrawer({
             rel="noreferrer"
             className="px-3 py-1.5 rounded-md bg-(--au-blue-600) text-white text-xs font-medium hover:bg-(--au-blue-700) transition no-underline"
           >
-            Abrir em nova aba ↗
+            Open in a new tab ↗
           </a>
         </div>
       ) : (
@@ -1678,7 +1681,7 @@ function ScreenPreviewDrawer({
           <iframe
             key={href}
             src={href}
-            title={screen?.title ?? "Pré-visualização"}
+            title={screen?.title ?? "Preview"}
             className="block w-full h-full border-0"
           />
         </div>

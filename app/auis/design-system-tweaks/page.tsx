@@ -3,7 +3,7 @@ import { DesignSystemTweaksClient } from "./_components/DesignSystemTweaksClient
 
 export const metadata: Metadata = {
   title: "Design System Tweaks",
-  description: "Editor visual de foundations do design system Auis.",
+  description: "Visual editor for the Auis design system's foundations.",
 }
 
 export default function DesignSystemTweaksPage() {

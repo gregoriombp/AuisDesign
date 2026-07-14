@@ -5,7 +5,7 @@ description: >
   styleguide (`/auis/styleguide/ux-flows/[slug]`). Applies the requested
   change to the ReactFlow diagram (new screen, new branch, removed node,
   rework) and adds an entry to that flow's `updates` array so the page shows
-  an "Atualizado em" badge plus a "Histórico de atualizações" section. Use
+  an "Updated on" badge plus an "Update history" section. Use
   when the user asks to "update flow X", "log an update on the flow", "add a
   page to the flow", "new branch on the flow", says "the flow's dynamic
   changed", "remove a screen from the flow", or hands over a meeting decision
@@ -194,8 +194,8 @@ npm run typecheck
 
 If the dev server is running on the LAN, open the page and confirm:
 
-- The "Atualizado em <data>" badge appears next to the title.
-- The "Histórico de atualizações" section renders at the bottom with the
+- The "Updated on <date>" badge appears next to the title.
+- The "Update history" section renders at the bottom with the
   new entry on top.
 - Tags render with their distinct pill colors (`new-page` blue, `new-branch`
   amber, `removed-page` red, `flow-rework` amber, `integration` emerald).

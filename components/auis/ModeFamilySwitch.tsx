@@ -5,12 +5,13 @@ import { useReviewStore } from "@/lib/auis-review/store"
 import { useEditStore } from "@/lib/auis-edit/store"
 
 /**
- * Troca rápida entre os dois modos Auis (Review ↔ Edit) direto na pílula
- * central — sem precisar abrir a bolota. Vive no canto esquerdo das duas
- * toolbars (ReviewToolbar / EditToolbar) como uma "categoria" própria, separada
- * do resto por uma divisória. Clicar no modo inativo liga ele; a exclusão mútua
- * dos providers (Edit.setActive desliga Review; o subscribe do EditModeProvider
- * desliga Edit quando Review liga) garante que nunca os dois ficam ativos.
+ * Quick switch between the two Auis modes (Review ↔ Edit) straight from the
+ * center pill — no need to open the dot. It lives on the left edge of both
+ * toolbars (ReviewToolbar / EditToolbar) as its own "category", separated from
+ * the rest by a divider. Clicking the inactive mode turns it on; the mutual
+ * exclusion in the providers (Edit.setActive turns Review off; the
+ * EditModeProvider subscription turns Edit off when Review turns on) guarantees
+ * the two are never active at the same time.
  */
 export function ModeFamilySwitch({ current }: { current: "review" | "edit" }) {
   const toggleReview = useReviewStore((s) => s.toggleActive)
@@ -44,8 +45,8 @@ export function ModeFamilySwitch({ current }: { current: "review" | "edit" }) {
 
   return (
     <div className="flex items-center gap-1">
-      {item("review", "rate_review", "Modo Review", () => toggleReview())}
-      {item("edit", "edit", "Modo edição", () => toggleEdit())}
+      {item("review", "rate_review", "Review Mode", () => toggleReview())}
+      {item("edit", "edit", "Edit Mode", () => toggleEdit())}
     </div>
   )
 }

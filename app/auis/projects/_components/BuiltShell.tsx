@@ -5,11 +5,11 @@ import { AuDashboardLayout } from "@/components/ui/AuDashboardLayout"
 import type { BreadcrumbsItems } from "@/components/ui/AuBreadcrumbsBar"
 
 /**
- * Casca das telas reconstruídas do workbench: renderiza o conteúdo dentro do
- * shell do produto (AuDashboardLayout) — no container central, com sidebar +
- * header em volta, como qualquer página de produto. `center` centraliza o
- * conteúdo verticalmente (telas de wizard/escolha); sem ele, o conteúdo flui do
- * topo (telas de gestão).
+ * Shell for the workbench's rebuilt screens: renders the content inside the
+ * product shell (AuDashboardLayout) — in the central container, with the sidebar
+ * and header around it, like any product page. `center` centers the content
+ * vertically (wizard/choice screens); without it, the content flows from the top
+ * (management screens).
  */
 export function BuiltShell({
   breadcrumbs,

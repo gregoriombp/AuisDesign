@@ -18,12 +18,13 @@ interface Target {
   label: string
 }
 
-// Ponteiro mágico: enquanto o revisor passa o mouse no modo "magic", realça o
-// elemento sob o cursor com uma borda em gradiente animado (estilo Stitch/AI) e
-// um chip identificando-o. O clique em si é tratado pelo ReviewCanvas (que está
-// capturando os pointers) — aqui só desenhamos o realce, com pointer-events:none
-// pra nunca bloquear o clique. A captura do pino reusa a mesma
-// `elementBelowOverlayAt`, então o que é realçado é exatamente o que é ancorado.
+// Magic pointer: while the reviewer hovers in "magic" mode, it highlights the
+// element under the cursor with an animated gradient border (Stitch/AI style)
+// plus a chip identifying it. The click itself is handled by ReviewCanvas (which
+// is capturing the pointers) — here we only draw the highlight, with
+// pointer-events:none so it never blocks the click. The pin capture reuses the
+// same `elementBelowOverlayAt`, so what gets highlighted is exactly what gets
+// anchored.
 export function ReviewMagicCursor() {
   const active = useReviewStore((s) => s.active)
   const mode = useReviewStore((s) => s.mode)
@@ -74,7 +75,7 @@ export function ReviewMagicCursor() {
         height: r.height,
       }
       if (el === lastElRef.current) {
-        // Mesmo elemento (scroll/resize) → só atualiza a posição.
+        // Same element (scroll/resize) → just update the position.
         setTarget((prev) => (prev ? { ...prev, rect } : prev))
         return
       }
@@ -134,9 +135,9 @@ export function ReviewMagicCursor() {
   )
 }
 
-// CSS da feature inline via <style> (convenção do repo: globals.css não
-// recompila no dev server local). Gradiente montado só com
-// tokens Auis (--au-*), sem hex cru.
+// The feature's CSS is inlined through <style> (repo convention: globals.css
+// does not recompile on the local dev server). The gradient is built only from
+// Auis tokens (--au-*), no raw hex.
 const MAGIC_CSS = `
 @property --au-magic-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
 @keyframes au-magic-spin { to { --au-magic-angle: 360deg; } }

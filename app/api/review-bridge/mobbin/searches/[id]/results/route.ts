@@ -30,7 +30,7 @@ export async function PUT(
     return NextResponse.json({ error: "invalid_results" }, { status: 400 });
   }
 
-  // Agente reporta falha em vez de resultados.
+  // Agent reports a failure instead of results.
   if (typeof body?.error === "string" && body.error.trim()) {
     const updated = setError(id, body.error.trim());
     if (!updated) return NextResponse.json({ error: "not_found" }, { status: 404 });

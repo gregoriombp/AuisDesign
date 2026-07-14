@@ -16,8 +16,8 @@ export const AuSlider = React.forwardRef<HTMLInputElement, AuSliderProps>(
     { label, valueDisplay, help, className, min = 0, max = 100, value, defaultValue, style, ...rest },
     ref
   ) {
-    // Progresso da esquerda ao thumb — preenche o trilho com bg dark.
-    // Lê value (controlado) ou defaultValue (uncontrolled); cai em min se nada.
+    // Progress from the left up to the thumb — fills the track with a dark bg.
+    // Reads value (controlled) or defaultValue (uncontrolled); falls back to min.
     const current = Number(value ?? defaultValue ?? min)
     const lo = Number(min)
     const hi = Number(max)

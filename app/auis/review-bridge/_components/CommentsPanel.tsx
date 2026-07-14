@@ -34,9 +34,9 @@ function formatTimestamp(ts: number): string {
 }
 
 function StatusPill({ status }: { status: ReviewComment["status"] }) {
-  if (status === "in_review") return <AuPill variant="beta">Em revisão</AuPill>
-  if (status === "resolved") return <AuPill variant="live">Resolvido</AuPill>
-  return <AuPill variant="draft">Aberto</AuPill>
+  if (status === "in_review") return <AuPill variant="beta">In review</AuPill>
+  if (status === "resolved") return <AuPill variant="live">Resolved</AuPill>
+  return <AuPill variant="draft">Open</AuPill>
 }
 
 function CommentCard({
@@ -62,8 +62,8 @@ function CommentCard({
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
   const setActive = useReviewStore((s) => s.setActive)
 
-  // Abre a tela do comentário mantendo o Review Mode ligado e o comentário
-  // destacado (permalink), via navegação client-side — sem reload.
+  // Opens the comment's screen with Review Mode still on and the comment
+  // highlighted (permalink), via client-side navigation — no reload.
   const openOnScreen = () => {
     selectComment(comment.id)
     setActive(true)
@@ -75,7 +75,7 @@ function CommentCard({
   const items: AuDropdownItem[] = [
     {
       id: "open",
-      label: "Abrir tela",
+      label: "Open screen",
       icon: "open_in_new",
       onSelect: openOnScreen,
     },
@@ -83,7 +83,7 @@ function CommentCard({
   if (archived) {
     items.push({
       id: "reopen",
-      label: "Reabrir",
+      label: "Reopen",
       icon: "refresh",
       onSelect: () => void reopenFromArchive(comment.id),
     })
@@ -91,13 +91,13 @@ function CommentCard({
     items.push(
       {
         id: "approve",
-        label: "Aprovar",
+        label: "Approve",
         icon: "check_circle",
         onSelect: () => void approveComment(comment.id),
       },
       {
         id: "reject",
-        label: "Rejeitar",
+        label: "Reject",
         icon: "undo",
         onSelect: () => void rejectComment(comment.id),
       }
@@ -105,7 +105,7 @@ function CommentCard({
   } else {
     items.push({
       id: "archive",
-      label: "Marcar como resolvido",
+      label: "Mark as resolved",
       icon: "check_circle",
       onSelect: () => void archiveDirect(comment.id),
     })
@@ -114,7 +114,7 @@ function CommentCard({
     { id: "sep", separator: true },
     {
       id: "delete",
-      label: "Excluir",
+      label: "Delete",
       icon: "delete",
       danger: true,
       onSelect: () => void deleteComment(comment.id),
@@ -128,7 +128,7 @@ function CommentCard({
           type="checkbox"
           checked={selected}
           onChange={onToggleSelected}
-          aria-label="Selecionar"
+          aria-label="Select"
           className="mt-1 accent-(--accent-brand)"
         />
       )}
@@ -161,7 +161,7 @@ function CommentCard({
           type="button"
           onClick={openOnScreen}
           className="mt-1 inline-flex items-center gap-1 text-[11px] text-(--fg-tertiary) hover:text-(--accent-brand)"
-          title={`Ir para ${comment.url}`}
+          title={`Go to ${comment.url}`}
         >
           <Icon name="web_asset" size={11} />
           <span className="truncate max-w-[280px]">{comment.url}</span>
@@ -173,7 +173,7 @@ function CommentCard({
         trigger={
           <button
             type="button"
-            aria-label="Ações"
+            aria-label="Actions"
             className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)"
           >
             <Icon name="more_horiz" size={14} />
@@ -288,17 +288,17 @@ export function CommentsPanel() {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <AuStatCard icon="forum" label="Total ativos" value={comments.length} />
-        <AuStatCard icon="pending" label="Abertos" value={openCount} />
-        <AuStatCard icon="hourglass_top" label="Em revisão" value={inReviewCount} />
-        <AuStatCard icon="archive" label="Arquivados" value={archivedCount} />
+        <AuStatCard icon="forum" label="Active total" value={comments.length} />
+        <AuStatCard icon="pending" label="Open" value={openCount} />
+        <AuStatCard icon="hourglass_top" label="In review" value={inReviewCount} />
+        <AuStatCard icon="archive" label="Archived" value={archivedCount} />
       </div>
 
       <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-4 flex flex-wrap items-center gap-3">
         <div className="flex-1 min-w-[200px] max-w-md">
           <AuInput
             iconLeft="search"
-            placeholder="Buscar texto…"
+            placeholder="Search text…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -317,7 +317,7 @@ export function CommentsPanel() {
                   : "text-(--fg-secondary) hover:text-(--fg-primary)",
               ].join(" ")}
             >
-              {t === "open" ? "Abertos" : t === "in_review" ? "Em revisão" : "Arquivados"}
+              {t === "open" ? "Open" : t === "in_review" ? "In review" : "Archived"}
               {t === "in_review" && inReviewCount > 0 && (
                 <span className="min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-[10px] font-semibold bg-(--au-amber-100) text-(--au-amber-700) tabular-nums">
                   {inReviewCount}
@@ -334,12 +334,12 @@ export function CommentsPanel() {
             onChange={(e) => setGroupByUrl(e.target.checked)}
             className="accent-(--accent-brand)"
           />
-          Agrupar por tela
+          Group by screen
         </label>
 
         <span className="ml-auto inline-flex items-center gap-2 text-[11px] text-(--fg-tertiary)">
           <Icon name={backend === "bridge" ? "cloud_done" : "save"} size={13} />
-          {backend === "bridge" ? "Bridge local" : "localStorage"}
+          {backend === "bridge" ? "Local bridge" : "localStorage"}
         </span>
 
         <AuButton
@@ -351,14 +351,14 @@ export function CommentsPanel() {
             void loadArchivePage(true)
           }}
         >
-          Atualizar
+          Refresh
         </AuButton>
       </div>
 
       {selectableTab && selectedIds.size > 0 && (
         <div className="flex items-center justify-between gap-3 px-4 py-2 rounded-md bg-(--bg-muted) border border-(--border-subtle)">
           <span className="text-sm text-(--fg-secondary)">
-            {selectedIds.size} selecionado{selectedIds.size === 1 ? "" : "s"}
+            {selectedIds.size} selected
           </span>
           <div className="flex items-center gap-2">
             <AuButton
@@ -369,7 +369,7 @@ export function CommentsPanel() {
               disabled={bulkBusy}
               onClick={() => void runBulk(approveComment)}
             >
-              Aprovar selecionados
+              Approve selected
             </AuButton>
             <AuButton
               variant="secondary"
@@ -378,7 +378,7 @@ export function CommentsPanel() {
               disabled={bulkBusy}
               onClick={() => void runBulk(rejectComment)}
             >
-              Rejeitar selecionados
+              Reject selected
             </AuButton>
           </div>
         </div>
@@ -392,21 +392,21 @@ export function CommentsPanel() {
             </AuEmptyMedia>
             <AuEmptyTitle>
               {tab === "archive" && !archiveLoaded
-                ? "Carregando arquivados…"
+                ? "Loading archived…"
                 : tab === "in_review"
-                ? "Nada esperando revisão"
+                ? "Nothing waiting for review"
                 : tab === "archive"
-                ? "Nenhum arquivado ainda"
+                ? "Nothing archived yet"
                 : comments.length === 0
-                ? "Nenhum comentário ainda"
-                : "Nada com esses filtros"}
+                ? "No comments yet"
+                : "Nothing matches these filters"}
             </AuEmptyTitle>
             <AuEmptyDescription>
               {tab === "open" && comments.length === 0
-                ? "Ative o Review Mode (⌘⇧Y) em qualquer tela e desenhe o primeiro comentário."
+                ? "Turn on Review Mode (⌘⇧Y) on any screen and draw your first comment."
                 : tab === "in_review"
-                ? "Quando um agente marcar algo como resolvido, ele aparece aqui pra você aprovar ou rejeitar."
-                : "Tente afrouxar a busca."}
+                ? "When an agent marks something as resolved, it shows up here for you to approve or reject."
+                : "Try loosening the search."}
             </AuEmptyDescription>
           </AuEmptyHeader>
         </AuEmpty>
@@ -423,7 +423,7 @@ export function CommentsPanel() {
                   {url}
                 </Link>
                 <span className="text-xs text-(--fg-tertiary) shrink-0">
-                  {items.length} no total
+                  {items.length} in total
                 </span>
               </header>
               {renderList(items)}
@@ -442,7 +442,7 @@ export function CommentsPanel() {
             iconLeft="expand_more"
             onClick={() => void loadArchivePage(false)}
           >
-            Carregar mais arquivados
+            Load more archived
           </AuButton>
         </div>
       )}

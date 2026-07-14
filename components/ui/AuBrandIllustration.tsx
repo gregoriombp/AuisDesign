@@ -2,15 +2,15 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 /**
- * AuBrandIllustration — ilustrações line-art da marca Auis.
+ * AuBrandIllustration — line-art illustrations for the Auis brand.
  *
- * Linguagem: geometria 1px, nada orgânico. Stroke/fill = currentColor, então a
- * mesma arte funciona em painel claro (tinta) e escuro (branco). As duas artes
- * oficiais do rebranding ("layers", "ignition") são geradas aqui de forma
- * paramétrica, fiéis aos vetores em public/assets/brand/illustrations/ — que
- * permanecem como fonte para export (deck, social, print). As demais estendem
- * a família com os símbolos da narrativa (constelação, órbita, whitefield,
- * ascensão).
+ * Language: 1px geometry, nothing organic. Stroke/fill = currentColor, so the
+ * same art works on a light panel (ink) and a dark one (white). The two
+ * official rebranding pieces ("layers", "ignition") are generated here
+ * parametrically, faithful to the vectors in public/assets/brand/illustrations/
+ * — which remain the source for exports (deck, social, print). The rest extend
+ * the family with the symbols of the narrative (constellation, orbit,
+ * whitefield, ascent).
  */
 
 export type AuBrandIllustrationName =
@@ -20,8 +20,9 @@ export type AuBrandIllustrationName =
   | "orbit"
   | "field"
   | "ascent"
-  // Geometric-Strokes do rebranding — vetores reais em /public, renderizados
-  // via CSS mask para herdar currentColor (themeáveis como as paramétricas).
+  // Geometric-Strokes from the rebranding — real vectors in /public, rendered
+  // through a CSS mask so they inherit currentColor (themeable like the
+  // parametric ones).
   | "shape-01"
   | "shape-02"
   | "shape-03"
@@ -30,26 +31,26 @@ export type AuBrandIllustrationName =
 
 export type AuBrandIllustrationProps = {
   name: AuBrandIllustrationName
-  /** Lado do quadrado em px. */
+  /** Side of the square, in px. */
   size?: number
   strokeWidth?: number
   className?: string
-  /** Acessibilidade: descrição curta; omita para decorativo (aria-hidden). */
+  /** Accessibility: short description; omit for decorative use (aria-hidden). */
   title?: string
 }
 
-/* Determinístico (sem Math.random): variações estáveis entre SSR e cliente. */
+/* Deterministic (no Math.random): variations stay stable across SSR and client. */
 function jitter(i: number, mod: number): number {
   return ((i * 7919 + 104729) % mod) / mod
 }
 
-/* ── layers — 6 losangos isométricos empilhados (Knowledge Layers) ───────── */
+/* ── layers — 6 stacked isometric diamonds (Knowledge Layers) ────────────── */
 const LAYERS_DIAMONDS = Array.from({ length: 6 }, (_, i) => {
   const cy = 72 + i * 51
   return `200,${cy - 51} 350,${cy} 200,${cy + 51} 50,${cy}`
 })
 
-/* ── ignition — explosão radial (a saída da atmosfera) ───────────────────── */
+/* ── ignition — radial burst (leaving the atmosphere) ────────────────────── */
 const IGNITION_RAYS = Array.from({ length: 36 }, (_, i) => {
   const angle = (i / 36) * Math.PI * 2 + jitter(i, 97) * 0.16
   const inner = 6 + jitter(i + 7, 53) * 8
@@ -64,7 +65,7 @@ const IGNITION_RAYS = Array.from({ length: 36 }, (_, i) => {
   }
 })
 
-/* ── constellation — Copilot (hexágono) cercado de agentes (círculos) ─────── */
+/* ── constellation — Copilot (hexagon) ringed by agents (circles) ────────── */
 const HEX_POINTS = Array.from({ length: 6 }, (_, i) => {
   const a = (i / 6) * Math.PI * 2 - Math.PI / 2
   return `${200 + Math.cos(a) * 34},${200 + Math.sin(a) * 34}`
@@ -76,7 +77,7 @@ const CONSTELLATION_NODES = Array.from({ length: 7 }, (_, i) => {
   return { x: 200 + Math.cos(a) * r, y: 200 + Math.sin(a) * r }
 })
 
-/* ── orbit — operação contínua (elipses concêntricas + nós) ──────────────── */
+/* ── orbit — continuous operation (concentric ellipses + nodes) ──────────── */
 const ORBIT_RINGS = [150, 110, 70]
 const ORBIT_NODES = [
   { rx: 150, t: 0.62 },
@@ -85,11 +86,11 @@ const ORBIT_NODES = [
   { rx: 70, t: 0.4 },
 ].map(({ rx, t }) => {
   const a = t * Math.PI * 2
-  // Ponto sobre a elipse (antes da rotação do grupo).
+  // Point on the ellipse (before the group rotation).
   return { x: 200 + Math.cos(a) * rx, y: 200 + Math.sin(a) * rx * 0.38 }
 })
 
-/* ── field — o whitefield em perspectiva (grade de pontos) ───────────────── */
+/* ── field — the whitefield in perspective (grid of dots) ────────────────── */
 const FIELD_DOTS = (() => {
   const dots: { x: number; y: number; r: number }[] = []
   const horizon = 150
@@ -110,7 +111,7 @@ const FIELD_DOTS = (() => {
   return dots
 })()
 
-/* ── ascent — receita/ignição em ritmo (linhas verticais crescentes) ─────── */
+/* ── ascent — revenue/ignition with rhythm (rising vertical lines) ───────── */
 const ASCENT_BARS = Array.from({ length: 14 }, (_, i) => {
   const t = i / 13
   const x = 64 + i * 21
@@ -118,9 +119,10 @@ const ASCENT_BARS = Array.from({ length: 14 }, (_, i) => {
   return { x, y1: 332, y2: 332 - h }
 })
 
-/* Geometric-Strokes importadas: o vetor mora em /public e é pintado via CSS
- * mask, então a arte herda currentColor (claro/escuro) como as paramétricas.
- * O traço já vem encorpado no arquivo; `strokeWidth` não se aplica a estas. */
+/* Imported Geometric-Strokes: the vector lives in /public and is painted through
+ * a CSS mask, so the art inherits currentColor (light/dark) like the parametric
+ * ones. The stroke weight is already baked into the file; `strokeWidth` does not
+ * apply to these. */
 const STROKE_SHAPE_SRC: Partial<Record<AuBrandIllustrationName, string>> = {
   "shape-01": "/assets/brand/illustrations/auis-shape-01.svg",
   "shape-02": "/assets/brand/illustrations/auis-shape-02.svg",

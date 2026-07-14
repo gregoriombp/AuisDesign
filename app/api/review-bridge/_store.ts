@@ -72,8 +72,8 @@ async function readArchive(): Promise<ArchiveDb> {
 
 async function writeFileAtomic(file: string, data: unknown): Promise<void> {
   await fs.mkdir(DATA_DIR, { recursive: true });
-  // tmp + rename: um crash no meio nunca deixa JSON truncado (leitores veem
-  // tudo-ou-nada). null,2 mantém o mesmo pretty-print que o lowdb gravava.
+  // tmp + rename: a crash mid-write never leaves truncated JSON (readers see
+  // all-or-nothing). null,2 keeps the same pretty-print lowdb used to write.
   const tmp = `${file}.tmp`;
   await fs.writeFile(tmp, JSON.stringify(data, null, 2), "utf8");
   await fs.rename(tmp, file);
@@ -81,10 +81,10 @@ async function writeFileAtomic(file: string, data: unknown): Promise<void> {
 const writeMain = (db: MainDb) => writeFileAtomic(MAIN_FILE, db);
 const writeArchive = (db: ArchiveDb) => writeFileAtomic(ARCHIVE_FILE, db);
 
-// É um processo só (o dev server), mas a UI dispara writes em rajada e várias
-// ops tocam os 2 arquivos (main+archive) — sem serializar, dois RMW concorrentes
-// perdem updates. Um lock global encadeia todas as escritas; leituras são
-// lock-free (sempre frescas do disco).
+// It's a single process (the dev server), but the UI fires writes in bursts and
+// several ops touch both files (main+archive) — without serializing, two
+// concurrent read-modify-writes lose updates. One global lock chains every
+// write; reads are lock-free (always fresh from disk).
 let lock: Promise<unknown> = Promise.resolve();
 function withLock<T>(fn: () => Promise<T>): Promise<T> {
   const run = lock.then(fn, fn);
@@ -95,14 +95,18 @@ function withLock<T>(fn: () => Promise<T>): Promise<T> {
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n);
 }
-// Mesmo formato do review-bridge/flow-bridge ("Resolvido por … em dd/mm/aaaa …").
+// Same format the review-bridge / flow-bridge use ("Resolved by … on DD/MM/YYYY …").
+// Byte-identical to components/auis-review/storage/utils.ts and
+// review-bridge/src/types.ts — the three code paths write the SAME string.
 function formatResolutionSummary(actor: ReviewActor, at: number): string {
   const d = new Date(at);
-  return `Resolvido por ${actor.name} em ${pad2(d.getDate())}/${pad2(
-    d.getMonth() + 1,
-  )}/${d.getFullYear()} às ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(
-    d.getSeconds(),
-  )}.`;
+  const day = pad2(d.getDate());
+  const month = pad2(d.getMonth() + 1);
+  const year = d.getFullYear();
+  const hours = pad2(d.getHours());
+  const minutes = pad2(d.getMinutes());
+  const seconds = pad2(d.getSeconds());
+  return `Resolved by ${actor.name} on ${day}/${month}/${year} at ${hours}:${minutes}:${seconds}.`;
 }
 function makeReplyId(): string {
   const t = Date.now().toString(36);
@@ -162,7 +166,7 @@ export async function getCommentAny(
   return null;
 }
 
-// ── writes (sob lock) ────────────────────────────────────────────────────────
+// ── writes (under the lock) ──────────────────────────────────────────────────
 export async function upsertComment(comment: ReviewComment): Promise<void> {
   return withLock(async () => {
     const db = await readMain();
@@ -463,8 +467,8 @@ export async function importMerge(
   });
 }
 
-// Assinatura barata pro polling do cliente (substitui o SSE do servidor Express):
-// o mtime dos 2 arquivos. Muda quando o app OU uma skill (solve/germano) escreve.
+// Cheap signature for client polling (replaces the Express server's SSE): the
+// mtime of both files. It changes when the app OR a skill (solve/germano) writes.
 export async function dataSignature(): Promise<string> {
   const stat = async (f: string) => {
     try {

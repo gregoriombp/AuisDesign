@@ -8,12 +8,12 @@ const MIN_CHARS = 6
 const DEBOUNCE_MS = 450
 
 /**
- * Autocomplete inline estilo Cursor: enquanto o revisor digita, busca uma
- * continuação curta e a expõe como `ghost` (texto fantasma que o card desenha
- * à frente do cursor; Tab aceita). Debounced, cancela requisições em voo e se
- * desliga sozinho se a chave da OpenAI não estiver configurada (503).
+ * Cursor-style inline autocomplete: while the reviewer types, it fetches a short
+ * continuation and exposes it as `ghost` (ghost text the card draws ahead of the
+ * caret; Tab accepts it). Debounced, cancels in-flight requests, and switches
+ * itself off when the OpenAI key isn't configured (503).
  *
- * `element` precisa ter identidade estável (memoize no chamador).
+ * `element` must have a stable identity (memoize it in the caller).
  */
 export function useInlineCompletion(
   draft: string,
@@ -21,7 +21,7 @@ export function useInlineCompletion(
   enabled: boolean
 ) {
   const [ghost, setGhost] = React.useState("")
-  const disabledRef = React.useRef(false) // 503 → para de tentar nesta sessão
+  const disabledRef = React.useRef(false) // 503 → stop trying for this session
   const abortRef = React.useRef<AbortController | null>(null)
 
   const clear = React.useCallback(() => setGhost(""), [])
@@ -35,7 +35,7 @@ export function useInlineCompletion(
       setGhost("")
       return
     }
-    // O texto mudou → o ghost atual ficou obsoleto.
+    // The text changed → the current ghost is stale.
     setGhost("")
     const timer = setTimeout(async () => {
       abortRef.current?.abort()
@@ -48,7 +48,7 @@ export function useInlineCompletion(
       }
       if (!r.ok || !r.text) return
       let g = r.text
-      // Espaçamento natural ao colar logo depois do texto digitado.
+      // Natural spacing when it lands right after the typed text.
       if (draft && !/\s$/.test(draft) && !/^[\s.,;:!?)\]]/.test(g)) {
         g = " " + g
       }
