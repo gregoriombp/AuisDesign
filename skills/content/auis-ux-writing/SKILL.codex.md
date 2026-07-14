@@ -120,6 +120,12 @@ The product's fixed terms are declared in `PRODUCT_CONTEXT.md` → **§ Protecte
 
 ### Phase 0 — Context (before anything else)
 
+0. **Is there a voice to apply?** Open `PRODUCT_CONTEXT.md`. If it is still the
+   untouched template — placeholders intact, **§ Language & locale** blank — **stop.**
+   You do not know what language to write in or which words are protected, and
+   guessing produces confident, generic copy that the user then has to undo. Say so,
+   and point them at **`auis-voice`**, the skill that fills that file from their real
+   product. Resume once it has run.
 1. **User memory:** `~/.claude/projects/<repo-encoded>/memory/MEMORY.md` — already-validated tone conventions.
 2. **Repo rules:** `AGENTS.md` (hard rules) and, in `PRODUCT_CONTEXT.md`, **§ Language & locale**, **§ Voice: site ≠ product**, and **§ Protected vocabulary**.
 3. **git status.** If the working tree is dirty, ask (commit/stash/ignore). If ignoring: **never** `git add .` / `-A` — always file by file.

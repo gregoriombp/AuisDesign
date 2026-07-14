@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated": "2026-07-14",
-  "count": 35,
+  "count": 36,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -143,6 +143,19 @@
       "legacy": false,
       "divergent": true,
       "description": "Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits each one against the Auis PRODUCT voice (it solves, it doesn't sell),"
+    },
+    {
+      "name": "auis-voice",
+      "capability": "content",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Bootstraps a product's voice by filling in PRODUCT_CONTEXT.md — the file every Auis writing skill reads. Derives the copy language and locale, the site-vs-product voice, the protected vocabulary, and the canonical copy c"
     },
     {
       "name": "auis-audit",
