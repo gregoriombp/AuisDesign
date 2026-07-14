@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-export type AuCardVariant = "default" | "ai" | "ai-warm" | "ai-copilot"
+export type AuCardVariant = "default" | "ai" | "ai-warm" | "ai-cool"
 
 export type AuCardProps = React.HTMLAttributes<HTMLDivElement> & {
   variant?: AuCardVariant
