@@ -124,7 +124,7 @@ export function useCumulativeScrollOffset() {
 }
 
 // Re-renderiza quando o layout reflui SEM scroll nem resize de window — caso
-// do Cortex/sidebars, que mudam a largura do `<main>` via flex. O
+// do Copilot/sidebars, que mudam a largura do `<main>` via flex. O
 // `useCumulativeScrollOffset` só ouve scroll/resize, então pins ancorados a
 // elemento não re-resolveriam. Um ResizeObserver no container principal (+ body)
 // cobre esse caso.

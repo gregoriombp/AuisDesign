@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 /**
- * Auis / Auis — design-system hygiene check.
+ * Auis — design-system hygiene check.
  *
  * WARN-ONLY by default (always exits 0) so it never blocks rapid prototyping.
  * Pass `--strict` to exit 1 when there are `warn`-level findings (opt-in CI).
  *
- * It flags the patterns AGENTS.md forbids and the "use the Aw component" rules
+ * It flags the patterns AGENTS.md forbids and the "use the Au component" rules
  * from docs/component-map.md:
  *   - hardcoded color (#hex) in className/style
  *   - arbitrary Tailwind values for radius / shadow / spacing / typography
  *   - arbitrary sizing (w/h/min/max) — info only, often legit
- *   - raw <svg> outside brand/illustration/agent visuals (use <Icon/>)
+ *   - raw <svg> outside brand/illustration visuals (use <Icon/>)
  *   - importing a raw shadcn primitive (card/table/button…) in product code
  *   - a hand-rolled overlay (fixed inset-0 + z-, role="dialog") — use AuModal/AuSheet
  *   - importing the deprecated BaseModal — use AuModal
- *   - a non-`Aw` component file sitting in components/ui/
- *   - drift between components/ui/Aw* and docs/component-map.md
+ *   - a non-`Au` component file sitting in components/ui/
+ *   - drift between components/ui/Au* and docs/component-map.md
  *
  * Usage:  npm run ds:check   (or)   node scripts/ds-check.mjs --strict
  */
@@ -32,67 +32,70 @@ const KNOWN_PRIMITIVES = [
   "dropdown-menu", "popover", "separator", "table", "tooltip",
 ];
 
-// Primitives with a TRUE drop-in Aw wrapper — importing the raw one in product
+// Primitives with a TRUE drop-in Au wrapper — importing the raw one in product
 // is a real miss, so we flag it with an actionable target. The rest are
 // "sanctioned bare primitives": low-customization Radix utilities already styled
-// via the globals.css compat tokens, with no drop-in Aw to point to (tooltip,
+// via the globals.css compat tokens, with no drop-in Au to point to (tooltip,
 // popover, collapsible, separator, calendar, accordion). `chart` has the AuChart
 // helper layer, not a drop-in; `table` uses AuTable for simple cases or DataTable
 // for rich ones — neither a 1:1 swap. See docs/component-map.md → primitives.
-const AW_EQUIVALENT = {
+const AU_EQUIVALENT = {
   card: "AuCard",
   button: "AuButton",
   badge: "AuPill",
   "dropdown-menu": "AuDropdownMenu",
 };
 
-// Files where a raw <svg> or a hex literal is legitimately expected:
-// brand marks, illustrations, agent/decorative visuals, the Icon component.
+// Files where a raw <svg> or a hex literal is legitimately expected: brand
+// marks, illustrations, decorative visuals, and the Icon component itself.
+// Every name here must resolve to a real component — a dead name silently
+// widens the allowlist and hides real findings.
 const RAW_VISUAL_RE =
-  /(BrandIllustration|BrandLogo|CardBrand|MemoryBaseLogo|Logo|AgentCore|AgentAvatar|UserAgentOrb|CortexSynthesis|Beams|DotTunnel|NeuralPattern|QrPlaceholder|Icon)\.tsx$/;
+  /(BrandIllustration|BrandLogo|Logo|CopilotSynthesis|Icon)\.tsx$/;
 // WebGL/shader files pass numeric hex to the GPU (var() can't be read there).
 const SHADER_HINT_RE =
   /@react-three|from ["']three["']|ShaderMaterial|uniforms|gl_FragColor|createShader/;
-// Overlays legitimamente "crus": o gate de tela cheia e o próprio shell legado
-// BaseModal (deprecado; seus imports são sinalizados à parte). Os primitivos de
-// overlay Aw* (AuModal/AuSheet/AuCopilotDrawer…) já ficam de fora via !inUi.
+// Overlays that are legitimately "raw": the fullscreen gate and the legacy
+// BaseModal shell itself (deprecated; its imports are flagged separately). The
+// Au* overlay primitives (AuModal/AuSheet/AuCopilotDrawer…) are already
+// excluded via !inUi.
 const OVERLAY_EXEMPT_RE = /(DesktopOnlyBlocker|modals\/BaseModal)\.tsx$/;
 
 const LINE_RULES = [
   {
     id: "hardcoded-color", sev: "warn", skipVisual: true,
     re: /-\[#[0-9a-fA-F]{3,8}\]|(?:color|background|backgroundColor|borderColor|fill|stroke)\s*:\s*["']?#[0-9a-fA-F]{3,8}/,
-    hint: "Cor hardcoded. Use tokens (bg-raised, text-fg-primary, border-subtle) ou a paleta au-*.",
+    hint: "Hardcoded color. Use tokens (bg-raised, text-fg-primary, border-subtle) or the au-* palette.",
   },
   {
     id: "arbitrary-radius-shadow", sev: "warn",
     re: /\b(?:rounded|shadow)-\[(?!inherit\]|auto\])/,
-    hint: "Radius/shadow arbitrário. Use rounded-{xs..2xl,full} / shadow-{xs..lg,overlay}.",
+    hint: "Arbitrary radius/shadow. Use rounded-{xs..2xl,full} / shadow-{xs..lg,overlay}.",
   },
   {
     id: "arbitrary-spacing", sev: "warn",
     re: /\b(?:p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|space-x|space-y)-\[(?!inherit\]|auto\])/,
-    hint: "Spacing arbitrário. Use a escala de spacing (p-4, gap-2…).",
+    hint: "Arbitrary spacing. Use the spacing scale (p-4, gap-2…).",
   },
   {
     id: "arbitrary-typography", sev: "warn",
     re: /\btext-\[[0-9]|\bleading-\[(?!inherit\]|auto\])|\btracking-\[|\bfont-\[(?!inherit\])/,
-    hint: "Tipografia arbitrária. Use as classes de texto do sistema.",
+    hint: "Arbitrary typography. Use the system text classes.",
   },
   {
     id: "raw-tailwind-color", sev: "warn",
     re: /\b(?:bg|text|border|fill|stroke|ring|divide|from|via|to|outline|decoration)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}\b/,
-    hint: "Cor Tailwind crua (fora dos tokens). Use a paleta au-* ou tokens semânticos (bg-raised, text-fg-*).",
+    hint: "Raw Tailwind color (outside the tokens). Use the au-* palette or semantic tokens (bg-raised, text-fg-*).",
   },
   {
     id: "arbitrary-size", sev: "info",
     re: /\b(?:w|h|min-w|max-w|min-h|max-h|size)-\[(?!inherit\]|auto\]|calc)/,
-    hint: "Tamanho arbitrário — revise (pode ser intencional; não há token de largura/altura).",
+    hint: "Arbitrary size — review it (may be intentional; there is no width/height token).",
   },
   {
     id: "raw-svg", sev: "warn", skipVisual: true,
     re: /<svg[\s>]/,
-    hint: 'SVG cru. Use <Icon name="…" />. SVG só p/ marca/ilustração/visual de agente.',
+    hint: 'Raw SVG. Use <Icon name="…" />. Raw SVG is only for brand / illustration visuals.',
   },
 ];
 
@@ -156,27 +159,27 @@ for (const file of files) {
   // raw shadcn primitive imported in product code (not a DS wrapper / adapter / showcase)
   if (!inStyleguide && !inUi && !inToolUi) {
     for (const m of src.matchAll(/from\s+["']@\/components\/ui\/([a-z][a-z-]*)["']/g)) {
-      const aw = AW_EQUIVALENT[m[1]];
-      if (aw) {
+      const au = AU_EQUIVALENT[m[1]];
+      if (au) {
         addFinding(
           "warn", "primitive-import-in-product", file, lineOf(src, m.index),
           `import … "@/components/ui/${m[1]}"`,
-          `Primitivo cru "${m[1]}" em produto — use ${aw} (docs/component-map.md).`,
+          `Raw primitive "${m[1]}" in product code — use ${au} (docs/component-map.md).`,
         );
       }
     }
 
-    // BaseModal deprecado — migrar para AuModal (anima entrada E saída).
+    // BaseModal is deprecated — migrate to AuModal (animates enter AND exit).
     for (const m of src.matchAll(/from\s+["'][^"']*BaseModal["']/g)) {
       addFinding(
         "warn", "deprecated-basemodal", file, lineOf(src, m.index),
         "import … BaseModal",
-        "BaseModal está deprecado — use AuModal (anima entrada E saída + tokens).",
+        "BaseModal is deprecated — use AuModal (animates enter AND exit + tokens).",
       );
     }
 
-    // Overlay na mão (modal/drawer) — perde a transição enter/exit que
-    // AuModal/AuSheet carregam. Pula os overlays crus sancionados.
+    // Hand-rolled overlay (modal/drawer) — loses the enter/exit transition that
+    // AuModal/AuSheet carry. Skips the sanctioned raw overlays.
     if (!OVERLAY_EXEMPT_RE.test(file)) {
       const ovLines = src.split("\n");
       for (let i = 0; i < ovLines.length; i++) {
@@ -185,8 +188,8 @@ for (const file of files) {
         if (t.startsWith("//") || t.startsWith("*") || t.startsWith("/*")) continue;
         const strongModal =
           /\brole=["']dialog["']/.test(ln) || /\baria-modal\b/.test(ln);
-        // fixed full-bleed com z-index POSITIVO e interativo = overlay. Exclui
-        // camadas de fundo (-z-, pointer-events-none).
+        // fixed full-bleed with a POSITIVE, interactive z-index = overlay.
+        // Excludes background layers (-z-, pointer-events-none).
         const fixedOverlay =
           /\bfixed inset-0\b/.test(ln) &&
           /\bz-(?:\[|[1-9])/.test(ln) &&
@@ -195,7 +198,7 @@ for (const file of files) {
         if (strongModal || fixedOverlay) {
           addFinding(
             "warn", "handrolled-overlay", file, i + 1, ln,
-            "Overlay na mão — use AuModal/AuSheet (carregam enter+exit + tokens). Modal na mão fecha sem transição.",
+            "Hand-rolled overlay — use AuModal/AuSheet (they carry enter+exit + tokens). A hand-rolled modal closes with no transition.",
           );
         }
       }
@@ -203,14 +206,14 @@ for (const file of files) {
   }
 }
 
-// non-Aw component file directly under components/ui/ (subfolders like fluid/ are exempt)
+// non-Au component file directly under components/ui/ (subfolders like fluid/ are exempt)
 for (const file of walk(join(ROOT, "components", "ui"))) {
   if (norm(dirname(file)) !== "components/ui") continue;
   if (!file.endsWith(".tsx")) continue;
   const name = basename(file, ".tsx");
   if (/^[a-z]/.test(name) && !KNOWN_PRIMITIVES.includes(name)) {
     addFinding("warn", "non-au-in-ui", file, 1, name,
-      "Arquivo de DS sem prefixo Aw. Componentes do DS são Aw* (AGENTS.md §1).");
+      "DS file without the Au prefix. DS components are Au* (AGENTS.md §1).");
   }
 }
 
@@ -221,20 +224,20 @@ if (existsSync(mapPath)) {
   for (const file of walk(join(ROOT, "components", "ui"))) {
     if (norm(dirname(file)) !== "components/ui") continue;
     const name = basename(file, ".tsx");
-    if (name.startsWith("Aw") && !mapTxt.includes(name)) {
+    if (name.startsWith("Au") && !mapTxt.includes(name)) {
       addFinding("info", "map-missing", file, 1, name,
-        "Componente não citado em docs/component-map.md — documente-o.");
+        "Component not referenced in docs/component-map.md — document it.");
     }
   }
-  for (const m of mapTxt.matchAll(/@\/components\/ui\/(Aw[A-Za-z0-9]+|Icon)\b/g)) {
+  for (const m of mapTxt.matchAll(/@\/components\/ui\/(Au[A-Za-z0-9]+|Icon)\b/g)) {
     if (!existsSync(join(ROOT, "components", "ui", `${m[1]}.tsx`))) {
       addFinding("warn", "map-broken", mapPath, lineOf(mapTxt, m.index), m[1],
-        "Linha do mapa aponta p/ componente inexistente.");
+        "Map line points at a component that does not exist.");
     }
   }
 } else {
   addFinding("warn", "map-missing-file", mapPath, 1, "docs/component-map.md",
-    "Índice de componentes ausente — crie docs/component-map.md.");
+    "Component index missing — create docs/component-map.md.");
 }
 
 // ── report ───────────────────────────────────────────────────────────────────
@@ -249,9 +252,9 @@ for (const f of findings) {
 const warnCount = findings.filter((f) => f.sev === "warn").length;
 const infoCount = findings.filter((f) => f.sev === "info").length;
 
-console.log("\n  ds:check — higiene do design system Auis\n");
+console.log("\n  ds:check — Auis design-system hygiene\n");
 if (!findings.length) {
-  console.log("  ✓ nenhum problema encontrado.\n");
+  console.log("  ✓ no problems found.\n");
   process.exit(0);
 }
 
@@ -259,19 +262,19 @@ for (const sev of order) {
   const keys = [...byRule.keys()].filter((k) => k.startsWith(`${sev}:`)).sort();
   for (const k of keys) {
     const items = byRule.get(k);
-    const label = sev === "warn" ? "AVISO" : "nota";
+    const label = sev === "warn" ? "WARN" : "note";
     console.log(`  [${label}] ${k.split(":")[1]} — ${items[0].hint}`);
     for (const it of items.slice(0, MAX_PER_RULE)) {
       console.log(`     ${it.file}:${it.line}  ${it.text}`);
     }
     if (items.length > MAX_PER_RULE) {
-      console.log(`     … +${items.length - MAX_PER_RULE} mais`);
+      console.log(`     … +${items.length - MAX_PER_RULE} more`);
     }
     console.log("");
   }
 }
 
-console.log(`  resumo: ${warnCount} aviso(s), ${infoCount} nota(s).`);
-console.log("  guia: docs/component-map.md · AGENTS.md (Tokens are sacred / Components before code)\n");
+console.log(`  summary: ${warnCount} warning(s), ${infoCount} note(s).`);
+console.log("  guide: docs/component-map.md · AGENTS.md (Tokens are sacred / Components before code)\n");
 
 process.exit(STRICT && warnCount > 0 ? 1 : 0);

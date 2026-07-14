@@ -18,7 +18,7 @@ place, whichever component they open.
 ## Structure of an **individual component** page (15 sections)
 
 Use this pattern for a page that documents **one** specific component
-(`AuButton`, `AuSelect`, `AuCheckpointChip`, etc.). For a parent page that groups
+(`AuButton`, `AuPill`, `AuCheckpointChip`, etc.). For a parent page that groups
 several implementations of the same family, use the "family hub page" section
 below.
 
@@ -50,7 +50,7 @@ Use it when the sidebar has a parent item with more than one child, for example:
 
 - `Tables` → `AuTable`, `Data table`, `Members table`
 - `Modals and dialogs` → `AuModal`, `Connect modal`, `Welcome modal`
-- `Agent visuals` → `Agent Core`, `User Agent`, `Cortex`
+- `Navigation` → `AuNavRail`, `AuSidebar`, `AuBreadcrumb`
 
 The hub page exists for quick decisions and visual comparison. It must not
 open with "when to use / when not to use" cards; it shows the whole

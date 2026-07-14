@@ -68,6 +68,6 @@ skills/registry.json + CATALOG.md        .claude/skills/<name>/   (Claude Code)
 
 Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `globals.css`, no `tailwind.config`) · shadcn/ui (lowercase primitives + `Au*` wrapper) · Material Symbols via `components/ui/Icon.tsx` · Zustand · framer-motion · `@xyflow/react` (flows). MCPs in `.mcp.json` (figma, shadcn, playwright, mobbin).
 
-## Boundary: engine vs. origin residue
+## Branding & theming
 
-The leftover branding (`AuBrandLogo`/`AuBrandIllustration`/`AuCortexSynthesis`, `comet-*` assets) and the `AuDashboardLayout` shell need replacement/a decision. The tokens are already on a neutral baseline; re-theming per product is the `auis-foundation` skill.
+The visual identity is Auis's own, not residue: `AuLogo` + `auis-wordmark.svg` and the `comet-*` assets are the Auis mark; `AuBrandIllustration` and `AuCopilotSynthesis` (the animated orb of the Copilot drawer) are DS components; `AuBrandLogo` is a registry of **third-party** marks (Google, Slack, …) that integration surfaces render, so it is product-neutral by design. `AuDashboardLayout` is the workbench shell. The tokens sit on a neutral baseline — re-theming for your own product is the `auis-foundation` skill.

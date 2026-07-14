@@ -1,8 +1,8 @@
 // Registry of the AGENTS that operate on the Review Bridge — the ones a reviewer
-// summons with "@" in a comment (Claude, Germano). Distinct from the user's
-// product agents (Agent Studio) and from the "claude" integration: these are the
-// bridge operators, matching the ReviewActor identities the skills already post
-// as (`{ kind: "agent", id, name }`).
+// summons with "@" in a comment (Claude, Germano). Distinct from any agents the
+// host product defines and from the "claude" integration: these are the bridge
+// operators, matching the ReviewActor identities the skills already post as
+// (`{ kind: "agent", id, name }`).
 //
 // Single source of truth for: the "@" mention menu, the per-agent control panel
 // on the floating Auis dot, and chip rendering for rendered mentions.

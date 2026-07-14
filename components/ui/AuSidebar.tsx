@@ -24,83 +24,86 @@ type NavSection = {
   items: NavItem[];
 };
 
+/** Placeholder orgs and people for the showcase — no real avatars ship with the
+ *  template, so every entry renders through the switcher's initials fallback.
+ *  The first org keeps a long name on purpose, to demo truncation in the rail. */
 const ORGANIZATIONS: AuNavRailOrgOption[] = [
   {
     id: "org-1",
-    name: "Nome da organização",
-    subtitle: "Organização",
-    icon: "/assets/icon_artificial_concord_organization.png",
+    name: "Northwind Industries",
+    subtitle: "Organization",
   },
   { id: "org-2", name: "Auis Labs", subtitle: "Workspace" },
-  { id: "org-3", name: "Cliente Demo", subtitle: "Organização" },
+  { id: "org-3", name: "Acme Demo", subtitle: "Organization" },
 ];
 
 const USERS: AuNavRailUserOption[] = [
   {
     id: "user-1",
-    name: "Gregório Pinheiro",
-    title: "Super Administrador",
-    initials: "GP",
-    avatar: "/assets/users/greg.jpg",
+    name: "Jordan Reyes",
+    title: "Owner",
+    initials: "JR",
   },
   {
     id: "user-2",
-    name: "Gabriel Lima",
-    title: "Administrador",
-    initials: "GL",
-    avatar: "/assets/users/gabriel_lima.jpg",
+    name: "Avery Chen",
+    title: "Admin",
+    initials: "AC",
   },
   {
     id: "user-3",
-    name: "José Júnior",
-    title: "Estagiário",
-    initials: "JJ",
-    avatar: "/assets/users/jose.jpg",
+    name: "Sam Okafor",
+    title: "Member",
+    initials: "SO",
   },
 ];
 
+/** Demo navigation for the design-system showcase — deliberately generic and
+ *  product-agnostic. The routes are placeholders: this component exists to
+ *  demonstrate the rail, not to describe a real app's information architecture.
+ *  Swap `NAV_SECTIONS` for your own tree when you adopt Auis.
+ *
+ *  Kept broad on purpose so every capability of the rail stays exercised:
+ *  unlabeled groups (first and last), labeled groups, numeric and string
+ *  `count` badges, and a mix of Material Symbols icons. */
 const NAV_SECTIONS: NavSection[] = [
   {
     items: [
-      { label: "Início", href: "/inicio", icon: "home" },
+      { label: "Home", href: "/home", icon: "home" },
       { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
       { label: "Insights", href: "/insights", icon: "bolt" },
     ],
   },
   {
-    label: "Agentes",
+    label: "Workspace",
     items: [
-      { label: "Agent studio", href: "/agent-studio", icon: "agent_studio" },
-      { label: "Aprovações", href: "/approvals", icon: "done_all" },
-      { label: "Disparos", href: "/triggers", icon: "send" },
+      { label: "Projects", href: "/projects", icon: "folder" },
+      { label: "Tasks", href: "/tasks", icon: "done_all", count: 12 },
+      { label: "Library", href: "/library", icon: "bookmark" },
     ],
   },
   {
-    label: "Fontes",
+    label: "Content",
     items: [
-      { label: "Memory base", href: "/memory-base", icon: "memory_base" },
-      { label: "AOPs", href: "/aops", icon: "description" },
-      { label: "Biblioteca", href: "/library", icon: "bookmark" },
-      { label: "Habilidades", href: "/tools", icon: "build" },
-      { label: "Canais", href: "/canais", icon: "forum" },
-      { label: "Integrações", href: "/integrations", icon: "extension" },
+      { label: "Documents", href: "/documents", icon: "description" },
+      { label: "Media", href: "/media", icon: "image" },
+      { label: "Integrations", href: "/integrations", icon: "extension" },
     ],
   },
   {
-    label: "Acompanhamento",
+    label: "Activity",
     items: [
-      { label: "Conversas", href: "/conversations", icon: "chat", count: 99 },
-      { label: "Playground", href: "/playground", icon: "forum" },
-      { label: "Histórico de alterações", href: "/history", icon: "history" },
+      { label: "Messages", href: "/messages", icon: "chat", count: "99+" },
+      { label: "Notifications", href: "/notifications", icon: "notifications" },
+      { label: "History", href: "/history", icon: "history" },
     ],
   },
   {
-    items: [{ label: "Configurações", href: "/settings", icon: "tune" }],
+    items: [{ label: "Settings", href: "/settings", icon: "tune" }],
   },
 ];
 
 const STORAGE_KEY = "auis:sidebar:collapsed";
-const FORCE_COLLAPSED_PREFIX = "/agent-studio/";
 
 /** Read the persisted collapsed flag synchronously so the very first render
  *  matches the user's last preference. Returning `undefined` on the server
@@ -130,7 +133,6 @@ export function AuSidebar({
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (forcedCollapsed) return true;
     if (floating) return true;
-    if (pathname?.startsWith(FORCE_COLLAPSED_PREFIX)) return true;
     return false;
   });
 
@@ -147,10 +149,6 @@ export function AuSidebar({
   }, []);
 
   useEffect(() => {
-    if (pathname?.startsWith(FORCE_COLLAPSED_PREFIX)) setIsCollapsed(true);
-  }, [pathname]);
-
-  useEffect(() => {
     if (forcedCollapsed) setIsCollapsed(true);
   }, [forcedCollapsed]);
 
@@ -159,13 +157,12 @@ export function AuSidebar({
   }, [floating]);
 
   // Restore the persisted collapse preference after mount. Skipped while a
-  // prop or route pins the rail collapsed (handled by the effects above).
+  // prop pins the rail collapsed (handled by the effects above).
   useEffect(() => {
     if (forcedCollapsed || floating) return;
-    if (pathname?.startsWith(FORCE_COLLAPSED_PREFIX)) return;
     const stored = readStoredCollapsed();
     if (stored != null) setIsCollapsed(stored);
-  }, [forcedCollapsed, floating, pathname]);
+  }, [forcedCollapsed, floating]);
 
   const handleToggleCollapsed = () => {
     setIsCollapsed((v) => {
@@ -195,7 +192,6 @@ export function AuSidebar({
       return;
     }
     event.preventDefault();
-    if (href === "/memory-base") setIsCollapsed(true);
     router.push(href);
   };
 

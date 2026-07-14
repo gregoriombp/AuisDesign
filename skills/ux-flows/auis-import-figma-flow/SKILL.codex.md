@@ -8,7 +8,7 @@ description: >
   activates the "Projetos" card on the hub. The screens become cards with
   the "Atualizar pro design system" and "Construir no repo" buttons. Use
   when the user asks to "import a Figma flow", "create a project from
-  Figma", "import Memory Base / Agent Studio", "bring the Figma screens
+  Figma", "import Onboarding / Checkout", "bring the Figma screens
   into the repo", or pastes a figma.com URL with the intent of importing it
   as a project. Do NOT use for `.awflow.json` → ReactFlow diagram (that is
   `auis-pg-create-flow`): here the source is a Figma URL and the output is
@@ -50,8 +50,8 @@ component, not the flow's page). Confirm it is the flow's **page/section** in
 Step 2. `get_metadata(fileKey)` WITHOUT a nodeId lists pages, but it may come
 back incomplete — always prefer the flow's node-id directly.
 
-Ask for (or infer) the project's `slug` + `title` (e.g. `memory-base` /
-"Memory Base"). The slug must not collide with `built` nor with an existing
+Ask for (or infer) the project's `slug` + `title` (e.g. `onboarding` /
+"Onboarding"). The slug must not collide with `built` nor with an existing
 slug in `PROJECTS`.
 
 ---

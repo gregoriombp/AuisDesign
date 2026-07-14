@@ -2,25 +2,29 @@
 
 > Source of truth for the **classification** of every component in the Auis DS.
 > Sibling of [`styleguide-page-structure.md`](./styleguide-page-structure.md) (which
-> defines the *structure* of each page). Here we define which **layer** each piece
+> defines the *structure* of each page) and of [`component-map.md`](./component-map.md)
+> (which tells you *what to import*). Here we define which **layer** each piece
 > lives in within the styleguide sidebar (`app/auis/styleguide/navigation.ts`).
-
-This is the 2026-05 version.
+>
+> **This is a classification yardstick, not an inventory.** It applies to both layers of the
+> [component map](./component-map.md): the 31 `Au*` that ship (Layer A — the builder's own UI)
+> and, above all, **the components you are about to build** (Layer B). Since the styleguide
+> gallery ships empty, this taxonomy is mostly here to tell you where *your* next component
+> goes in the sidebar.
 
 ## Why it exists
 
-The per-component documentation is already strong. What was missing was **taxonomy**: a dev
-glancing at the sidebar couldn't tell a reusable brick (`Buttons`) from a one-off
-business-screen piece (`WhatsApp panel`) — both sat side by side in a single
-"Components" section with ~55 items in alphabetical order.
+Taxonomy: a dev glancing at the sidebar should be able to tell a reusable brick (`AuButton`)
+from a piece that only makes sense inside this product (`AuCheckpointChip`) — without them
+sitting side by side in one undifferentiated "Components" list.
 
-The sidebar now reflects the design system's **abstraction pyramid**. Reading top to
+The sidebar reflects the design system's **abstraction pyramid**. Reading top to
 bottom, the dev learns the hierarchy: from the most fundamental and reusable (base) to the
 most specific and product-bound (top).
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Domain       ← only makes sense in Auis (agent, billing)   │  + specific
+│  Domain       ← only makes sense in Auis (brand, billing)   │  + specific
 │  Patterns     ← a whole flow/region, still generic          │
 │  Components   ← composes primitives, business-agnostic      │
 │  Primitives   ← 1-purpose brick, no domain                  │  + fundamental
@@ -29,23 +33,31 @@ most specific and product-bound (top).
 ```
 
 **Dependency rule:** each layer depends only on the layers **below** it, never on the
-ones above. `Buttons` (primitive) never imports an `Integration card` (domain); an
-`Integration card` is free to use `Buttons`, `Avatar`, `Pills`. That is what keeps the base
-stable — touching a primitive propagates to everyone; touching a domain piece keeps the
-damage local.
+ones above. `AuButton` (primitive) never imports `AuCheckpointChip` (domain); `AuCheckpointChip`
+is free to use `AuBrandLogo`, `Icon`, and the `badge` primitive — which is exactly what it
+does. That is what keeps the base stable: touching a primitive propagates to everyone;
+touching a domain piece keeps the damage local.
 
 ## The 4 layers (the classification yardstick)
 
-| Layer | Key question | Business-aware? | Examples |
+Examples are drawn from what actually ships (Layer A). Your own components (Layer B) classify
+the same way.
+
+| Layer | Key question | Business-aware? | Examples that ship |
 |---|---|---|---|
-| **Primitives** | Is it a single-purpose brick, made only of tokens + HTML/Radix? | No | Buttons, Inputs, Select, Checkbox, Avatar, Pills, Toast, Skeleton |
-| **Components** | Does it combine primitives into a generic block, reusable in any product? | No | Cards, Modals, Sheet, Table, Nav rail, Page header, Stat card |
-| **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | Onboarding shell, Welcome modal, Connect modal, Password setup |
-| **Domain** | Is it tied to an Auis business concept (agent, integration, billing, brand)? | Yes | Agent visuals, Specialists pair, Integration card, WhatsApp panel |
+| **Primitives** | Is it a single-purpose brick, made only of tokens + HTML/Radix? | No | `AuButton`, `AuInput`/`AuField`, `AuCheckbox`, `AuToggle`, `AuSlider`, `AuPill`, `AuToast`, `AuAlert`, `AuEmpty`, `Icon` |
+| **Components** | Does it combine primitives into a generic block, reusable in any product? | No | `AuCard`, `AuStatCard`, `AuTable`, `AuModal`, `AuSheet`, `AuNavRail`, `AuBreadcrumbsBar`, `AuNotificationsPanel` |
+| **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | *(none ship — this layer is yours to fill: an onboarding shell, a multi-step wizard, a settings region)* |
+| **Domain** | Is it tied to an Auis concept (Review Bridge, Copilot, brand)? | Yes | `AuMentionMenu`, `AuCheckpointChip`, `AuCopilotSynthesis`, `AuLogo`, `AuBrandLogo`, `AuBrandIllustration` |
+
+> The **Patterns** row is empty on purpose, and the **Domain** row is Auis's own domain (the
+> builder), not your product's. When you build a pricing table, an integration tile, or a
+> billing card, those are *your* Domain — they belong in Layer B of the
+> [component map](./component-map.md).
 
 ### Tie-break rules
 
-1. **If it would stop making sense in a product other than Auis → it's Domain.**
+1. **If it would stop making sense in a product other than yours → it's Domain.**
    (wins over the other layers)
 2. **In doubt between two adjacent layers → pick the lower one** (more
    fundamental / more reusable) and record why here.
@@ -56,7 +68,7 @@ damage local.
 ## I created a new component — which layer does it go in?
 
 ```
-Does it only make sense inside Auis (agent, integration, billing, brand)?
+Does it only make sense inside your product (billing, integrations, your domain)?
    └─ yes → Domain
    └─ no  → Is it a whole flow/region (multi-step)?
               └─ yes → Patterns
@@ -72,47 +84,45 @@ governance only.
 When a family has more than one concrete item, use a parent item with
 `children` instead of creating several top-level entries. The parent item points at the
 canonical hub; the children point at technical subpages or anchors inside the
-hub. Current examples:
+hub.
 
-- `Tables` → `AuTable`, `Data table`, `Members table`
-- `Modals and dialogs` → `AuModal`, `Connect modal`, `Contact channel modal`,
-  `Welcome modal`, `Add integration modal`
-- `Sheets and drawers` → `AuSheet`, `Template builder sheet`
-- `Agent visuals` → `Agent Core`, `User Agent`, `Cortex`
+The one family that ships today is **Navigation** → `AuNavRail`, `AuSidebar`, `AuBreadcrumb`.
+The pattern generalizes: when your second table variant appears, don't add a second top-level
+`Tables` entry — make the first one the hub and hang the variant off it as a child.
 
-## Current mapping (audit)
+## Current mapping
 
-Mirrors `app/auis/styleguide/navigation.ts` — check the nav for the live inventory (the count changes; we don't pin a number here).
+Mirrors [`navigation.ts`](../app/auis/styleguide/navigation.ts) — check the nav for the live
+inventory. We deliberately don't duplicate the list here; it would fall behind with every new
+component.
 
-The inventory by layer lives in the **Primitives / Components / Patterns /
-Domain** sections of [`navigation.ts`](../app/auis/styleguide/navigation.ts). We
-deliberately don't duplicate the list here — it would fall behind with every new
-component. For the classification of each piece, read the 4-layer yardstick above and the
-revised boundaries below.
+Today that nav is a **zeroed template** (an intro entry plus the Review Mode pages). The
+Primitives / Components / Patterns / Domain sections are commented-out scaffolding, waiting
+for your first `auis-component` run. For what *does* ship and how to import it, use
+[`component-map.md`](./component-map.md) → Layer A.
 
-### Revised boundaries (2026-05)
+### Boundary precedents
 
-Debatable items, resolved by applying tie-break #1 — *"only makes sense in
-Auis"*:
+Debatable calls, resolved by applying tie-break #1 — *"only makes sense in this product"*.
+Kept because the reasoning transfers to the calls you'll have to make:
 
-- **Dot tunnel** → *Components* (was Domain). Decorative visual with no business
-  logic; it makes sense in any product, so it is not Domain.
-- **Payment method card** + **Card brand** → *Components*, together (Payment method
-  card was Domain). A brand chip and a saved card are generic payment UI —
-  any SaaS with billing uses them; they are not a concept exclusive to Auis.
-- **Empty** / **Alerts** → *Primitives*. They compose sub-parts, but have a single
+- **Decorative visuals** (a dot tunnel, an animated background) → *Components*, not Domain.
+  No business logic; they'd make sense in any product.
+- **Generic payment UI** (a saved-card chip, a card-brand mark) → *Components*, not Domain.
+  Any SaaS with billing uses them; they aren't exclusive to one product.
+- **`AuEmpty` / `AuAlert`** → *Primitives*. They compose sub-parts, but have a single
   feedback purpose; they stay in the base for reuse.
 
-Result: **Domain** keeps only the unmistakably Auis — agents
-(Specialists pair, Agent visuals), integrations (Integration card, Brand logo,
-WhatsApp panel), and commercial (Additional plan banner).
+Applied to what ships, that leaves **Domain** holding only the unmistakably-Auis pieces: the
+Review Bridge surfaces (`AuMentionMenu`, `AuCheckpointChip`), the Copilot orb
+(`AuCopilotSynthesis`), and brand (`AuLogo`, `AuBrandLogo`, `AuBrandIllustration`).
 
 ## Scope of this phase
 
 The physical `components/ui/` folder stays **flat on purpose** — the layer lives in
-**navigation and governance**, not in the filesystem. Moving ~78 files into subfolders
-would break hundreds of imports for marginal gain. If a folder migration is ever
-wanted, it follows exactly this mapping as its script.
+**navigation and governance**, not in the filesystem. Splitting 31 files into subfolders
+would break every import for marginal gain. If a folder migration is ever wanted, it follows
+exactly this mapping as its script.
 
 Out of scope (decided): moving files, creating barrel exports, renaming
 components.

@@ -860,7 +860,7 @@ function ProductPreview() {
         >
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="au-eyebrow mb-2">Agent Studio</p>
+              <p className="au-eyebrow mb-2">Preview</p>
               <h3 className="m-0">Orquestração de agentes</h3>
             </div>
             <AuPill variant="ai">Beta</AuPill>
@@ -1111,7 +1111,7 @@ function ChromePreview() {
             </div>
           </div>
         </div>
-        {["Dashboard", "Agent Studio", "Memory Base", "Settings"].map(
+        {["Dashboard", "Projects", "Library", "Settings"].map(
           (item, index) => (
             <div
               key={item}

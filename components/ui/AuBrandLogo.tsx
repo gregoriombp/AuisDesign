@@ -482,7 +482,7 @@ const BRANDS: Record<string, Brand> = {
   intercom: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/intercom.svg` },
   zapier: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/zapier.svg` },
   /* ------------------------------------------------------------------
-   * Fontes / produtividade (Memory Base) e identidade
+   * Sources / productivity and identity
    * ------------------------------------------------------------------ */
   github: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/github.svg` },
   linear: { bg: "#FFFFFF", bordered: true, markSrc: `${ICONIFY_BASE}/linear.svg` },
@@ -547,7 +547,7 @@ export type AuBrandLogoProps = React.HTMLAttributes<HTMLDivElement> & {
   markOnly?: boolean
 }
 
-export const AW_BRAND_LOGO_REGISTRY = Object.freeze(
+export const AU_BRAND_LOGO_REGISTRY = Object.freeze(
   Object.keys(BRANDS).sort()
 ) as readonly string[]
 

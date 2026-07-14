@@ -8,7 +8,7 @@ import type {
 } from "@/components/auis-review/types"
 
 // Pins guardam uma posição absoluta (doc coords), mas quando um painel lateral
-// abre/fecha (Cortex, sidebars) o `<main>` muda de largura e o conteúdo reflui
+// abre/fecha (Copilot, sidebars) o `<main>` muda de largura e o conteúdo reflui
 // horizontalmente — aí o pin preso a um x fixo "desgruda" do elemento.
 //
 // Pra resolver isso, além da coord absoluta, ancoramos o pin ao ELEMENTO sob

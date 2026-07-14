@@ -32,9 +32,9 @@ Concrete jobs this skill is for:
 - "Compile into a single flow: **creating the first agent** and, later,
   **adjusting an agent that already exists**" — two scenarios that share the
   agent-editor screens; the *adjust* scenario re-enters the graph partway through.
-- "The person **has no memory base** created, so they need to create one before
-  moving on" — a decision (`Has a memory base?`) routes into a sub-journey (create
-  the base) that then **converges** back into the main path. Those nuances are
+- "The person **has no workspace** created, so they need to create one before
+  moving on" — a decision (`Has a workspace?`) routes into a sub-journey (create
+  the workspace) that then **converges** back into the main path. Those nuances are
   exactly what the lens makes legible.
 
 ---
@@ -105,15 +105,15 @@ bare canvas for a normal flow; it is specific to compiled multi-scenario views.
    to dedup.
 5. **Cross-scenario continuation** — one scenario's terminal is another's entry,
    or a decision routes into a **sub-journey** that converges back (the "no
-   memory base → create it → come back" shape).
+   workspace → create it → come back" shape).
 
 ---
 
 ## Input expected from the user
 
 ```txt
-Compiled view name: [e.g. "Agent — compiled view", "Memory Base — golden eye"]
-Slug:               [e.g. "agent-compiled-view", "memory-base-golden-eye"]
+Compiled view name: [e.g. "Agent — compiled view", "Workspace — golden eye"]
+Slug:               [e.g. "agent-compiled-view", "workspace-golden-eye"]
 Scenarios:          [2–6 journeys to overlay, each with a one-line intent]
 Per scenario:       [ordered screens/states + decision points]
 Shared screens:     [which screens >1 scenario touches — the dedup list]
@@ -136,7 +136,7 @@ This is the whole game. Before any code:
 2. **Find shared screens across scenarios** → these dedup into single cards.
    Record which scenarios own each (the dot list).
 3. **List decision points**, including the "state gates" that make scenarios
-   branch: `Has a memory base?`, `First time?`, `Already has 2FA?`.
+   branch: `Has a workspace?`, `First time?`, `Already has 2FA?`.
 4. **List convergences** (where paths rejoin the shared trunk).
 5. **List cross-scenario links** (terminal-of-A = entry-of-B; decision →
    sub-journey → converge back).

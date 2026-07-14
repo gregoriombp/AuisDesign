@@ -64,7 +64,7 @@ const IGNITION_RAYS = Array.from({ length: 36 }, (_, i) => {
   }
 })
 
-/* ── constellation — Cortex (hexágono) cercado de agentes (círculos) ─────── */
+/* ── constellation — Copilot (hexágono) cercado de agentes (círculos) ─────── */
 const HEX_POINTS = Array.from({ length: 6 }, (_, i) => {
   const a = (i / 6) * Math.PI * 2 - Math.PI / 2
   return `${200 + Math.cos(a) * 34},${200 + Math.sin(a) * 34}`

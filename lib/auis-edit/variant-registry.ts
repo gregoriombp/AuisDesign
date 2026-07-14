@@ -40,18 +40,18 @@ function bare(value: string, label: string): VariantOption {
   return { value, label, className: "" }
 }
 
-const AW_BTN = "au-btn--"
-const AW_CARD = "au-card--"
-const AW_PILL = "au-pill--"
-const AW_ALERT = "au-alert--"
-const AW_AVATAR = "au-avatar--"
-const AW_PROGRESS = "au-progress--"
-const AW_TABS = "au-tabs--"
-const AW_TOAST = "au-toast--"
-const AW_INPUT = "au-input--"
-const AW_SHEET = "au-sheet--"
-const AW_MODAL = "au-modal--"
-const AW_CHAT = "au-chat--"
+const AU_BTN = "au-btn--"
+const AU_CARD = "au-card--"
+const AU_PILL = "au-pill--"
+const AU_ALERT = "au-alert--"
+const AU_AVATAR = "au-avatar--"
+const AU_PROGRESS = "au-progress--"
+const AU_TABS = "au-tabs--"
+const AU_TOAST = "au-toast--"
+const AU_INPUT = "au-input--"
+const AU_SHEET = "au-sheet--"
+const AU_MODAL = "au-modal--"
+const AU_CHAT = "au-chat--"
 
 export const COMPONENT_REGISTRY: ComponentSpec[] = [
   {
@@ -63,20 +63,20 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "variant",
         label: "Variante",
         options: [
-          opt(AW_BTN, "primary", "Primary"),
-          opt(AW_BTN, "secondary", "Secondary"),
-          opt(AW_BTN, "ghost", "Ghost"),
-          opt(AW_BTN, "subtle", "Subtle"),
-          opt(AW_BTN, "danger", "Danger"),
-          opt(AW_BTN, "ai", "AI"),
-          opt(AW_BTN, "ai-spectrum", "AI spectrum"),
-          opt(AW_BTN, "ai-outline", "AI outline"),
+          opt(AU_BTN, "primary", "Primary"),
+          opt(AU_BTN, "secondary", "Secondary"),
+          opt(AU_BTN, "ghost", "Ghost"),
+          opt(AU_BTN, "subtle", "Subtle"),
+          opt(AU_BTN, "danger", "Danger"),
+          opt(AU_BTN, "ai", "AI"),
+          opt(AU_BTN, "ai-spectrum", "AI spectrum"),
+          opt(AU_BTN, "ai-outline", "AI outline"),
         ],
       },
       {
         key: "size",
         label: "Tamanho",
-        options: [opt(AW_BTN, "sm", "SM"), opt(AW_BTN, "md", "MD"), opt(AW_BTN, "lg", "LG")],
+        options: [opt(AU_BTN, "sm", "SM"), opt(AU_BTN, "md", "MD"), opt(AU_BTN, "lg", "LG")],
       },
     ],
   },
@@ -89,10 +89,10 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "variant",
         label: "Variante",
         options: [
-          opt(AW_CARD, "default", "Padrão"),
-          opt(AW_CARD, "ai", "AI"),
-          opt(AW_CARD, "ai-warm", "AI warm"),
-          opt(AW_CARD, "ai-cortex", "AI cortex"),
+          opt(AU_CARD, "default", "Padrão"),
+          opt(AU_CARD, "ai", "AI"),
+          opt(AU_CARD, "ai-warm", "AI warm"),
+          opt(AU_CARD, "ai-copilot", "AI copilot"),
         ],
       },
     ],
@@ -106,13 +106,13 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "variant",
         label: "Variante",
         options: [
-          opt(AW_PILL, "neutral", "Neutral"),
-          opt(AW_PILL, "ai", "AI"),
-          opt(AW_PILL, "beta", "Beta"),
-          opt(AW_PILL, "draft", "Draft"),
-          opt(AW_PILL, "live", "Live"),
-          opt(AW_PILL, "warning", "Warning"),
-          opt(AW_PILL, "error", "Error"),
+          opt(AU_PILL, "neutral", "Neutral"),
+          opt(AU_PILL, "ai", "AI"),
+          opt(AU_PILL, "beta", "Beta"),
+          opt(AU_PILL, "draft", "Draft"),
+          opt(AU_PILL, "live", "Live"),
+          opt(AU_PILL, "warning", "Warning"),
+          opt(AU_PILL, "error", "Error"),
         ],
       },
     ],
@@ -126,10 +126,10 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "variant",
         label: "Variante",
         options: [
-          opt(AW_ALERT, "info", "Info"),
-          opt(AW_ALERT, "success", "Success"),
-          opt(AW_ALERT, "warning", "Warning"),
-          opt(AW_ALERT, "danger", "Danger"),
+          opt(AU_ALERT, "info", "Info"),
+          opt(AU_ALERT, "success", "Success"),
+          opt(AU_ALERT, "warning", "Warning"),
+          opt(AU_ALERT, "danger", "Danger"),
         ],
       },
     ],
@@ -144,7 +144,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         label: "Tamanho",
         // AuAvatarSize = "sm" | "md" | "lg"; "md" é o default e não tem classe
         // (`size !== "md" && au-avatar--${size}`).
-        options: [opt(AW_AVATAR, "sm", "SM"), bare("md", "MD"), opt(AW_AVATAR, "lg", "LG")],
+        options: [opt(AU_AVATAR, "sm", "SM"), bare("md", "MD"), opt(AU_AVATAR, "lg", "LG")],
       },
     ],
   },
@@ -157,10 +157,10 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "variant",
         label: "Variante",
         options: [
-          opt(AW_PROGRESS, "default", "Padrão"),
-          opt(AW_PROGRESS, "success", "Success"),
-          opt(AW_PROGRESS, "warning", "Warning"),
-          opt(AW_PROGRESS, "danger", "Danger"),
+          opt(AU_PROGRESS, "default", "Padrão"),
+          opt(AU_PROGRESS, "success", "Success"),
+          opt(AU_PROGRESS, "warning", "Warning"),
+          opt(AU_PROGRESS, "danger", "Danger"),
         ],
       },
     ],
@@ -174,9 +174,9 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "variant",
         label: "Variante",
         options: [
-          opt(AW_TABS, "segmented", "Segmented"),
-          opt(AW_TABS, "standalone", "Standalone"),
-          opt(AW_TABS, "underline", "Underline"),
+          opt(AU_TABS, "segmented", "Segmented"),
+          opt(AU_TABS, "standalone", "Standalone"),
+          opt(AU_TABS, "underline", "Underline"),
         ],
       },
     ],
@@ -191,9 +191,9 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         label: "Variante",
         options: [
           bare("default", "Padrão"),
-          opt(AW_TOAST, "warning", "Warning"),
-          opt(AW_TOAST, "error", "Error"),
-          opt(AW_TOAST, "ai", "AI"),
+          opt(AU_TOAST, "warning", "Warning"),
+          opt(AU_TOAST, "error", "Error"),
+          opt(AU_TOAST, "ai", "AI"),
         ],
       },
     ],
@@ -206,20 +206,20 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
       {
         key: "density",
         label: "Densidade",
-        options: [bare("default", "Padrão"), opt(AW_INPUT, "dense", "Dense")],
+        options: [bare("default", "Padrão"), opt(AU_INPUT, "dense", "Dense")],
       },
       {
         key: "mode",
         label: "Modo",
-        options: [bare("default", "Padrão"), opt(AW_INPUT, "search", "Busca")],
+        options: [bare("default", "Padrão"), opt(AU_INPUT, "search", "Busca")],
       },
       {
         key: "state",
         label: "Estado",
         options: [
           bare("default", "Normal"),
-          opt(AW_INPUT, "invalid", "Inválido"),
-          opt(AW_INPUT, "disabled", "Desabilitado"),
+          opt(AU_INPUT, "invalid", "Inválido"),
+          opt(AU_INPUT, "disabled", "Desabilitado"),
         ],
       },
     ],
@@ -234,8 +234,8 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         label: "Tamanho",
         options: [
           bare("default", "Padrão"),
-          opt(AW_SHEET, "wide", "Wide"),
-          opt(AW_SHEET, "xwide", "XWide"),
+          opt(AU_SHEET, "wide", "Wide"),
+          opt(AU_SHEET, "xwide", "XWide"),
         ],
       },
     ],
@@ -248,7 +248,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
       {
         key: "size",
         label: "Tamanho",
-        options: [bare("md", "MD"), opt(AW_MODAL, "cockpit", "Cockpit")],
+        options: [bare("md", "MD"), opt(AU_MODAL, "cockpit", "Cockpit")],
       },
     ],
   },
@@ -261,8 +261,8 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
         key: "author",
         label: "Autor",
         options: [
-          opt(AW_CHAT, "agent", "Agente"),
-          opt(AW_CHAT, "user", "Usuário"),
+          opt(AU_CHAT, "agent", "Agente"),
+          opt(AU_CHAT, "user", "Usuário"),
         ],
       },
     ],

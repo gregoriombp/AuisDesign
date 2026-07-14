@@ -13,13 +13,13 @@ export type AuCheckpointChipTone =
   | "pink"
   | "blue"
 
-export const AW_CHECKPOINT_CHIP_BASE_CLASS =
+export const AU_CHECKPOINT_CHIP_BASE_CLASS =
   "inline-flex min-h-6 items-center gap-1.5 rounded-lg border-transparent px-2.5 py-1 text-xs font-medium leading-none align-baseline select-none"
 
-export const AW_CHECKPOINT_CHIP_INTERACTIVE_CLASS =
+export const AU_CHECKPOINT_CHIP_INTERACTIVE_CLASS =
   "cursor-pointer transition-[background-color,color,border-color,filter] duration-au-fast hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--accent-brand)"
 
-export const AW_CHECKPOINT_CHIP_TONE_CLASS: Record<AuCheckpointChipTone, string> = {
+export const AU_CHECKPOINT_CHIP_TONE_CLASS: Record<AuCheckpointChipTone, string> = {
   neutral: "bg-(--bg-hover) text-(--fg-secondary)",
   inverse: "bg-(--bg-inverse) text-(--fg-on-inverse)",
   teal: "bg-(--au-teal-100) text-(--au-teal-800)",
@@ -55,9 +55,9 @@ export function AuCheckpointChip({
   const buttonProps = as === "button" ? { type: "button" as const } : undefined
 
   const chipClassName = cn(
-    AW_CHECKPOINT_CHIP_BASE_CLASS,
-    AW_CHECKPOINT_CHIP_TONE_CLASS[tone],
-    interactive && AW_CHECKPOINT_CHIP_INTERACTIVE_CLASS,
+    AU_CHECKPOINT_CHIP_BASE_CLASS,
+    AU_CHECKPOINT_CHIP_TONE_CLASS[tone],
+    interactive && AU_CHECKPOINT_CHIP_INTERACTIVE_CLASS,
     className,
   )
 

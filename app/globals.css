@@ -655,7 +655,7 @@
    * Above the max, the canvas centers — it does not stretch. */
     --content-narrow: 720px; /* single-column reading: forms, perfil, onboarding */
     --content-default: 1200px; /* mixed content: docs, catalog, billing overview */
-    --content-wide: 1440px; /* data dense: dashboard, agent studio, big tables */
+    --content-wide: 1440px; /* data dense: dashboards, editors, big tables */
     --content-px: 40px; /* horizontal padding inside the container */
     --content-gutter: 24px; /* default gap between cards / blocks (gap-6) */
 
@@ -927,17 +927,8 @@
   }
 }
 
-/* Memory Base Onboarding Animations */
-
-/* Welcome icon: fade-in de entrada */
-@keyframes memory-base-fade-in {
-  to {
-    opacity: 1;
-  }
-}
-
-/* Wizard do Agent Studio: entrada suave de cada etapa (fade + slide up).
- * Aplicada num wrapper com key={currentStep} pra tocar a cada troca de tela. */
+/* Wizard: smooth entry for each step (fade + slide up). Apply on a wrapper
+ * keyed by the current step so it replays on every screen change. */
 @keyframes au-wizard-step-in {
   from {
     opacity: 0;
@@ -973,82 +964,6 @@
   }
 }
 
-/* Cada dot: pulsação suave (opacidade + escala) – efeito partículas */
-@keyframes memory-base-dot-pulse {
-  0%, 100% {
-    opacity: 0.65;
-    transform: scale(0.92);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
-}
-
-.memory-base-welcome-icon {
-  opacity: 0;
-  animation: memory-base-fade-in 0.7s ease-out forwards;
-}
-
-.memory-base-welcome-icon path {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: memory-base-dot-pulse 2.6s ease-in-out infinite;
-}
-
-/* Stagger nos dots para efeito de onda/partículas (4 grupos de fase) */
-.memory-base-welcome-icon path:nth-child(4n + 1) { animation-delay: 0s; }
-.memory-base-welcome-icon path:nth-child(4n + 2) { animation-delay: 0.32s; }
-.memory-base-welcome-icon path:nth-child(4n + 3) { animation-delay: 0.65s; }
-.memory-base-welcome-icon path:nth-child(4n + 4) { animation-delay: 0.98s; }
-
-/* ── Fluxo de criação da Memory Base (/memory-base/new) ───────────────────── */
-
-/* Glyphs decorativos do passo "envio" (Padrão = estrela, Catálogo = funil).
- * Giro lento e contínuo só pra dar vida — puramente ornamental. */
-@keyframes mb-glyph-spin {
-  to { transform: rotate(360deg); }
-}
-.mb-glyph-spin {
-  transform-origin: center;
-  animation: mb-glyph-spin 30s linear infinite;
-}
-.mb-glyph-spin-rev {
-  transform-origin: center;
-  animation: mb-glyph-spin 44s linear infinite reverse;
-}
-
-/* Botão "Configurar" da tela de base criada: surge em fade depois da celebração. */
-@keyframes mb-reveal-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.mb-reveal-up {
-  opacity: 0;
-  animation: mb-reveal-up 0.5s var(--ease-out) forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mb-glyph-spin,
-  .mb-glyph-spin-rev,
-  .mb-reveal-up { animation: none; }
-  .mb-reveal-up { opacity: 1; }
-}
-
-/* Pulse animation for the Memory Base icon container */
-@keyframes onboarding-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(13, 13, 13, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 0 12px rgba(13, 13, 13, 0.05);
-  }
-}
-
-.animate-onboarding-pulse {
-  animation: onboarding-pulse 2s ease-in-out infinite;
-}
-
 /* Draw animation for branching lines */
 @keyframes onboarding-draw {
   to {
@@ -1080,9 +995,9 @@
   }
 }
 
-/* Entry animation for primeiro-acesso step transitions.
-   Wraps `app/primeiro-acesso/template.tsx`; re-fires on every navigation
-   inside the segment. Uses the project ease-out token. */
+/* Entry animation for step transitions in a multi-step segment. Apply on the
+   segment's `template.tsx` so it re-fires on every navigation inside it.
+   Uses the project ease-out token. */
 .au-step-transition {
   animation: onboarding-fadeInUp 0.42s var(--ease-out) both;
 }
@@ -1216,8 +1131,6 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .memory-base-welcome-icon,
-  .animate-onboarding-pulse,
   .step4-timeline-spine,
   .step4-timeline-branch,
   .step4-timeline-ramif,
@@ -1227,14 +1140,6 @@
   .step4-dotted-node,
   .step4-cube-dot {
     animation: none;
-  }
-  .memory-base-welcome-icon {
-    opacity: 1;
-  }
-  .memory-base-welcome-icon path {
-    animation: none;
-    opacity: 1;
-    transform: none;
   }
   .step4-timeline-spine,
   .step4-timeline-branch,
@@ -1258,7 +1163,7 @@
   }
 }
 
-/* Agent Studio: variable chips - dark bg, light text, no border, rounded */
+/* Variable chips - dark bg, light text, no border, rounded */
 .variable-chip-at {
   background-color: #1e3a5f;
   color: #e0f2fe;
@@ -2077,12 +1982,11 @@
 @media (prefers-reduced-motion: reduce) {
   .au-spinner-gradient::before { animation: none; }
 }
-/* Ai-cortex — silver mesh inspired by the Cortex marble cube.
-   Cool slate base, brighter pocket on the left, darker pocket on the
-   right where the dark CTA usually sits. Designed for the AI side of
-   AuSpecialistsPair, where the AI is a system co-pilot rather than a
-   generative agent (which keeps using the blue/purple ai variant). */
-.au-card--ai-cortex {
+/* Ai-copilot — silver mesh. Cool slate base, brighter pocket on the left,
+   darker pocket on the right where the dark CTA usually sits. Use it when the
+   AI is a system co-pilot rather than a generative agent (the latter keeps the
+   blue/purple `ai` variant). */
+.au-card--ai-copilot {
   background:
     radial-gradient(ellipse 80% 100% at 8%  50%, rgba(226, 232, 240, 0.55), transparent 65%),
     radial-gradient(ellipse 60% 80%  at 92% 50%, rgba(100, 116, 139, 0.22), transparent 65%),
@@ -5486,7 +5390,7 @@
 }
 
 /* ============================================================
- * AuUserAgentOrb — `thinking` shape morph. The orb gently rotates a full
+ * Agent / copilot orb — `thinking` shape morph. The orb gently rotates a full
  * turn while morphing rounded-square (radius 30%) ↔ circle (radius 50%)
  * and back, looping until the state changes. A rounded square's corners
  * always reach past its edge midpoints, so the squarest keyframe
@@ -5516,10 +5420,10 @@
   will-change: border-radius, transform;
 }
 
-/* Cortex pensando: o hex morfa por formas geométricas (hex → círculo →
+/* Copilot pensando: o hex morfa por formas geométricas (hex → círculo →
    quadrado → triângulo) via clip-path. Pontos equidistantes (12) em cada
    forma pra o CSS interpolar suave. Combina com hueSpeed na textura. */
-@keyframes au-cortex-think-morph {
+@keyframes au-copilot-think-morph {
   0%, 100% {
     clip-path: polygon(50.0% 0.0%, 74.1% 12.1%, 98.2% 24.1%, 100.0% 50.0%, 98.2% 75.9%, 74.1% 87.9%, 50.0% 100.0%, 25.9% 87.9%, 1.8% 75.9%, 0.0% 50.0%, 1.8% 24.1%, 25.9% 12.1%);
   }
@@ -5533,13 +5437,13 @@
     clip-path: polygon(50.0% 3.0%, 61.6% 22.4%, 73.2% 41.8%, 84.8% 61.2%, 95.2% 80.0%, 72.6% 80.0%, 50.0% 80.0%, 27.4% 80.0%, 4.8% 80.0%, 15.2% 61.2%, 26.8% 41.8%, 38.4% 22.4%);
   }
 }
-.au-cortex-think {
+.au-copilot-think {
   clip-path: polygon(50.0% 0.0%, 74.1% 12.1%, 98.2% 24.1%, 100.0% 50.0%, 98.2% 75.9%, 74.1% 87.9%, 50.0% 100.0%, 25.9% 87.9%, 1.8% 75.9%, 0.0% 50.0%, 1.8% 24.1%, 25.9% 12.1%);
-  animation: au-cortex-think-morph 5s ease-in-out infinite;
+  animation: au-copilot-think-morph 5s ease-in-out infinite;
   will-change: clip-path;
 }
 @media (prefers-reduced-motion: reduce) {
-  .au-cortex-think {
+  .au-copilot-think {
     animation: none;
   }
 }

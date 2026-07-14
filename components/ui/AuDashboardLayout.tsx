@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { AuSidebar } from "@/components/ui/AuSidebar";
 import { AuHeader } from "@/components/ui/AuHeader";
 import { AuCopilotDrawer } from "@/components/ui/AuCopilotDrawer";
@@ -23,13 +22,11 @@ export function AuDashboardLayout({
   mainClassName?: string;
   /** Sidebar floats over full-width content as a liquid-glass rail. */
   floatingSidebar?: boolean;
-  /** Center/limit breadcrumb text to match a narrow main column (e.g. Agent Studio). */
+  /** Center/limit breadcrumb text to match a narrow main column. */
   breadcrumbInnerClassName?: string;
 }) {
   const isCopilotOpen = useCopilotDrawer((s) => s.open);
   const setIsCopilotOpen = useCopilotDrawer((s) => s.setOpen);
-  const pathname = usePathname();
-  const isInMemoryBase = pathname?.startsWith("/memory-base") ?? false;
 
   return (
     <div className="flex h-screen overflow-hidden bg-(--bg-surface) relative">
@@ -38,7 +35,7 @@ export function AuDashboardLayout({
           <AuSidebar floating />
         </div>
       ) : (
-        <AuSidebar forcedCollapsed={isInMemoryBase} />
+        <AuSidebar />
       )}
       <div className="flex flex-1 min-w-0 flex-col overflow-hidden relative">
         <div className="flex flex-1 min-w-0 overflow-hidden">

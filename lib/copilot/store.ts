@@ -1,7 +1,7 @@
 import { create } from "zustand"
 
 /**
- * Open state for the Copilot (Cortex) drawer.
+ * Open state for the Copilot (Copilot) drawer.
  *
  * The drawer itself lives in DashboardLayout, but the toggle needs to be
  * reachable from anywhere — the topbar orb and feature pages alike — so the

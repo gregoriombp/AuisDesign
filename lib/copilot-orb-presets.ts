@@ -1,11 +1,11 @@
-export type CortexState =
+export type CopilotState =
   | "idle"
   | "listening"
   | "thinking"
   | "responding"
   | "error";
 
-export type CortexPreset = {
+export type CopilotPreset = {
   speed: number;
   color1: string;
   color2: string;
@@ -18,11 +18,11 @@ export type CortexPreset = {
   contrast: number;
   bg: string;
   /** Rotação de hue (varredura de cor). Só `thinking` usa — a textura muda
-   *  de matiz enquanto o Cortex pensa. 0 = desligado. */
+   *  de matiz enquanto o Copilot pensa. 0 = desligado. */
   hueSpeed?: number;
 };
 
-export const CORTEX_STATE_PRESETS: Record<CortexState, CortexPreset> = {
+export const COPILOT_STATE_PRESETS: Record<CopilotState, CopilotPreset> = {
   idle: {
     speed: 0.1,
     color1: "#ffffff",
@@ -50,7 +50,7 @@ export const CORTEX_STATE_PRESETS: Record<CortexState, CortexPreset> = {
     bg: "#05080f",
   },
   // Thinking mantém os MESMOS controles de listening; o que muda é o shape
-  // (morfa entre formas geométricas, via .au-cortex-think) e a variação de
+  // (morfa entre formas geométricas, via .au-copilot-think) e a variação de
   // hue na textura (hueSpeed).
   thinking: {
     speed: 0.16,
