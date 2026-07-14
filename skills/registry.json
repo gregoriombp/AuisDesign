@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated": "2026-07-03",
+  "generated": "2026-07-04",
   "count": 35,
   "skills": [
     {
@@ -181,7 +181,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Audit the Auis Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage."
+      "description": "Audit the Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage."
     },
     {
       "name": "auis-design-system-foundation",
@@ -233,7 +233,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Add or update an Auis Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation."
+      "description": "Add or update an Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation."
     },
     {
       "name": "auis-new-page",

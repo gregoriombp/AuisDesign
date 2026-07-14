@@ -10,11 +10,11 @@
 |---|---|---|---|---|
 | `auis-audit` | 🟣🟠🌐 | cowork | ⭐ | Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app compon |
 | `auis-component` | 🟣🟠🌐 | cowork | ⭐ | Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always check |
-| `auis-design-system-audit` | 🟣🟠 | repo | — | Audit the Auis Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage. |
+| `auis-design-system-audit` | 🟣🟠 | repo | — | Audit the Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage. |
 | `auis-design-system-foundation` | 🟣🟠 | repo | — | Bootstrap or update the Auis design system foundation from a visual reference. This is the only skill allowed to create or change tokens. |
 | `auis-foundation` | 🟣🟠🌐 | cowork | ⭐ | Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Be |
 | `auis-foundation-update` | 🟣🟠 | repo | — | INCREMENTALLY updates the foundation tokens of the Auis design system in app/globals.css (color, typography, spacing, radius, shadow, motion) — additi |
-| `auis-new-component` | 🟣🟠 | repo | — | Add or update an Auis Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation. |
+| `auis-new-component` | 🟣🟠 | repo | — | Add or update an Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation. |
 | `auis-new-page` | 🟣🟠 | repo | — | Build or rework a product page in this Next.js app using the Auis design system, existing components, existing tokens, and desktop-only constraints. |
 | `auis-page` | 🟣🟠🌐 | cowork | ⭐ | Builds a full page in a Auis design system project (Next.js + shadcn/ui) from a screenshot, Figma URL, wireframe, or written description. Maps every v |
 

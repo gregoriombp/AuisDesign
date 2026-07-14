@@ -1,7 +1,7 @@
 ---
 name: auis-design-system-audit
 description: >
-  Audit the Auis Auis design system for internal consistency across
+  Audit the Auis design system for internal consistency across
   tokens, components, showcases, navigation, and page usage.
 ---
 
