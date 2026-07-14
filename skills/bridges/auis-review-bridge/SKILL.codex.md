@@ -4,102 +4,101 @@ description: >
   Diagnoses or manually recovers the local Auis Review Mode server
   (review-bridge). The normal flow is `npm run dev`, which already prepares
   the envs and brings the bridge up. Use this skill only when the user asks
-  to "/auis-review-bridge", start the review-bridge ("subir o
-  review-bridge"), spin up the review bridge, turn on the comments server
-  ("ligar o servidor de comentários"), start a review with the agent, open
+  to "/auis-review-bridge", "start the review-bridge", spin up the review
+  bridge, "turn on the comments server", start a review with the agent, open
   the review-bridge, "/review-bridge", or similar. Do NOT use it to resolve
   comments — for that, see `auis-review-bridge-solve`.
 ---
 
-# Auis Review Mode — Diagnosticar o Bridge
+# Auis Review Mode — Diagnose the Bridge
 
-O caminho normal é rodar **`npm run dev` na raiz**. Esse comando executa
-`review-bridge:prepare`, sincroniza `review-bridge/.env` + `.env.local`, e sobe
-o Next junto do bridge local em `127.0.0.1:9878`.
+The normal path is to run **`npm run dev` at the root**. That command runs
+`review-bridge:prepare`, syncs `review-bridge/.env` + `.env.local`, and brings up
+Next together with the local bridge on `127.0.0.1:9878`.
 
-Esta skill só existe como fallback/diagnóstico quando o bridge local caiu ou
-quando o usuário pediu explicitamente para mexer nele. Ela NÃO resolve comentários —
-pra resolver/aprovar/responder em lote, use a skill irmã
+This skill exists only as a fallback/diagnostic when the local bridge went down or
+when the user explicitly asked to touch it. It does NOT resolve comments —
+to resolve/approve/reply in bulk, use the sibling skill
 `auis-review-bridge-solve`.
 
-> **Arquitetura, lifecycle, API completa e exemplos curl pra agentes:**
-> sempre consulte `review-bridge/README.md`. Esse arquivo descreve o
-> esquema atual (v3: `open | in_review | resolved`), o split físico
-> `comments.json` (ativos) / `comments.archive.json` (arquivados), e
-> todas as transitions/endpoints.
+> **Architecture, lifecycle, full API and curl examples for agents:**
+> always check `review-bridge/README.md`. That file describes the
+> current schema (v3: `open | in_review | resolved`), the physical split
+> `comments.json` (active) / `comments.archive.json` (archived), and
+> all the transitions/endpoints.
 
-## Pré-checagem (sempre rodar primeiro)
+## Pre-check (always run first)
 
-Antes de qualquer ação, confirme em paralelo:
+Before any action, confirm in parallel:
 
-1. `review-bridge/package.json` existe → senão **abortar** com mensagem
-   pedindo pra rodar a etapa de scaffolding do servidor (não recrie aqui).
-2. `review-bridge/node_modules/` existe → se não, anotar que vai precisar
-   instalar.
-3. `review-bridge/.env` existe → se não, anotar que vai precisar gerar.
-4. `.env.local` existe na raiz → necessário pra escrever as envs do frontend.
+1. `review-bridge/package.json` exists → otherwise **abort** with a message
+   asking the user to run the server's scaffolding step (do not recreate it here).
+2. `review-bridge/node_modules/` exists → if not, note that you will need to
+   install it.
+3. `review-bridge/.env` exists → if not, note that you will need to generate it.
+4. `.env.local` exists at the root → needed to write the frontend envs.
 
-## Passos
+## Steps
 
-### 1. Instalar deps (se precisar)
+### 1. Install deps (if needed)
 
 ```bash
 npm run review-bridge:install
 ```
 
-Pula se `review-bridge/node_modules/` já existe.
+Skip if `review-bridge/node_modules/` already exists.
 
-### 2. Gerar token (se precisar)
+### 2. Generate token (if needed)
 
-Se `review-bridge/.env` não existe:
+If `review-bridge/.env` does not exist:
 
 ```bash
 TOKEN=$(openssl rand -hex 32)
 echo "AUIS_REVIEW_TOKEN=$TOKEN" > review-bridge/.env
 ```
 
-Se já existe, **leia** o valor de `AUIS_REVIEW_TOKEN` no arquivo —
-não regenere (invalidaria a configuração local já usada pelo frontend/agentes).
+If it already exists, **read** the `AUIS_REVIEW_TOKEN` value in the file —
+do not regenerate it (that would invalidate the local configuration already used by the frontend/agents).
 
-### 3. Escrever envs no .env.local do frontend
+### 3. Write the envs into the frontend's .env.local
 
-Escreva/atualize as duas linhas:
+Write/update the two lines:
 
 ```
 NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL=http://127.0.0.1:9878
 NEXT_PUBLIC_AUIS_REVIEW_TOKEN=<TOKEN>
 ```
 
-- **URL:** deve ser sempre `http://127.0.0.1:9878` neste fluxo local.
-- **Token:** nunca regenere se já existe.
+- **URL:** it must always be `http://127.0.0.1:9878` in this local flow.
+- **Token:** never regenerate it if one already exists.
 
-Use Edit/Write preservando as outras linhas do `.env.local`.
+Use Edit/Write, preserving the other lines of `.env.local`.
 
-### 4. Subir o servidor em background
+### 4. Start the server in the background
 
 ```bash
 npm run review-bridge:dev
 ```
 
-O servidor deve escutar em `127.0.0.1`, nunca em `0.0.0.0`. Use Bash com
-`run_in_background: true`. Não fique pollando — o usuário recebe notificação
-quando o processo termina (ou seja, se cair).
+The server must listen on `127.0.0.1`, never on `0.0.0.0`. Use Bash with
+`run_in_background: true`. Do not poll — the user gets a notification
+when the process ends (that is, if it goes down).
 
-> **Migração automática:** se o `data/comments.json` ainda está em v2,
-> o boot migra in-place pra v3 e cria `data/comments.archive.json` com
-> todos os `status: "resolved"` antigos. Isso é idempotente, mas avise o
-> usuário pra fazer backup antes do primeiro boot pós-v3 se tiver dados
-> que importam.
+> **Automatic migration:** if `data/comments.json` is still on v2,
+> the boot migrates it in-place to v3 and creates `data/comments.archive.json` with
+> all the old `status: "resolved"` ones. This is idempotent, but tell the
+> user to back up before the first post-v3 boot if they have data
+> that matters.
 
-### 5. Validar /health
+### 5. Validate /health
 
-Aguarde ~2s e bata em:
+Wait ~2s and hit:
 
 ```bash
 curl -s -H "X-Review-Token: <TOKEN>" http://127.0.0.1:9878/health
 ```
 
-Espere:
+Expect:
 
 ```json
 {
@@ -115,51 +114,51 @@ Espere:
 }
 ```
 
-Se `schemaVersion` for diferente de `3` ou o `archiveFile` não estiver
-listado, está rodando uma versão antiga. Avise pro usuário atualizar.
+If `schemaVersion` is anything other than `3`, or `archiveFile` is not
+listed, an old version is running. Tell the user to update.
 
-### 6. Reportar
+### 6. Report
 
-Mensagem final pro usuário, concisa, com:
+Final message to the user, concise, with:
 
-- ✓ Servidor rodando em `http://127.0.0.1:9878`
-- ✓ Token configurado
-- ✓ Schema v3 — `comments.json` (ativos) + `comments.archive.json` (arquivados)
-- Contagens rápidas (úteis pro user pra saber a fila):
+- ✓ Server running at `http://127.0.0.1:9878`
+- ✓ Token configured
+- ✓ Schema v3 — `comments.json` (active) + `comments.archive.json` (archived)
+- Quick counts (useful for the user to know the queue):
   ```bash
   curl -s -H "X-Review-Token: $TOKEN" "http://127.0.0.1:9878/comments?status=open"     | python3 -c "import sys,json;print('open:',len(json.load(sys.stdin)['comments']))"
   curl -s -H "X-Review-Token: $TOKEN" "http://127.0.0.1:9878/comments?status=in_review"     | python3 -c "import sys,json;print('in_review:',len(json.load(sys.stdin)['comments']))"
   curl -s -H "X-Review-Token: $TOKEN" "http://127.0.0.1:9878/comments/archive?limit=1"     | python3 -c "import sys,json;d=json.load(sys.stdin);print('next_archive_cursor:',d.get('nextCursor'))"
   ```
-- O Review Mode fica **sempre montado** (sem env flag): é só abrir a bolota →
-  "Entrar no Review Mode" (ou `⌘⇧Y`). Toast "X comentários no localStorage"
-  aparece se tiverem dados antigos pra importar.
-- Como parar o servidor: `pkill -f "tsx src/index.ts"` ou usar TaskStop
-  no PID retornado pelo Bash.
-- Pra começar a **resolver** os comentários em lote, invocar a skill
-  `auis-review-bridge-solve`.
+- Review Mode is **always mounted** (no env flag): just open the floating button →
+  "Entrar no Review Mode" (or `⌘⇧Y`). A "X comentários no localStorage" toast
+  appears if there is old data to import.
+- How to stop the server: `pkill -f "tsx src/index.ts"` or use TaskStop
+  on the PID returned by Bash.
+- To start **resolving** the comments in bulk, invoke the
+  `auis-review-bridge-solve` skill.
 
-## Restrições
+## Constraints
 
-- ❌ Não regere o token se `review-bridge/.env` já tem um — quebra o frontend
-  local e agentes já configurados.
-- ❌ Não sobrescreva `.env.local` sem perguntar quando já há valores
-  divergentes.
-- ❌ Não exponha o servidor na rede (não rode em `0.0.0.0`, não faça port
-  forwarding). O modo atual é local-only.
-- ❌ Não commit `review-bridge/.env` nem `.env.local` (já no .gitignore).
-- ❌ Não delete `data/comments.archive.json` "pra limpar" — quebra histórico
-  e tudo que o frontend lista na aba Arquivados.
+- ❌ Do not regenerate the token if `review-bridge/.env` already has one — it breaks
+  the local frontend and already-configured agents.
+- ❌ Do not overwrite `.env.local` without asking when there are already divergent
+  values.
+- ❌ Do not expose the server on the network (do not run on `0.0.0.0`, do not set up
+  port forwarding). The current mode is local-only.
+- ❌ Do not commit `review-bridge/.env` or `.env.local` (already in .gitignore).
+- ❌ Do not delete `data/comments.archive.json` "to clean up" — it breaks history
+  and everything the frontend lists in the Archived tab.
 
-## Checagem rápida quando algo dá errado
+## Quick check when something goes wrong
 
-| Sintoma | Provável causa | Como verificar |
+| Symptom | Likely cause | How to check |
 |---|---|---|
-| `EADDRINUSE` | porta 9878 ocupada | `lsof -i :9878` |
-| 401 do health | token errado | comparar `.env` do bridge com `.env.local` |
-| Frontend não detecta bridge | `NEXT_PUBLIC_*` não foi recarregado | reiniciar `npm run dev` |
-| CORS bloqueia request | app aberto fora de `localhost`/`127.0.0.1` | abrir localmente; o bridge não aceita origem de rede |
-| Toast de "importar" não aparece | já tinha sido oferecido nessa sessão | recarregar a página |
-| `schemaVersion: 2` no health | versão antiga do bridge rodando | `git pull` em `review-bridge/`, reinstalar deps, reiniciar |
-| `comments.archive.json` não existe | nunca rodou v3 ou data dir estava vazio | normal se nunca houve comments resolvidos; cria-se sozinho |
-| Comentário "sumiu" depois de aprovar | foi pro archive — esperado | `GET /comments/archive?url=…` |
+| `EADDRINUSE` | port 9878 taken | `lsof -i :9878` |
+| 401 from health | wrong token | compare the bridge's `.env` with `.env.local` |
+| Frontend does not detect the bridge | `NEXT_PUBLIC_*` was not reloaded | restart `npm run dev` |
+| CORS blocks the request | app opened outside `localhost`/`127.0.0.1` | open it locally; the bridge does not accept a network origin |
+| The "import" toast does not appear | it was already offered in this session | reload the page |
+| `schemaVersion: 2` in health | an old version of the bridge is running | `git pull` in `review-bridge/`, reinstall deps, restart |
+| `comments.archive.json` does not exist | v3 never ran or the data dir was empty | normal if there were never any resolved comments; it creates itself |
+| Comment "disappeared" after approving | it went to the archive — expected | `GET /comments/archive?url=…` |

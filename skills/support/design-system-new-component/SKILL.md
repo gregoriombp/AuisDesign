@@ -7,45 +7,45 @@ description: >
   the Au prefix, Auis tokens, and the shadcn-wrapper flow. See AGENTS.md.
 ---
 
-> **[DEPRECADO neste repo — use `auis-new-component`].** Esta skill é genérica e
-> **Au-cega**: gera componente sem prefixo `Au`, no lugar errado e fora dos tokens
-> Auis. Não use aqui. Para adicionar/editar componente, use
-> **`auis-new-component`** (ver tabela "Routing" em `AGENTS.md` e
+> **[DEPRECATED in this repo — use `auis-new-component`].** This skill is generic and
+> **Au-blind**: it generates a component with no `Au` prefix, in the wrong place and
+> outside the Auis tokens. Do not use it here. To add or edit a component, use
+> **`auis-new-component`** (see the "Routing" table in `AGENTS.md` and
 > `docs/component-map.md`).
 
-# Design System — Novo Componente
+# Design System — New Component
 
-Adiciona um componente ao projeto seguindo a hierarquia: **shadcn registry →
-extender shadcn → construir custom**. Em todos os casos, gera showcase no
-styleguide em `/app/auis/styleguide/components/[name]/page.tsx` e
-atualiza a navegação.
+Adds a component to the project following the hierarchy: **shadcn registry →
+extend shadcn → build custom**. In every case, it generates a showcase in the
+styleguide at `/app/auis/styleguide/components/[name]/page.tsx` and
+updates the navigation.
 
-> **Pré-requisito:** o projeto já deve ter um design system inicializado
-> (rota `/auis/styleguide` configurada via skill
-> `setup-design-system-from-claude-design` ou
-> `setup-design-system-from-reference`). Se não tiver, pare e oriente o
-> usuário a rodar essa skill antes.
+> **Prerequisite:** the project must already have an initialized design system
+> (the `/auis/styleguide` route configured via the
+> `setup-design-system-from-claude-design` or
+> `setup-design-system-from-reference` skill). If it does not, stop and tell the
+> user to run that skill first.
 
 ---
 
 ## Workflow
 
-### 1. Verificar se o componente existe no shadcn
+### 1. Check whether the component exists in shadcn
 
-Use o **shadcn MCP** para consultar o registry antes de qualquer outra ação:
+Use the **shadcn MCP** to query the registry before doing anything else:
 
-- **Buscar:** `search_items_in_registries` com query `"[component name]"`.
-- **Se encontrado, ver detalhes:** `view_items_in_registries` para checar
-  estrutura e dependências.
-- **Pegar exemplos de uso:** `get_item_examples_from_registries` com query
+- **Search:** `search_items_in_registries` with query `"[component name]"`.
+- **If found, view the details:** `view_items_in_registries` to check
+  structure and dependencies.
+- **Get usage examples:** `get_item_examples_from_registries` with query
   `"[component]-demo"`.
 
-**Decisão:**
+**Decision:**
 
-- Componente existe no registry → ir para o **passo 2 (Instalar)**.
-- Componente não existe → ir para o **passo 4 (Construir custom)**.
+- The component exists in the registry → go to **step 2 (Install)**.
+- The component does not exist → go to **step 4 (Build custom)**.
 
-**Componentes mais comuns no shadcn (referência rápida):**
+**Most common shadcn components (quick reference):**
 
 - **Layout:** Card, Separator, Tabs, Accordion, Collapsible.
 - **Forms:** Button, Input, Select, Checkbox, Radio, Switch, Textarea, Label,
@@ -58,34 +58,34 @@ Use o **shadcn MCP** para consultar o registry antes de qualquer outra ação:
 
 ---
 
-### 2. Instalar o componente shadcn
+### 2. Install the shadcn component
 
-Pegue o comando de instalação via shadcn MCP:
+Get the install command via the shadcn MCP:
 
-- `get_add_command_for_items` para o componente alvo.
+- `get_add_command_for_items` for the target component.
 
-Rode:
+Run:
 
 ```bash
 npx shadcn@latest add [component-name]
 ```
 
-Isso adiciona o componente em `/components/ui/` e ele já consome
-automaticamente as CSS variables definidas em `globals.css`.
+This adds the component to `/components/ui/` and it automatically consumes
+the CSS variables defined in `globals.css`.
 
-Antes de seguir, abra o arquivo gerado e identifique:
+Before moving on, open the generated file and identify:
 
-- Variantes disponíveis (size, variant, style).
-- Interface de props.
-- Como usa as CSS variables (para consistência com seus tokens).
+- The available variants (size, variant, style).
+- The props interface.
+- How it uses the CSS variables (for consistency with your tokens).
 
 ---
 
-### 3. Customizar o componente (se necessário)
+### 3. Customize the component (if needed)
 
-Se o componente base precisar de variantes ou comportamentos extras, **não
-edite o arquivo em `/components/ui/`** diretamente (ele será sobrescrito em
-updates). Crie uma versão wrappada em `/components/[ComponentName].tsx`:
+If the base component needs extra variants or behaviors, **do not edit the
+file in `/components/ui/`** directly (it will be overwritten on updates).
+Create a wrapped version at `/components/[ComponentName].tsx`:
 
 ```tsx
 import { Button } from "@/components/ui/button"
@@ -115,23 +115,23 @@ export function CustomButton({
 }
 ```
 
-**Padrões de customização:**
+**Customization patterns:**
 
-- Adicionar variantes de cor usando suas CSS variables (`bg-success`,
+- Add color variants using your CSS variables (`bg-success`,
   `text-warning`, etc.).
-- Adicionar variantes de tamanho.
-- Compor múltiplos componentes shadcn juntos.
-- Adicionar loading states, ícones ou outros recursos.
+- Add size variants.
+- Compose multiple shadcn components together.
+- Add loading states, icons or other features.
 
 ---
 
-### 4. Construir componente custom (se não houver no shadcn)
+### 4. Build a custom component (if shadcn doesn't have it)
 
-Se o registry não tiver o componente, construa usando:
+If the registry does not have the component, build it using:
 
-- Primitives do shadcn como blocos (Radix UI, etc.).
-- CSS variables via classes Tailwind (`bg-primary`, `text-foreground`).
-- Padrões consistentes com os outros componentes shadcn do projeto.
+- shadcn primitives as building blocks (Radix UI, etc.).
+- CSS variables via Tailwind classes (`bg-primary`, `text-foreground`).
+- Patterns consistent with the project's other shadcn components.
 
 ```tsx
 import { cn } from "@/lib/utils"
@@ -163,93 +163,92 @@ export function CustomWidget({
 
 ---
 
-### 5. Criar a showcase do componente
+### 5. Create the component showcase
 
-Adicione `/app/auis/styleguide/components/[component-name]/page.tsx`
-contendo:
+Add `/app/auis/styleguide/components/[component-name]/page.tsx`
+containing:
 
-- **Todas as variantes lado a lado** (sizes, colors, styles).
-- **Todos os estados** (default, hover, focus, disabled, loading).
-- **Preview de dark mode** (toggle entre temas).
-- **Demo interativo** com controles de prop.
-- **Exemplos de código** para os usos mais comuns.
+- **Every variant side by side** (sizes, colors, styles).
+- **Every state** (default, hover, focus, disabled, loading).
+- **Dark mode preview** (toggle between themes).
+- **Interactive demo** with prop controls.
+- **Code examples** for the most common uses.
 
-Use os exemplos do shadcn MCP (`get_item_examples_from_registries`) como
-ponto de partida.
-
----
-
-### 6. Documentar uso
-
-Inclua na página de showcase:
-
-- Import statement.
-- Exemplo básico de uso.
-- Tabela de props (nome, tipo, default, descrição).
-- Exemplos por variante, com o código embaixo.
-- Notas de acessibilidade (navegação por teclado, ARIA).
+Use the shadcn MCP examples (`get_item_examples_from_registries`) as a
+starting point.
 
 ---
 
-### 7. Atualizar a navegação do styleguide
+### 6. Document usage
 
-Edite `/app/auis/styleguide/navigation.ts` e adicione o componente na
-seção `Components`:
+Include in the showcase page:
+
+- The import statement.
+- A basic usage example.
+- A props table (name, type, default, description).
+- Examples per variant, with the code underneath.
+- Accessibility notes (keyboard navigation, ARIA).
+
+---
+
+### 7. Update the styleguide navigation
+
+Edit `/app/auis/styleguide/navigation.ts` and add the component to the
+`Components` section:
 
 ```ts
 {
   title: "Components",
   items: [
-    // ... componentes existentes
+    // ... existing components
     { name: "[Component Name]", href: "/auis/styleguide/components/[component-name]" },
   ]
 }
 ```
 
-Isso faz o componente aparecer na sidebar do styleguide.
+This makes the component show up in the styleguide sidebar.
 
 ---
 
-## Estrutura de diretórios resultante
+## Resulting directory structure
 
 ```
 components/
-├── ui/                      # Base shadcn (auto-gerado, não editar)
+├── ui/                      # shadcn base (auto-generated, don't edit)
 │   ├── button.tsx
 │   ├── card.tsx
 │   └── ...
-└── [CustomComponent].tsx    # Wrappers e custom components
+└── [CustomComponent].tsx    # Wrappers and custom components
 
 app/
 └── auis/
     └── styleguide/
-        ├── navigation.ts                          # ← editar (passo 7)
+        ├── navigation.ts                          # ← edit (step 7)
         └── components/
             └── [component-name]/
-                └── page.tsx                       # ← criar (passo 5)
+                └── page.tsx                       # ← create (step 5)
 ```
 
 ---
 
-## Output esperado
+## Expected output
 
-- Componente instalado/criado em `/components/`.
-- Showcase em `/app/auis/styleguide/components/[name]/page.tsx`.
-- Navegação atualizada em `/app/auis/styleguide/navigation.ts`.
-- Componente visível na sidebar do styleguide.
-- Uso documentado com exemplos de código.
+- The component installed/created in `/components/`.
+- A showcase at `/app/auis/styleguide/components/[name]/page.tsx`.
+- The navigation updated in `/app/auis/styleguide/navigation.ts`.
+- The component visible in the styleguide sidebar.
+- Usage documented with code examples.
 
 ---
 
-## Notas
+## Notes
 
-- **Use o shadcn MCP** para buscar, ver e pegar exemplos antes de construir.
-- **CSS variables são a fonte da verdade** (definidas em `globals.css`).
-- **Classes Tailwind referenciam as CSS variables** (`bg-primary`,
+- **Use the shadcn MCP** to search, view and get examples before building.
+- **CSS variables are the source of truth** (defined in `globals.css`).
+- **Tailwind classes reference the CSS variables** (`bg-primary`,
   `text-muted-foreground`).
-- **Não precisa de Figma** para desenvolvimento de componente — o shadcn
-  define o design.
-- **Estender, não reconstruir** — customize componentes shadcn em vez de
-  começar do zero.
-- Nunca edite arquivos em `/components/ui/` diretamente; crie wrappers em
+- **No Figma needed** for component development — shadcn defines the design.
+- **Extend, don't rebuild** — customize shadcn components instead of
+  starting from scratch.
+- Never edit files in `/components/ui/` directly; create wrappers in
   `/components/`.

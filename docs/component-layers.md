@@ -1,118 +1,118 @@
-# Camadas do design system — taxonomia canônica
+# Design system layers — the canonical taxonomy
 
-> Fonte de verdade para a **classificação** de cada componente do Auis DS.
-> Irmão do [`styleguide-page-structure.md`](./styleguide-page-structure.md) (que
-> define a *estrutura* de cada página). Aqui definimos em que **camada** cada peça
-> vive na sidebar do styleguide (`app/auis/styleguide/navigation.ts`).
+> Source of truth for the **classification** of every component in the Auis DS.
+> Sibling of [`styleguide-page-structure.md`](./styleguide-page-structure.md) (which
+> defines the *structure* of each page). Here we define which **layer** each piece
+> lives in within the styleguide sidebar (`app/auis/styleguide/navigation.ts`).
 
-Esta é a versão 2026-05.
+This is the 2026-05 version.
 
-## Por que existe
+## Why it exists
 
-A documentação por componente já é forte. O que faltava era **taxonomia**: um dev
-batendo o olho na sidebar não distinguia um tijolo reutilizável (`Botões`) de uma
-peça única de tela de negócio (`WhatsApp panel`) — ambos ficavam lado a lado numa
-única seção "Componentes" com ~55 itens em ordem alfabética.
+The per-component documentation is already strong. What was missing was **taxonomy**: a dev
+glancing at the sidebar couldn't tell a reusable brick (`Buttons`) from a one-off
+business-screen piece (`WhatsApp panel`) — both sat side by side in a single
+"Components" section with ~55 items in alphabetical order.
 
-A sidebar agora reflete a **pirâmide de abstração** do design system. Lendo de cima
-pra baixo, o dev aprende a hierarquia: do mais fundamental e reutilizável (base) ao
-mais específico e amarrado ao produto (topo).
+The sidebar now reflects the design system's **abstraction pyramid**. Reading top to
+bottom, the dev learns the hierarchy: from the most fundamental and reusable (base) to the
+most specific and product-bound (top).
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Domínio        ← só faz sentido na Auis (agente, billing) │  + específico
-│  Padrões        ← fluxo/região inteira, ainda genérico        │
-│  Componentes    ← compõe primitivos, agnóstico de negócio     │
-│  Primitivos     ← tijolo de 1 propósito, sem domínio          │  + fundamental
-│  Foundations    ← tokens: cor, tipografia, spacing, motion…   │  (base, não-componente)
+│  Domain       ← only makes sense in Auis (agent, billing)   │  + specific
+│  Patterns     ← a whole flow/region, still generic          │
+│  Components   ← composes primitives, business-agnostic      │
+│  Primitives   ← 1-purpose brick, no domain                  │  + fundamental
+│  Foundations  ← tokens: color, typography, spacing, motion… │  (base, not a component)
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Regra de dependência:** cada camada só depende das camadas **abaixo** dela, nunca
-das de cima. Um `Botões` (primitivo) jamais importa um `Integration card` (domínio); um
-`Integration card` é livre pra usar `Botões`, `Avatar`, `Pills`. É isso que mantém a base
-estável — mexer num primitivo propaga pra todo mundo; mexer numa peça de domínio o
-estrago é local.
+**Dependency rule:** each layer depends only on the layers **below** it, never on the
+ones above. `Buttons` (primitive) never imports an `Integration card` (domain); an
+`Integration card` is free to use `Buttons`, `Avatar`, `Pills`. That is what keeps the base
+stable — touching a primitive propagates to everyone; touching a domain piece keeps the
+damage local.
 
-## As 4 camadas (a régua de classificação)
+## The 4 layers (the classification yardstick)
 
-| Camada | Pergunta-chave | Sabe de negócio? | Exemplos |
+| Layer | Key question | Business-aware? | Examples |
 |---|---|---|---|
-| **Primitivos** | É um tijolo de propósito único, composto só de tokens + HTML/Radix? | Não | Botões, Inputs, Select, Checkbox, Avatar, Pills, Toast, Skeleton |
-| **Componentes** | Combina primitivos num bloco genérico, reutilizável em qualquer produto? | Não | Cards, Modais, Sheet, Tabela, Nav rail, Page header, Stat card |
-| **Padrões** | Orquestra um fluxo ou região inteira de tela, mas ainda genérico? | Pouco | Onboarding shell, Welcome modal, Connect modal, Password setup |
-| **Domínio** | Está amarrado a um conceito de negócio da Auis (agente, integração, billing, brand)? | Sim | Visual dos agentes, Specialists pair, Integration card, WhatsApp panel |
+| **Primitives** | Is it a single-purpose brick, made only of tokens + HTML/Radix? | No | Buttons, Inputs, Select, Checkbox, Avatar, Pills, Toast, Skeleton |
+| **Components** | Does it combine primitives into a generic block, reusable in any product? | No | Cards, Modals, Sheet, Table, Nav rail, Page header, Stat card |
+| **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | Onboarding shell, Welcome modal, Connect modal, Password setup |
+| **Domain** | Is it tied to an Auis business concept (agent, integration, billing, brand)? | Yes | Agent visuals, Specialists pair, Integration card, WhatsApp panel |
 
-### Regras de desempate
+### Tie-break rules
 
-1. **Se deixaria de fazer sentido em outro produto que não a Auis → é Domínio.**
-   (vence sobre as outras camadas)
-2. **Na dúvida entre duas camadas adjacentes → escolha a mais baixa** (mais
-   fundamental / mais reutilizável) e registre o porquê aqui.
-3. Pergunta-guia: *"compõe outros componentes do DS?"* Não → Primitivo. Sim e
-   genérico → Componente. Sim e multi-passo/região → Padrão. Sim mas preso ao
-   negócio → Domínio.
+1. **If it would stop making sense in a product other than Auis → it's Domain.**
+   (wins over the other layers)
+2. **In doubt between two adjacent layers → pick the lower one** (more
+   fundamental / more reusable) and record why here.
+3. Guiding question: *"does it compose other DS components?"* No → Primitive. Yes and
+   generic → Component. Yes and multi-step/region → Pattern. Yes but bound to the
+   business → Domain.
 
-## Criei um componente novo — em que camada coloco?
+## I created a new component — which layer does it go in?
 
 ```
-Só faz sentido dentro da Auis (agente, integração, billing, brand)?
-   └─ sim → Domínio
-   └─ não → É um fluxo/região inteira (multi-passo)?
-              └─ sim → Padrões
-              └─ não → Compõe outros componentes do DS?
-                         └─ sim → Componentes
-                         └─ não → Primitivos
+Does it only make sense inside Auis (agent, integration, billing, brand)?
+   └─ yes → Domain
+   └─ no  → Is it a whole flow/region (multi-step)?
+              └─ yes → Patterns
+              └─ no  → Does it compose other DS components?
+                         └─ yes → Components
+                         └─ no  → Primitives
 ```
 
-Registre o componente em `navigation.ts` na seção da sua camada, em ordem
-alfabética. **Nenhum `href` muda** ao mudar de camada — o agrupamento é só
-governança de navegação.
+Register the component in `navigation.ts` under its layer's section, in alphabetical
+order. **No `href` changes** when it moves layer — the grouping is navigation
+governance only.
 
-Quando uma família tem mais de um item concreto, use um item-mãe com
-`children` em vez de criar várias entradas top-level. O item-mãe aponta para o
-hub canônico; os filhos apontam para subpáginas técnicas ou anchors dentro do
-hub. Exemplos atuais:
+When a family has more than one concrete item, use a parent item with
+`children` instead of creating several top-level entries. The parent item points at the
+canonical hub; the children point at technical subpages or anchors inside the
+hub. Current examples:
 
-- `Tabelas` → `AuTable`, `Data table`, `Members table`
-- `Modais e dialogs` → `AuModal`, `Connect modal`, `Contact channel modal`,
+- `Tables` → `AuTable`, `Data table`, `Members table`
+- `Modals and dialogs` → `AuModal`, `Connect modal`, `Contact channel modal`,
   `Welcome modal`, `Add integration modal`
-- `Sheets e drawers` → `AuSheet`, `Template builder sheet`
-- `Visual dos agentes` → `Agent Core`, `Agente do Usuário`, `Cortex`
+- `Sheets and drawers` → `AuSheet`, `Template builder sheet`
+- `Agent visuals` → `Agent Core`, `User Agent`, `Cortex`
 
-## Mapeamento atual (auditoria)
+## Current mapping (audit)
 
-Espelha `app/auis/styleguide/navigation.ts` — consulte a nav para o inventário vivo (a contagem muda; não fixamos número aqui).
+Mirrors `app/auis/styleguide/navigation.ts` — check the nav for the live inventory (the count changes; we don't pin a number here).
 
-O inventário por camada vive nas seções **Primitivos / Componentes / Padrões /
-Domínio** de [`navigation.ts`](../app/auis/styleguide/navigation.ts). Não
-duplicamos a lista aqui de propósito — ela defasaria a cada componente novo. Para a
-classificação de cada peça, leia a régua das 4 camadas acima e as fronteiras
-revisadas abaixo.
+The inventory by layer lives in the **Primitives / Components / Patterns /
+Domain** sections of [`navigation.ts`](../app/auis/styleguide/navigation.ts). We
+deliberately don't duplicate the list here — it would fall behind with every new
+component. For the classification of each piece, read the 4-layer yardstick above and the
+revised boundaries below.
 
-### Fronteiras revisadas (2026-05)
+### Revised boundaries (2026-05)
 
-Itens debatíveis, resolvidos aplicando o tie-break #1 — *"só faz sentido na
+Debatable items, resolved by applying tie-break #1 — *"only makes sense in
 Auis"*:
 
-- **Dot tunnel** → *Componentes* (era Domínio). Visual decorativo sem lógica de
-  negócio; faz sentido em qualquer produto, então não é Domínio.
-- **Payment method card** + **Card brand** → *Componentes*, juntos (Payment method
-  card era Domínio). Chip de bandeira e cartão salvo são UI de pagamento genérica —
-  qualquer SaaS com billing usa; não são conceito exclusivo da Auis.
-- **Empty** / **Alertas** → *Primitivos*. Compõem sub-partes, mas têm propósito
-  único de feedback; ficam na base por reutilização.
+- **Dot tunnel** → *Components* (was Domain). Decorative visual with no business
+  logic; it makes sense in any product, so it is not Domain.
+- **Payment method card** + **Card brand** → *Components*, together (Payment method
+  card was Domain). A brand chip and a saved card are generic payment UI —
+  any SaaS with billing uses them; they are not a concept exclusive to Auis.
+- **Empty** / **Alerts** → *Primitives*. They compose sub-parts, but have a single
+  feedback purpose; they stay in the base for reuse.
 
-Resultado: **Domínio** fica só com o inequivocamente Auis — agentes
-(Specialists pair, Visual dos agentes), integrações (Integration card, Brand logo,
-WhatsApp panel) e comercial (Banner de plano adicional).
+Result: **Domain** keeps only the unmistakably Auis — agents
+(Specialists pair, Agent visuals), integrations (Integration card, Brand logo,
+WhatsApp panel), and commercial (Additional plan banner).
 
-## Escopo desta fase
+## Scope of this phase
 
-A pasta física `components/ui/` permanece **plana de propósito** — a camada vive na
-**navegação e na governança**, não no filesystem. Mover ~78 arquivos pra subpastas
-quebraria centenas de imports por ganho marginal. Se um dia uma migração de pastas
-for desejada, ela segue exatamente este mapeamento como roteiro.
+The physical `components/ui/` folder stays **flat on purpose** — the layer lives in
+**navigation and governance**, not in the filesystem. Moving ~78 files into subfolders
+would break hundreds of imports for marginal gain. If a folder migration is ever
+wanted, it follows exactly this mapping as its script.
 
-Fora de escopo (decidido): mover arquivos, criar barrel exports, renomear
-componentes.
+Out of scope (decided): moving files, creating barrel exports, renaming
+components.

@@ -10,33 +10,32 @@ description: >
   mode posts notes to /api/flow-suggestions; plus fullscreen, draggable nodes,
   and the updates changelog. Modeled on the poc-visao-global page — self-contained
   raw ReactFlow, NOT the shared <FlowDiagram>. Use when the user wants a global or
-  compiled view ("visão global / compilada"), a "golden eye", a flow that
-  encompasses several scenarios ("engloba vários cenários"), an overlay of
-  multiple journeys with lenses, or says things like "criar flow golden-eye",
-  compile scenarios into one flow, merge several flows into a single graph, a
-  ux flow with lenses / per-scenario focus, or a bird's-eye view of the flows.
-  For a SINGLE linear journey, use auis-create-ux-flow instead.
+  compiled view, a "golden eye", a flow that encompasses several scenarios, an
+  overlay of multiple journeys with lenses, or says things like "create a
+  golden-eye flow", compile scenarios into one flow, merge several flows into a
+  single graph, a ux flow with lenses / per-scenario focus, or a bird's-eye view
+  of the flows. For a SINGLE linear journey, use auis-create-ux-flow instead.
 ---
 
-# Auis — UX Flow · Golden Eye (visão compilada multi-cenário)
+# Auis — UX Flow · Golden Eye (compiled multi-scenario view)
 
 Build a **compiled** UX flow page under
 `/app/auis/styleguide/ux-flows/[slug]/page.tsx` that fuses **several
-product journeys (cenários)** into one diagram. Where a normal flow maps a
+product journeys (scenarios)** into one diagram. Where a normal flow maps a
 single path start-to-finish, a golden-eye view overlays many paths on the same
 board, **dedups the screens they share**, and gives the reader a **lens** to
-isolate any one scenario at a time. It is the bird's-eye / "olho dourado" map of
+isolate any one scenario at a time. It is the bird's-eye / "golden eye" map of
 how a region of the product actually works across situations.
 
 Concrete jobs this skill is for:
 
-- "Compilar num flow só: **criar o primeiro agente** e, depois, **ajustar um
-  agente que já existe**" — two scenarios that share the agent-editor screens;
-  the *ajuste* scenario re-enters the graph partway through.
-- "A pessoa **não tem memory base** criada, então precisa criar antes de seguir"
-  — a decision (`Tem memory base?`) routes into a sub-journey (criar base) that
-  then **converges** back into the main path. Those nuances are exactly what the
-  lens makes legible.
+- "Compile into a single flow: **creating the first agent** and, later,
+  **adjusting an agent that already exists**" — two scenarios that share the
+  agent-editor screens; the *adjust* scenario re-enters the graph partway through.
+- "The person **has no memory base** created, so they need to create one before
+  moving on" — a decision (`Has a memory base?`) routes into a sub-journey (create
+  the base) that then **converges** back into the main path. Those nuances are
+  exactly what the lens makes legible.
 
 ---
 
@@ -64,7 +63,7 @@ the fullest single-path example is `login-auth/page.tsx` — skim it too.
 
 | | `auis-create-ux-flow` | **this skill (`-golden-eye`)** |
 |---|---|---|
-| Scope | ONE journey, start → finish | SEVERAL journeys (cenários) merged |
+| Scope | ONE journey, start → finish | SEVERAL journeys (scenarios) merged |
 | Board | shared `<FlowDiagram>` | **raw self-contained `<ReactFlow>`** |
 | Shared screens | n/a | **deduped** — one card, one dot per scenario |
 | Lens / focus | none | **per-scenario lens** (dim + band) |
@@ -91,30 +90,30 @@ bare canvas for a normal flow; it is specific to compiled multi-scenario views.
 
 ## Core mental model
 
-1. **Cenário (`Scenario`)** — a distinct journey/path you overlay on the board.
+1. **Scenario (`Scenario`)** — a distinct journey/path you overlay on the board.
    Each gets a label and a color. (The POC happens to call its scenarios
    "personas" because they were 4 access journeys; the general term here is
    **scenario**.)
 2. **Dedup** — a screen used by more than one scenario is drawn **once**, as a
    single card, carrying **one colored dot per owning scenario**. 2+ dots = a
    shared screen. Never duplicate a card just because two scenarios touch it.
-3. **Lens / Focus** — chips (`Todo` + one per scenario) above the canvas. Picking
+3. **Lens / Focus** — chips (`All` + one per scenario) above the canvas. Picking
    a scenario **grays out** (opacity + desaturate) every node and edge that
    isn't part of it and draws a tinted **band** around the ones that are.
 4. **Convergence** — the point where scenarios rejoin a **shared trunk** (e.g.
-   every scenario ends at "Agente publicado"). These are the most valuable cards
+   every scenario ends at "Agent published"). These are the most valuable cards
    to dedup.
 5. **Cross-scenario continuation** — one scenario's terminal is another's entry,
-   or a decision routes into a **sub-journey** that converges back (the "não tem
-   memory base → cria → volta" shape).
+   or a decision routes into a **sub-journey** that converges back (the "no
+   memory base → create it → come back" shape).
 
 ---
 
 ## Input expected from the user
 
 ```txt
-Compiled view name: [e.g. "Agente — visão compilada", "Memory Base — golden eye"]
-Slug:               [e.g. "agente-visao-global", "memory-base-golden-eye"]
+Compiled view name: [e.g. "Agent — compiled view", "Memory Base — golden eye"]
+Slug:               [e.g. "agent-compiled-view", "memory-base-golden-eye"]
 Scenarios:          [2–6 journeys to overlay, each with a one-line intent]
 Per scenario:       [ordered screens/states + decision points]
 Shared screens:     [which screens >1 scenario touches — the dedup list]
@@ -137,23 +136,23 @@ This is the whole game. Before any code:
 2. **Find shared screens across scenarios** → these dedup into single cards.
    Record which scenarios own each (the dot list).
 3. **List decision points**, including the "state gates" that make scenarios
-   branch: `Tem memory base?`, `Primeira vez?`, `Já tem 2FA?`.
+   branch: `Has a memory base?`, `First time?`, `Already has 2FA?`.
 4. **List convergences** (where paths rejoin the shared trunk).
 5. **List cross-scenario links** (terminal-of-A = entry-of-B; decision →
    sub-journey → converge back).
 6. **Terminal states** per scenario.
 
-Produce a merge table before touching code, e.g. for *criar agente* + *ajustar
-agente*:
+Produce a merge table before touching code, e.g. for *create agent* + *adjust
+agent*:
 
 ```
-Card                    | criar 1º agente | ajustar agente | shared?
-------------------------|-----------------|----------------|--------
-Studio (lista)          |   entry         |   entry        |  ●● 2 dots
-Decisão: tem agente?    |   →não          |   →sim         |  ●● 2 dots
-Criar agente (form)     |   ✓             |   —            |  ● 1 dot
-Editor do agente        |   ✓             |   ✓ (re-entra) |  ●● 2 dots  ← convergência
-Publicar / salvar       |   ✓             |   ✓            |  ●● 2 dots
+Card                    | create 1st agent | adjust agent  | shared?
+------------------------|------------------|---------------|--------
+Studio (list)           |   entry          |   entry       |  ●● 2 dots
+Decision: has an agent? |   →no            |   →yes        |  ●● 2 dots
+Create agent (form)     |   ✓              |   —           |  ● 1 dot
+Agent editor            |   ✓              |  ✓ (re-enters)|  ●● 2 dots  ← convergence
+Publish / save          |   ✓              |   ✓           |  ●● 2 dots
 ```
 
 The cards with 2 dots are the spine of the value — they're what a single linear
@@ -167,17 +166,17 @@ Each scenario gets a `-600` color token. Build the registry like the POC's
 `PERSONA`:
 
 ```ts
-type Scenario = "criar-agente" | "ajustar-agente" | /* … */ "all-ignored"
+type Scenario = "create-agent" | "adjust-agent" | /* … */ "all-ignored"
 type Focus = Scenario | "all"
 
 const SCENARIO: Record<Scenario, { label: string; color: string }> = {
-  "criar-agente":  { label: "Criar 1º agente", color: "var(--au-blue-600)" },
-  "ajustar-agente":{ label: "Ajustar agente",  color: "var(--au-emerald-600)" },
+  "create-agent": { label: "Create 1st agent", color: "var(--au-blue-600)" },
+  "adjust-agent": { label: "Adjust agent",     color: "var(--au-emerald-600)" },
   // …
 }
 const ALL = Object.keys(SCENARIO) as Scenario[]
 const FOCI: { id: Focus; label: string }[] = [
-  { id: "all", label: "Todo" },
+  { id: "all", label: "All" },
   ...ALL.map((s) => ({ id: s, label: SCENARIO[s].label })),
 ]
 ```
@@ -197,7 +196,7 @@ lenses stop being legible — split into two compiled views instead.
 
 Lay scenarios out as **parallel vertical streams** that drop into a **shared
 trunk** at the convergence. The POC does exactly this (LOGIN stream left,
-ONBOARDING stream right, shared 2FA→conclusão trunk centered below) — mirror it.
+ONBOARDING stream right, shared 2FA→conclusion trunk centered below) — mirror it.
 
 ```ts
 // One x-band per stream. Example for two streams + a centered trunk:
@@ -252,7 +251,7 @@ Three renderers, registered once as `nodeTypes`. **Copy all three from
 const nodeTypes = { screen: ScreenNode, decision: DecisionNode, section: SectionNode }
 ```
 
-`variants` is the trick for "link expirado / usado / cancelado"-style triples:
+`variants` is the trick for "link expired / used / cancelled"-style triples:
 one card, three states, the modal lists one tab per state. Use it whenever a
 single conceptual screen has several terminal variants.
 
@@ -265,7 +264,7 @@ Three edge bases, declared inline like the POC (`base`, `branch`, `cross`):
 - **`base`** — grey `smoothstep`, the main flow (entry→step, step→step,
   convergence→trunk).
 - **`branch`** — amber, every edge **leaving a decision**; always labelled with
-  the choice (`"Sim"`, `"Não"`, `"Pix"`, `"E-mail comum"`).
+  the choice (`"Yes"`, `"No"`, `"Pix"`, `"Regular e-mail"`).
 - **`cross`** — pink dashed, a **cross-scenario jump** (one scenario continuing
   into another's territory).
 
@@ -338,7 +337,7 @@ import {
 const updates: FlowUpdate[] = [
   {
     date: "[today YYYY-MM-DD]",
-    summary: "Visão compilada criada: [N] cenários fundidos num grafo só.",
+    summary: "Compiled view created: [N] scenarios merged into a single graph.",
     tags: ["new-page"],
   },
 ]
@@ -375,7 +374,7 @@ export default function [Name]GoldenEyePage() {
         trailing={
           <>
             <span className="inline-flex items-center rounded-full border border-(--au-amber-300) bg-(--au-amber-100) px-2 py-0.5 text-[11px] font-medium text-(--au-amber-800)">
-              visão compilada
+              compiled view
             </span>
             <FlowUpdatesBadge updates={updates} />
           </>
@@ -389,8 +388,8 @@ export default function [Name]GoldenEyePage() {
       <div className="w-full px-10 pb-10">
         <Section
           id="flow"
-          title="Fluxograma compilado"
-          lead="2+ bolinhas num card = tela compartilhada entre cenários. A lente acinzenta o que está fora do cenário em foco e desenha a faixa dele. No modo Mover: arraste os cards e clique pra abrir a tela real. No modo Comentar: clique num card pra deixar uma nota. Botão de tela cheia no canto."
+          title="Compiled flowchart"
+          lead="2+ dots on a card = a screen shared between scenarios. The lens grays out whatever sits outside the focused scenario and draws its band. In Mover mode: drag the cards and click one to open the real screen. In Comentar mode: click a card to leave a note. Tela cheia button in the corner."
         >
           {/* focus chips, legend, then the ReactFlow block with Panels — copy from POC */}
         </Section>
@@ -399,13 +398,13 @@ export default function [Name]GoldenEyePage() {
       {/* Doc — back inside a normal text column */}
       <div className="mx-auto max-w-[1100px] px-10 pb-14 flex flex-col gap-16">
 
-        {/* Cenários compilados — one entry per scenario */}
-        <Section id="cenarios" title="Cenários compilados" lead="Cada jornada sobreposta neste mapa: o que é, onde entra, onde converge.">
+        {/* Compiled scenarios — one entry per scenario */}
+        <Section id="cenarios" title="Compiled scenarios" lead="Every journey overlaid on this map: what it is, where it enters, where it converges.">
           {/* list: scenario dot + label + entry → terminal + which shared cards it touches */}
         </Section>
 
-        {/* Telas compartilhadas e convergências — the dedup decisions */}
-        <Section id="compartilhadas" title="Telas compartilhadas e convergências" lead="Por que estas telas viraram um card só — e onde os cenários se reencontram.">
+        {/* Shared screens and convergences — the dedup decisions */}
+        <Section id="compartilhadas" title="Shared screens and convergences" lead="Why these screens collapsed into a single card — and where the scenarios meet again.">
           {/* ordered list, one line per deduped/convergence card + the decision */}
         </Section>
 
@@ -413,31 +412,31 @@ export default function [Name]GoldenEyePage() {
         <FlowUpdatesHistorySection updates={updates} />
       </div>
 
-      {/* Modal de tela + Composer de comentário — copy from POC */}
+      {/* Screen modal + comment composer — copy from POC */}
     </>
   )
 }
 ```
 
-The two doc sections replace the POC's bespoke "Conflitos resolvidos" block:
+The two doc sections replace the POC's bespoke "Resolved conflicts" block:
 
-- **Cenários compilados** — orientation: one row per scenario (its dot/color,
+- **Compiled scenarios** — orientation: one row per scenario (its dot/color,
   one-line intent, entry → terminal, and the shared cards it passes through).
-- **Telas compartilhadas e convergências** — the dedup ledger: each shared card
-  and *why* it's one card (e.g. "Editor do agente — criar e ajustar usam a mesma
-  tela; ajustar re-entra aqui direto"), plus each convergence point.
+- **Shared screens and convergences** — the dedup ledger: each shared card
+  and *why* it's one card (e.g. "Agent editor — create and adjust use the same
+  screen; adjust re-enters here directly"), plus each convergence point.
 
 ---
 
 ## Step 9 — Register in navigation.ts
 
-Add the page under `group: "UX Flows"` in a `title: "Visões compiladas"`
+Add the page under `group: "UX Flows"` in a `title: "Compiled views"`
 subgroup. Create that subgroup if it doesn't exist yet; otherwise append to it.
 
 ```ts
 {
   group: "UX Flows",
-  title: "Visões compiladas",
+  title: "Compiled views",
   items: [
     { name: "[Compiled view name]", href: "/auis/styleguide/ux-flows/[slug]" },
   ],
@@ -445,8 +444,8 @@ subgroup. Create that subgroup if it doesn't exist yet; otherwise append to it.
 ```
 
 Keep it under the existing `group: "UX Flows"` — never invent a new group. (The
-POC currently sits under `title: "Experimentos"`; new golden-eye views go under
-"Visões compiladas".)
+POC currently sits under `title: "Experiments"`; new golden-eye views go under
+"Compiled views".)
 
 ---
 
@@ -456,10 +455,10 @@ POC currently sits under `title: "Experimentos"`; new golden-eye views go under
 Use single quotes, a template literal, or rephrase:
 
 ```ts
-note: 'Clique em "Criar agente" pra começar.',   // ✅ single-quoted outer
-note: `Clique em "Criar agente" pra começar.`,   // ✅ template literal
-note: "Clique em Criar agente pra começar.",     // ✅ rephrased
-note: "Clique em "Criar agente" pra começar.",   // ❌ breaks
+note: 'Click "Create agent" to start.',   // ✅ single-quoted outer
+note: `Click "Create agent" to start.`,   // ✅ template literal
+note: "Click Create agent to start.",     // ✅ rephrased
+note: "Click "Create agent" to start.",   // ❌ breaks
 ```
 
 ---
@@ -496,10 +495,10 @@ Comentar posts a note, dragging persists, and fullscreen toggles.
 - [ ] Changelog wired: imports from `../_components/flow-updates`, `updates[]`
       seeded with a "new-page" entry dated today, `FlowUpdatesBadge` in `trailing`,
       `FlowUpdatesHistorySection` last
-- [ ] Canvas section is full-width; doc sections ("Cenários compilados",
-      "Telas compartilhadas e convergências") are inside the text column
+- [ ] Canvas section is full-width; doc sections ("Compiled scenarios",
+      "Shared screens and convergences") are inside the text column
 - [ ] No ASCII double-quotes inside JS string values
-- [ ] `navigation.ts` updated under `group: "UX Flows"` → `title: "Visões compiladas"`
+- [ ] `navigation.ts` updated under `group: "UX Flows"` → `title: "Compiled views"`
 - [ ] `npm run typecheck` passes
 
 ---
@@ -520,7 +519,7 @@ Compiled structure:
 
 Changed:
 - app/auis/styleguide/ux-flows/[slug]/page.tsx — created
-- app/auis/styleguide/navigation.ts — added entry under UX Flows › Visões compiladas
+- app/auis/styleguide/navigation.ts — added entry under UX Flows › Compiled views
 
 Validation:
 - typecheck — passed / failed

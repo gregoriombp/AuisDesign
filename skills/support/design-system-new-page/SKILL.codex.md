@@ -6,100 +6,100 @@ description: '[INACTIVE in this repo — do not trigger.] Generic, Au-blind vers
   and Auis tokens. See AGENTS.md.'
 ---
 
-# Design System — Nova Página
+# Design System — New Page
 
-Constrói uma página completa em Next.js (App Router) a partir de um design
-visual (screenshot ou link do Figma), reusando componentes do design system
-sempre que possível.
+Builds a complete page in Next.js (App Router) from a visual design
+(screenshot or Figma link), reusing design system components
+whenever possible.
 
-> **Pré-requisito:** o projeto já deve ter um design system inicializado
-> (rota `/auis/styleguide` configurada). Sem ele, pare e oriente o
-> usuário a rodar `setup-design-system-from-claude-design` ou
-> `setup-design-system-from-reference` antes.
+> **Prerequisite:** the project must already have an initialized design system
+> (the `/auis/styleguide` route configured). Without it, stop and tell the
+> user to run `setup-design-system-from-claude-design` or
+> `setup-design-system-from-reference` first.
 
 ---
 
 ## Input
 
-Aceita uma das duas formas:
+Accepts one of two forms:
 
-1. **Imagem** (PNG, JPG, WebP) — screenshot, mockup, foto.
-2. **URL do Figma** — neste caso, use o Figma MCP (se disponível) para
-   extrair metadata, screenshot e variable defs antes de prosseguir; se
-   não estiver disponível, peça um export PNG.
+1. **Image** (PNG, JPG, WebP) — screenshot, mockup, photo.
+2. **Figma URL** — in this case, use the Figma MCP (if available) to
+   extract metadata, screenshot and variable defs before proceeding; if
+   it is not available, ask for a PNG export.
 
-Se faltar input, **pergunte** antes de prosseguir.
+If the input is missing, **ask** before proceeding.
 
 ---
 
 ## Workflow
 
-### 1. Análise visual do design
+### 1. Visual analysis of the design
 
-Examine o input e identifique:
+Examine the input and identify:
 
-**Estrutura de layout:**
-- Quantas seções/colunas principais?
-- Tem sidebar? Header? Footer?
-- Qual é a grid? (1, 2, 3 colunas).
-- Largura de containers, padrões de spacing.
+**Layout structure:**
+- How many main sections/columns?
+- Is there a sidebar? A header? A footer?
+- What is the grid? (1, 2, 3 columns).
+- Container widths, spacing patterns.
 
-**Seções da UI:**
-- Quebre a página em seções lógicas (top → bottom, left → right).
-- Nomeie cada seção pelo propósito (ex.: "Sidebar Navigation", "Task List",
+**UI sections:**
+- Break the page into logical sections (top → bottom, left → right).
+- Name each section by its purpose (e.g. "Sidebar Navigation", "Task List",
   "Chat Panel").
 
-**Hierarquia de conteúdo:**
-- Quais são os headings primários?
-- O que é conteúdo principal vs. suporte?
-- Quais são os CTAs?
+**Content hierarchy:**
+- What are the primary headings?
+- What is main content vs. supporting content?
+- What are the CTAs?
 
 ---
 
-### 2. Mapear elementos visuais → componentes do design system
+### 2. Map visual elements → design system components
 
-Para cada elemento identificado, mapeie para um componente. **Prioridade
-absoluta:** reusar componentes já documentados em
-`/auis/styleguide/components/` antes de instalar coisa nova.
+For each element identified, map it to a component. **Absolute
+priority:** reuse components already documented in
+`/auis/styleguide/components/` before installing anything new.
 
-| Elemento visual | Componente | Notas |
+| Visual element | Component | Notes |
 |---|---|---|
-| Sidebar de navegação | Sidebar | Use sidebar primitives |
-| Tabs / segmented control | Tabs | Para troca de seção |
-| Cards com conteúdo | Card | CardHeader, CardContent, CardFooter |
-| Lista de itens | Card ou Table | Depende da complexidade |
-| Botões | Button | Variantes: default, outline, ghost |
-| Inputs de form | Input, Textarea | Sempre com Label |
-| Dropdowns | Select ou DropdownMenu | |
-| Badges / tags | Badge | Para status |
-| Ícones | lucide-react | |
-| Modal / dialog | Dialog | Para overlays |
-| Toast / notificação | Toast / Sonner | Para feedback |
+| Navigation sidebar | Sidebar | Use sidebar primitives |
+| Tabs / segmented control | Tabs | For switching sections |
+| Cards with content | Card | CardHeader, CardContent, CardFooter |
+| Item list | Card or Table | Depends on the complexity |
+| Buttons | Button | Variants: default, outline, ghost |
+| Form inputs | Input, Textarea | Always with a Label |
+| Dropdowns | Select or DropdownMenu | |
+| Badges / tags | Badge | For status |
+| Icons | lucide-react | |
+| Modal / dialog | Dialog | For overlays |
+| Toast / notification | Toast / Sonner | For feedback |
 | Avatar | Avatar | |
-| Progresso | Progress | |
-| Checkbox / toggle | Checkbox ou Switch | |
+| Progress | Progress | |
+| Checkbox / toggle | Checkbox or Switch | |
 
-**Fluxo de decisão para cada elemento:**
+**Decision flow for each element:**
 
-1. Já existe em `/auis/styleguide/components/`? → **importar do
-   wrapper local** (`@/components/...`).
-2. Existe no shadcn registry mas não foi instalado? → instalar via shadcn
-   MCP (passo 4).
-3. Não existe em nenhum dos dois? → considerar usar a skill
-   `design-system-new-component` antes de seguir.
+1. Does it already exist in `/auis/styleguide/components/`? → **import from
+   the local wrapper** (`@/components/...`).
+2. Does it exist in the shadcn registry but is not installed? → install it via
+   the shadcn MCP (step 4).
+3. Does it exist in neither? → consider using the
+   `design-system-new-component` skill before moving on.
 
-> **NUNCA** crie um componente inline na página se ele tem cara de algo
-> reutilizável. Promova para o design system primeiro.
+> **NEVER** create a component inline in the page if it looks like something
+> reusable. Promote it to the design system first.
 
-Use o shadcn MCP para verificar disponibilidade:
-- `search_items_in_registries` para cada tipo.
-- `get_add_command_for_items` para os install commands.
+Use the shadcn MCP to check availability:
+- `search_items_in_registries` for each type.
+- `get_add_command_for_items` for the install commands.
 
 ---
 
-### 3. Definir a estrutura de seções
+### 3. Define the section structure
 
-Antes de codar, gere um breakdown textual:
+Before coding, generate a textual breakdown:
 
 ```
 Page: [PAGE NAME]
@@ -107,49 +107,49 @@ Page: [PAGE NAME]
 │   ├── Logo/Brand
 │   ├── Navigation tabs
 │   └── User actions
-├── Sidebar (se houver)
+├── Sidebar (if any)
 │   ├── Navigation items
 │   └── ...
 ├── Main Content
-│   ├── Section 1: [nome]
-│   ├── Section 2: [nome]
+│   ├── Section 1: [name]
+│   ├── Section 2: [name]
 │   └── ...
-└── Footer (se houver)
+└── Footer (if any)
 ```
 
-Confirme com o usuário se o breakdown bate antes de instalar componentes.
+Confirm with the user that the breakdown matches before installing components.
 
 ---
 
-### 4. Instalar os componentes faltantes
+### 4. Install the missing components
 
-Com base no mapping do passo 2, instale apenas o que ainda não existe no
-projeto:
+Based on the mapping from step 2, install only what does not yet exist in the
+project:
 
 ```bash
 npx shadcn@latest add [component1] [component2] [component3]
 ```
 
-Para cada componente novo, considere se ele merece passar pela skill
-`design-system-new-component` (showcase + entrada na navigation) antes de
-ser usado em produção. Para protótipos rápidos, pode usar direto.
+For each new component, consider whether it deserves to go through the
+`design-system-new-component` skill (showcase + navigation entry) before
+being used in production. For quick prototypes, you can use it directly.
 
 ---
 
-### 5. Scaffold da estrutura da página
+### 5. Scaffold the page structure
 
-Crie `/app/[page-name]/page.tsx` (rota normal, **fora** do styleguide):
+Create `/app/[page-name]/page.tsx` (a normal route, **outside** the styleguide):
 
 ```tsx
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-// ... outros imports
+// ... other imports
 
 export default function PageName() {
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar (se houver) */}
+      {/* Sidebar (if any) */}
       <aside className="w-64 border-r bg-sidebar">
         {/* Sidebar content */}
       </aside>
@@ -173,33 +173,33 @@ export default function PageName() {
 
 ---
 
-### 6. Aplicar styling com tokens
+### 6. Apply styling with tokens
 
-Use classes Tailwind que referenciam as CSS variables do design system —
-**nunca** valores hard-coded:
+Use Tailwind classes that reference the design system's CSS variables —
+**never** hard-coded values:
 
 - **Backgrounds:** `bg-background`, `bg-card`, `bg-muted`, `bg-sidebar`.
-- **Texto:** `text-foreground`, `text-muted-foreground`.
-- **Bordas:** `border-border`.
-- **Spacing:** escala do Tailwind (`p-4`, `gap-6`, `space-y-4`).
+- **Text:** `text-foreground`, `text-muted-foreground`.
+- **Borders:** `border-border`.
+- **Spacing:** the Tailwind scale (`p-4`, `gap-6`, `space-y-4`).
 
-Se um valor visual não tiver token correspondente, pare e pergunte ao
-usuário se vale criar um token novo (em `globals.css`) antes de hard-codar.
+If a visual value has no corresponding token, stop and ask the
+user whether it is worth creating a new token (in `globals.css`) before hard-coding it.
 
 ---
 
-### 7. Comportamento responsivo
+### 7. Responsive behavior
 
-Defina como o layout adapta:
+Define how the layout adapts:
 
-- **Mobile (< 768px):** sidebar colapsa, single column.
-- **Tablet (768–1024px):** sidebar como overlay ou mini.
-- **Desktop (> 1024px):** layout completo como no design.
+- **Mobile (< 768px):** the sidebar collapses, single column.
+- **Tablet (768–1024px):** sidebar as an overlay or mini.
+- **Desktop (> 1024px):** the full layout as in the design.
 
 ```tsx
 <div className="flex flex-col md:flex-row">
   <aside className="hidden md:block md:w-64">
-    {/* Sidebar - oculto no mobile */}
+    {/* Sidebar - hidden on mobile */}
   </aside>
   <main className="flex-1">
     {/* Main content */}
@@ -209,56 +209,56 @@ Defina como o layout adapta:
 
 ---
 
-### 8. Adicionar interatividade
+### 8. Add interactivity
 
-Implemente:
+Implement:
 
-- Navegação/routing entre páginas.
-- Estado para tabs, toggles, seleções (`useState`).
-- Form handling (se aplicável).
-- Loading e error states.
+- Navigation/routing between pages.
+- State for tabs, toggles, selections (`useState`).
+- Form handling (if applicable).
+- Loading and error states.
 
-Componentes que precisam de interatividade exigem `"use client"` no topo
-do arquivo. Se a página é majoritariamente estática, mantenha como Server
-Component e isole as ilhas interativas em sub-componentes `"use client"`.
+Components that need interactivity require `"use client"` at the top
+of the file. If the page is mostly static, keep it as a Server
+Component and isolate the interactive islands in `"use client"` sub-components.
 
 ---
 
-### 9. Adicionar metadata da página
+### 9. Add the page metadata
 
 ```tsx
 export const metadata = {
   title: 'Page Title',
-  description: 'Descrição da página para SEO',
+  description: 'Page description for SEO',
 }
 ```
 
 ---
 
-## Output esperado
+## Expected output
 
-- Lista das seções e componentes identificados (passos 1–3).
-- Componentes shadcn faltantes instalados (passo 4).
-- Página criada em `/app/[page-name]/page.tsx` (passo 5).
-- Layout responsivo casando com o design (passo 7).
-- Elementos interativos funcionando (passo 8).
-- Metadata configurada (passo 9).
+- A list of the sections and components identified (steps 1–3).
+- The missing shadcn components installed (step 4).
+- The page created at `/app/[page-name]/page.tsx` (step 5).
+- A responsive layout matching the design (step 7).
+- Interactive elements working (step 8).
+- Metadata configured (step 9).
 
 ---
 
-## Exemplo de análise
+## Example analysis
 
-Para um screenshot de project management:
+For a project management screenshot:
 
-**Seções identificadas:**
+**Sections identified:**
 
-1. Sidebar esquerda — Navegação e info do projeto.
-2. Painel central — Chat/conversação com cards de tarefas.
-3. Painel direito — Lista de tarefas com ações.
+1. Left sidebar — Navigation and project info.
+2. Center panel — Chat/conversation with task cards.
+3. Right panel — Task list with actions.
 
 **Mapping:**
 
-| Elemento | Componente |
+| Element | Component |
 |---|---|
 | Sidebar | Sidebar |
 | Project dropdown | Select |
@@ -266,12 +266,12 @@ Para um screenshot de project management:
 | Task cards | Card (Header + Content + Footer) |
 | "Approve Plan" | Button (default) |
 | "Edit Plan" | Button (outline) |
-| Task list items | Card ou custom list |
+| Task list items | Card or custom list |
 | "View Plan" links | Button (ghost) |
 | Status badges | Badge |
 | Tabs (Preview/Plan/Code) | Tabs |
 | Avatar | Avatar |
-| Input | Input ou Textarea |
+| Input | Input or Textarea |
 
 **Install command:**
 
@@ -281,15 +281,15 @@ npx shadcn@latest add sidebar card button badge tabs avatar input select
 
 ---
 
-## Notas
+## Notes
 
-- **Funciona com qualquer imagem** — Figma rough, screenshots ou mockups.
-- **Análise visual primeiro** — identifique padrões antes de mapear.
-- **Use o shadcn MCP** para validar disponibilidade e pegar install commands.
-- **CSS variables** para todas as cores (definidas em `globals.css`).
-- **Mobile-first** — pense responsividade desde o começo.
-- **Importar do design system primeiro** — só instale do shadcn se realmente
-  não existir nada equivalente em `/auis/styleguide/components/`.
-- Para componentes que vão ser reusados em outras páginas, considere passar
-  pela skill `design-system-new-component` para criar showcase e registrar
-  na navegação do styleguide.
+- **Works with any image** — a rough Figma, screenshots or mockups.
+- **Visual analysis first** — identify patterns before mapping.
+- **Use the shadcn MCP** to validate availability and get install commands.
+- **CSS variables** for every color (defined in `globals.css`).
+- **Mobile-first** — think about responsiveness from the start.
+- **Import from the design system first** — only install from shadcn if there
+  really is no equivalent in `/auis/styleguide/components/`.
+- For components that will be reused on other pages, consider going through
+  the `design-system-new-component` skill to create a showcase and register it
+  in the styleguide navigation.

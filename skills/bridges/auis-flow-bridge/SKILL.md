@@ -5,39 +5,38 @@ description: >
   go to a same-origin route (/api/flow-suggestions) that writes to
   flow-bridge/data/suggestions.json, with no separate server, no token, and no
   env. There is nothing left to "start up". Use this skill only when the user
-  asks to "/auis-flow-bridge", "subir o flow-bridge" (start the
-  flow-bridge), "ligar o servidor de sugestões" (turn on the suggestions
-  server), start the flows bridge, or "/flow-bridge" — to explain it is no
-  longer needed and redirect them. To apply suggestions in bulk, use
+  asks to "/auis-flow-bridge", "start the flow-bridge", "turn on the
+  suggestions server", start the flows bridge, or "/flow-bridge" — to explain
+  it is no longer needed and redirect them. To apply suggestions in bulk, use
   `auis-flow-bridge-solve`.
 ---
 
-# Auis Flow Bridge — não precisa mais subir nada
+# Auis Flow Bridge — nothing left to start
 
-O fluxo de sugestões dos UX flows (`/auis/styleguide/ux-flows/*`)
-**não depende mais de um servidor separado**. Cutover feito: o botão
-"Sugerir edição" está **sempre ativo** e o "Salvar" grava direto via uma
-rota do próprio Next.
+The suggestion flow of the UX flows (`/auis/styleguide/ux-flows/*`)
+**no longer depends on a separate server**. Cutover done: the
+"Sugerir edição" button is **always active** and "Salvar" writes straight through a
+route in Next itself.
 
-- **Rota:** `app/api/flow-suggestions/` (GET/POST/PUT/DELETE), mesma origem
-  do app, **sem auth**.
-- **Persistência:** `flow-bridge/data/suggestions.json` (+
-  `suggestions.archive.json`) — os mesmos arquivos de antes, então o
-  histórico continua e a skill `auis-flow-bridge-solve` segue lendo
-  daí.
-- **"Copiar prompt"** continua como fallback 100% client-side (cola no chat).
+- **Route:** `app/api/flow-suggestions/` (GET/POST/PUT/DELETE), same origin
+  as the app, **no auth**.
+- **Persistence:** `flow-bridge/data/suggestions.json` (+
+  `suggestions.archive.json`) — the same files as before, so the
+  history carries over and the `auis-flow-bridge-solve` skill keeps reading
+  from there.
+- **"Copiar prompt"** remains a 100% client-side fallback (paste it into the chat).
 
-## O que fazer quando te chamarem
+## What to do when they call you
 
-Se o usuário pedir pra "subir o flow-bridge":
+If the user asks to "start the flow-bridge":
 
-1. Explique que **não precisa mais** — o editor é serverless agora.
-2. Confirme que o dev server do time (`npm run dev`) está no ar — é onde a
-   rota `/api/flow-suggestions` vive. Se sim, está tudo pronto: abra
-   qualquer `/auis/styleguide/ux-flows/*` e use "Sugerir edição".
-3. Pra aplicar sugestões que já chegaram, aponte pra
+1. Explain that it is **no longer needed** — the editor is serverless now.
+2. Confirm that the team's dev server (`npm run dev`) is up — that is where the
+   `/api/flow-suggestions` route lives. If it is, everything is ready: open
+   any `/auis/styleguide/ux-flows/*` and use "Sugerir edição".
+3. To apply suggestions that already came in, point to
    `auis-flow-bridge-solve`.
 
-> O servidor Express em `flow-bridge/` foi **aposentado** (continua no repo
-> só porque é dono da pasta `data/`). O `dev` script **não** o sobe mais, e
-> as envs `NEXT_PUBLIC_AUIS_FLOW_*` ficaram sem uso.
+> The Express server in `flow-bridge/` has been **retired** (it stays in the repo
+> only because it owns the `data/` folder). The `dev` script **no longer** starts it, and
+> the `NEXT_PUBLIC_AUIS_FLOW_*` envs are now unused.

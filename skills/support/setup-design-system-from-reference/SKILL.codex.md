@@ -9,103 +9,103 @@ description: >
 
 # Design System Setup — Reference Image
 
-Este skill recebe **uma imagem de referência** (screenshot do Dribbble,
-Behance, Mobbin, ou qualquer inspiração visual) e monta um projeto
-**Next.js + shadcn/ui** com uma rota `/auis/styleguide` documentando os tokens
-extraídos/inferidos.
+This skill takes **a reference image** (a screenshot from Dribbble,
+Behance, Mobbin, or any visual inspiration) and sets up a
+**Next.js + shadcn/ui** project with an `/auis/styleguide` route documenting the
+extracted/inferred tokens.
 
-> **Diferente do skill `setup-design-system-from-claude-design`:** aqui não
-> há bundle nem componentes prontos. Tokens são extraídos da imagem e os
-> componentes são instalados via `shadcn add` (passo 5.1).
+> **Different from the `setup-design-system-from-claude-design` skill:** here there
+> is no bundle and no ready-made components. Tokens are extracted from the image and the
+> components are installed via `shadcn add` (step 5.1).
 
 ---
 
 ## Input
 
-Uma imagem (PNG, JPG, WebP). Pode ser:
+An image (PNG, JPG, WebP). It can be:
 
-- Screenshot do Dribbble/Behance/Mobbin.
-- Print de um produto real.
-- Mockup do Figma exportado como imagem.
-- Fotografia de um material gráfico.
+- A screenshot from Dribbble/Behance/Mobbin.
+- A screen grab of a real product.
+- A Figma mockup exported as an image.
+- A photograph of printed graphic material.
 
-Se o usuário não anexar imagem, **pergunte** antes de continuar.
+If the user does not attach an image, **ask** before continuing.
 
 ---
 
 ## Workflow
 
-### 1. Analisar o design
+### 1. Analyze the design
 
-Examine a imagem e identifique/inferi:
+Examine the image and identify/infer:
 
-**Cores:**
-- Cor primária / brand → escala completa (50–900+).
-- Cores neutras/cinzas → escala completa (50–900+).
-- Cores semânticas (success, error, warning, info) — se visíveis.
-- Background e surface.
+**Colors:**
+- Primary / brand color → full scale (50–900+).
+- Neutral/grey colors → full scale (50–900+).
+- Semantic colors (success, error, warning, info) — if visible.
+- Background and surface.
 - Border colors.
-- Quaisquer outras cores presentes.
+- Any other colors present.
 
-**Tipografia:**
-- Font family (sans-serif, serif, monospace, etc.). Quando não houver pista
-  óbvia, sugira a Google Font mais próxima e marque como inferência.
-- Tamanhos e pesos de heading.
-- Tamanhos de body / label / caption.
-- Outros detalhes (line-height, letter-spacing) se inferíveis.
+**Typography:**
+- Font family (sans-serif, serif, monospace, etc.). When there is no obvious
+  clue, suggest the closest Google Font and mark it as an inference.
+- Heading sizes and weights.
+- Body / label / caption sizes.
+- Other details (line-height, letter-spacing) if inferable.
 
-**Espaçamento & Radius:**
-- Ritmo de espaçamento (tight, normal, relaxed).
-- Estilo de border radius (sharp, rounded, pill).
+**Spacing & Radius:**
+- Spacing rhythm (tight, normal, relaxed).
+- Border radius style (sharp, rounded, pill).
 
-**Sombras:**
-- Estilo de shadow (none, subtle, prominent).
+**Shadows:**
+- Shadow style (none, subtle, prominent).
 
-> Sempre que estiver inferindo (não medindo), marque o token com **(inferido)**
-> no resumo final para que o usuário possa ajustar.
+> Whenever you are inferring (not measuring), mark the token with **(inferred)**
+> in the final summary so the user can adjust it.
 
 ---
 
-### 2. Inicializar shadcn
+### 2. Initialize shadcn
 
 ```bash
 npx shadcn@latest init
 ```
 
-Quando perguntado:
+When prompted:
 
 - Style: **Default**
-- Base color: **Neutral** (vamos sobrescrever com nossos tokens)
+- Base color: **Neutral** (we will override it with our tokens)
 - CSS variables: **Yes**
 
 ---
 
-### 3. Gerar e aplicar `globals.css`
+### 3. Generate and apply `globals.css`
 
-Substituir `/app/globals.css` com os tokens extraídos:
+Replace `/app/globals.css` with the extracted tokens:
 
 ```css
 @import "tailwindcss";
 
 :root {
   /* === BASE === */
-  --background: [extraído];
-  --foreground: [extraído];
+  --background: [extracted];
+  --foreground: [extracted];
 
   /* === CARD === */
-  --card: [extraído];
-  --card-foreground: [extraído];
+  --card: [extracted];
+  --card-foreground: [extracted];
 
   /* === POPOVER / DROPDOWN / TOOLTIP === */
-  --popover: [igual ao card ou white];
-  --popover-foreground: [igual ao card-foreground];
+  --popover: [same as card, or white];
+  --popover-foreground: [same as card-foreground];
 
   /* === PRIMARY === */
-  --primary: [extraído];
-  --primary-foreground: [white ou dark, baseado em contraste];
+  --primary: [extracted];
+  --primary-foreground: [white or dark, based on contrast];
 
   /* === SECONDARY === */
-  --secondary: [light grey ou versão muted];
+  --secondary: [light grey or a muted version];
   --secondary-foreground: [dark text];
 
   /* === MUTED === */
@@ -113,7 +113,7 @@ Substituir `/app/globals.css` com os tokens extraídos:
   --muted-foreground: [medium grey text];
 
   /* === ACCENT === */
-  --accent: [igual ao secondary ou tint leve];
+  --accent: [same as secondary, or a light tint];
   --accent-foreground: [dark text];
 
   /* === DESTRUCTIVE === */
@@ -121,19 +121,19 @@ Substituir `/app/globals.css` com os tokens extraídos:
   --destructive-foreground: [white];
 
   /* === BORDERS & INPUTS === */
-  --border: [extraído];
-  --input: [border um pouco mais escura];
-  --ring: [primary, para focus];
+  --border: [extracted];
+  --input: [a slightly darker border];
+  --ring: [primary, for focus];
 
   /* === BORDER RADIUS === */
-  --radius: [extraído, ex. 0.5rem];
+  --radius: [extracted, e.g. 0.5rem];
 
   /* === CHART COLORS === */
   --chart-1: [primary];
-  --chart-2: [complementar];
-  --chart-3: [variação];
-  --chart-4: [variação];
-  --chart-5: [variação];
+  --chart-2: [complementary];
+  --chart-3: [variation];
+  --chart-4: [variation];
+  --chart-5: [variation];
 
   /* === SIDEBAR === */
   --sidebar: [sidebar background];
@@ -155,10 +155,10 @@ Substituir `/app/globals.css` com os tokens extraídos:
 }
 
 .dark {
-  /* Valores invertidos para dark mode */
+  /* Values inverted for dark mode */
   --background: [dark background];
   --foreground: [light text];
-  /* ... demais variáveis */
+  /* ... remaining variables */
 }
 
 @theme inline {
@@ -194,18 +194,18 @@ Substituir `/app/globals.css` com os tokens extraídos:
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: [extraído], sans-serif;
+  font-family: [extracted], sans-serif;
 }
 ```
 
 ---
 
-### 4. Instalar a fonte recomendada
+### 4. Install the recommended font
 
-Se uma Google Font for compatível, adicione em `/app/layout.tsx`:
+If a Google Font is compatible, add it in `/app/layout.tsx`:
 
 ```tsx
-import { Inter } from 'next/font/google'  // ou a fonte recomendada
+import { Inter } from 'next/font/google'  // or the recommended font
 
 const font = Inter({ subsets: ['latin'] })
 
@@ -220,21 +220,21 @@ export default function RootLayout({ children }) {
 
 ---
 
-### 5. Instalar componentes demo
+### 5. Install demo components
 
-Como aqui não há bundle, instalamos componentes do shadcn diretamente para
-poder demonstrar os tokens no styleguide:
+Since there is no bundle here, we install shadcn components directly so we can
+demonstrate the tokens in the styleguide:
 
 ```bash
 npx shadcn@latest add button card badge alert radio-group
 ```
 
-> Adicione mais componentes (input, dialog, tabs, etc.) se a referência
-> visual claramente exigir.
+> Add more components (input, dialog, tabs, etc.) if the visual
+> reference clearly requires it.
 
 ---
 
-### 6. Criar a config de navegação do styleguide
+### 6. Create the styleguide navigation config
 
 `/app/auis/styleguide/navigation.ts`:
 
@@ -259,7 +259,7 @@ export const navigation: NavSection[] = [
   {
     title: "Components",
     items: [
-      // Adicionados pelo Prompt 2 / por skills posteriores
+      // Added by Prompt 2 / by later skills
     ]
   }
 ]
@@ -267,7 +267,7 @@ export const navigation: NavSection[] = [
 
 ---
 
-### 7. Criar layout do styleguide com sidebar
+### 7. Create the styleguide layout with a sidebar
 
 `/app/auis/styleguide/layout.tsx`:
 
@@ -333,71 +333,71 @@ export default function StyleguideLayout({
 
 ---
 
-### 8. Criar a página principal do styleguide
+### 8. Create the main styleguide page
 
-`/app/auis/styleguide/page.tsx` — exibe **todos os tokens** numa só página:
+`/app/auis/styleguide/page.tsx` — displays **every token** on a single page:
 
-- **Color palette** — swatches com nome da CSS variable.
-- **Primary scale** — 50 a 900.
-- **Grey scale** — 50 a 900.
+- **Color palette** — swatches with the CSS variable name.
+- **Primary scale** — 50 to 900.
+- **Grey scale** — 50 to 900.
 - **Semantic colors** — success, warning, error, info.
-- **Typography** — amostras de heading e body.
-- **Border radius** — exemplos de cada tamanho.
-- **Shadows** — exemplos.
-- **Components** — preview de Button, Card, Badge, Alert, Radio Group usando
-  os tokens.
-- **Dark mode toggle** — preview dos dois temas.
+- **Typography** — heading and body samples.
+- **Border radius** — examples of each size.
+- **Shadows** — examples.
+- **Components** — a preview of Button, Card, Badge, Alert, Radio Group using
+  the tokens.
+- **Dark mode toggle** — a preview of both themes.
 
-> **Importante:** inclua qualquer token adicional inferido da imagem que não
-> esteja na lista acima.
+> **Important:** include any additional token inferred from the image that is
+> not in the list above.
 
 ---
 
-## Estrutura de diretórios resultante
+## Resulting directory structure
 
 ```
 app/
 └── auis/
     └── styleguide/
-        ├── layout.tsx           # Sidebar nav (passo 7)
-        ├── navigation.ts        # Config de nav (passo 6)
-        ├── page.tsx             # Todos os tokens (passo 8)
+        ├── layout.tsx           # Sidebar nav (step 7)
+        ├── navigation.ts        # Nav config (step 6)
+        ├── page.tsx             # All tokens (step 8)
         └── components/
-            └── [nome]/
-                └── page.tsx     # Adicionados por skills posteriores
+            └── [name]/
+                └── page.tsx     # Added by later skills
 ```
 
 ---
 
-## Output esperado
+## Expected output
 
-- shadcn inicializado.
-- `/app/globals.css` com tokens extraídos da imagem.
-- Fonte instalada em `/app/layout.tsx`.
-- Componentes demo instalados (button, card, badge, alert, radio-group).
-- Styleguide navegável:
+- shadcn initialized.
+- `/app/globals.css` with the tokens extracted from the image.
+- The font installed in `/app/layout.tsx`.
+- Demo components installed (button, card, badge, alert, radio-group).
+- A navigable styleguide:
   - `/app/auis/styleguide/layout.tsx`
   - `/app/auis/styleguide/navigation.ts`
   - `/app/auis/styleguide/page.tsx`
-- Pronto para próximos prompts (componentes, páginas).
+- Ready for the next prompts (components, pages).
 
 ---
 
-## Resumo de design (entregar ao final)
+## Design summary (deliver at the end)
 
-- **Cor primária:** [hex e nome]
-- **Fonte:** [nome]
-- **Estilo:** [ex. "Modern minimal", "Bold colorful", "Soft friendly"]
-- **Border radius:** [ex. "Rounded 8px", "Sharp", "Pill"]
-- **Sensação geral:** [breve descrição]
-- **Tokens marcados como (inferido):** [lista do que veio de inferência, não
-  de medição direta — para o usuário validar]
+- **Primary color:** [hex and name]
+- **Font:** [name]
+- **Style:** [e.g. "Modern minimal", "Bold colorful", "Soft friendly"]
+- **Border radius:** [e.g. "Rounded 8px", "Sharp", "Pill"]
+- **Overall feel:** [brief description]
+- **Tokens marked as (inferred):** [list of what came from inference, not
+  from direct measurement — for the user to validate]
 
 ---
 
-## Notas
+## Notes
 
-- Se algo na imagem estiver ambíguo, **pergunte** antes de prosseguir.
-- **Nunca** use um componente ou token shadcn sem confirmação explícita do
-  usuário.
-- Em caso de dúvida, **não** extraia nada do shadcn — pergunte primeiro.
+- If anything in the image is ambiguous, **ask** before proceeding.
+- **Never** use a shadcn component or token without explicit confirmation from the
+  user.
+- When in doubt, **do not** pull anything from shadcn — ask first.

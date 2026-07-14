@@ -12,147 +12,146 @@ description: >
   `get_design_context` as reference; for `restyle`, produces a preview in
   the current DS. It stamps each request `in_review`/`apply` with
   `actor {kind:"agent",id:"claude",name:"Claude"}` + `builtRoute`, and
-  updates the manifest. Use when the user asks to "resolve os builds dos
-  projetos" (resolve the project builds), "constrói as telas pedidas"
-  (build the requested screens), "aplica os pedidos do Memory Base"
-  (apply the Memory Base requests), or "pega os pedidos de build e
-  resolve" (take the build requests and resolve them). Do NOT use it for
-  importing (that is `auis-import-figma-flow`) nor for UX Flow
+  updates the manifest. Use when the user asks to "resolve the project
+  builds", "build the requested screens", "apply the Memory Base
+  requests", or "take the build requests and resolve them". Do NOT use it
+  for importing (that is `auis-import-figma-flow`) nor for UX Flow
   suggestions (that is `auis-flow-bridge-solve`).
 ---
 
-# Auis — Resolver pedidos de build/restyle dos projetos
+# Auis — Resolve the projects' build/restyle requests
 
-Os cards de tela em `/auis/projects/<slug>` têm dois botões que
-gravam pedidos via `POST /api/project-builds`. Esta skill consome essa
-fila e cumpre os pedidos — sempre com **plano + aprovação antes de mexer
-em código**, no mesmo espírito do
+The screen cards in `/auis/projects/<slug>` have two buttons that write
+requests via `POST /api/project-builds`. This skill consumes that queue
+and fulfills the requests — always with a **plan + approval before touching
+code**, in the same spirit as
 [`auis-review-bridge-solve`](../auis-review-bridge-solve/SKILL.md).
 
-## Pré-requisitos
+## Prerequisites
 
-- Dev server da LAN no ar (`:3000`) pra falar com a API. **Não suba um
-  segundo** (Next 16 bloqueia).
-- Existe `app/api/project-builds/` (store + rotas) e o manifest
-  `app/auis/projects/_data/projects.ts`.
+- LAN dev server up (`:3000`) to talk to the API. **Don't start a
+  second one** (Next 16 blocks it).
+- `app/api/project-builds/` (store + routes) and the manifest
+  `app/auis/projects/_data/projects.ts` exist.
 
 ---
 
-## Step 1 — Ler a fila
+## Step 1 — Read the queue
 
-`GET /api/project-builds` com o filtro que o usuário pediu:
+`GET /api/project-builds` with the filter the user asked for:
 `?projectSlug=&screenId=&kind=&status=`. Default: `status=open`.
 
 ```bash
 curl -s "http://localhost:3000/api/project-builds?projectSlug=<slug>&status=open" | python3 -m json.tool
 ```
 
-Cada pedido traz `kind` (`restyle`|`build`), `screenId`, `screenName`,
-`figmaFileKey`, `figmaNodeId`, `thumbnail`, `note?`. Se a fila estiver
-vazia, diga isso e pare.
+Each request carries `kind` (`restyle`|`build`), `screenId`, `screenName`,
+`figmaFileKey`, `figmaNodeId`, `thumbnail`, `note?`. If the queue is
+empty, say so and stop.
 
 ---
 
-## Step 2 — Plano (antes de qualquer código)
+## Step 2 — Plan (before any code)
 
-Pra cada pedido, monte uma linha no plano:
-- tela (`screenName` + `figmaNodeId`), `kind`, e o que será feito.
-- pra `build`: a rota de destino (ver Step 4) e os componentes Au* que
-  pretende usar.
+For each request, write one line in the plan:
+- the screen (`screenName` + `figmaNodeId`), the `kind`, and what will be done.
+- for `build`: the destination route (see Step 4) and the Au* components you
+  intend to use.
 
-Mostre o plano e **espere aprovação explícita**. Se um pedido for
-ambíguo, marque-o pra perguntar (pode responder com pergunta em vez de
-agir).
-
----
-
-## Step 3 — Referência da tela (Figma)
-
-Pra cada tela a tratar, puxe a estrutura como REFERÊNCIA (não fonte da
-verdade): `get_design_context(figmaFileKey, figmaNodeId)`. Veja também o
-screenshot já importado em `public/projects/<slug>/<screenId>.webp`.
-O design vem do **DS antigo** — você re-mapeia a intenção (layout,
-hierarquia, copy) pros tokens e componentes Au* atuais. Siga
-[`auis-new-page`](../auis-new-page/SKILL.md) pra montar a
-página (lookup de componente: Au* → shadcn → custom; tokens são sagrados).
+Show the plan and **wait for explicit approval**. If a request is
+ambiguous, flag it to ask about (you may answer with a question instead of
+acting).
 
 ---
 
-## Step 4 — Construir (`build`) ou re-skinar (`restyle`)
+## Step 3 — Screen reference (Figma)
 
-**`build`** — página real, roteável:
-- Rota: `app/auis/projects/built/<slug>/<screenId-ou-nome>/page.tsx`.
-  Use o segmento estático `built/` — ele **não** colide com a rota
-  `projects/[slug]` (desde que nenhum projeto tenha slug `built`).
-  ⚠️ NÃO crie uma pasta com o nome do slug do projeto sob `projects/`:
-  isso sombreia o viewer `[slug]`.
+For each screen you're handling, pull the structure as a REFERENCE (not the
+source of truth): `get_design_context(figmaFileKey, figmaNodeId)`. Also look at
+the screenshot already imported at `public/projects/<slug>/<screenId>.webp`.
+The design comes from the **old DS** — you re-map the intent (layout,
+hierarchy, copy) onto the current Au* tokens and components. Follow
+[`auis-new-page`](../auis-new-page/SKILL.md) to assemble the
+page (component lookup: Au* → shadcn → custom; tokens are sacred).
+
+---
+
+## Step 4 — Build (`build`) or re-skin (`restyle`)
+
+**`build`** — a real, routable page:
+- Route: `app/auis/projects/built/<slug>/<screenId-or-name>/page.tsx`.
+  Use the static `built/` segment — it does **not** collide with the
+  `projects/[slug]` route (as long as no project has the slug `built`).
+  ⚠️ Do NOT create a folder named after the project's slug under `projects/`:
+  that shadows the `[slug]` viewer.
 - `builtRoute` = `/auis/projects/built/<slug>/<...>`.
-- Componha com Au* (ex: a tela de boas-vindas do Memory Base usa
-  `AuMemoryBaseLogo` + `AuButton`). Inclua uma barra de contexto no topo
-  ("Reconstruído de <step · name>", link de volta ao projeto, link
-  "Original no Figma"). Tela desktop-only.
+- Compose with Au* (e.g. the Memory Base welcome screen uses
+  `AuMemoryBaseLogo` + `AuButton`). Include a context bar at the top
+  ("Rebuilt from <step · name>", a link back to the project, an
+  "Original in Figma" link). Desktop-only screen.
 
-**`restyle`** — preview de re-skin no DS atual (sem virar rota de produto
-necessariamente). Trate como um `build` mais leve/parcial, ou um preview
-lado-a-lado, conforme o pedido.
-
----
-
-## Step 5 — Transicionar o pedido + atualizar o manifest
-
-1. (Opcional) `PUT /api/project-builds/<id>` `{transition:"in_review",
-   actor:{kind:"agent",id:"claude",name:"Claude"}}` ao começar.
-2. Ao concluir: `PUT .../<id>` `{transition:"apply",
-   actor:{kind:"agent",id:"claude",name:"Claude"}, builtRoute:"<rota>"}`.
-   Isso carimba a resolução e arquiva o pedido.
-3. **Atualize o manifest** (`_data/projects.ts`) na tela correspondente:
-   `status: "built"` (ou `"restyled"`) + `builtRoute`. O manifest é o
-   estado durável; a API é só a fila. É o manifest que faz o card mostrar
-   a pill "No repo" + "Ver no repo".
-
-Se o usuário rejeitar depois, ele resolve pelo inbox/`discard` — não
-desfaça automaticamente.
+**`restyle`** — a re-skin preview in the current DS (it doesn't necessarily
+become a product route). Treat it as a lighter/partial `build`, or a
+side-by-side preview, depending on the request.
 
 ---
 
-## Step 6 — Validação
+## Step 5 — Transition the request + update the manifest
+
+1. (Optional) `PUT /api/project-builds/<id>` `{transition:"in_review",
+   actor:{kind:"agent",id:"claude",name:"Claude"}}` when you start.
+2. On completion: `PUT .../<id>` `{transition:"apply",
+   actor:{kind:"agent",id:"claude",name:"Claude"}, builtRoute:"<route>"}`.
+   That stamps the resolution and archives the request.
+3. **Update the manifest** (`_data/projects.ts`) on the matching screen:
+   `status: "built"` (or `"restyled"`) + `builtRoute`. The manifest is the
+   durable state; the API is only the queue. The manifest is what makes the
+   card show the "No repo" pill + "Ver no repo".
+
+If the user rejects it later, they resolve it from the inbox/`discard` — don't
+undo it automatically.
+
+---
+
+## Step 6 — Validation
 
 ```bash
 npm run typecheck
 ```
 
-Confirme por HTTP: a `builtRoute` responde 200, e o card da tela no
-viewer agora mostra a pill "No repo" linkando pra ela. **Não commite.**
+Confirm over HTTP: the `builtRoute` answers 200, and the screen's card in the
+viewer now shows the "No repo" pill linking to it. **Don't commit.**
 
 ---
 
-## Output esperado
+## Expected output
 
 ```md
-Pedidos resolvidos: <N> (<builds> build · <restyles> restyle)
+Requests resolved: <N> (<builds> build · <restyles> restyle)
 
-Por tela:
+Per screen:
 - <screenName> [<kind>] -> <builtRoute> (status: applied)
 
-Arquivos:
-- app/auis/projects/built/<slug>/<...>/page.tsx (novos)
+Files:
+- app/auis/projects/built/<slug>/<...>/page.tsx (new)
 - app/auis/projects/_data/projects.ts (status/builtRoute)
 
-Store: <N> pedidos em applied (arquivados)
-Validação: typecheck passed · rotas 200
+Store: <N> requests in applied (archived)
+Validation: typecheck passed · routes 200
 ```
 
 ---
 
-## O que NÃO fazer
+## What NOT to do
 
-- **Não mexa em código antes do plano aprovado.**
-- **Não crie pasta `projects/<slug>/`** pra telas construídas — sombreia
-  o viewer `[slug]`. Use sempre `projects/built/<slug>/...`.
-- **Não invente tokens** nem use valores arbitrários de cor/spacing — só
-  Au* + tokens existentes (`AGENTS.md`).
-- **Não copie o pixel do DS antigo** — re-mapeie pro DS atual; o
-  screenshot é referência de intenção, não de estilo.
-- **Não edite o manifest E o store na mão pra "forçar" estado** — o
-  fluxo é: API arquiva o pedido (apply) + skill escreve o manifest.
-- **Não commitar.**
+- **Don't touch code before the plan is approved.**
+- **Don't create a `projects/<slug>/` folder** for built screens — it shadows
+  the `[slug]` viewer. Always use `projects/built/<slug>/...`.
+- **Don't invent tokens** and don't use arbitrary color/spacing values — only
+  Au* + existing tokens (`AGENTS.md`).
+- **Don't copy the old DS pixel for pixel** — re-map it to the current DS; the
+  screenshot is a reference for intent, not for style.
+- **Don't hand-edit the manifest AND the store to "force" a state** — the
+  flow is: the API archives the request (apply) + the skill writes the
+  manifest.
+- **Don't commit.**

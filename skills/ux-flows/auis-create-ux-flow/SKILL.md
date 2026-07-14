@@ -7,9 +7,8 @@ description: >
   convergence into a ReactFlow diagram using the established Auis UX flow
   format. Registers the new page in navigation.ts. Use when the user asks to
   "build a UX flow", "map a flow", "create a flow diagram", or "put together a
-  flowchart" (in Portuguese: "criar flow", "mapear fluxo", "criar diagrama de
-  fluxo", "montar fluxograma"), or hands over a list of steps/screens asking
-  for a styleguide UX flow page.
+  flowchart", or hands over a list of steps/screens asking for a styleguide UX
+  flow page.
 ---
 
 # Auis — UX Flow
@@ -55,7 +54,7 @@ automatically inherits all of these — you do **not** wire them per page:
   serverless route `/api/flow-suggestions` (no server, no token). Suggestions
   are applied later via the `auis-flow-bridge-solve` skill.
 - **Tela cheia** — fullscreen toggle (CSS overlay, ESC to exit).
-- **Sub-flow expansion** — a `crossflow` losango whose `href` points at another
+- **Sub-flow expansion** — a `crossflow` diamond whose `href` points at another
   expandable ux-flow opens that flow inline.
 - **Suggestions badge** — count of open suggestions, top-right.
 
@@ -73,8 +72,8 @@ The only feature a page **does** author itself is the **updates changelog**
 ## Input expected from the user
 
 ```txt
-Flow name:  [e.g. "Login", "Criação de agente", "Recuperação de senha"]
-Slug:       [e.g. "login", "criacao-agente", "recuperacao-senha"]
+Flow name:  [e.g. "Login", "Agent creation", "Password recovery"]
+Slug:       [e.g. "login", "agent-creation", "password-recovery"]
 Steps:      [numbered list of screens / states]
 Decision points: [where the user chooses between paths]
 Branches:   [what each path contains and how they converge]
@@ -130,7 +129,7 @@ RIGHT_X = 480   centre = 580
 avg centre = 380 ✓
 ```
 
-**3-branch layout** (pix / cartão / boleto style):
+**3-branch layout** (pix / card / boleto style):
 ```
 LEFT_X   = 40   centre = 140
 CENTER_X = 280  centre = 380   (same as COL)
@@ -181,7 +180,7 @@ implemented in `../_components/flow-editor.tsx` and registered inside
 the `NODES` and `EDGES` arrays and hands them to `<FlowDiagram>`. Do not invent
 new node types.
 
-### `screen` — a tela/estado
+### `screen` — a screen/state
 
 Data shape: `{ step: string; title: string; href: string; note?: string }`
 
@@ -205,12 +204,12 @@ to do anything beyond filling `href` correctly.
 So: **prefer real internal routes over `#`** whenever a prototype exists.
 The drawer makes them previewable in-place from the diagram.
 
-### `decision` — ponto de decisão
+### `decision` — decision point
 
 Data shape: `{ step: string; title: string; question: string }`
 
 - `step`: decision identifier (`"02"`, `"fim"`, etc.)
-- `title`: the decision name (e.g. `"Método de autenticação"`)
+- `title`: the decision name (e.g. `"Authentication method"`)
 - `question`: the question the user faces at this point (≤ 15 words)
 
 **Handle rules for decision nodes:**
@@ -219,17 +218,17 @@ Data shape: `{ step: string; title: string; question: string }`
 - `id="right"` → used when the right branch exits from the right side
 - Always specify `sourceHandle` on edges leaving a decision node
 
-### `crossflow` — salto pra outro fluxo
+### `crossflow` — jump to another flow
 
 Use this **only** when the path leaves THIS flow and enters ANOTHER styleguide
-flow (e.g. login → primeiro-acesso). Renders as a purple losango (rotated
+flow (e.g. login → primeiro-acesso). Renders as a purple diamond (rotated
 square), visually distinct from screen cards and decision boxes. Clicking it
 opens a confirmation modal ("Ir para outro fluxo?") and only navigates on
 confirm.
 
 Data shape (same as `screen`): `{ step: string; title: string; href: string; note?: string }`
 
-- `title`: the **destination flow's name** — short, shows inside the losango and in the modal (e.g. `"Login"`, `"Primeiro acesso"`).
+- `title`: the **destination flow's name** — short, shows inside the diamond and in the modal (e.g. `"Login"`, `"First access"`).
 - `href`: the OTHER flow's page route — `/auis/styleguide/ux-flows/[other-slug]`. Not a prototype route.
 - `note`: optional one-liner of context.
 - Handles are top (target) + bottom (source), like `screen` — no `sourceHandle` needed on its edges.
@@ -267,8 +266,8 @@ const labelProps = {
 - `crossEdge` — an edge that touches a `crossflow` node (purple dashed, marks the jump to another flow)
 
 **Edge labelling:**
-- Decision → branch: label with the branch choice (e.g. `"Pix"`, `"Google"`, `"Sim"`, `"Não"`)
-- Entry → first step: label with the action that starts the flow (e.g. `"Primeiro acesso"`)
+- Decision → branch: label with the branch choice (e.g. `"Pix"`, `"Google"`, `"Yes"`, `"No"`)
+- Entry → first step: label with the action that starts the flow (e.g. `"First access"`)
 - Other edges: no label unless they carry important context
 
 ---
@@ -280,16 +279,16 @@ break. Use one of these approaches:
 
 ```ts
 // ✅ Use single-quoted outer string for notes with quotes inside
-note: 'Clique em "Primeiro acesso" para iniciar.',
+note: 'Click "First access" to start.',
 
 // ✅ Use a template literal
-note: `Clique em "Primeiro acesso" para iniciar.`,
+note: `Click "First access" to start.`,
 
 // ✅ Rephrase to avoid inner quotes
-note: "Clique em Primeiro acesso para iniciar o fluxo.",
+note: "Click First access to start the flow.",
 
 // ❌ NEVER — breaks the parser
-note: "Clique em "Primeiro acesso" para iniciar.",
+note: "Click "First access" to start.",
 ```
 
 ---
@@ -326,7 +325,7 @@ import {
 const updates: FlowUpdate[] = [
   {
     date: "[today YYYY-MM-DD]",
-    summary: "Flow mapeado no styleguide.",
+    summary: "Flow mapped in the styleguide.",
     tags: ["new-page"],
   },
 ]
@@ -359,8 +358,8 @@ export default function [FlowName]FlowPage() {
         {/* SECTION 2 — the diagram */}
         <Section
           id="flow"
-          title="Fluxograma"
-          lead="Clique em qualquer tela pra abrir o protótipo num painel lateral. Caixas tracejadas em âmbar são decisões — pontos em que o usuário faz uma escolha. Setas âmbar indicam os caminhos de bifurcação."
+          title="Flowchart"
+          lead="Click any screen to open its prototype in a side panel. Amber dashed boxes are decisions — points where the user makes a choice. Amber arrows mark the branching paths."
         >
           <FlowDiagram
             flow="[flow-slug]"
@@ -373,8 +372,8 @@ export default function [FlowName]FlowPage() {
         {/* SECTION 3 — each screen documented */}
         <Section
           id="screens"
-          title="Cada tela"
-          lead="Propósito, decisões e link direto pro protótipo de cada uma."
+          title="Every screen"
+          lead="Purpose, decisions, and a direct link to each one's prototype."
         >
           <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-raised)] overflow-hidden">
             <ul className="m-0 p-0 list-none flex flex-col divide-y divide-[var(--border-subtle)]">
@@ -387,11 +386,11 @@ export default function [FlowName]FlowPage() {
                   <p className="m-0 text-sm text-[var(--fg-secondary)] leading-relaxed">{s.purpose}</p>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-1">
                     <span className="caption">
-                      <span className="font-medium text-[var(--fg-secondary)]">Decisões: </span>
+                      <span className="font-medium text-[var(--fg-secondary)]">Decisions: </span>
                       {s.decisions}
                     </span>
                     <Link href={s.href} className="text-sm font-medium text-[var(--au-blue-700)] hover:text-[var(--au-blue-800)] no-underline hover:underline">
-                      Abrir protótipo →
+                      Open prototype →
                     </Link>
                   </div>
                 </li>
@@ -403,8 +402,8 @@ export default function [FlowName]FlowPage() {
         {/* SECTION 4 — design decisions (2–4 cards) */}
         <Section
           id="design-notes"
-          title="Decisões de design"
-          lead="Por que o fluxo está estruturado desse jeito."
+          title="Design decisions"
+          lead="Why the flow is structured this way."
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* One card per key design decision. Use the info from the flow
@@ -454,7 +453,7 @@ Add the new flow to the `"UX Flows"` section in
 {
   title: "UX Flows",
   items: [
-    { name: "Primeiro acesso", href: "/auis/styleguide/ux-flows/primeiro-acesso" },
+    { name: "First access", href: "/auis/styleguide/ux-flows/primeiro-acesso" },
     { name: "[New flow title]", href: "/auis/styleguide/ux-flows/[flow-slug]" },
   ],
 },
@@ -488,7 +487,7 @@ nodes are clickable, and the dots background is visible.
 - [ ] `sourceHandle` specified on all edges leaving a decision node
 - [ ] No ASCII double-quotes inside JS string values
 - [ ] `Tldr` component NOT used — replaced with intro `<p>` paragraph
-- [ ] Section `lead` mentions "clique" + "painel lateral" so readers know the card opens a preview drawer
+- [ ] Section `lead` mentions "click" + "side panel" so readers know the card opens a preview drawer
 - [ ] `screens` array covers all main steps (not sub-branch variants)
 - [ ] `navigation.ts` updated under `"UX Flows"` section
 - [ ] `npm run typecheck` passes

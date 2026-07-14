@@ -13,46 +13,49 @@ description: >
 
 # Auis — Foundation Update (incremental)
 
-Use para ADICIONAR ou AJUSTAR tokens numa foundation que **já existe** — nunca
-para rebootstrap. Irmã da `auis-design-system-foundation` (que faz bootstrap
-a partir de uma referência e pode reescrever o `globals.css`). Estas duas são as
-únicas skills autorizadas a mexer em token.
+Use this to ADD or ADJUST tokens in a foundation that **already exists** — never
+to rebootstrap. Sibling of `auis-design-system-foundation` (which bootstraps
+from a reference and may rewrite `globals.css`). These two are the only skills
+authorized to touch tokens.
 
-`AGENTS.md` é a fonte de verdade. Se algo aqui conflitar, siga o `AGENTS.md`.
+`AGENTS.md` is the source of truth. If anything here conflicts with it, follow
+`AGENTS.md`.
 
 ## Hard rules
 
-- **Nunca** reescreva/rescaffold o `globals.css`. Só edição cirúrgica do bloco de
-  tokens; não toque em CSS que não seja token.
-- **Aditivo por padrão.** Não remova nem renomeie token em uso (isso é breaking).
-- **Dois canais em sincronia:** o `@theme` (gera as utility classes do Tailwind v4)
-  e o espelho em `:root` / `--au-*` (consumo por `var()`), incluindo o override do
-  dark mode. Um token novo entra nos dois quando se aplica aos dois.
-- Não cria cor fora das 10 famílias `au-*`; nada de hex solto.
-- Token novo entra no vocabulário de `docs/component-map.md` e, quando fizer
-  sentido, ganha exemplo na foundation page correspondente.
+- **Never** rewrite/rescaffold `globals.css`. Surgical edits to the token block
+  only; don't touch CSS that isn't a token.
+- **Additive by default.** Don't remove or rename a token in use (that's breaking).
+- **Two channels in sync:** `@theme` (generates the Tailwind v4 utility classes)
+  and the mirror in `:root` / `--au-*` (consumed via `var()`), including the dark
+  mode override. A new token goes into both when it applies to both.
+- Never create a color outside the 10 `au-*` families; no loose hex values.
+- A new token goes into the vocabulary in `docs/component-map.md` and, when it
+  makes sense, gets an example on the matching foundation page.
 
 ## Workflow
 
-1. Leia `AGENTS.md` e o bloco de tokens atual em `app/globals.css`.
-2. **Audite o que já existe** — não duplique um token que já cobre o valor, e veja
-   se já há um sistema semântico (ex.: as utilities `body-*`/`display-*`/`caption`/
-   `au-eyebrow`) antes de criar um paralelo.
-3. **Classifique cada mudança:**
-   - **safe** (aplica direto): adicionar token novo que não altera nada existente;
-     alias; doc. Zero mudança visual.
-   - **needs review** (propõe + espera ok): mudar o valor de um token em uso, ou
-     redefinir uma escala (tipo/cor/radius) — tem impacto visual.
-   - **breaking** (só com ok explícito): remover/renomear token em uso.
-4. Aplique as **safe**; para needs-review/breaking, mostre o delta e espere aprovação.
-5. Sincronize `@theme` + `:root` + dark.
-6. Valide: `npm run typecheck`, `npm run ds:check`, e verificação visual
-   (Playwright) sempre que algum valor **em uso** mudar.
-7. Atualize `docs/component-map.md` (vocabulário de tokens).
+1. Read `AGENTS.md` and the current token block in `app/globals.css`.
+2. **Audit what already exists** — don't duplicate a token that already covers the
+   value, and check whether a semantic system is already there (e.g. the
+   `body-*`/`display-*`/`caption`/`au-eyebrow` utilities) before creating a
+   parallel one.
+3. **Classify each change:**
+   - **safe** (apply directly): adding a new token that changes nothing existing;
+     an alias; docs. Zero visual change.
+   - **needs review** (propose + wait for an ok): changing the value of a token in
+     use, or redefining a scale (type/color/radius) — it has visual impact.
+   - **breaking** (only with an explicit ok): removing/renaming a token in use.
+4. Apply the **safe** ones; for needs-review/breaking, show the delta and wait for
+   approval.
+5. Sync `@theme` + `:root` + dark.
+6. Validate: `npm run typecheck`, `npm run ds:check`, and a visual check
+   (Playwright) whenever a value **in use** changes.
+7. Update `docs/component-map.md` (token vocabulary).
 
 ## Output
 
-- tokens adicionados / alterados / intocados (com px ou valor)
-- classificação de cada um (safe / needs review / breaking)
-- mudanças arriscadas puladas (aguardando ok)
-- validações rodadas
+- tokens added / changed / untouched (with px or value)
+- the classification of each (safe / needs review / breaking)
+- risky changes skipped (awaiting an ok)
+- validations run

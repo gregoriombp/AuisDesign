@@ -1,158 +1,158 @@
 ---
 name: ux-page-rework
-description: Audits a product page (and its subpages) and delivers TWO different improvement directions — one refinement (keeps the structure, polishes components and UX writing) and one restructuring (reorganizes the information hierarchy, proposes new patterns) — each on its own branch, no merge. Use whenever the user asks to "improve this page", "rework this page", "refine this page", "audit the UX of this screen", "create 2 improvement versions", "redesign /<route>", "propose improvements for this page" (in Portuguese — "melhorar página", "rework página", "refinar página", "auditar UX desta tela"), or pastes a URL/route and asks for a UX audit/improvement. Also applies when the user says "compare it with Mobbin/Dribbble/competitor X" about an existing page. Ideal for UI/UX preview repos (Next.js + design system) that need two implementable directions for the same screen.
+description: Audits a product page (and its subpages) and delivers TWO different improvement directions — one refinement (keeps the structure, polishes components and UX writing) and one restructuring (reorganizes the information hierarchy, proposes new patterns) — each on its own branch, no merge. Use whenever the user asks to "improve this page", "rework this page", "refine this page", "audit the UX of this screen", "create 2 improvement versions", "redesign /<route>", "propose improvements for this page", or pastes a URL/route and asks for a UX audit/improvement. Also applies when the user says "compare it with Mobbin/Dribbble/competitor X" about an existing page. Ideal for UI/UX preview repos (Next.js + design system) that need two implementable directions for the same screen.
 ---
 
 # UX Page Rework
 
-Duas direções de melhoria pra uma página do produto, cada uma na sua branch, sem merge. Acionada por pedido de "melhorar/rework/auditar/redesign" de uma rota.
+Two improvement directions for a product page, each on its own branch, no merge. Triggered by a request to "improve/rework/audit/redesign" a route.
 
-## O que você entrega
+## What you deliver
 
-- `ux/<slug>-refinamento` — preserva estrutura e rotas; afina componentes, hierarquia visual dentro de cada página, copy.
-- `ux/<slug>-reestruturacao` — reorganiza hierarquia de informação; propõe novos padrões de interação.
+- `ux/<slug>-refinement` — preserves structure and routes; polishes components, visual hierarchy within each page, copy.
+- `ux/<slug>-restructure` — reorganizes the information hierarchy; proposes new interaction patterns.
 
-Onde `<slug>` é o último segmento significativo do path (`/settings/financeiro/` → `financeiro`; `/dashboard/billing` → `billing`). Nunca a URL inteira.
+Where `<slug>` is the last meaningful segment of the path (`/settings/financeiro/` → `financeiro`; `/dashboard/billing` → `billing`). Never the whole URL.
 
-Branches ficam locais, sem push e sem merge. O usuário compara, escolhe (ou cherry-picks), e segue.
+Branches stay local, no push and no merge. The user compares, picks one (or cherry-picks), and moves on.
 
 ## Workflow
 
-### Fase 0 — Contexto do projeto (antes de tudo)
+### Phase 0 — Project context (before anything else)
 
-Antes de tocar em qualquer arquivo:
+Before touching any file:
 
-1. **Regras do repo** — ler `AGENTS.md` na raiz do projeto. Convenções de nomenclatura, prefixos de componente, restrição de tokens, etc.
-2. **Memory do usuário** — ler `~/.claude/projects/<este-repo-encoded>/memory/MEMORY.md` se existir, mas tratar como consultiva. Se conflitar com `AGENTS.md`, o repo vence.
-3. **Localizar o design system** — tipicamente `app/auis/styleguide/` ou `app/styleguide/`. Listar `components/`, ler `navigation.ts`, identificar tokens em `globals.css`.
-4. **Estado do git** — `git status`. Se houver mudanças não-commitadas:
-   - Pergunte ao usuário: commita, stash, ou ignora?
-   - Se ignorar: você NUNCA usa `git add .` ou `git add -A` no commit. Sempre `git add <caminho>` arquivo a arquivo, pra não puxar trabalho de outro agente/sessão.
-5. **Dev server** — verificar se algo já roda em `:3000`. Se sim, deixar quieto — hot reload vai pegar suas mudanças. Não kill.
+1. **Repo rules** — read `AGENTS.md` at the project root. Naming conventions, component prefixes, token restrictions, etc.
+2. **User memory** — read `~/.claude/projects/<this-repo-encoded>/memory/MEMORY.md` if it exists, but treat it as advisory. If it conflicts with `AGENTS.md`, the repo wins.
+3. **Locate the design system** — typically `app/auis/styleguide/` or `app/styleguide/`. List `components/`, read `navigation.ts`, identify tokens in `globals.css`.
+4. **Git state** — `git status`. If there are uncommitted changes:
+   - Ask the user: commit, stash, or ignore?
+   - If ignoring: you NEVER use `git add .` or `git add -A` in the commit. Always `git add <path>` file by file, so you don't pull in work from another agent/session.
+5. **Dev server** — check whether something is already running on `:3000`. If so, leave it alone — hot reload will pick up your changes. Don't kill it.
 
-### Fase 1 — Entender a página atual
+### Phase 1 — Understand the current page
 
-1. **Normalizar o slug** a partir da URL.
-2. **Detectar subpáginas automaticamente.** Se a rota tem layout com tabs, ler o arquivo de tabs (ex.: `FinanceiroTabs.tsx`) e listar todas as rotas filhas. Não confiar só na URL inicial.
-3. **Listar as páginas que você vai tocar** com o role de cada uma. Mostrar pro usuário antes de continuar — se você inferiu errado, ele corrige aqui.
-4. **Ler os arquivos** de cada página + componentes locais (`_components/`). Não ler primitivas do design system inteiro — só o que é específico dessas páginas.
-5. **Interpretar como usuário final.** O que essa página comunica? Qual a função? Como ela opera? Escreva isso em 2-3 linhas — vai ancorar tudo que vem depois.
+1. **Normalize the slug** from the URL.
+2. **Detect subpages automatically.** If the route has a layout with tabs, read the tabs file (e.g. `FinanceiroTabs.tsx`) and list every child route. Don't rely on the initial URL alone.
+3. **List the pages you are going to touch** with the role of each one. Show it to the user before continuing — if you inferred wrong, they correct it here.
+4. **Read the files** of each page + local components (`_components/`). Don't read the entire design system's primitives — only what is specific to these pages.
+5. **Interpret it as an end user.** What does this page communicate? What is its function? How does it operate? Write that in 2-3 lines — it will anchor everything that comes after.
 
-### Fase 2 — Referências externas (opcional, sem bloquear)
+### Phase 2 — External references (optional, non-blocking)
 
-Sites de referência tipo **Mobbin, Dribbble, Behance, Mobbin público** têm paywall ou bloqueiam scraping. `WebFetch` falha. Não insista.
+Reference sites like **Mobbin, Dribbble, Behance, public Mobbin** have a paywall or block scraping. `WebFetch` fails. Don't insist.
 
-Dois caminhos:
+Two paths:
 
-- **A — usuário envia material.** Peça 1-3 screenshots ou notas escritas das flows que ele quer absorver. Pergunte explicitamente quais são "visuais" (componente, elegância) e quais são "conteúdo" (hierarquia, copy) — porque você vai tratar diferente.
-- **B — fallback por inferência.** Se o usuário citou apps que você conhece (OpenAI Platform, Stripe, Intercom, Linear, etc.), use conhecimento prévio dos padrões deles e **sinalize que é inferência**, não pesquisa fresca. Exemplo: "Não consegui acessar o Mobbin (paywall). Vou usar o que sei dos padrões de billing dessas empresas — me corrija se estiver desatualizado."
+- **A — the user sends material.** Ask for 1-3 screenshots or written notes about the flows they want to absorb. Ask explicitly which ones are "visual" (component, elegance) and which are "content" (hierarchy, copy) — because you will treat them differently.
+- **B — inference fallback.** If the user mentioned apps you know (OpenAI Platform, Stripe, Intercom, Linear, etc.), use prior knowledge of their patterns and **flag that it is inference**, not fresh research. Example: "I couldn't access Mobbin (paywall). I'll use what I know about these companies' billing patterns — correct me if I'm out of date."
 
-Quando o usuário envia material, separe em dois baldes e trate diferente:
+When the user sends material, split it into two buckets and treat them differently:
 
-| Bucket | Usa pra | Ignora |
+| Bucket | Use it for | Ignore |
 |---|---|---|
-| Referência **visual** (ex.: ElevenLabs, OpenAI) | Padrões de componente, densidade, elegância visual, espaçamento | Cores e tokens — esses vêm do design system local |
-| Referência **conteúdo** (ex.: Intercom, Lemni) | Hierarquia de informação, estrutura, UX writing, ordem de seções | Visual inteiro — não importa como parece |
+| **Visual** reference (e.g. ElevenLabs, OpenAI) | Component patterns, density, visual elegance, spacing | Colors and tokens — those come from the local design system |
+| **Content** reference (e.g. Intercom, Lemni) | Information hierarchy, structure, UX writing, section order | The entire visual — it doesn't matter how it looks |
 
-### Fase 3 — Avaliação + plano (com gate de aprovação)
+### Phase 3 — Assessment + plan (with approval gate)
 
-Escreva uma avaliação curta da página atual nos três eixos:
+Write a short assessment of the current page along three axes:
 
-- **A.** Componentes são inteligentes? Design elegante e minimalista?
-- **B.** Informações acessíveis e visualmente intuitivas?
-- **C.** UX writing claro, direto, no tom do produto?
+- **A.** Are the components smart? Is the design elegant and minimal?
+- **B.** Is the information accessible and visually intuitive?
+- **C.** Is the UX writing clear, direct, in the product's tone?
 
-Depois proponha as **duas versões**, cada uma como uma lista por subpágina:
+Then propose the **two versions**, each as a list per subpage:
 
 ```
-Versão A — Refinamento (mantém rotas/estrutura)
-- visao-geral: <o que muda + por quê>
-- saldo-creditos: <o que muda + por quê>
+Version A — Refinement (keeps routes/structure)
+- visao-geral: <what changes + why>
+- saldo-creditos: <what changes + why>
 - ...
 
-Versão B — Reestruturação (reorganiza hierarquia)
-- visao-geral: <o que muda + por quê>
-- saldo-creditos: <o que muda + por quê>
+Version B — Restructure (reorganizes the hierarchy)
+- visao-geral: <what changes + why>
+- saldo-creditos: <what changes + why>
 - ...
 ```
 
-**PARE AQUI.** Mostre o plano e peça aprovação. Não pule pra Fase 4 direto. O usuário pode:
-- aprovar as duas,
-- aprovar só uma (válido — economiza meio trabalho),
-- pedir cortes ("V1 enxuta, só a página principal"),
-- redirecionar.
+**STOP HERE.** Show the plan and ask for approval. Don't jump straight to Phase 4. The user can:
+- approve both,
+- approve only one (valid — saves half the work),
+- ask for cuts ("lean V1, just the main page"),
+- redirect.
 
-### Fase 3.5 — Check de tamanho (gate automático)
+### Phase 3.5 — Size check (automatic gate)
 
-Antes de implementar, faça uma estimativa rápida: `subpáginas × seções-por-página × versões`. Se o produto é alto (sinal arbitrário: ≥ 20), **proponha uma V1 enxuta antes**. Algo como:
+Before implementing, make a quick estimate: `subpages × sections-per-page × versions`. If the product is high (arbitrary threshold: ≥ 20), **propose a lean V1 first**. Something like:
 
-> "Esta rota tem 4 subpáginas com ~3 seções cada. Duas versões = 24 implementações. Sugiro V1 focada nas 2 subpáginas que mais entregam diferença visual (`visao-geral` e `saldo-creditos`); as outras herdam mudanças menores. Topa?"
+> "This route has 4 subpages with ~3 sections each. Two versions = 24 implementations. I suggest a V1 focused on the 2 subpages that deliver the most visual difference (`visao-geral` and `saldo-creditos`); the others inherit smaller changes. Sound good?"
 
-A regra de fundo: prompts externos exagerados (ChatGPT-style, listas de 30 mudanças) quase sempre carregam 70% de busywork. Identifique as 3-4 coisas que importam de verdade e proponha essas. Não suba spec pura sem destilar.
+The underlying rule: over-the-top external prompts (ChatGPT-style, lists of 30 changes) almost always carry 70% busywork. Identify the 3-4 things that really matter and propose those. Don't ship raw spec without distilling it.
 
-### Fase 4 — Implementação
+### Phase 4 — Implementation
 
-Pra cada versão aprovada:
+For each approved version:
 
-1. **Cria a branch.** `git checkout -b ux/<slug>-refinamento` (ou `-reestruturacao`). Sempre a partir do branch atual do usuário, não force `main`.
-2. **Implementa** arquivo por arquivo. Reuse componentes do styleguide; não duplique primitivas.
-3. **Valida ANTES de commitar:**
-   - `npx tsc --noEmit` — tem que passar limpo.
-   - Pra cada rota afetada: `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000<rota>` — espera 200 ou 3xx. Se 500, abre o log do dev server e conserta.
-4. **Stage seletivo.** `git add <arquivo>` pra cada arquivo que VOCÊ tocou. Nunca `git add .` — pode ter agente paralelo ou linter rodando que deixou outras coisas modificadas no working tree.
-5. **Commit descritivo** focando no PORQUÊ, não no o-quê. Estilo: `ux(<slug>): refine hierarchy and copy across all subpages` + bullets explicando a mudança principal por subpágina.
-6. **Não faz merge. Não faz push.** A não ser que o usuário peça explicitamente.
+1. **Create the branch.** `git checkout -b ux/<slug>-refinement` (or `-restructure`). Always from the user's current branch, don't force `main`.
+2. **Implement** file by file. Reuse styleguide components; don't duplicate primitives.
+3. **Validate BEFORE committing:**
+   - `npx tsc --noEmit` — has to pass clean.
+   - For each affected route: `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000<route>` — expect 200 or 3xx. If 500, open the dev server log and fix it.
+4. **Selective staging.** `git add <file>` for each file YOU touched. Never `git add .` — there may be a parallel agent or a linter running that left other things modified in the working tree.
+5. **Descriptive commit** focusing on the WHY, not the what. Style: `ux(<slug>): refine hierarchy and copy across all subpages` + bullets explaining the main change per subpage.
+6. **No merge. No push.** Unless the user explicitly asks.
 
-Repete pra Versão B, voltando primeiro pro branch base (`git checkout <base>`).
+Repeat for Version B, first going back to the base branch (`git checkout <base>`).
 
-### Fase 5 — Preview side-by-side (opcional)
+### Phase 5 — Side-by-side preview (optional)
 
-Pra revisar as duas versões rodando ao mesmo tempo sem trocar branch (especialmente útil quando tem outro agente no Cursor mexendo no main em paralelo), oferecer setup de worktrees:
+To review the two versions running at the same time without switching branches (especially useful when another agent in Cursor is working on main in parallel), offer a worktree setup:
 
 ```bash
-# A partir da raiz do repo:
-git worktree add ../<repo>-refinamento ux/<slug>-refinamento
-git worktree add ../<repo>-reestruturacao ux/<slug>-reestruturacao
+# From the repo root:
+git worktree add ../<repo>-refinement ux/<slug>-refinement
+git worktree add ../<repo>-restructure ux/<slug>-restructure
 
-# Em cada worktree, evita reinstalar node_modules:
-ln -s /caminho/absoluto/do/repo/node_modules <worktree>/node_modules
+# In each worktree, avoid reinstalling node_modules:
+ln -s /absolute/path/to/repo/node_modules <worktree>/node_modules
 
-# Sobe um dev server em cada porta diferente:
-cd ../<repo>-refinamento && PORT=3001 npm run dev
-cd ../<repo>-reestruturacao && PORT=3002 npm run dev
+# Start a dev server on a different port for each:
+cd ../<repo>-refinement && PORT=3001 npm run dev
+cd ../<repo>-restructure && PORT=3002 npm run dev
 ```
 
-Usuário abre `:3001` e `:3002` no browser, vê as duas versões lado a lado. Branch principal e `:3000` ficam livres pro agente paralelo.
+The user opens `:3001` and `:3002` in the browser and sees the two versions side by side. The main branch and `:3000` stay free for the parallel agent.
 
-Quando o usuário terminar de revisar: `git worktree remove <path>` em cada uma.
+When the user is done reviewing: `git worktree remove <path>` on each one.
 
-## Regras (carrega convenções do projeto)
+## Rules (loads the project's conventions)
 
-Aplicar as que existirem neste repo. Padrão pra projetos de preview UI/UX:
+Apply whichever exist in this repo. Default for UI/UX preview projects:
 
-- **Design system é lei.** Decisão visual nunca contraria o styleguide local. Tokens, componentes, spacing — tudo flui de lá.
-- **Nunca crie tokens novos.** Se cor/spacing/radius não existe, use o mais próximo que existe ou pergunta. Proibido: `bg-[#hex]`, `p-[Npx]`, `text-[#hex]`, `gap-[Npx]`. Use `var(--<token>)` ou classes Tailwind dos tokens.
-- **Ordem de busca de componente:** componente do projeto (ex.: `Au*`) → primitiva shadcn (via MCP se disponível) → custom só em último caso. Se vai criar custom, pergunta primeiro.
-- **Referência informa estrutura, não estilo.** Roubar layout do OpenAI ≠ roubar as cores do OpenAI.
-- **Desktop-only** a menos que o repo prove o contrário. Não adicionar `md:` / `lg:` reflows só pra preencher espaço. Não documentar mobile-first se o produto não tem mobile.
-- **`font-mono` é proibido em UI de produto.** Use `tabular-nums` pra números alinhados. Mono só pra código real exibido em bloco.
-- **Tom UX writing:** direto, operacional, presente. "Faturas tentam cobrar nessa ordem" > "As cobranças serão tentadas em ordem". Leia 2-3 strings que já existem no repo antes de escrever novas — copie o tom.
+- **The design system is law.** A visual decision never contradicts the local styleguide. Tokens, components, spacing — everything flows from there.
+- **Never create new tokens.** If a color/spacing/radius does not exist, use the closest one that does or ask. Forbidden: `bg-[#hex]`, `p-[Npx]`, `text-[#hex]`, `gap-[Npx]`. Use `var(--<token>)` or the tokens' Tailwind classes.
+- **Component lookup order:** project component (e.g. `Au*`) → shadcn primitive (via MCP if available) → custom only as a last resort. If you are going to create a custom one, ask first.
+- **The reference informs structure, not style.** Stealing OpenAI's layout ≠ stealing OpenAI's colors.
+- **Desktop-only** unless the repo proves otherwise. Don't add `md:` / `lg:` reflows just to fill space. Don't document mobile-first if the product has no mobile.
+- **`font-mono` is forbidden in product UI.** Use `tabular-nums` for aligned numbers. Mono only for real code displayed in a block.
+- **UX writing tone:** direct, operational, present tense. "Invoices attempt charges in this order" > "Charges will be attempted in order". Read 2-3 strings that already exist in the repo before writing new ones — copy the tone.
 
-## Antipadrões pra rejeitar de cara
+## Antipatterns to reject on sight
 
-Se você se pegar fazendo um destes, pare e reconsidere — quase sempre é a versão errada:
+If you catch yourself doing one of these, stop and reconsider — it's almost always the wrong version:
 
-- **Grids de KPI cards** em telas de billing / usage. Parecem "dashboardy" mas enterram o número que importa. Prefira: número grande + banner único + atalhos flat.
-- **Dois hero cards paralelos** (ex.: "Próxima cobrança" + "Saldo de créditos" com mesmo peso). Um é o hero, o outro é contexto.
-- **Toggles de notificação** quando o usuário quer um feed de atividade recente. Lê a intenção real, não a interface óbvia.
-- **Duplicar a mesma informação** em hero + tile + gráfico. Mostra uma vez no lugar mais alto da hierarquia.
-- **Renomear pastas de showcase legadas** do styleguide. Quebra rotas. Se a convenção mudou, deixe o legado e siga a nova só pros componentes novos.
+- **Grids of KPI cards** on billing / usage screens. They look "dashboardy" but bury the number that matters. Prefer: one big number + a single banner + flat shortcuts.
+- **Two parallel hero cards** (e.g. "Next charge" + "Credit balance" with the same weight). One is the hero, the other is context.
+- **Notification toggles** when the user wants a recent activity feed. Read the real intent, not the obvious interface.
+- **Duplicating the same information** across hero + tile + chart. Show it once, at the highest point in the hierarchy.
+- **Renaming legacy showcase folders** in the styleguide. It breaks routes. If the convention changed, leave the legacy alone and follow the new one only for new components.
 
 ## Edge cases
 
-- **Working tree sujo de outro agente.** Não inclua nos seus commits. `git add <arquivo>` por arquivo. Se você precisar trocar de branch e o agente paralelo está escrevendo, evite trocar — só cria a próxima branch direto do estado atual com `git checkout -b`.
-- **Linter reescreve seu código no meio do trabalho.** Alguns editores rodam format-on-save independente da sua sessão. Releia o arquivo antes do próximo Edit — o que está em disco pode ter mudado depois do seu último Write.
-- **Dev server já rodando.** Não mate. Hot reload pega suas mudanças. Pra ver duas versões simultaneamente, use worktrees (Fase 5).
-- **Mobbin/Dribbble/Behance.** WebFetch falha. Não fique tentando. Pede screenshot ou usa inferência declarada.
-- **Subpáginas que não existem na sidebar mas existem no app router** (ex.: páginas órfãs). `find <app-dir>/<slug> -name "page.tsx"` pra garantir que pegou todas.
-- **A rota é uma redirect** (ex.: `page.tsx` que só faz `redirect("/sub")`). Você quer trabalhar nas subpáginas, não no redirect.
+- **Working tree dirty from another agent.** Don't include it in your commits. `git add <file>` file by file. If you need to switch branches and the parallel agent is writing, avoid switching — just create the next branch straight from the current state with `git checkout -b`.
+- **The linter rewrites your code mid-work.** Some editors run format-on-save independently of your session. Re-read the file before the next Edit — what is on disk may have changed after your last Write.
+- **Dev server already running.** Don't kill it. Hot reload picks up your changes. To see two versions simultaneously, use worktrees (Phase 5).
+- **Mobbin/Dribbble/Behance.** WebFetch fails. Don't keep trying. Ask for a screenshot or use declared inference.
+- **Subpages that don't exist in the sidebar but do exist in the app router** (e.g. orphan pages). `find <app-dir>/<slug> -name "page.tsx"` to make sure you got them all.
+- **The route is a redirect** (e.g. a `page.tsx` that only does `redirect("/sub")`). You want to work on the subpages, not the redirect.

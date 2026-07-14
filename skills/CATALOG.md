@@ -1,12 +1,12 @@
-# Auis Skills — Catálogo
+# Auis Skills — Catalog
 
-> Gerado de `skills/registry.json` (`npm run skills:catalog`). **35 skills.** Fonte única em `skills/<capability>/<name>/`. As pastas de auto-discovery `.claude/skills/` (Claude Code) e `.agents/skills/` (Codex/Cursor) são **geradas** por `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **35 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
-**Legenda:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (genérica/zerada) · ⭐ set recomendado · ◐ tem variante `SKILL.codex.md` · _legacy_ neutralizada.
+**Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
 ## Design System (9)
 
-| Skill | Plataforma | Origem | Tags | O que faz |
+| Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-audit` | 🟣🟠🌐 | cowork | ⭐ | Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app compon |
 | `auis-component` | 🟣🟠🌐 | cowork | ⭐ | Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always check |
@@ -20,7 +20,7 @@
 
 ## UX Flows (7)
 
-| Skill | Plataforma | Origem | Tags | O que faz |
+| Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-create-ux-flow` | 🟣🟠 | repo | — | Builds a UX flow diagram page in the Auis styleguide (/auis/styleguide/ux-flows/[name]) from a flow description, a list of steps, or any written brief |
 | `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Builds a COMPILED, multi-scenario "golden eye" UX flow page in the Auis styleguide (/auis/styleguide/ux-flows/[slug]) — several product journeys merge |
@@ -32,7 +32,7 @@
 
 ## Bridges (review / flow / edit / project) (8)
 
-| Skill | Plataforma | Origem | Tags | O que faz |
+| Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-edit-bridge-solve` | 🟣 | repo | — | Materializes Auis Live Edit Mode overlays into real code. The page editor stores non-destructive edit "ops" (text, style token, variant/size, icon, ic |
 | `auis-flow-bridge` | 🟣🟠 | repo | — | [OBSOLETE] The styleguide UX flow editor went serverless — suggestions now go to a same-origin route (/api/flow-suggestions) that writes to flow-bridg |
@@ -45,20 +45,20 @@
 
 ## Build & Handoff (2)
 
-| Skill | Plataforma | Origem | Tags | O que faz |
+| Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-handoff` | 🟣🟠🌐 | cowork | ⭐ | Converts a Claude Design (or Cloud Design) handoff into production code by remapping the generated output onto Auis/styleguide components first and sh |
 | `auis-project-build-solve` | 🟣🟠 | repo | ◐ | Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the "Atualizar pro design system" button (kind `restyle`) and  |
 
 ## Content / UX Writing (1)
 
-| Skill | Plataforma | Origem | Tags | O que faz |
+| Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-ux-writing` | 🟣🟠 | repo | ⭐ ◐ | Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits |
 
 ## Support (8)
 
-| Skill | Plataforma | Origem | Tags | O que faz |
+| Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `commit` | 🟣🟠 | repo | — | Maps the pending changes and creates local atomic commits — one commit per file/area when it makes sense, without rewriting content inside a file just |
 | `design-system-new-component` | 🟣🟠 | repo | ◐ legacy | [INACTIVE in this repo — do not trigger.] Generic, Au-blind version of "new component", kept only as a record of the Auis initial setup. To add or edi |
@@ -71,7 +71,7 @@
 
 ---
 
-## Set recomendado — núcleo "zerado" (pronto pra qualquer produto)
+## Recommended set — the "zeroed" core (ready for any product)
 
 - `auis-review-bridge-solve`
 - `auis-handoff` 🌐
@@ -82,8 +82,8 @@
 - `auis-page` 🌐
 - `auis-flow` 🌐
 
-As 🌐 (origin `cowork`) são as versões **genéricas publicadas** — preferir para construir do zero. As `repo` são variantes mais ricas (bridges, ux-flow, audit) do uso real. Sobreposições conhecidas: `auis-foundation` 🌐 vs `auis-design-system-foundation`; `auis-component` 🌐 vs `auis-new-component`; `auis-page` 🌐 vs `auis-new-page`; `auis-audit` 🌐 vs `auis-design-system-audit`.
+The 🌐 ones (origin `cowork`) are the **published generic** versions — prefer them when starting from scratch. The `repo` ones are richer variants (bridges, ux-flow, audit) taken from real use. Known overlaps: `auis-foundation` 🌐 vs `auis-design-system-foundation`; `auis-component` 🌐 vs `auis-new-component`; `auis-page` 🌐 vs `auis-new-page`; `auis-audit` 🌐 vs `auis-design-system-audit`.
 
-## Plataformas
+## Platforms
 
-Das 35: 33 em Claude+Codex, 2 só Claude (`auis-edit-bridge-solve`, `auis-review-bridge-dispatch`). 13 têm variante Codex própria (◐).
+Of the 35: 33 on Claude+Codex, 2 Claude-only (`auis-edit-bridge-solve`, `auis-review-bridge-dispatch`). 13 have their own Codex variant (◐).

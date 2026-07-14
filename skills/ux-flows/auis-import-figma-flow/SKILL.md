@@ -7,61 +7,60 @@ description: >
   typed manifest in `app/auis/projects/_data/projects.ts`, and
   activates the "Projetos" card on the hub. The screens become cards with
   the "Atualizar pro design system" and "Construir no repo" buttons. Use
-  when the user asks to "importar flow do Figma" (import a Figma flow),
-  "criar projeto a partir do Figma" (create a project from Figma),
-  "importar Memory Base / Agent Studio", "trazer as telas do Figma pro
-  repo" (bring the Figma screens into the repo), or pastes a figma.com URL
-  with the intent of importing it as a project. Do NOT use for
-  `.awflow.json` → ReactFlow diagram (that is `auis-pg-create-flow`):
-  here the source is a Figma URL and the output is
+  when the user asks to "import a Figma flow", "create a project from
+  Figma", "import Memory Base / Agent Studio", "bring the Figma screens
+  into the repo", or pastes a figma.com URL with the intent of importing it
+  as a project. Do NOT use for `.awflow.json` → ReactFlow diagram (that is
+  `auis-pg-create-flow`): here the source is a Figma URL and the output is
   SCREENSHOTS-as-a-project, not a node diagram.
 ---
 
-# Auis — Importar flow do Figma como projeto
+# Auis — Import a Figma flow as a project
 
-Traz um flow inteiro do Figma pro workbench `/auis/projects`: cada
-tela = um frame renderizado como screenshot, navegável tela-a-tela, com
-ações por tela. O design no Figma costuma estar num **design system
-antigo** — o screenshot é só referência visual; o re-skin/build sempre
-remapeia pros tokens e componentes Au* atuais (ver
+Brings an entire Figma flow into the `/auis/projects` workbench: each
+screen = one frame rendered as a screenshot, navigable screen by screen, with
+per-screen actions. The design in Figma is usually on an **old design
+system** — the screenshot is only a visual reference; the re-skin/build always
+remaps to the current Au* tokens and components (see
 [`auis-project-build-solve`](../auis-project-build-solve/SKILL.md)).
 
-## Pré-requisitos
+## Prerequisites
 
-- Figma MCP autenticado — confirme com `whoami` (`mcp__figma__whoami`).
-- O arquivo precisa estar no **Figma cloud** (o MCP não lê `.fig` local).
-  Se o usuário só tem o `.fig`, peça pra abrir/subir no Figma e mandar a
-  URL de share. O `.fig` é um ZIP com `canvas.fig` em formato kiwi
-  (binário, instável) — não vale a pena parsear; a rota robusta é a URL.
-- `cwebp` disponível (`which cwebp`) pra comprimir os screenshots. Sem
-  ele, caia pra PNG (mais pesado) ou pare e avise.
-- Existe `app/auis/projects/_data/projects.ts` com o tipo `Project`.
-  Se não existir, algo está fora do lugar — pare e avise.
-
----
-
-## Step 1 — Parsear a URL e definir o projeto
-
-Da URL `figma.com/design/:fileKey/:nome?node-id=:a-:b`:
-- `fileKey` = primeiro segmento.
-- `nodeId` = `node-id` com `-` → `:` (ex: `929-29942` → `929:29942`).
-
-⚠️ O node-id que o usuário copia costuma apontar pra um elemento solto
-(um componente, não a página do flow). Confirme que é a **página/seção do
-flow** no Step 2. `get_metadata(fileKey)` SEM nodeId lista páginas, mas
-pode vir incompleto — sempre prefira o node-id do flow direto.
-
-Pergunte (ou infira) `slug` + `title` do projeto (ex: `memory-base` /
-"Memory Base"). O slug não pode colidir com `built` nem com slug
-existente em `PROJECTS`.
+- Figma MCP authenticated — confirm with `whoami` (`mcp__figma__whoami`).
+- The file has to be in the **Figma cloud** (the MCP can't read a local
+  `.fig`). If the user only has the `.fig`, ask them to open/upload it in
+  Figma and send the share URL. The `.fig` is a ZIP with `canvas.fig` in the
+  kiwi format (binary, unstable) — not worth parsing; the robust route is the
+  URL.
+- `cwebp` available (`which cwebp`) to compress the screenshots. Without it,
+  fall back to PNG (heavier) or stop and say so.
+- `app/auis/projects/_data/projects.ts` exists with the `Project` type.
+  If it doesn't, something is out of place — stop and say so.
 
 ---
 
-## Step 2 — Enumerar as telas
+## Step 1 — Parse the URL and define the project
 
-`get_metadata(fileKey, nodeId)` no nó do flow. O subtree é grande →
-costuma exceder o limite e ser salvo num arquivo. Parseie esse arquivo
-(JSON `[{type,text}]` com XML dentro) com Python:
+From the URL `figma.com/design/:fileKey/:nome?node-id=:a-:b`:
+- `fileKey` = first segment.
+- `nodeId` = `node-id` with `-` → `:` (e.g. `929-29942` → `929:29942`).
+
+⚠️ The node-id the user copies usually points at a loose element (a
+component, not the flow's page). Confirm it is the flow's **page/section** in
+Step 2. `get_metadata(fileKey)` WITHOUT a nodeId lists pages, but it may come
+back incomplete — always prefer the flow's node-id directly.
+
+Ask for (or infer) the project's `slug` + `title` (e.g. `memory-base` /
+"Memory Base"). The slug must not collide with `built` nor with an existing
+slug in `PROJECTS`.
+
+---
+
+## Step 2 — Enumerate the screens
+
+`get_metadata(fileKey, nodeId)` on the flow's node. The subtree is large →
+it usually exceeds the limit and gets saved to a file. Parse that file
+(JSON `[{type,text}]` with XML inside) with Python:
 
 ```python
 import json, xml.etree.ElementTree as ET
@@ -70,111 +69,111 @@ xml = "".join(p.get("text","") for p in data if p.get("text","").lstrip().starts
 root = ET.fromstring("<root>"+xml+"</root>")
 ```
 
-- As **seções** (`<section>`) são os agrupadores do flow.
-- As **telas** são os `<frame>` filhos com tamanho de tela (no Memory
-  Base, 1920×1080 — ajuste o filtro pro tamanho do arquivo em mãos).
-- O nome do frame costuma trazer ordem embutida: `... | Tela NN | Área | NN`.
-  Derive `step` ("Tela NN"), `section` (nome da `<section>`), `name`
-  (rótulo limpo, ex. "Homepage 01"), e `order` (ordem de fluxo:
-  step → seção → número).
+- The **sections** (`<section>`) are the flow's groupers.
+- The **screens** are the child `<frame>`s with a screen size (in Memory
+  Base, 1920×1080 — adjust the filter to the size of the file at hand).
+- The frame's name usually carries the order embedded: `... | Tela NN | Área | NN`.
+  Derive `step` ("Tela NN"), `section` (the `<section>`'s name), `name`
+  (clean label, e.g. "Homepage 01"), and `order` (flow order:
+  step → section → number).
 
-**Conte e CONFIRME com o usuário antes do download em massa** (ex: "São
-73 telas em 16 seções, ~1.5 MB em .webp — sigo com tudo, ou um
-subconjunto de seções?"). Permita subset.
+**Count and CONFIRM with the user before the bulk download** (e.g. "That's
+73 screens across 16 sections, ~1.5 MB in .webp — do I go with all of them,
+or a subset of the sections?"). Allow a subset.
 
 ---
 
-## Step 3 — Renderizar e baixar cada tela
+## Step 3 — Render and download each screen
 
-Crie `public/projects/<slug>/`. Pra cada frame:
+Create `public/projects/<slug>/`. For each frame:
 
-1. `get_screenshot(fileKey, frameNodeId, maxDimension=1280)` → devolve uma
-   `image_url` efêmera + `width`/`height`.
-2. Baixe e converta pra webp. Faça em **lotes** (~12-14 `get_screenshot`
-   concorrentes por mensagem, depois um `Bash` que baixa o lote — as URLs
-   são curtas-duração, baixe logo):
+1. `get_screenshot(fileKey, frameNodeId, maxDimension=1280)` → returns an
+   ephemeral `image_url` + `width`/`height`.
+2. Download it and convert to webp. Do it in **batches** (~12-14 concurrent
+   `get_screenshot` calls per message, then a `Bash` that downloads the batch
+   — the URLs are short-lived, download them right away):
 
 ```bash
 B="https://www.figma.com/api/mcp/asset"
 dl(){ curl -fsS -o /tmp/_dl.png "$B/$2" && cwebp -quiet -q 82 /tmp/_dl.png -o "$1.webp" && echo "ok $1" || echo "FAIL $1"; }
-dl <id> <asset-uuid>   # id = nodeId com ":" -> "-"
+dl <id> <asset-uuid>   # id = nodeId with ":" -> "-"
 ```
 
-O `id` (= `figmaNodeId` com `:`→`-`) é o nome do arquivo E a chave da
-tela no manifest. Nunca persista a `image_url` do Figma (efêmera).
+The `id` (= `figmaNodeId` with `:`→`-`) is the file name AND the screen's key
+in the manifest. Never persist Figma's `image_url` (ephemeral).
 
 ---
 
-## Step 4 — Gerar o manifest
+## Step 4 — Generate the manifest
 
-Escreva a entrada `Project` (com `screens[]`, todos `status:"imported"`)
-em `app/auis/projects/_data/projects.ts`. Gere por script pra ficar
-determinístico — uma tabela `(nodeId, name, step, section)` em ordem de
-fluxo, e o script calcula `id`, `order`, `thumbnail`
-(`/projects/<slug>/<id>.webp`), `w/h`. Faça um replace do
-`export const PROJECTS: Project[] = []` (ou append à array se já houver
-projetos). Campos do projeto: `figmaFileKey`, `figmaNodeId`, `figmaUrl`,
-`importedAt`, `updatedAt`.
+Write the `Project` entry (with `screens[]`, all `status:"imported"`) in
+`app/auis/projects/_data/projects.ts`. Generate it by script so it stays
+deterministic — a `(nodeId, name, step, section)` table in flow order, and the
+script computes `id`, `order`, `thumbnail` (`/projects/<slug>/<id>.webp`),
+`w/h`. Replace `export const PROJECTS: Project[] = []` (or append to the array
+if there are already projects). Project fields: `figmaFileKey`, `figmaNodeId`,
+`figmaUrl`, `importedAt`, `updatedAt`.
 
-Depois **verifique** que todo `thumbnail` do manifest tem `.webp`
-correspondente e que não há órfãos.
-
----
-
-## Step 5 — Ativar o card do hub
-
-Em `app/auis/page.tsx`, o item "Projetos" deve estar
-`status: "ready"` (idempotente — se já estiver, pule). É o que troca
-"Indisponível" por "Abrir".
+Then **verify** that every `thumbnail` in the manifest has a matching `.webp`
+and that there are no orphans.
 
 ---
 
-## Step 6 — Validação
+## Step 5 — Activate the hub card
+
+In `app/auis/page.tsx`, the "Projetos" item must be
+`status: "ready"` (idempotent — if it already is, skip). That's what swaps
+"Indisponível" for "Abrir".
+
+---
+
+## Step 6 — Validation
 
 ```bash
 npm run typecheck
 ```
 
-O dev server local normalmente já roda em `127.0.0.1:3000` — **não suba um
-segundo** (Next 16 bloqueia). Verifique por HTTP (ou peça pro usuário
-abrir no browser dele):
+The local dev server usually already runs on `127.0.0.1:3000` — **don't start
+a second one** (Next 16 blocks it). Check over HTTP (or ask the user to open
+it in their own browser):
 
-- `/auis` → card Projetos ativo (link `/auis/projects`).
-- `/auis/projects` → card do projeto com "<N> telas".
-- `/auis/projects/<slug>` → telas agrupadas por seção (confira a
-  contagem de blocos de seção) + screenshots carregando.
+- `/auis` → Projetos card active (link `/auis/projects`).
+- `/auis/projects` → the project's card with "<N> telas".
+- `/auis/projects/<slug>` → screens grouped by section (check the count of
+  section blocks) + screenshots loading.
 - `GET /projects/<slug>/<id>.webp` → 200 `image/webp`.
 
-**Não commite** — deixe o `git diff` pro usuário.
+**Don't commit** — leave the `git diff` to the user.
 
 ---
 
-## Output esperado
+## Expected output
 
 ```md
-Projeto importado: <title>
-Rota: /auis/projects/<slug>
-Telas: <N> em <S> seções · <tamanho> em .webp
-Fonte: figma.com/design/<fileKey> (node <figmaNodeId>)
+Project imported: <title>
+Route: /auis/projects/<slug>
+Screens: <N> across <S> sections · <size> in .webp
+Source: figma.com/design/<fileKey> (node <figmaNodeId>)
 
-Arquivos:
-- app/auis/projects/_data/projects.ts (entrada do projeto)
+Files:
+- app/auis/projects/_data/projects.ts (project entry)
 - public/projects/<slug>/*.webp (<N> screenshots)
-- app/auis/page.tsx (card "Projetos" -> ready, se 1º projeto)
+- app/auis/page.tsx (card "Projetos" -> ready, if it is the 1st project)
 
-Validação: typecheck passed · rotas 200
+Validation: typecheck passed · routes 200
 ```
 
 ---
 
-## O que NÃO fazer
+## What NOT to do
 
-- **Não hotlinkar** a `image_url` do Figma — é efêmera; sempre baixe.
-- **Não parsear o `.fig` local** — formato kiwi instável; use a URL.
-- **Não construir/re-skinar telas aqui** — import só renderiza +
-  manifesta. Build é `auis-project-build-solve`.
-- **Não renomear ids** — `id`/`figmaNodeId` são chaves estáveis (arquivo,
-  store, builtRoute). Mantenha o `nodeId` do Figma.
-- **Não criar tokens novos** (regra do `AGENTS.md`).
-- **Não usar slug `built`** (colide com a rota das telas construídas).
-- **Não commitar.**
+- **Don't hotlink** Figma's `image_url` — it's ephemeral; always download it.
+- **Don't parse the local `.fig`** — unstable kiwi format; use the URL.
+- **Don't build/re-skin screens here** — the import only renders +
+  manifests. Building is `auis-project-build-solve`.
+- **Don't rename ids** — `id`/`figmaNodeId` are stable keys (file, store,
+  builtRoute). Keep Figma's `nodeId`.
+- **Don't create new tokens** (`AGENTS.md` rule).
+- **Don't use the slug `built`** (it collides with the route of the built
+  screens).
+- **Don't commit.**
