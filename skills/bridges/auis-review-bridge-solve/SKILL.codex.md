@@ -165,7 +165,7 @@ curl -s -X PUT "$BRIDGE_URL/comments/$ID" \
 The response must include `resolution.summary` in the format:
 
 ```
-Resolvido por Claude em DD/MM/YYYY às HH:MM:SS.
+Resolved by Claude on DD/MM/YYYY at HH:MM:SS.
 ```
 
 Note the id+summary to put in the final summary.

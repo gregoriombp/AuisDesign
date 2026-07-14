@@ -32,7 +32,7 @@ flow has no cross-flow jumps.)
 ### Always the rich `<FlowDiagram>` board — never a simpler diagram
 
 The diagram is **always** `<FlowDiagram>` — the shared rich board that carries
-fullscreen ("Tela cheia"), Comentar, Sugerir edição, the suggestions badge, and
+fullscreen ("Fullscreen"), Comment, Suggest edit, the suggestions badge, and
 the side-drawer prototype preview (see the next section). This is the same board
 the login flow uses. **Do not** hand-roll a bare `<ReactFlow>` or a stripped-down
 canvas per page — every flow inherits the full toolset for free by rendering
@@ -47,13 +47,13 @@ Every interactive feature of the flow diagram lives **inside `<FlowDiagram>`**,
 not in the page. A page that renders `<FlowDiagram flow="…" nodes={…} edges={…} />`
 automatically inherits all of these — you do **not** wire them per page:
 
-- **Comentar** — FigJam-style comment markers. Each comment goes to the
+- **Comment** — FigJam-style comment markers. Each comment goes to the
   review-bridge tagged `origin: "ux-flow"` and shows in Review Mode with a
   **"UX Flow"** chip.
-- **Sugerir edição** — opens edit mode; "Salvar" POSTs the edited graph to the
+- **Suggest edit** — opens edit mode; "Save" POSTs the edited graph to the
   serverless route `/api/flow-suggestions` (no server, no token). Suggestions
   are applied later via the `auis-flow-bridge-solve` skill.
-- **Tela cheia** — fullscreen toggle (CSS overlay, ESC to exit).
+- **Fullscreen** — fullscreen toggle (CSS overlay, ESC to exit).
 - **Sub-flow expansion** — a `crossflow` diamond whose `href` points at another
   expandable ux-flow opens that flow inline.
 - **Suggestions badge** — count of open suggestions, top-right.
@@ -184,7 +184,7 @@ new node types.
 
 Data shape: `{ step: string; title: string; href: string; note?: string }`
 
-- `step`: label shown as eyebrow — use `"entrada"`, `"01"`, `"02a"`, `"→ plataforma"`, etc.
+- `step`: label shown as eyebrow — use `"entry"`, `"01"`, `"02a"`, `"→ flow"`, etc.
 - `title`: short screen name (≤ 4 words)
 - `href`: route to the prototype screen, or `#` if no prototype yet.
 - `note`: one short sentence about the screen's purpose (optional but recommended)
@@ -197,8 +197,8 @@ ReactFlow's pointer handling tends to swallow); flow pages don't need
 to do anything beyond filling `href` correctly.
 
 - Internal route (`/inicio`, `/primeiro-acesso/perfil`, …) → loaded in the iframe.
-- `#` or empty string → drawer shows a "Sem protótipo ainda" placeholder.
-- External URL (`https://…`) → drawer offers an "Abrir em nova aba" button instead of the iframe.
+- `#` or empty string → drawer shows a "No prototype yet" placeholder.
+- External URL (`https://…`) → drawer offers an "Open in a new tab" button instead of the iframe.
 - `cmd/ctrl-click` on an internal route opens it in a new tab — plain click opens the drawer.
 
 So: **prefer real internal routes over `#`** whenever a prototype exists.
@@ -223,7 +223,7 @@ Data shape: `{ step: string; title: string; question: string }`
 Use this **only** when the path leaves THIS flow and enters ANOTHER styleguide
 flow (e.g. login → primeiro-acesso). Renders as a purple diamond (rotated
 square), visually distinct from screen cards and decision boxes. Clicking it
-opens a confirmation modal ("Ir para outro fluxo?") and only navigates on
+opens a confirmation modal ("Go to another flow?") and only navigates on
 confirm.
 
 Data shape (same as `screen`): `{ step: string; title: string; href: string; note?: string }`

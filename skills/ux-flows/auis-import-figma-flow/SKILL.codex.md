@@ -5,8 +5,8 @@ description: >
   `/auis/projects` — enumerates the frames via the Figma MCP,
   renders each screen as a screenshot (.webp in /public), generates the
   typed manifest in `app/auis/projects/_data/projects.ts`, and
-  activates the "Projetos" card on the hub. The screens become cards with
-  the "Atualizar pro design system" and "Construir no repo" buttons. Use
+  activates the "Projects" card on the hub. The screens become cards with
+  the "Restyle with the design system" and "Build in repo" buttons. Use
   when the user asks to "import a Figma flow", "create a project from
   Figma", "import Onboarding / Checkout", "bring the Figma screens
   into the repo", or pastes a figma.com URL with the intent of importing it
@@ -121,9 +121,9 @@ and that there are no orphans.
 
 ## Step 5 — Activate the hub card
 
-In `app/auis/page.tsx`, the "Projetos" item must be
+In `app/auis/page.tsx`, the "Projects" item must be
 `status: "ready"` (idempotent — if it already is, skip). That's what swaps
-"Indisponível" for "Abrir".
+"Unavailable" for "Open".
 
 ---
 
@@ -137,8 +137,8 @@ The LAN dev server usually already runs on `:3000` — **don't start
 a second one** (Next 16 blocks it). Check over HTTP (or ask the user to open
 it in their own browser):
 
-- `/auis` → Projetos card active (link `/auis/projects`).
-- `/auis/projects` → the project's card with "<N> telas".
+- `/auis` → Projects card active (link `/auis/projects`).
+- `/auis/projects` → the project's card with "<N> screens".
 - `/auis/projects/<slug>` → screens grouped by section (check the count of
   section blocks) + screenshots loading.
 - `GET /projects/<slug>/<id>.webp` → 200 `image/webp`.
@@ -158,7 +158,7 @@ Source: figma.com/design/<fileKey> (node <figmaNodeId>)
 Files:
 - app/auis/projects/_data/projects.ts (project entry)
 - public/projects/<slug>/*.webp (<N> screenshots)
-- app/auis/page.tsx (card "Projetos" -> ready, if it is the 1st project)
+- app/auis/page.tsx (card "Projects" -> ready, if it is the 1st project)
 
 Validation: typecheck passed · routes 200
 ```

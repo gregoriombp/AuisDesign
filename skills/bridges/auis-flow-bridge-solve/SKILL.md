@@ -153,7 +153,7 @@ curl -s -X PUT "http://localhost:3000/api/flow-suggestions/$ID" \
 ```
 
 The response includes `resolution.summary` in the format:
-`Em revisão por Claude em DD/MM/YYYY às HH:MM:SS.`
+`In review by Claude on DD/MM/YYYY at HH:MM:SS.`
 
 ### 5. Final summary
 
@@ -166,7 +166,7 @@ The response includes `resolution.summary` in the format:
    - abc12345 · primeiro-acesso · reason
 
 ▶ Open /auis/styleguide/ux-flows/<flow> and click the amber badge
-  ("N sugestões") to approve (apply) or reject (goes back to open).
+  ("N suggestions") to approve (apply) or reject (goes back to open).
 ```
 
 ---
@@ -246,6 +246,6 @@ for s in d['suggestions']:
 |---|---|---|
 | route does not respond / `ECONNREFUSED` | dev server (`npm run dev`) is down | start the dev server, or edit `flow-bridge/data/suggestions.json` directly |
 | `404` on a transition | suggestion already archived/deleted | skip it in the batch |
-| `400 transition inválida` | `transition` missing/wrong in the body | use only `in_review` \| `apply` \| `discard` \| `reject` |
+| `400 Invalid transition` | `transition` missing/wrong in the body | use only `in_review` \| `apply` \| `discard` \| `reject` |
 | 0 suggestions returned | filter too restrictive | drop `flow=` and look at the full listing first |
 | Diff too complicated for one batch | abort the batch, slice it by flow, ask for confirmation | "I'll apply only flow X's first, ok?" |

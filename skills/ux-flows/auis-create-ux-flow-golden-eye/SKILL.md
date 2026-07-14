@@ -6,7 +6,7 @@ description: >
   merged into ONE deduped ReactFlow graph with per-scenario focus lenses. Shared
   screens collapse to a single card carrying one colored dot per owning scenario
   (2+ dots = shared); a lens grays out everything outside the focused scenario
-  and draws its band; clicking a card opens the real screen in a modal; Comentar
+  and draws its band; clicking a card opens the real screen in a modal; Comment
   mode posts notes to /api/flow-suggestions; plus fullscreen, draggable nodes,
   and the updates changelog. Modeled on the poc-visao-global page — self-contained
   raw ReactFlow, NOT the shared <FlowDiagram>. Use when the user wants a global or
@@ -50,7 +50,7 @@ app/auis/styleguide/ux-flows/poc-visao-global/page.tsx
 **Read it before writing anything.** It is the source of truth and the working
 contract for every piece below: node renderers (`ScreenNode`, `DecisionNode`,
 `SectionNode`), the 4-side handles, edge styles, the lens/dimming engine,
-`focusBand`, the click-to-open modal with variant tabs, the Comentar composer
+`focusBand`, the click-to-open modal with variant tabs, the Comment composer
 wired to `/api/flow-suggestions`, fullscreen, and draggable-node persistence.
 **Copy from it and adapt** — do not re-derive these blocks from memory.
 
@@ -68,7 +68,7 @@ the fullest single-path example is `login-auth/page.tsx` — skim it too.
 | Shared screens | n/a | **deduped** — one card, one dot per scenario |
 | Lens / focus | none | **per-scenario lens** (dim + band) |
 | Card click | side **drawer** (`AuSheet` + iframe) | **modal** (iframe, variant tabs) |
-| Comentar / fullscreen / changelog | yes (via board) | yes (authored on the page) |
+| Comment / fullscreen / changelog | yes (via board) | yes (authored on the page) |
 
 If the user describes a single linear path, stop and use
 `auis-create-ux-flow`. Use this skill only when the value is in **seeing
@@ -296,12 +296,12 @@ record so the controlled graph doesn't snap cards back (copy the POC's handler).
 
 **6b — Click-to-open modal.** `onNodeClick` (when not in comment mode): for a
 `screen` with `href`/`variants`, open a modal with an `iframe` to the route.
-Multi-variant cards render a tab per state + an "Abrir em nova aba ↗". The modal
+Multi-variant cards render a tab per state + an "Open in a new tab ↗". The modal
 is ≥768px wide so the **desktop-only** product renders correctly. Copy the modal
 block verbatim.
 
-**6c — Comentar mode → `/api/flow-suggestions`.** A bottom-center `Mover /
-Comentar` toolbar. In Comentar mode a card click opens a composer; "Enviar"
+**6c — Comment mode → `/api/flow-suggestions`.** A bottom-center `Move /
+Comment` toolbar. In Comment mode a card click opens a composer; "Send"
 POSTs to the **same-origin** route and the note lands in the queue the
 `auis-flow-bridge-solve` skill reads. Copy the composer + the load
 `useEffect` + `sendComment`, and change **exactly two things**:
@@ -389,7 +389,7 @@ export default function [Name]GoldenEyePage() {
         <Section
           id="flow"
           title="Compiled flowchart"
-          lead="2+ dots on a card = a screen shared between scenarios. The lens grays out whatever sits outside the focused scenario and draws its band. In Mover mode: drag the cards and click one to open the real screen. In Comentar mode: click a card to leave a note. Tela cheia button in the corner."
+          lead="2+ dots on a card = a screen shared between scenarios. The lens grays out whatever sits outside the focused scenario and draws its band. In Move mode: drag the cards and click one to open the real screen. In Comment mode: click a card to leave a note. Fullscreen button in the corner."
         >
           {/* focus chips, legend, then the ReactFlow block with Panels — copy from POC */}
         </Section>
@@ -471,7 +471,7 @@ npm run typecheck    # must pass — no TS errors
 
 If the dev server is up, open the page and confirm: the graph fits on load, the
 lens chips dim/undim and draw the band, a card click opens the modal iframe,
-Comentar posts a note, dragging persists, and fullscreen toggles.
+Comment posts a note, dragging persists, and fullscreen toggles.
 
 ---
 
@@ -490,7 +490,7 @@ Comentar posts a note, dragging persists, and fullscreen toggles.
       labels dropped, `focusBand` drawn; dragging persists via `positions`
 - [ ] Click-to-open modal (iframe ≥768, variant tabs, open-in-new-tab); `href`
       is a real internal route where a prototype exists, else `#`
-- [ ] Comentar: `flow` **equals the folder slug** in GET and POST; node tag `ge`
+- [ ] Comment: `flow` **equals the folder slug** in GET and POST; node tag `ge`
       identical in the POST description and the parse regex
 - [ ] Changelog wired: imports from `../_components/flow-updates`, `updates[]`
       seeded with a "new-page" entry dated today, `FlowUpdatesBadge` in `trailing`,

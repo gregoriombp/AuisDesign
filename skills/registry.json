@@ -129,7 +129,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": true,
-      "description": "Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the \"Atualizar pro design system\" button (kind `restyle`) and the \"Construir no repo\" button (kind `build`) write requests to `/api/"
+      "description": "Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the \"Restyle with the design system\" button (kind `restyle`) and the \"Build in repo\" button (kind `build`) write requests to `/api/p"
     },
     {
       "name": "auis-ux-writing",

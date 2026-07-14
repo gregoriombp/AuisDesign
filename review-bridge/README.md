@@ -141,7 +141,7 @@ Response:
     "resolution": {
       "actor": { "kind": "agent", "id": "claude", "name": "Claude" },
       "at": 1779800744000,
-      "summary": "Resolvido por Claude em 20/05/2026 às 16:05:44."
+      "summary": "Resolved by Claude on 20/05/2026 at 16:05:44."
     },
     ...
   }
@@ -151,7 +151,7 @@ Response:
 The `resolution.summary` field is **always** a string in the format:
 
 ```
-Resolvido por <name> em DD/MM/YYYY às HH:MM:SS.
+Resolved by <name> on DD/MM/YYYY at HH:MM:SS.
 ```
 
 Agents that read this JSON later will know exactly who claimed to resolve it and when. Use the server timezone (the clock of the machine running Next).
@@ -206,15 +206,15 @@ in short instructions like "remove this":
     "target": {
       "tag": "button",
       "role": "button",
-      "label": "Salvar",
-      "text": "Salvar",
+      "label": "Save",
+      "text": "Save",
       "selector": "body > main:nth-of-type(1) > ...",
-      "fingerprint": { "tag": "button", "text": "Salvar" },
-      "attributes": { "type": "button", "ariaLabel": "Salvar" },
+      "fingerprint": { "tag": "button", "text": "Save" },
+      "attributes": { "type": "button", "ariaLabel": "Save" },
       "rect": { "x": 420, "y": 216, "width": 88, "height": 32 },
       "pointer": { "fx": 0.48, "fy": 0.52 }
     },
-    "nearbyText": ["Cancelar", "Salvar alterações"]
+    "nearbyText": ["Cancel", "Save changes"]
   }
 }
 ```
@@ -239,7 +239,7 @@ v3 format — this section is historical. What changed:
      "resolution": {
        "actor": { "kind": "user", "id": "legacy", "name": "Alex" },
        "at": 1779...,
-       "summary": "Resolvido por Alex em DD/MM/YYYY às HH:MM:SS."
+       "summary": "Resolved by Alex on DD/MM/YYYY at HH:MM:SS."
      }
    }
    ```

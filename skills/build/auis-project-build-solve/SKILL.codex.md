@@ -2,8 +2,8 @@
 name: auis-project-build-solve
 description: >
   Fulfills, in bulk, the per-screen action requests from the
-  `/auis/projects` workbench — the "Atualizar pro design system"
-  button (kind `restyle`) and the "Construir no repo" button (kind
+  `/auis/projects` workbench — the "Restyle with the design system"
+  button (kind `restyle`) and the "Build in repo" button (kind
   `build`) write requests to `/api/project-builds` (stored in
   `flow-bridge/data/project-builds.json`). This skill reads the requests
   (with a filter), MAKES A PLAN and waits for approval, then: for
@@ -106,7 +106,7 @@ side-by-side preview, depending on the request.
 3. **Update the manifest** (`_data/projects.ts`) on the matching screen:
    `status: "built"` (or `"restyled"`) + `builtRoute`. The manifest is the
    durable state; the API is only the queue. The manifest is what makes the
-   card show the "No repo" pill + "Ver no repo".
+   card show the "In repo" pill + "View in repo".
 
 If the user rejects it later, they resolve it from the inbox/`discard` — don't
 undo it automatically.
@@ -120,7 +120,7 @@ npm run typecheck
 ```
 
 Confirm over HTTP: the `builtRoute` answers 200, and the screen's card in the
-viewer now shows the "No repo" pill linking to it. **Don't commit.**
+viewer now shows the "In repo" pill linking to it. **Don't commit.**
 
 ---
 

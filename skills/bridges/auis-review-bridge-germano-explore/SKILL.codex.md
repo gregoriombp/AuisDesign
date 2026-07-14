@@ -320,7 +320,7 @@ Pass a selector/logic to find the element you want to pin:
 ```
 
 > To find the element without a ready-made CSS selector, locate it by text inside the
-> evaluate (e.g. `[...document.querySelectorAll('button')].find(b => /Exportar/.test(b.textContent))`)
+> evaluate (e.g. `[...document.querySelectorAll('button')].find(b => /Export/.test(b.textContent))`)
 > and run the capture on it. Save the resulting JSON at `/tmp/germano-cap.json`.
 > **Important:** the pin anchors to the coordinate/scroll of the moment — pin the screen in
 > the state where the problem shows up (modal open, right tab, etc.).
