@@ -1,14 +1,15 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **36 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **38 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
-## Design System (9)
+## Design System (10)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-audit` | 🟣🟠🌐 | cowork | ⭐ | Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app compon |
+| `auis-brand` | 🟣🟠 | repo | ⭐ | Establishes a product's brand identity — the app name, the logo/mark, and the one-line positioning — and wires them into the app. Reads the welcome in |
 | `auis-component` | 🟣🟠🌐 | cowork | ⭐ | Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always check |
 | `auis-design-system-audit` | 🟣🟠 | repo | — | Audit the Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage. |
 | `auis-design-system-foundation` | 🟣🟠 | repo | — | Bootstrap or update the Auis design system foundation from a visual reference. This is the only skill allowed to create or change tokens. |
@@ -43,12 +44,13 @@
 | `auis-review-bridge-germano-explore` | 🟣🟠 | repo | ◐ | You are GERMANO FACCIO on PROACTIVE PATROL — an extremely critical UI/UX designer with a taste for premium/minimalist interfaces (Vercel, ElevenLabs,  |
 | `auis-review-bridge-solve` | 🟣🟠 | repo | ⭐ ◐ | Resolves Auis Review Mode comments in bulk. Reads from the local review-bridge using a filter chosen by the user (all of them, only today's, only open |
 
-## Build & Handoff (2)
+## Build & Handoff (3)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-handoff` | 🟣🟠🌐 | cowork | ⭐ | Converts a Claude Design (or Cloud Design) handoff into production code by remapping the generated output onto Auis/styleguide components first and sh |
 | `auis-project-build-solve` | 🟣🟠 | repo | ◐ | Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the "Restyle with the design system" button (kind `restyle`) a |
+| `auis-setup` | 🟣🟠 | repo | ⭐ | The guided first-run orchestrator the welcome screen points at. It does NOT create tokens, voice, or brand itself — it SEQUENCES the three creator ski |
 
 ## Content / UX Writing (2)
 
@@ -76,9 +78,11 @@
 
 - `auis-review-bridge-solve`
 - `auis-handoff` 🌐
+- `auis-setup`
 - `auis-ux-writing`
 - `auis-voice`
 - `auis-audit` 🌐
+- `auis-brand`
 - `auis-component` 🌐
 - `auis-foundation` 🌐
 - `auis-page` 🌐
@@ -88,4 +92,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 36: 34 on Claude+Codex, 2 Claude-only (`auis-edit-bridge-solve`, `auis-review-bridge-dispatch`). 13 have their own Codex variant (◐).
+Of the 38: 36 on Claude+Codex, 2 Claude-only (`auis-edit-bridge-solve`, `auis-review-bridge-dispatch`). 13 have their own Codex variant (◐).

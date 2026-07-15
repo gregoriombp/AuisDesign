@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-07-14",
-  "count": 36,
+  "generated": "2026-07-15",
+  "count": 38,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -132,6 +132,19 @@
       "description": "Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the \"Restyle with the design system\" button (kind `restyle`) and the \"Build in repo\" button (kind `build`) write requests to `/api/p"
     },
     {
+      "name": "auis-setup",
+      "capability": "build",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "The guided first-run orchestrator the welcome screen points at. It does NOT create tokens, voice, or brand itself — it SEQUENCES the three creator skills, in order, checking in with the user between each: auis-brand (nam"
+    },
+    {
       "name": "auis-ux-writing",
       "capability": "content",
       "origin": "repo",
@@ -169,6 +182,19 @@
       "legacy": false,
       "divergent": false,
       "description": "Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app components, shadcn/ui primitives, wrapped components, and page-local compone"
+    },
+    {
+      "name": "auis-brand",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": true,
+      "legacy": false,
+      "divergent": false,
+      "description": "Establishes a product's brand identity — the app name, the logo/mark, and the one-line positioning — and wires them into the app. Reads the welcome intake written by the /auis/welcome form (app/auis/_data/brand.runtime.j"
     },
     {
       "name": "auis-component",
