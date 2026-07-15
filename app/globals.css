@@ -3382,3 +3382,86 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* ============================================================
+ * Auis welcome — first-run brand setup (/auis/welcome) and the
+ * soft-gate card on the hub. Tokens only, light/dark aware.
+ * ============================================================ */
+
+/* Soft-gate card at the top of the hub, shown until the brand is configured. */
+.auis-welcome-gate {
+  border-color: var(--border-strong);
+  background: var(--bg-raised);
+}
+
+.auis-welcome-gate__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  color: var(--fg-primary);
+}
+
+/* Logo upload row on the welcome form. */
+.auis-welcome-upload {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auis-welcome-upload__preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.auis-welcome-upload__img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Success handoff — the copy-the-command panel. */
+.auis-welcome-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--au-emerald-100);
+  color: var(--au-emerald-600);
+}
+
+.auis-welcome-command {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 0.625rem 0.625rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.auis-welcome-command__text {
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  color: var(--fg-primary);
+  overflow-x: auto;
+  white-space: nowrap;
+}

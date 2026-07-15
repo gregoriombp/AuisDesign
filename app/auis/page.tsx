@@ -4,6 +4,11 @@ import { AuPill } from "@/components/ui/AuPill"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuLogo } from "@/components/ui/AuLogo"
 import { Icon } from "@/components/ui/Icon"
+import { getBrand } from "@/app/auis/_data/brand"
+
+// The soft gate reads the runtime brand overlay, which changes after build —
+// render on demand so it reflects the current setup state, never a stale cache.
+export const dynamic = "force-dynamic"
 
 type HubSection = {
   title: string
@@ -56,7 +61,9 @@ const sections: HubSection[] = [
   },
 ]
 
-export default function AuisHub() {
+export default async function AuisHub() {
+  const brand = await getBrand()
+
   return (
     <main className="min-h-screen bg-(--bg-canvas) text-(--fg-primary)">
       <div className="max-w-5xl mx-auto px-8 py-16">
@@ -70,6 +77,36 @@ export default function AuisHub() {
             without going through Figma.
           </p>
         </header>
+
+        {!brand.configured && (
+          <section className="mb-10">
+            <Link href="/auis/welcome" className="no-underline">
+              <AuCard
+                interactive
+                className="auis-welcome-gate p-6 flex items-center gap-5"
+                style={{ borderRadius: "var(--radius-2xl)" }}
+              >
+                <span className="auis-welcome-gate__icon">
+                  <Icon name="waving_hand" size={26} fill={1} />
+                </span>
+                <div className="flex flex-col gap-1 flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold m-0">
+                      Welcome — set up your brand
+                    </h2>
+                    <AuPill variant="draft">Setup</AuPill>
+                  </div>
+                  <p className="text-sm text-(--fg-secondary) leading-relaxed m-0">
+                    Name your project, say what it does, and upload a logo. Then
+                    run <code>/auis-setup</code> in your agent to build the design
+                    system.
+                  </p>
+                </div>
+                <Icon name="arrow_forward" size={22} className="text-(--fg-tertiary)" />
+              </AuCard>
+            </Link>
+          </section>
+        )}
 
         <section className="mb-10">
           <h2 className="text-xl font-semibold tracking-tight mb-3">Your projects</h2>
@@ -91,15 +128,17 @@ export default function AuisHub() {
                     variant="mark"
                     height={30}
                     style={{ color: "#ffffff" }}
+                    brand={brand}
                   />
                 </span>
                 <div className="flex flex-col gap-1">
                   <h2 className="text-2xl font-semibold tracking-tight text-(--fg-on-inverse)">
-                    Auis
+                    {brand.name}
                   </h2>
                   <p className="text-sm text-white/70 leading-relaxed max-w-xl">
-                    Agent-powered sales platform — open the product to explore the
-                    dashboard, conversations, channels and settings.
+                    {brand.configured && brand.tagline
+                      ? brand.tagline
+                      : "Open the product to explore its pages, flows and design system."}
                   </p>
                 </div>
               </div>
