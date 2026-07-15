@@ -56,7 +56,7 @@ export const AuStatCard = React.forwardRef<HTMLDivElement, AuStatCardProps>(
           {value}
         </div>
         {hint && (
-          <div className="text-(length:--body-xs-size) leading-[1.45] text-fg-tertiary">
+          <div className="body-xs text-fg-tertiary">
             {hint}
           </div>
         )}
