@@ -1,22 +1,13 @@
 ---
 name: auis-project-build-solve
 description: >
-  Fulfills, in bulk, the per-screen action requests from the
-  `/auis/projects` workbench — the "Restyle with the design system"
-  button (kind `restyle`) and the "Build in repo" button (kind
-  `build`) write requests to `/api/project-builds` (stored in
-  `flow-bridge/data/project-builds.json`). This skill reads the requests
-  (with a filter), MAKES A PLAN and waits for approval, then: for
-  `build`, rebuilds the screen as a real page using Au* components and
-  current tokens (backed by `auis-new-page`), using Figma's
-  `get_design_context` as reference; for `restyle`, produces a preview in
-  the current DS. It stamps each request `in_review`/`apply` with
-  `actor {kind:"agent",id:"claude",name:"Claude"}` + `builtRoute`, and
-  updates the manifest. Use when the user asks to "resolve the project
-  builds", "build the requested screens", "apply the requests for a
-  project", or "take the build requests and resolve them". Do NOT use it
-  for importing (that is `auis-import-figma-flow`) nor for UX Flow
-  suggestions (that is `auis-flow-bridge-solve`).
+  Resolves filtered restyle and build requests from the /auis/projects
+  workbench. Plans once and waits for approval; build creates a real page from
+  Au components and current tokens using Figma context, while restyle produces
+  a design-system preview. Updates the manifest and returns each request for
+  user review. Use for "resolve the project builds", "build the requested
+  screens", "apply this project's requests", or "process the build queue".
+  Do not use for Figma-flow import or UX Flow suggestions.
 ---
 
 # Auis — Resolve the projects' build/restyle requests

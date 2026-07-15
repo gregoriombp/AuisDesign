@@ -2,7 +2,7 @@
 name: auis-flow-bridge-solve
 description: >
   Reads and applies UX flow edit suggestions stored in the flow-bridge
-  (`/auis/styleguide/ux-flows/<flow>`). Pulls from the bridge using a
+  (`/auis/styleguide/ux-flows/[flow]`). Pulls from the bridge using a
   filter chosen by the user (all of them, only one flow, only open ones, a
   specific ID, etc.), makes ONE PLAN BEFORE touching any code, waits for the
   user's approval, edits the canonical `NODES`/`EDGES` of the flow's page,
@@ -10,7 +10,7 @@ description: >
   `actor: { kind: "agent", id: "claude", name: "Claude" }` — the user then
   approves (apply) or rejects it from the page's inbox. Use whenever the
   user asks for "/auis-flow-bridge-solve", "evaluate suggestion X of flow Y",
-  "apply the open suggestions for login-auth", "take today's suggestions and
+  "apply the open suggestions for example", "take today's suggestions and
   resolve them", "look at what's in the flow-bridge", or variations. Do not
   use it to start the server — for that, see `auis-flow-bridge`.
 ---
@@ -84,7 +84,7 @@ the transition). If it is down, edit the JSON directly (change `status` to
 | "the open ones" / "open" | `status=open` |
 | "the ones in review" / "in_review" | `status=in_review` (but do NOT touch them — just list) |
 | "today's" | `status=open` + filter `createdAt >= today's local midnight` |
-| "the ones on flow login-auth" | `status=open&flow=login-auth` |
+| "the ones on flow example" | `status=open&flow=example` |
 | "suggestion `abc12345`" / "id `abc12345`" | direct GET by id |
 
 ### 2. Fetch and prioritize
@@ -103,10 +103,10 @@ block (you read that flow's `page.tsx` only once).
 For each suggestion in scope, build one line:
 
 ```
-- abc12345 · flow:login-auth · "first 60 chars of the description..."
+- abc12345 · flow:example · "first 60 chars of the description..."
   diff vs canonical: <N nodes added, M edges, K nodes edited>
   proposal: <what you are going to apply in page.tsx, in 1 line>
-  files: app/auis/styleguide/ux-flows/login-auth/page.tsx
+  files: app/auis/styleguide/ux-flows/example/page.tsx
   confidence: high | medium | low
   action: apply | skip (reason)
 ```
@@ -159,11 +159,11 @@ The response includes `resolution.summary` in the format:
 
 ```
 ✅ N applied (in review in each flow's inbox):
-   - abc12345 · login-auth · 1 line on what was done
+   - abc12345 · example · 1 line on what was done
    ...
 
 ⏭️ K skipped:
-   - abc12345 · primeiro-acesso · reason
+   - abc12345 · checkout-review · reason
 
 ▶ Open /auis/styleguide/ux-flows/<flow> and click the amber badge
   ("N suggestions") to approve (apply) or reject (goes back to open).
@@ -216,7 +216,7 @@ print(json.dumps({'count': len(hoje), 'ids': [s['id'] for s in hoje]}, indent=2)
 ### Everything open on a flow
 
 ```bash
-curl -s "http://localhost:3000/api/flow-suggestions?status=open&flow=login-auth"
+curl -s "http://localhost:3000/api/flow-suggestions?status=open&flow=example"
 ```
 
 ### A specific suggestion

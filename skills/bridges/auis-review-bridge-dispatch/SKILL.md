@@ -1,24 +1,14 @@
 ---
 name: auis-review-bridge-dispatch
 description: >
-  The /loop dispatcher for the Auis Review Bridge — the "motor" that turns
-  comments into live agent commands. One pass = read the dispatch queue
-  (`/api/review-bridge/dispatch-queue`): OPEN, user-authored comments that
-  @mention an agent the user ENABLED in the floating Auis dot, already gated
-  by the double-lock (Live Response = reply only; Auto Construct + `#now` = act).
-  For each item it routes by agent and mode: @Claude respond → replies in-thread;
-  @Claude act (with #now) → runs the referenced `/skill` (or infers solve /
-  ux-writing / edit-bridge-solve), implements, marks the comment `in_review` for
-  the user's inbox, and replies a summary; @Germano respond → posts a UI/UX read;
-  @Germano act (with #now) → runs his explore/audit skills and replies the
-  findings. Meant to run under `/loop` (e.g. "/loop 30s /auis-review-bridge-dispatch"
-  or self-paced) so the bridge feels live — it only acts on agents the user turned
-  on in the dot, and `#now` is required for any code change. Use when the user
-  says "/auis-review-bridge-dispatch", "turn on the agents' motor", "run the
-  bridge dispatcher", "make the agents answer the @ in review", "process the
-  mention queue", "start the dispatch loop", or sets up a loop over the review
-  bridge mentions. Does NOT author comments (that is the in-browser Review Mode)
-  and does NOT start the server (that is `auis-review-bridge`).
+  Runs the /loop dispatcher for Auis Review Bridge mentions. Reads the dispatch
+  queue, routes enabled @Claude and @Germano items, replies when Live Response
+  is enabled, and acts only when Auto Construct plus #now are both present.
+  Action items run the referenced or inferred skill, move to in_review, and get
+  an in-thread summary. Use for /auis-review-bridge-dispatch, "turn on the
+  agents' motor", "process the mention queue", "make agents answer review
+  mentions", or a recurring dispatch loop. It does not author comments or
+  start the server.
 ---
 
 # Auis Review Bridge — Dispatcher (the `/loop` motor)

@@ -1,20 +1,14 @@
 ---
 name: auis-brand
 description: >
-  Establishes a product's brand identity — the app name, the logo/mark, and the
-  one-line positioning — and wires them into the app. Reads the welcome intake
-  written by the /auis/welcome form (app/auis/_data/brand.runtime.json plus the
-  uploaded logo now in public/assets/brand/); when there is no intake it interviews
-  for the name, the one-liner, and a logo path or a description to generate a simple
-  wordmark from. Confirms and normalizes the name and tagline, verifies the logo file
-  exists and is a sane image, records the identity into PRODUCT_CONTEXT.md, and points
-  components/ui/AuLogo.tsx and the brand config at the user's mark instead of Auis's
-  default. This is the ONLY skill that establishes brand — auis-foundation is the token
-  counterpart, auis-voice is the voice counterpart, and this skill touches neither. Use
-  when the user asks to "set up my brand", "set the app name and logo", "wire in my
-  logo", "establish the brand identity", "I uploaded a logo in the welcome screen",
-  "change the app name", "replace the Auis logo with mine", or "make it my product,
-  not Auis".
+  Establishes a product's brand identity: app name, logo or mark, and one-line
+  positioning. Reads the /auis/welcome intake or interviews for missing facts,
+  verifies the logo, records the identity in PRODUCT_CONTEXT.md, and wires the
+  brand config and AuLogo to the user's mark. This is the only brand authority;
+  it does not create tokens or voice rules. Use for "set up my brand", "set the
+  app name and logo", "wire in my logo", "establish the brand identity", "I
+  uploaded a logo", "change the app name", "replace the Auis logo", or "make
+  this my product".
 ---
 
 # Auis — Brand Identity

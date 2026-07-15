@@ -20,14 +20,13 @@ from a written description of the flow.
 
 The canonical example lives at:
 ```
-app/auis/styleguide/ux-flows/login-auth/page.tsx
+app/auis/styleguide/ux-flows/example/page.tsx
 ```
 Read it **before starting**. It is the source of truth for node types, edge
-styles, layout constants, and page structure — and it's the **fullest** example:
-multiple decision branches, convergences, and a `crossflow` jump (`crossEdge`)
-to another flow. All new flow pages must follow the same pattern — no deviations
-without a reason. (`primeiro-acesso/page.tsx` is a good simpler example if the
-flow has no cross-flow jumps.)
+styles, layout constants, and page structure. It deliberately uses a neutral
+builder scenario, public routes, one decision, two branches, and a convergence.
+All new flow pages must follow the same contract; add `crossflow` nodes only
+when the requested journey genuinely jumps to another registered flow.
 
 ### Always the rich `<FlowDiagram>` board — never a simpler diagram
 
@@ -36,8 +35,7 @@ fullscreen ("Fullscreen"), Comment, Suggest edit, the suggestions badge, and
 the side-drawer prototype preview (see the next section). This is the same board
 the login flow uses. **Do not** hand-roll a bare `<ReactFlow>` or a stripped-down
 canvas per page — every flow inherits the full toolset for free by rendering
-`<FlowDiagram>`. The only existing exception (`poc-visao-global`, which embeds raw
-ReactFlow for its focus-lens experiment) is **not** a template to copy.
+`<FlowDiagram>`.
 
 ---
 
@@ -62,7 +60,7 @@ automatically inherits all of these — you do **not** wire them per page:
 both comments (`flowRef.flow`) and suggestions (`/api/flow-suggestions?flow=…`).
 It **must equal the page's slug** — the folder name under `ux-flows/`. Pass it
 wrong and comments/suggestions silently land in the wrong bucket. So:
-`ux-flows/login-auth/` → `<FlowDiagram flow="login-auth" …>`.
+`ux-flows/example/` → `<FlowDiagram flow="example" …>`.
 
 The only feature a page **does** author itself is the **updates changelog**
 (`updates[]` + `<FlowUpdatesBadge>` + `<FlowUpdatesHistorySection>`) — see Step 6.
@@ -196,7 +194,7 @@ ReactFlow's `onNodeClick` (not via a `<Link>` wrapping the card, which
 ReactFlow's pointer handling tends to swallow); flow pages don't need
 to do anything beyond filling `href` correctly.
 
-- Internal route (`/inicio`, `/primeiro-acesso/perfil`, …) → loaded in the iframe.
+- Internal route (`/projects/checkout`, `/settings/profile`, …) → loaded in the iframe.
 - `#` or empty string → drawer shows a "No prototype yet" placeholder.
 - External URL (`https://…`) → drawer offers an "Open in a new tab" button instead of the iframe.
 - `cmd/ctrl-click` on an internal route opens it in a new tab — plain click opens the drawer.
@@ -221,14 +219,14 @@ Data shape: `{ step: string; title: string; question: string }`
 ### `crossflow` — jump to another flow
 
 Use this **only** when the path leaves THIS flow and enters ANOTHER styleguide
-flow (e.g. login → primeiro-acesso). Renders as a purple diamond (rotated
+flow (e.g. checkout → order-confirmation). Renders as a purple diamond (rotated
 square), visually distinct from screen cards and decision boxes. Clicking it
 opens a confirmation modal ("Go to another flow?") and only navigates on
 confirm.
 
 Data shape (same as `screen`): `{ step: string; title: string; href: string; note?: string }`
 
-- `title`: the **destination flow's name** — short, shows inside the diamond and in the modal (e.g. `"Login"`, `"First access"`).
+- `title`: the **destination flow's name** — short, shows inside the diamond and in the modal (e.g. `"Checkout"`, `"Confirmation"`).
 - `href`: the OTHER flow's page route — `/auis/styleguide/ux-flows/[other-slug]`. Not a prototype route.
 - `note`: optional one-liner of context.
 - Handles are top (target) + bottom (source), like `screen` — no `sourceHandle` needed on its edges.
@@ -345,10 +343,10 @@ export default function [FlowName]FlowPage() {
         through it, when to use this map.]
       </PageHero>
 
-      <div className="max-w-[1400px] mx-auto px-10 pb-14 flex flex-col gap-16">
+      <div className="mx-auto flex max-w-7xl flex-col gap-16 px-10 pb-14">
 
         {/* SECTION 1 — intro text (replaces Tldr) */}
-        <p className="text-sm text-[var(--fg-secondary)] leading-relaxed max-w-2xl -mt-8">
+        <p className="max-w-2xl text-sm leading-relaxed text-fg-secondary">
           [2–4 sentences. Overview of the flow structure: how many steps,
           where decision points are, what the terminal states are. This is
           the "orientation" paragraph a reader needs before diving into the
@@ -375,21 +373,21 @@ export default function [FlowName]FlowPage() {
           title="Every screen"
           lead="Purpose, decisions, and a direct link to each one's prototype."
         >
-          <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-raised)] overflow-hidden">
+          <div className="overflow-hidden rounded-lg border border-subtle bg-raised">
             <ul className="m-0 p-0 list-none flex flex-col divide-y divide-[var(--border-subtle)]">
               {screens.map((s) => (
                 <li key={s.step + s.title} className="p-5 flex flex-col gap-2">
                   <div className="flex items-baseline gap-3">
-                    <span className="au-eyebrow text-[var(--au-blue-700)]">{s.step}</span>
-                    <h3 className="m-0 text-base font-medium text-[var(--fg-primary)]">{s.title}</h3>
+                    <span className="au-eyebrow text-fg-tertiary">{s.step}</span>
+                    <h3 className="m-0 text-base font-medium text-fg-primary">{s.title}</h3>
                   </div>
-                  <p className="m-0 text-sm text-[var(--fg-secondary)] leading-relaxed">{s.purpose}</p>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-1">
+                  <p className="m-0 text-sm leading-relaxed text-fg-secondary">{s.purpose}</p>
+                  <div className="mt-1 flex items-center gap-6">
                     <span className="caption">
-                      <span className="font-medium text-[var(--fg-secondary)]">Decisions: </span>
+                      <span className="font-medium text-fg-secondary">Decisions: </span>
                       {s.decisions}
                     </span>
-                    <Link href={s.href} className="text-sm font-medium text-[var(--au-blue-700)] hover:text-[var(--au-blue-800)] no-underline hover:underline">
+                    <Link href={s.href} className="text-sm font-medium text-fg-primary no-underline hover:underline">
                       Open prototype →
                     </Link>
                   </div>
@@ -405,12 +403,12 @@ export default function [FlowName]FlowPage() {
           title="Design decisions"
           lead="Why the flow is structured this way."
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {/* One card per key design decision. Use the info from the flow
                 description to fill these. Each card: eyebrow + paragraph. */}
-            <div className="rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-raised)] p-5">
+            <div className="rounded-lg border border-subtle bg-raised p-5">
               <div className="au-eyebrow mb-2">[Decision title]</div>
-              <p className="m-0 text-sm text-[var(--fg-secondary)] leading-relaxed">
+              <p className="m-0 text-sm leading-relaxed text-fg-secondary">
                 [Why the flow is structured this way.]
               </p>
             </div>
@@ -453,7 +451,7 @@ Add the new flow to the `"UX Flows"` section in
 {
   title: "UX Flows",
   items: [
-    { name: "First access", href: "/auis/styleguide/ux-flows/primeiro-acesso" },
+    { name: "Example flow", href: "/auis/styleguide/ux-flows/example" },
     { name: "[New flow title]", href: "/auis/styleguide/ux-flows/[flow-slug]" },
   ],
 },
@@ -476,7 +474,7 @@ nodes are clickable, and the dots background is visible.
 
 ## Quick checklist before submitting
 
-- [ ] Read `login-auth/page.tsx` as reference (fullest example) — diagram is the rich `<FlowDiagram>`, never a bare ReactFlow
+- [ ] Read `example/page.tsx` as the public reference — diagram is the rich `<FlowDiagram>`, never a bare ReactFlow
 - [ ] Page imports `branchEdge`, `edgeBase`, `FlowDiagram` from `../_components/flow-editor` — never redefines node or edge primitives
 - [ ] `<FlowDiagram flow="…">` **equals the folder slug** (scoping key for comments + suggestions)
 - [ ] Changelog wired: imports from `../_components/flow-updates`, `updates[]` seeded with a "new-page" entry dated today, `trailing={<FlowUpdatesBadge updates={updates} />}` on `PageHero`, `<FlowUpdatesHistorySection updates={updates} />` last

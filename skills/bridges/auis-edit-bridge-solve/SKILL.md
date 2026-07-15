@@ -1,25 +1,14 @@
 ---
 name: auis-edit-bridge-solve
 description: >
-  Materializes Auis Live Edit Mode overlays into real code. The page
-  editor stores non-destructive edit "ops" (text, style token, variant/size,
-  icon, icon optical axes, token-value edits, custom/off-palette colors,
-  hide/remove, move/reorder-siblings) per route in page-editor/data via
-  the serverless /api/page-edits route; this skill reads them with a filter
-  chosen by the user (a whole route, only open ones, a specific id, everything),
-  makes ONE PLAN BEFORE touching any code, waits for approval, rewrites the real
-  TSX (text→string literal, variant→prop, style→token class/prop, icon→icon
-  prop, hide→remove/condition, move→reorder JSX siblings), and marks each op
-  `in_review` in the bridge with
-  `actor: { kind: "agent", id: "claude", name: "Claude" }` — the user then
-  approves or rejects it from the edit inbox, which clears the overlay so the
-  materialized code becomes the source of truth (committed
-  like any other change). Use whenever the user asks for
-  "/auis-edit-bridge-solve", "materialize the edits", "turn the overlay into
-  code", "apply the edits from page X to the code", "promote the live editor's
-  edits", "resolve the page-edits", or variations. Do NOT use it to author
-  edits (that is the in-browser Edit Mode) nor for Review Mode comments (that
-  is `auis-review-bridge-solve`).
+  Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered
+  page-editor ops (text, token/style, variant, icon, hide, and sibling order),
+  plans once, waits for approval, applies the changes, and marks each op
+  in_review so the user can approve or reject it in the edit inbox. Use for
+  /auis-edit-bridge-solve, "materialize the edits", "turn the overlay into
+  code", "apply the edits from page X", "promote the live edits", or "resolve
+  page-edits". Do not use to author browser edits or resolve Review Mode
+  comments.
 ---
 
 # Auis Edit Bridge — Materialize overlays into code

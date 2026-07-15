@@ -1,7 +1,6 @@
 ---
 name: auis-ux-writing
 description: Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits each one against the Auis PRODUCT voice (it solves, it doesn't sell), proposes rewrites with rationale, waits for approval, and applies surgically (text only, never layout). The voice is inspired by ElevenLabs (efficiency, simplicity, clarity) and OpenAI (warm, concise, confident, never sycophantic), and is anchored in PRODUCT_CONTEXT.md. Use when the user says "/auis-ux-writing", "apply the ux writing", "review the copy on this page", "look at the text/microcopy of /route", "improve the ux writing", "review the labels/errors/empty states", "make this screen match the product tone", or pastes a route/link/text asking for an interface-writing review. This is NOT the marketing/site voice (that is `auis-brand-voice`) and it does NOT touch layout/structure (that is `ux-page-rework`).
-argument-hint: "<route(s), link(s), or paste the text>"
 ---
 
 # UX Writing — Auis (product)

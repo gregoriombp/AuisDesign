@@ -13,7 +13,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Materializes Auis Live Edit Mode overlays into real code. The page editor stores non-destructive edit \"ops\" (text, style token, variant/size, icon, icon optical axes, token-value edits, custom/off-palette colors, hide/re"
+      "description": "Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, token/style, variant, icon, hide, and sibling order), plans once, waits for approval, applies the changes, and marks each op "
     },
     {
       "name": "auis-flow-bridge",
@@ -39,7 +39,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Reads and applies UX flow edit suggestions stored in the flow-bridge (`/auis/styleguide/ux-flows/<flow>`). Pulls from the bridge using a filter chosen by the user (all of them, only one flow, only open ones, a specific I"
+      "description": "Reads and applies UX flow edit suggestions stored in the flow-bridge (`/auis/styleguide/ux-flows/[flow]`). Pulls from the bridge using a filter chosen by the user (all of them, only one flow, only open ones, a specific I"
     },
     {
       "name": "auis-review-bridge",
@@ -64,7 +64,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "The /loop dispatcher for the Auis Review Bridge — the \"motor\" that turns comments into live agent commands. One pass = read the dispatch queue (`/api/review-bridge/dispatch-queue`): OPEN, user-authored comments that @men"
+      "description": "Runs the /loop dispatcher for Auis Review Bridge mentions. Reads the dispatch queue, routes enabled @Claude and @Germano items, replies when Live Response is enabled, and acts only when Auto Construct plus #now are both "
     },
     {
       "name": "auis-review-bridge-germano-audit",
@@ -77,7 +77,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": true,
-      "description": "You are GERMANO FACCIO — an extremely critical UI/UX designer with a taste for premium/minimalist interfaces (Vercel, ElevenLabs, OpenAI, Langdock, StackAI, Cursor, Linear, Raycast, Apple). Instead of RESOLVING the Auis "
+      "description": "Runs Germano Faccio as a critical UI/UX second opinion on Review Bridge items already in_review. Compares the request with the delivery and posts one reply: good to proceed, or ask for improvement with a ready correction"
     },
     {
       "name": "auis-review-bridge-germano-explore",
@@ -90,7 +90,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": true,
-      "description": "You are GERMANO FACCIO on PROACTIVE PATROL — an extremely critical UI/UX designer with a taste for premium/minimalist interfaces (Vercel, ElevenLabs, OpenAI, Langdock, StackAI, Cursor, Linear, Raycast, Apple). the user h"
+      "description": "Runs Germano Faccio in proactive UI/UX patrol mode. Navigates the requested pages, opens states and overlays, judges appearance and behavior, and drops a concrete Review Mode pin for each real issue. It never edits code,"
     },
     {
       "name": "auis-review-bridge-solve",
@@ -129,7 +129,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": true,
-      "description": "Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the \"Restyle with the design system\" button (kind `restyle`) and the \"Build in repo\" button (kind `build`) write requests to `/api/p"
+      "description": "Resolves filtered restyle and build requests from the /auis/projects workbench. Plans once and waits for approval; build creates a real page from Au components and current tokens using Figma context, while restyle produc"
     },
     {
       "name": "auis-setup",
@@ -194,7 +194,7 @@
       "recommended": true,
       "legacy": false,
       "divergent": false,
-      "description": "Establishes a product's brand identity — the app name, the logo/mark, and the one-line positioning — and wires them into the app. Reads the welcome intake written by the /auis/welcome form (app/auis/_data/brand.runtime.j"
+      "description": "Establishes a product's brand identity: app name, logo or mark, and one-line positioning. Reads the /auis/welcome intake or interviews for missing facts, verifies the logo, records the identity in PRODUCT_CONTEXT.md, and"
     },
     {
       "name": "auis-component",
@@ -428,7 +428,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Builds a COMPILED, multi-scenario \"golden eye\" UX flow page in the Auis styleguide (/auis/styleguide/ux-flows/[slug]) — several product journeys merged into ONE deduped ReactFlow graph with per-scenario focus lenses. Sha"
+      "description": "Builds a compiled, multi-scenario golden-eye UX flow page in the Auis styleguide. Merges several product journeys into one deduplicated ReactFlow graph with per-scenario focus lenses, shared-screen dots, route previews, "
     },
     {
       "name": "auis-flow",

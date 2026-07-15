@@ -9,7 +9,7 @@
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-audit` | 🟣🟠🌐 | cowork | ⭐ | Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app compon |
-| `auis-brand` | 🟣🟠 | repo | ⭐ | Establishes a product's brand identity — the app name, the logo/mark, and the one-line positioning — and wires them into the app. Reads the welcome in |
+| `auis-brand` | 🟣🟠 | repo | ⭐ | Establishes a product's brand identity: app name, logo or mark, and one-line positioning. Reads the /auis/welcome intake or interviews for missing fac |
 | `auis-component` | 🟣🟠🌐 | cowork | ⭐ | Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always check |
 | `auis-design-system-audit` | 🟣🟠 | repo | — | Audit the Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage. |
 | `auis-design-system-foundation` | 🟣🟠 | repo | — | Bootstrap or update the Auis design system foundation from a visual reference. This is the only skill allowed to create or change tokens. |
@@ -24,7 +24,7 @@
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-create-ux-flow` | 🟣🟠 | repo | — | Builds a UX flow diagram page in the Auis styleguide (/auis/styleguide/ux-flows/[name]) from a flow description, a list of steps, or any written brief |
-| `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Builds a COMPILED, multi-scenario "golden eye" UX flow page in the Auis styleguide (/auis/styleguide/ux-flows/[slug]) — several product journeys merge |
+| `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Builds a compiled, multi-scenario golden-eye UX flow page in the Auis styleguide. Merges several product journeys into one deduplicated ReactFlow grap |
 | `auis-flow` | 🟣🟠🌐 | cowork | ⭐ | Designs a feature's user flow as a FigJam board using the Auis convention: every screen becomes a card with name + route + file path + status; every t |
 | `auis-import-figma-flow` | 🟣🟠 | repo | ◐ | Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as  |
 | `auis-pg-create-flow` | 🟣🟠 | repo | ◐ | Creates a NEW UX flow in the styleguide (`/auis/styleguide/ux-flows/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads t |
@@ -35,13 +35,13 @@
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
-| `auis-edit-bridge-solve` | 🟣 | repo | — | Materializes Auis Live Edit Mode overlays into real code. The page editor stores non-destructive edit "ops" (text, style token, variant/size, icon, ic |
+| `auis-edit-bridge-solve` | 🟣 | repo | — | Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, token/style, variant, icon, hide, and sibling order), p |
 | `auis-flow-bridge` | 🟣🟠 | repo | — | [OBSOLETE] The styleguide UX flow editor went serverless — suggestions now go to a same-origin route (/api/flow-suggestions) that writes to flow-bridg |
-| `auis-flow-bridge-solve` | 🟣🟠 | repo | — | Reads and applies UX flow edit suggestions stored in the flow-bridge (`/auis/styleguide/ux-flows/<flow>`). Pulls from the bridge using a filter chosen |
+| `auis-flow-bridge-solve` | 🟣🟠 | repo | — | Reads and applies UX flow edit suggestions stored in the flow-bridge (`/auis/styleguide/ux-flows/[flow]`). Pulls from the bridge using a filter chosen |
 | `auis-review-bridge` | 🟣🟠 | repo | ◐ | Explains that the Auis Review Mode bridge is now serverless and embedded in the Next app at `/api/review-bridge/*` — `npm run dev` already brings ever |
-| `auis-review-bridge-dispatch` | 🟣 | repo | — | The /loop dispatcher for the Auis Review Bridge — the "motor" that turns comments into live agent commands. One pass = read the dispatch queue (`/api/ |
-| `auis-review-bridge-germano-audit` | 🟣🟠 | repo | ◐ | You are GERMANO FACCIO — an extremely critical UI/UX designer with a taste for premium/minimalist interfaces (Vercel, ElevenLabs, OpenAI, Langdock, St |
-| `auis-review-bridge-germano-explore` | 🟣🟠 | repo | ◐ | You are GERMANO FACCIO on PROACTIVE PATROL — an extremely critical UI/UX designer with a taste for premium/minimalist interfaces (Vercel, ElevenLabs,  |
+| `auis-review-bridge-dispatch` | 🟣 | repo | — | Runs the /loop dispatcher for Auis Review Bridge mentions. Reads the dispatch queue, routes enabled @Claude and @Germano items, replies when Live Resp |
+| `auis-review-bridge-germano-audit` | 🟣🟠 | repo | ◐ | Runs Germano Faccio as a critical UI/UX second opinion on Review Bridge items already in_review. Compares the request with the delivery and posts one  |
+| `auis-review-bridge-germano-explore` | 🟣🟠 | repo | ◐ | Runs Germano Faccio in proactive UI/UX patrol mode. Navigates the requested pages, opens states and overlays, judges appearance and behavior, and drop |
 | `auis-review-bridge-solve` | 🟣🟠 | repo | ⭐ ◐ | Resolves Auis Review Mode comments in bulk. Reads from the local review-bridge using a filter chosen by the user (all of them, only today's, only open |
 
 ## Build & Handoff (3)
@@ -49,7 +49,7 @@
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-handoff` | 🟣🟠🌐 | cowork | ⭐ | Converts a Claude Design (or Cloud Design) handoff into production code by remapping the generated output onto Auis/styleguide components first and sh |
-| `auis-project-build-solve` | 🟣🟠 | repo | ◐ | Fulfills, in bulk, the per-screen action requests from the `/auis/projects` workbench — the "Restyle with the design system" button (kind `restyle`) a |
+| `auis-project-build-solve` | 🟣🟠 | repo | ◐ | Resolves filtered restyle and build requests from the /auis/projects workbench. Plans once and waits for approval; build creates a real page from Au c |
 | `auis-setup` | 🟣🟠 | repo | ⭐ | The guided first-run orchestrator the welcome screen points at. It does NOT create tokens, voice, or brand itself — it SEQUENCES the three creator ski |
 
 ## Content / UX Writing (2)

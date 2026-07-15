@@ -5,7 +5,7 @@ description: >
   (`/auis/styleguide/ux-flows/[slug]`) from an `.awflow.json` file
   exported from the PG (designer) repo. Reads the file (local path or
   pasted content), parses it via `parseAuFlowFile`, maps it to the
-  `<FlowDiagram>` shape via `mapAuFlowToLocal`, asks for the screens'
+  `FlowDiagram` shape via `mapAuFlowToLocal`, asks for the screens'
   `href` values (PG doesn't carry that info), scaffolds the full page,
   and registers it in `navigation.ts`. Use when the user asks to
   "import a flow from PG", "create a flow from the .awflow", "new flow
@@ -27,8 +27,8 @@ flow already exists, redirect to [`auis-pg-merge-flow`](../auis-pg-merge-flow/SK
 - `app/auis/styleguide/ux-flows/_lib/awflow-import.ts` exists in the
   repo (the importer module). If it doesn't, stop and tell the user —
   something is out of place.
-- There is at least one reference flow in `ux-flows/login-auth/` or
-  `ux-flows/primeiro-acesso/` to copy the page pattern from.
+- The public reference flow exists at `ux-flows/example/` to copy the page
+  contract from.
 
 ---
 
@@ -145,8 +145,7 @@ Ask for **explicit approval** before creating files.
 ## Step 6 — Scaffold the page
 
 Create `app/auis/styleguide/ux-flows/<slug>/page.tsx` following the
-pattern of the existing pages (use `login-auth/page.tsx` or
-`primeiro-acesso/page.tsx` as reference).
+pattern of the existing pages (use `example/page.tsx` as reference).
 
 Minimum structure:
 
