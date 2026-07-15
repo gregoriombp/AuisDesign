@@ -72,6 +72,10 @@ flow-bridge/node_modules/
 # page-editor runtime state — Live Edit Mode persisted edits (not source code)
 page-editor/data/*.json
 
+# brand setup runtime overlay — the user's own brand (not source code; AuisDesign
+# ships the default). Written by /api/setup, read by getBrand().
+app/auis/_data/brand.runtime.json
+
 # Playwright MCP verification artifacts (snapshots/console logs)
 .playwright-mcp/
 

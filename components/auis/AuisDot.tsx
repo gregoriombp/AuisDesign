@@ -7,6 +7,7 @@ import {
   type AuDropdownItem,
 } from "@/components/ui/AuDropdownMenu";
 import { AuLogo } from "@/components/ui/AuLogo";
+import { useBrand } from "@/app/auis/_data/BrandProvider";
 import { useReviewStore } from "@/lib/auis-review/store";
 import { useEditStore } from "@/lib/auis-edit/store";
 import {
@@ -17,6 +18,7 @@ import { REVIEW_AGENTS } from "@/lib/auis-review/agents";
 
 export function AuisDot() {
   const router = useRouter();
+  const brand = useBrand();
   const [visible, setVisible] = React.useState(true);
   const reviewActive = useReviewStore((s) => s.active);
   const toggleReview = useReviewStore((s) => s.toggleActive);
@@ -120,7 +122,7 @@ export function AuisDot() {
             aria-label="Auis shortcuts"
             className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-(--bg-inverse) text-(--fg-on-inverse) shadow-(--shadow-md) outline-hidden transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-(--ring-focus) focus-visible:ring-offset-2 focus-visible:ring-offset-(--bg-canvas)"
           >
-            <AuLogo variant="mark" height={14} aria-label="Auis" />
+            <AuLogo variant="mark" height={14} aria-label={brand.name} brand={brand} />
           </button>
         }
         items={items}

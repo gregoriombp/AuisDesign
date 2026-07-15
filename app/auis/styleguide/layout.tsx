@@ -9,6 +9,7 @@ import { AuLogo } from "@/components/ui/AuLogo"
 import { AuToastProvider } from "@/components/ui/AuToast"
 import { Icon } from "@/components/ui/Icon"
 import { SidebarSearch } from "./_SidebarSearch"
+import { useBrand } from "@/app/auis/_data/BrandProvider"
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
@@ -24,6 +25,7 @@ export default function StyleguideLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const brand = useBrand()
 
   return (
     <AuToastProvider>
@@ -35,7 +37,7 @@ export default function StyleguideLayout({
           className="inline-flex flex-col items-start no-underline"
           style={{ color: "var(--fg-primary)" }}
         >
-          <AuLogo variant="wordmark" height={22} />
+          <AuLogo variant="wordmark" height={22} brand={brand} />
           <span className="au-sg-sidebar__subtitle">Design System | 2026</span>
         </Link>
 

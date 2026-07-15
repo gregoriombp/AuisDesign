@@ -65,12 +65,18 @@ catalog.
 > finished product's chrome. If your product needs a shell, that is Layer B and it is yours to
 > build.
 
+> **First-run UI is feature-local, not Layer A.** The `/auis/welcome` setup form lives at
+> `app/auis/welcome/_components/WelcomeForm.tsx` and the brand config at
+> `app/auis/_data/brand.ts` (overlay written by `/api/setup`). Like the Review/Edit feature
+> modules, these *consume* `Au*` primitives but are not themselves DS components — don't import
+> them as if they were, and don't add them to the inventory below.
+
 ## What each cluster is for
 
 | Cluster | Components | What it powers |
 |---|---|---|
 | **Review Bridge** | `AuMentionMenu` · `AuMentionChip` | The comment/review layer: `@agent` / `/skill` picker and the chips those commands render as inside comment text. |
-| **Brand** | `AuLogo` | Auis's own mark — the builder chrome only. No third-party logos and no illustrations ship: those belong to the product you build. |
+| **Brand** | `AuLogo` | Auis's own mark — the builder chrome only. It renders the seeded brand from `app/auis/_data/brand.ts` (the user's logo, once `/auis/welcome` → `/api/setup` writes the overlay; the Auis default until then). No third-party logos and no illustrations ship: those belong to the product you build. |
 | **Primitives & feedback** | The remaining 18 | The bricks the two clusters above stand on. Genuinely generic — this is the part most worth reusing. |
 
 ## Shortcut by intent (the fast path)
@@ -81,7 +87,7 @@ build it (see [Genuinely missing something?](#genuinely-missing-something)).
 | I need… | Use | Import | When NOT to use it |
 |---|---|---|---|
 | Icon | `Icon` | `@/components/ui/Icon` | `<Icon name="..." size={20} />`. Automatic optical default (`wght`/`GRAD`/`opsz`) — don't force `weight={200}` on a small icon. Never a raw `<svg>`. |
-| Auis logo / lockup | `AuLogo` | `@/components/ui/AuLogo` | Auis's own mark, for the builder chrome (`/auis/*`). Never render it from a DS component — that component ships inside *your* product. |
+| Auis logo / lockup | `AuLogo` | `@/components/ui/AuLogo` | The builder chrome's mark (`/auis/*`). Renders the brand seeded via `/auis/welcome` (server reads it through `app/auis/_data/brand.ts`; `import type` only in client components). Never render it from a DS component — that component ships inside *your* product. |
 | Button | `AuButton` | `@/components/ui/AuButton` | has `intent`/`size`/an `Icon` slot. Don't style a `<button>` by hand. |
 | Form field | `AuField` (or `AuInput`) | `@/components/ui/AuInput` | `AuField` (label + error + `framed` variant) and `AuInput` are exported from the **same file**. Use `AuField` when you need a label/error; bare `AuInput` otherwise. |
 | Checkbox / toggle / slider | `AuCheckbox` · `AuToggle` · `AuSlider` | `@/components/ui/AuCheckbox` · `@/components/ui/AuToggle` · `@/components/ui/AuSlider` | Don't hand-roll a styled `<input type=checkbox>`. |

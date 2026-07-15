@@ -13,6 +13,18 @@ npm run dev        # http://127.0.0.1:3000
 
 Open `/auis/styleguide`. It will be mostly empty — that's correct. Auis ships **de-branded**: neutral tokens, empty component catalog, zeroed navigation. Your product fills it.
 
+### First move: set up your brand
+
+The hub (`/auis`) greets a fresh clone with a soft-gate **"Welcome — set up your brand"** card. Open `/auis/welcome` (or just click the card) and give it three things: your **project name**, a one-line **"what is your product"**, and a **logo** upload. Submitting posts to `/api/setup`, which saves the logo under `public/assets/brand/` and a gitignored brand overlay at `app/auis/_data/brand.runtime.json` — so the builder chrome starts reading as *your* product. The card disappears once setup is done.
+
+Then let your agent finish the job in one guided pass:
+
+```
+/auis-setup
+```
+
+`auis-setup` is an orchestrator — it sequences the three creators, checking in between each: `auis-brand` (materializes the name, tagline, and logo you just uploaded into `PRODUCT_CONTEXT.md` and `AuLogo`), then `auis-foundation` (tokens, step 3 below), then `auis-voice` (voice + locale, feeds step 2 below). You can also run each creator on its own; the steps below cover them individually.
+
 ### Known state of this snapshot
 
 The engine was extracted from a private product; it **compiles clean** (`typecheck`, `lint`, `build` all pass) but some content was deliberately emptied:

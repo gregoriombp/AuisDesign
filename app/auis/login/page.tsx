@@ -95,9 +95,9 @@ export default function AuisLogin() {
         </AuCard>
 
         <p className="auis-login-foot">
-          Don&apos;t have access?{" "}
-          <Link href="/primeiro-acesso" className="auis-login-foot-link">
-            Create account
+          First time here?{" "}
+          <Link href="/auis/welcome" className="auis-login-foot-link">
+            Set up your brand
           </Link>
         </p>
       </div>

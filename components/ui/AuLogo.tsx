@@ -1,4 +1,5 @@
 import * as React from "react"
+import type { Brand } from "@/app/auis/_data/brand"
 
 export type AuLogoProps = {
   variant?: "wordmark" | "mark" | "horizontal"
@@ -6,6 +7,13 @@ export type AuLogoProps = {
   className?: string
   style?: React.CSSProperties
   "aria-label"?: string
+  /**
+   * The configured brand, resolved server-side with `getBrand()`. When it
+   * carries a custom uploaded logo, that image is rendered instead of the
+   * built-in Auis geometry. Omitted (the default) → the Auis mark, so the
+   * builder's own chrome and any client component keep working unchanged.
+   */
+  brand?: Brand
 }
 
 /**
@@ -24,6 +32,17 @@ export type AuLogoProps = {
  * repo ships, and it is the only path listed here.
  */
 export const AU_LOGO_ASSET = "/assets/brand/auis-wordmark.svg"
+
+/** Renders the configured brand's own uploaded logo as an image. */
+function isCustomLogo(brand?: Brand): brand is Brand {
+  return (
+    !!brand &&
+    brand.configured &&
+    typeof brand.logo === "string" &&
+    brand.logo.trim().length > 0 &&
+    brand.logo !== AU_LOGO_ASSET
+  )
+}
 
 /* Official geometry of the symbol: three blades fanned out, joined at the base,
  * with a harmonic 6° progression of tilt (15° · 21° · 27°). */
@@ -61,7 +80,23 @@ export function AuLogo({
   className,
   style,
   "aria-label": ariaLabel = "Auis",
+  brand,
 }: AuLogoProps) {
+  // A configured brand ships a single uploaded asset — render it for every
+  // variant (there is no mark/wordmark split for a user's own logo).
+  if (isCustomLogo(brand)) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={brand.logo}
+        alt={brand.name || ariaLabel}
+        height={height}
+        style={{ height, width: "auto", ...style }}
+        className={className}
+      />
+    )
+  }
+
   if (variant === "mark") {
     return (
       <svg
