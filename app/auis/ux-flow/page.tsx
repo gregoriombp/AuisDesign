@@ -7,10 +7,18 @@ import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
 import { CollapsibleGroup } from "./_components/CollapsibleGroup"
 import { FLOW_GROUPS, FLOW_META, type FlowGroup } from "./_data/flow-meta"
+import {
+  AuEmpty,
+  AuEmptyContent,
+  AuEmptyDescription,
+  AuEmptyHeader,
+  AuEmptyMedia,
+  AuEmptyTitle,
+} from "@/components/ui/AuEmpty"
 
 export const metadata: Metadata = {
-  title: "UX Flow",
-  description: "Every navigable flow in the product, Figma-prototype style.",
+  title: "UX Flows",
+  description: "Navigable product flows that stay versioned with the code.",
 }
 
 function formatDate(iso: string): string {
@@ -40,7 +48,7 @@ export default function UxFlowIndex() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+        <div className="grid grid-cols-3 gap-4 mb-12">
           <AuStatCard icon="account_tree" label="Flows" value={FLOW_META.length} />
           <AuStatCard icon="web_asset" label="Screens mapped" value={totalScreens} />
           <AuStatCard
@@ -51,12 +59,33 @@ export default function UxFlowIndex() {
           />
         </div>
 
+        {FLOW_META.length === 0 ? (
+          <AuEmpty>
+            <AuEmptyHeader>
+              <AuEmptyMedia variant="icon">
+                <Icon name="account_tree" size={24} />
+              </AuEmptyMedia>
+              <AuEmptyTitle>No flows yet</AuEmptyTitle>
+              <AuEmptyDescription>
+                Run <code>/auis-create-ux-flow</code> with a journey or step list.
+                Auis will create the flow page, register its metadata, and make it
+                available here.
+              </AuEmptyDescription>
+            </AuEmptyHeader>
+            <AuEmptyContent>
+              <AuButton asChild variant="secondary" iconLeft="menu_book">
+                <Link href="/auis/styleguide">Open the styleguide</Link>
+              </AuButton>
+            </AuEmptyContent>
+          </AuEmpty>
+        ) : null}
+
         {FLOW_GROUPS.map((group: FlowGroup) => {
           const flows = FLOW_META.filter((f) => f.group === group)
           if (flows.length === 0) return null
           return (
             <CollapsibleGroup key={group} title={group} count={flows.length}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-2 gap-6">
                 {flows.map((f) => (
                   <AuCard
                     key={f.slug}
@@ -64,10 +93,7 @@ export default function UxFlowIndex() {
                     className="p-6 flex flex-col gap-4"
                   >
                     <div className="flex items-start justify-between">
-                      <span
-                        className="inline-flex items-center justify-center rounded-md bg-(--bg-surface)"
-                        style={{ width: 44, height: 44 }}
-                      >
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-surface">
                         <Icon name="account_tree" size={24} />
                       </span>
                       <AuPill variant="neutral">
@@ -81,7 +107,7 @@ export default function UxFlowIndex() {
                       </p>
                     </div>
                     <div className="mt-auto pt-2 flex items-center justify-between gap-3">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] text-(--fg-tertiary)">
+                      <span className="inline-flex items-center gap-1.5 text-2xs text-fg-tertiary">
                         <Icon name="schedule" size={13} />
                         Updated on {formatDate(f.updatedAt)}
                       </span>

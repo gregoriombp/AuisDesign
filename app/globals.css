@@ -414,12 +414,6 @@
   text-wrap: balance;
 }
 
-@utility login-bg-animate {
-  animation: loginBgFloat 18s ease-in-out infinite;
-  transform-origin: center;
-  will-change: transform;
-}
-
 @layer utilities {
   /* ============================================================
  * Auis Design System tokens
@@ -781,60 +775,6 @@
   }
 }
 
-@keyframes loginBgFloat {
-  0% {
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-  50% {
-    transform: scale(1.06) translate3d(-2%, -1%, 0);
-  }
-  100% {
-    transform: scale(1) translate3d(0, 0, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .login-bg-animate {
-    animation: none;
-    transform: none;
-  }
-}
-
-/* Integration icon – gradient beam TRAVELLING along the border (like blood through veins), no rotation */
-@property --integration-beam-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes integration-beam-travel {
-  to {
-    --integration-beam-angle: 360deg;
-  }
-}
-
-.integration-icon-gradient-border {
-  background: conic-gradient(
-    from var(--integration-beam-angle),
-    transparent 0deg,
-    transparent 10deg,
-    #5616f9 250deg,
-    #ec4899 270deg,
-    #8b5cf6 290deg,
-    #06b6d4 310deg,
-    transparent 330deg,
-    transparent 360deg
-  );
-  animation: integration-beam-travel 5.5s linear infinite;
-  box-shadow: 0 0 30px rgba(236, 72, 153, 0.4);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .integration-icon-gradient-border {
-    animation: none;
-  }
-}
-
 /* Wizard: smooth entry for each step (fade + slide up). Apply on a wrapper
  * keyed by the current step so it replays on every screen change. */
 @keyframes au-wizard-step-in {
@@ -854,178 +794,6 @@
   .au-wizard-step {
     animation: none;
   }
-}
-
-/* Draw animation for branching lines */
-@keyframes onboarding-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-/* Fade in from right */
-@keyframes onboarding-fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Simple fade in */
-@keyframes onboarding-fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Center drop animation for step 3 */
-@keyframes onboarding-centerDrop {
-  0% {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.9);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(10px) scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Step 4 – Branching timeline (main spine + branches + nodes) */
-.step4-timeline-spine {
-  stroke-dasharray: 420;
-  stroke-dashoffset: 420;
-  animation: step4-draw-path 0.9s ease-out 0.2s forwards;
-}
-.step4-timeline-branch {
-  stroke-dasharray: 220;
-  stroke-dashoffset: 220;
-  animation: step4-draw-path 0.6s ease-out 0.7s forwards;
-}
-.step4-timeline-ramif {
-  stroke-dasharray: 150;
-  stroke-dashoffset: 150;
-  animation: step4-draw-path 0.4s ease-out forwards;
-}
-.step4-ramif-1 { animation-delay: 0.5s; }
-.step4-ramif-2 { animation-delay: 0.6s; }
-.step4-ramif-3 { animation-delay: 0.85s; }
-@keyframes step4-draw-path {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.step4-node-dot {
-  opacity: 0;
-  animation: step4-node-in 0.35s ease-out forwards;
-}
-.step4-node-dot:nth-child(1) { animation-delay: 0.45s; }
-.step4-node-dot:nth-child(2) { animation-delay: 0.6s; }
-.step4-node-dot:nth-child(3) { animation-delay: 0.75s; }
-.step4-node-junction {
-  opacity: 0;
-  transform: scale(0.5);
-  animation: step4-junction-in 0.4s ease-out 0.75s forwards;
-}
-.step4-node-end {
-  opacity: 0;
-  animation: step4-node-in 0.4s ease-out 1s forwards;
-}
-@keyframes step4-node-in {
-  to {
-    opacity: 1;
-  }
-}
-@keyframes step4-junction-in {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.step4-dotted-node {
-  animation: step4-dotted-pulse 3s ease-in-out infinite;
-}
-.step4-cube-dot {
-  animation: step4-cube-pulse 2.5s ease-in-out infinite;
-}
-.step4-cube-dot:nth-child(odd) {
-  animation-delay: 0.3s;
-}
-@keyframes step4-dotted-pulse {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 1; }
-}
-@keyframes step4-cube-pulse {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 1; }
-}
-
-@keyframes step4-content-in {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .step4-timeline-spine,
-  .step4-timeline-branch,
-  .step4-timeline-ramif,
-  .step4-node-dot,
-  .step4-node-junction,
-  .step4-node-end,
-  .step4-dotted-node,
-  .step4-cube-dot {
-    animation: none;
-  }
-  .step4-timeline-spine,
-  .step4-timeline-branch,
-  .step4-timeline-ramif {
-    stroke-dashoffset: 0;
-  }
-  .step4-node-dot,
-  .step4-node-junction,
-  .step4-node-end,
-  .step4-cube-dot {
-    opacity: 1;
-  }
-  .step4-node-junction {
-    transform: scale(1);
-  }
-  [style*="onboarding-"],
-  [style*="step4-content-in"] {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-/* Variable chips - dark bg, light text, no border, rounded */
-.variable-chip-at {
-  background-color: #1e3a5f;
-  color: #e0f2fe;
-}
-
-.variable-chip-mustache {
-  background-color: #14532d;
-  color: #dcfce7;
 }
 
 /* Material Symbols Rounded — Auis icon system.
@@ -2139,10 +1907,6 @@
 }
 
 /* ============================================================
- * AuChatBubble — user/agent conversation bubbles.
- * ============================================================ */
-
-/* ============================================================
  * AuModal — scrim + centered dialog, focus-trapped by React.
  * ============================================================ */
 .au-modal-scrim {
@@ -2277,10 +2041,6 @@
 .au-alert--warning .au-alert__icon { color: var(--au-amber-600); }
 .au-alert--danger  { background: var(--au-red-100); }
 .au-alert--danger  .au-alert__icon { color: var(--au-red-600); }
-
-/* ============================================================
- * AuAvatar — 36 px circle with initials or glyph.
- * ============================================================ */
 
 /* ============================================================
  * AuBreadcrumb — inline navigation path.
@@ -3291,96 +3051,6 @@
   .au-card--shiny::after {
     animation: none;
   }
-}
-
-/* ============================================================
- * Auis login — title-card landing with centered login box.
- * Page background and wordmark switch via prefers-color-scheme;
- * inner Aw components inherit theme from .dark on the wrapper.
- * ============================================================ */
-.auis-login-page {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
-  background: var(--bg-canvas);
-  color: var(--fg-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7rem 1.5rem 4rem;
-}
-
-.auis-login-wordmark {
-  position: absolute;
-  top: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 130vw;
-  aspect-ratio: 2331 / 172;
-  background-color: rgba(0, 0, 0, 0.55);
-  -webkit-mask-image: url("/assets/brand/auis-wordmark.svg");
-  mask-image: url("/assets/brand/auis-wordmark.svg");
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  pointer-events: none;
-  user-select: none;
-}
-
-.auis-login-page.dark .auis-login-wordmark {
-  background-color: rgba(255, 255, 255, 0.76);
-}
-
-.auis-login-content {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 26rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.auis-login-header {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.auis-login-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  margin: 0;
-  color: var(--fg-primary);
-}
-
-.auis-login-subtitle {
-  font-size: 0.875rem;
-  color: var(--fg-secondary);
-  margin: 0;
-}
-
-.auis-login-foot {
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--fg-secondary);
-  margin: 0;
-}
-
-.auis-login-foot-link {
-  color: var(--fg-primary);
-  text-decoration: none;
-}
-
-.auis-login-foot-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 /* ============================================================

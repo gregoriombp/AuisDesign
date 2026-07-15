@@ -74,7 +74,25 @@ export function AuisDot() {
       id: "ux-flows",
       label: "UX Flows",
       icon: "account_tree",
-      onSelect: () => go("/auis/styleguide/ux-flows/primeiro-acesso"),
+      onSelect: () => go("/auis/ux-flow"),
+    },
+    {
+      id: "design-tweaks",
+      label: "Design tweaks",
+      icon: "tune",
+      onSelect: () => go("/auis/design-system-tweaks"),
+    },
+    {
+      id: "projects",
+      label: "Projects",
+      icon: "folder_open",
+      onSelect: () => go("/auis/projects"),
+    },
+    {
+      id: "roadmap",
+      label: "Roadmap",
+      icon: "flag",
+      onSelect: () => go("/auis/roadmap"),
     },
     { id: "sep-review", separator: true },
     {

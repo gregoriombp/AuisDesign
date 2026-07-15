@@ -59,6 +59,14 @@ const sections: HubSection[] = [
     href: "/auis/ux-flow",
     status: "ready",
   },
+  {
+    title: "Roadmap",
+    description:
+      "A lightweight parking lot for ideas and follow-ups that belong to the builder itself.",
+    icon: "flag",
+    href: "/auis/roadmap",
+    status: "ready",
+  },
 ]
 
 export default async function AuisHub() {
@@ -109,7 +117,7 @@ export default async function AuisHub() {
         )}
 
         <section className="mb-10">
-          <h2 className="text-xl font-semibold tracking-tight mb-3">Your projects</h2>
+          <h2 className="text-xl font-semibold tracking-tight mb-3">Your workspace</h2>
           <AuCard
             interactive
             className="p-6 flex flex-col gap-4 border-transparent"
@@ -127,7 +135,7 @@ export default async function AuisHub() {
                   <AuLogo
                     variant="mark"
                     height={30}
-                    style={{ color: "#ffffff" }}
+                    style={{ color: "var(--fg-on-inverse)" }}
                     brand={brand}
                   />
                 </span>
@@ -135,7 +143,7 @@ export default async function AuisHub() {
                   <h2 className="text-2xl font-semibold tracking-tight text-(--fg-on-inverse)">
                     {brand.name}
                   </h2>
-                  <p className="text-sm text-white/70 leading-relaxed max-w-xl">
+                  <p className="text-sm text-fg-on-inverse opacity-70 leading-relaxed max-w-xl">
                     {brand.configured && brand.tagline
                       ? brand.tagline
                       : "Open the product to explore its pages, flows and design system."}
@@ -145,13 +153,13 @@ export default async function AuisHub() {
               <AuPill variant="live">Active</AuPill>
             </div>
             <div className="mt-2">
-              <Link href="/auis/login" className="no-underline">
+              <Link href="/auis/projects" className="no-underline">
                 <AuButton
                   variant="primary"
                   iconRight="arrow_forward"
-                  style={{ background: "var(--au-white)", color: "var(--au-gray-1200)" }}
+                  className="bg-raised! text-fg-primary!"
                 >
-                  Open project
+                  Open workbench
                 </AuButton>
               </Link>
             </div>

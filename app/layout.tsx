@@ -1,6 +1,13 @@
 import type { Metadata } from "next"
 
 import "./globals.css"
+import { BrandProvider } from "@/app/auis/_data/BrandProvider"
+import { getBrand } from "@/app/auis/_data/brand"
+import { AuisDot } from "@/components/auis/AuisDot"
+import { FlowStateDriver } from "@/components/auis/FlowStateDriver"
+import { EditModeProvider } from "@/components/auis-edit/EditModeProvider"
+import { ReviewModeProvider } from "@/components/auis-review/ReviewModeProvider"
+import { AuToastProvider } from "@/components/ui/AuToast"
 
 export const metadata: Metadata = {
   title: "Auis",
@@ -8,11 +15,14 @@ export const metadata: Metadata = {
     "Product Builder — design system, page builder and UX flow builder in one place.",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const brand = await getBrand()
+  const dotEnabled = process.env.NEXT_PUBLIC_AUIS_DOT_DISABLED !== "true"
+
   return (
     <html lang="en">
       <head>
@@ -36,7 +46,17 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..200&display=block"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <BrandProvider value={brand}>
+          <AuToastProvider>
+            {children}
+            <ReviewModeProvider />
+            <EditModeProvider />
+            <FlowStateDriver />
+            {dotEnabled ? <AuisDot /> : null}
+          </AuToastProvider>
+        </BrandProvider>
+      </body>
     </html>
   )
 }
