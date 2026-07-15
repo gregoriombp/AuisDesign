@@ -21,8 +21,8 @@ approval.
 | Review Inbox | `/auis/styleguide/review` | Inbox for comments created through Review Mode. |
 | Review Bridge (server/data) | `review-bridge/` | Local comment-queue server + data dir for agents (a filesystem dir, not a route), with user approval after agent work. |
 | Review Bridge (dashboard) | `/auis/review-bridge` | In-app view of the local review-bridge queue (comments + suggestions panels). |
-| Login | `/auis/login` | Login screen for the Auis area. |
 | Design System Tweaks | `/auis/design-system-tweaks` | Controlled foundation/token experiments and visual impact checks. |
+| Roadmap | `/auis/roadmap` | Non-authoritative parking lot for ideas about the Auis builder itself. |
 
 ## Mental Model
 
@@ -39,6 +39,8 @@ that runs with the Next.js app.
   not static images.
 - **Review as work queue:** visual comments carry route and target context, so
   local agents can resolve them before the user approves or rejects the result.
+- **Review and Edit are global:** the root layout mounts both providers, the Auis
+  dot, and the UX-flow state driver so the tools work on product routes too.
 - **Skills as execution contracts:** agents use Auis skills to follow repo
   rules instead of inventing file structure.
 
@@ -90,8 +92,10 @@ app/auis/styleguide/ux-flows/[slug]/page.tsx
 
 ### Review Comments
 
-`npm run dev` prepares and starts Review Bridge at `127.0.0.1:9878`. Review Mode
-comments enter that local queue. Agents should use `auis-review-bridge-solve`
+`npm run dev` uses the same-origin Review Bridge routes built into the app. The
+optional `npm run dev:bridge` command starts the legacy Express bridge on
+`127.0.0.1:9878`. Review Mode comments enter the same local queue in either
+mode. Agents should use `auis-review-bridge-solve`
 to move work to `in_review`; the user approves or rejects it afterward from the
 inbox.
 

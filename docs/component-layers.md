@@ -7,10 +7,9 @@
 > lives in within the styleguide sidebar (`app/auis/styleguide/navigation.ts`).
 >
 > **This is a classification yardstick, not an inventory.** It applies to both layers of the
-> [component map](./component-map.md): the 21 `Au*` that ship (Layer A — the builder's own UI)
-> and, above all, **the components you are about to build** (Layer B). Since the styleguide
-> gallery ships empty, this taxonomy is mostly here to tell you where *your* next component
-> goes in the sidebar.
+> [component map](./component-map.md): the 22 `Au*` that ship (Layer A — the builder's own UI)
+> and, above all, **the components you are about to build** (Layer B). Layer A is registered
+> in the styleguide today; this taxonomy also tells you where *your* next component goes.
 
 ## Why it exists
 
@@ -46,7 +45,7 @@ the same way.
 | Layer | Key question | Business-aware? | Examples that ship |
 |---|---|---|---|
 | **Primitives** | Is it a single-purpose brick, made only of tokens + HTML/Radix? | No | `AuButton`, `AuInput`/`AuField`, `AuCheckbox`, `AuToggle`, `AuSlider`, `AuPill`, `AuToast`, `AuAlert`, `AuEmpty`, `AuProgress`, `AuTabs`, `AuDropdownMenu`, `AuBreadcrumb`, `Icon` |
-| **Components** | Does it combine primitives into a generic block, reusable in any product? | No | `AuCard`, `AuStatCard`, `AuTable`, `AuModal`, `AuSheet` |
+| **Components** | Does it combine primitives into a generic block, reusable in any product? | No | `AuCard`, `AuStatCard`, `AuTable`, `AuModal`, `AuSheet`, `AuBreadcrumbsBar` |
 | **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | *(none ship — this layer is yours to fill: an app shell, an onboarding flow, a multi-step wizard, a settings region)* |
 | **Domain** | Is it tied to an Auis concept (Review Bridge, brand)? | Yes | `AuMentionMenu`, `AuMentionChip`, `AuLogo` |
 
@@ -97,10 +96,9 @@ Mirrors [`navigation.ts`](../app/auis/styleguide/navigation.ts) — check the na
 inventory. We deliberately don't duplicate the list here; it would fall behind with every new
 component.
 
-Today that nav is a **zeroed template** (an intro entry plus the Review Mode pages). The
-Primitives / Components / Patterns / Domain sections are commented-out scaffolding, waiting
-for your first `auis-component` run. For what *does* ship and how to import it, use
-[`component-map.md`](./component-map.md) → Layer A.
+Today the nav registers foundations, all Layer A components, and the Auis builder surfaces.
+New Layer B families join the same taxonomy through `auis-component`. For what ships and how
+to import it, use [`component-map.md`](./component-map.md) → Layer A.
 
 ### Boundary precedents
 
@@ -120,7 +118,7 @@ Review Bridge surfaces (`AuMentionMenu`, `AuMentionChip`) and Auis's own mark (`
 ## Scope of this phase
 
 The physical `components/ui/` folder stays **flat on purpose** — the layer lives in
-**navigation and governance**, not in the filesystem. Splitting 21 files into subfolders
+**navigation and governance**, not in the filesystem. Splitting 22 files into subfolders
 would break every import for marginal gain. If a folder migration is ever wanted, it follows
 exactly this mapping as its script.
 

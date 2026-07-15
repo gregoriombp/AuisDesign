@@ -5,13 +5,13 @@ This guide takes you from `git clone` to a working design system built by your A
 ## 1. Install and run
 
 ```bash
-git clone https://github.com/gregoriombp/auis.git my-product
+git clone https://github.com/gregoriombp/AuisDesign.git my-product
 cd my-product
 npm install        # postinstall generates .claude/skills + .agents/skills
 npm run dev        # http://127.0.0.1:3000
 ```
 
-Open `/auis/styleguide`. It will be mostly empty — that's correct. Auis ships **de-branded**: neutral tokens, empty component catalog, zeroed navigation. Your product fills it.
+Open `/auis/styleguide`. Auis ships **de-branded**, with neutral foundations and documented showcases for the builder's own `Au*` components. Your product-specific component layer starts empty and grows from there.
 
 ### First move: set up your brand
 
@@ -30,8 +30,7 @@ Then let your agent finish the job in one guided pass:
 The engine was extracted from a private product; it **compiles clean** (`typecheck`, `lint`, `build` all pass) but some content was deliberately emptied:
 
 - `app/auis/projects/_data/projects.ts`, `app/auis/ux-flow/_data/flow-meta.ts`, `app/auis/ux-flow/[slug]/flow-data.ts` are **empty stubs** — galleries render empty until skills populate them.
-- The inline sub-flow loader registry (`app/auis/styleguide/ux-flows/_components/flow-subflow.tsx`) is empty — register your flows there as you create them.
-- `app/globals.css` carries some origin-product animations; harmless, prune at will (but never hand-edit tokens — see step 3).
+- The inline sub-flow loader registry (`app/auis/styleguide/ux-flows/_components/flow-subflow.tsx`) includes the public example — register product flows there as you create them.
 - Two React 19 hooks lint rules are temporarily downgraded to warnings (see `eslint.config.mjs` TODO).
 
 ## 2. Point your agent at the rulebook
@@ -81,9 +80,12 @@ Flows are React pages with structured nodes/edges under `app/auis/styleguide/ux-
 
 ## 7. Review loop
 
+The default `npm run dev` command serves the Review Bridge through same-origin
+Next.js routes. If you need the legacy standalone Express bridge instead:
+
 ```bash
 npm run review-bridge:install   # once
-npm run dev:bridge              # Next + review bridge on 127.0.0.1:9878
+npm run dev:bridge              # Next + legacy bridge on 127.0.0.1:9878
 ```
 
 1. Browse your app, enter **Review Mode**, drop pin comments on anything ("this spacing is off", "wrong icon", "rewrite this empty state").

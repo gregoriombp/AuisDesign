@@ -18,7 +18,7 @@ was never here.
 
 | | **Layer A — Auis builder components** | **Layer B — your product's components** |
 |---|---|---|
-| What | The **21** `Au*` files in `components/ui/` | Whatever you build |
+| What | The **22** `Au*` files in `components/ui/` | Whatever you build |
 | Does it ship? | **Yes** — it is the tool's own UI | **No — empty on purpose** |
 | Why it exists | The Review Bridge, Auis's own mark, and the primitives those stand on | Your product |
 | Can I import it? | Yes — freely | — |
@@ -29,9 +29,9 @@ was never here.
 assembled from"*. If you need a pricing table, a payment card, or an integration tile,
 Layer A does not have one and never did — that is Layer B, and Layer B is yours to build.
 
-**Layer B ships deliberately empty.** The styleguide gallery
-([`navigation.ts`](../app/auis/styleguide/navigation.ts)) is a zeroed template waiting for
-**your** components. That is a starting line, not a gap.
+**Layer B ships deliberately empty.** The styleguide navigation already documents Layer A;
+the product-specific sections begin only when you add **your** components. That is a
+starting line, not a gap.
 
 ## Golden rule (the atomic recipe)
 
@@ -54,7 +54,7 @@ Layer A does not have one and never did — that is Layer B, and Layer B is your
 
 # Layer A — Auis builder components (what ships)
 
-The 21 `Au*` in `components/ui/`. They exist because the **Auis builder** needed them: the
+The 22 `Au*` in `components/ui/`. They exist because the **Auis builder** needed them: the
 Review Bridge is built out of them, and the primitives underneath exist to serve it. You may
 import and reuse any of them in your own screens — just don't mistake this for a product
 catalog.
@@ -105,10 +105,11 @@ build it (see [Genuinely missing something?](#genuinely-missing-something)).
 | Inline alert | `AuAlert` | `@/components/ui/AuAlert` | Persistent, in-flow feedback. Transient feedback → `AuToast`. |
 | Toast | `AuToast` | `@/components/ui/AuToast` | Mount `AuToastProvider` at the top of the tree (already done in the root layout). |
 | Progress | `AuProgress` | `@/components/ui/AuProgress` | Determinate progress bar. |
-| Breadcrumb | `AuBreadcrumb` | `@/components/ui/AuBreadcrumb` | The breadcrumb atom. There is **no** pre-assembled breadcrumbs bar — compose it yourself. |
+| Breadcrumb | `AuBreadcrumb` | `@/components/ui/AuBreadcrumb` | The compact breadcrumb atom. |
+| Breadcrumb bar | `AuBreadcrumbsBar` | `@/components/ui/AuBreadcrumbsBar` | Full-width navigation trail with an optional trailing action. Use the atom when you do not need the strip. |
 | Side navigation / app shell / notifications | *(nothing ships)* | — | **Layer B.** Auis ships no sidebar, nav rail, header, dashboard layout, or notifications panel. Build what your product needs on `AuButton` + `Icon` + tokens. |
 
-## Full Layer A inventory (21)
+## Full Layer A inventory (22)
 
 Terse on purpose (name · import `@/components/ui/<Name>` · role). Every name below resolves to
 a file in `components/ui/`. Mirrors the taxonomy in
@@ -121,9 +122,9 @@ a file in `components/ui/`. Mirrors the taxonomy in
 `AuEmpty` empty state (+ slots) · `AuTabs` tabs · `AuDropdownMenu` dropdown ·
 `AuBreadcrumb` breadcrumb (atom) · `Icon` base icon.
 
-### Components (5)
+### Components (6)
 `AuCard` card (+ sub-exports) · `AuStatCard` metric · `AuTable` table ·
-`AuModal` modal · `AuSheet` drawer.
+`AuModal` modal · `AuSheet` drawer · `AuBreadcrumbsBar` navigation strip.
 
 ### Domain (3 — tied to Auis)
 `AuMentionMenu` mentions (Review Bridge) · `AuMentionChip` mention/skill chips (Review Bridge) ·
@@ -136,8 +137,9 @@ There is no infra/layout tier: **Auis ships no application shell.**
 # Layer B — Your product's components (empty on purpose)
 
 **Nothing ships here yet. That is the design.** Auis was extracted from a private product;
-that product's component catalog was deliberately left behind. What you get is the builder
-plus a clean, empty styleguide — so the first component in this table is *yours*.
+that product's component catalog was deliberately left behind. What you get is the builder,
+its documented Layer A, and an empty product layer — so the first component in this table is
+*yours*.
 
 Fill the table as you build. Same shape as Layer A, same "when NOT to use" discipline —
 that column is what stops the next agent from duplicating what you just made.
@@ -259,14 +261,14 @@ pass them in as props (see AGENTS.md §4).
 
 ## shadcn primitives — what's actually here
 
-`components/ui/` ships **24** `.tsx` files: the **21** `Au*`, plus `Icon.tsx`, plus exactly
+`components/ui/` ships **25** `.tsx` files: the **22** `Au*`, plus `Icon.tsx`, plus exactly
 **two** shadcn primitives — `badge.tsx` and `popover.tsx`. There is no `card.tsx`,
 `button.tsx`, `table.tsx`, `chart.tsx` or `calendar.tsx` in this repo, and no `tool-ui/`
 subsystem. Don't import one; it isn't there.
 
 - **`badge.tsx`** — the base of `AuMentionChip` (its only consumer). In product code use **`AuPill`**.
 - **`popover.tsx`** — sanctioned for direct use (the styleguide flow editor uses it).
-- **The 21 `Au*` are not shadcn wrappers today.** Nine of them use `@radix-ui/*` directly
+- **The 22 `Au*` are not shadcn wrappers today.** Nine of them use `@radix-ui/*` directly
   (`AuButton`, `AuCheckbox`, `AuDropdownMenu`, `AuModal`, `AuProgress`, `AuSheet`, `AuTabs`,
   `AuToggle`, `AuToast`); the rest are hand-rolled in Tailwind + tokens. This is known debt,
   not a pattern to copy — see AGENTS.md §1.

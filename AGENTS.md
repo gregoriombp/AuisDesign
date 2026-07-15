@@ -4,7 +4,7 @@ Conventions for any AI Agent (Claude Code, Codex, Cursor, etc.) working in this 
 
 > For product context (what Auis is, voice, vocabulary) see `PRODUCT_CONTEXT.md`. For styleguide page structure see `docs/`. The conventions, tokens, stack rules and skills below are authoritative.
 >
-> **Before building anything, open [`docs/component-map.md`](docs/component-map.md)** — the index of "I need X → use Y → import path → when not to". It has **two layers**, and the distinction matters: **Layer A** is the 21 `Au*` in `components/ui/` — the UI the **Auis builder itself** is made of (the Review Bridge, Auis's own mark, and the primitives those stand on). They are importable and reusable, but they are not a catalog for your product. Auis ships **no application shell and no AI copilot** — no dashboard layout, sidebar, header, nav rail, or notifications panel. **Layer B** — your product's own components — **ships empty on purpose**; you populate it with the `auis-component` skill. So the map is the fastest way to find the right `Au*` **and** to see, honestly, when a thing doesn't exist yet and you have to build it.
+> **Before building anything, open [`docs/component-map.md`](docs/component-map.md)** — the index of "I need X → use Y → import path → when not to". It has **two layers**, and the distinction matters: **Layer A** is the 22 `Au*` in `components/ui/` — the UI the **Auis builder itself** is made of (the Review Bridge, Auis's own mark, and the primitives those stand on). They are importable and reusable, but they are not a catalog for your product. Auis ships **no application shell and no AI copilot** — no dashboard layout, sidebar, header, nav rail, or notifications panel. **Layer B** — your product's own components — **ships empty on purpose**; you populate it with the `auis-component` skill. So the map is the fastest way to find the right `Au*` **and** to see, honestly, when a thing doesn't exist yet and you have to build it.
 >
 > Continuing the design-system cleanup? Read [`docs/ds-cleanup-plan.md`](docs/ds-cleanup-plan.md) (what's done, what's left, how to resume) and run `npm run ds:check` for the live debt count.
 
@@ -71,7 +71,7 @@ components/ui/MyButton.tsx               ← no prefix
 components/ui/au-button.tsx              ← file must be PascalCase
 ```
 
-**`Au[Name]` wraps a shadcn primitive — going forward.** (Reality today: of the **29**
+**`Au[Name]` wraps a shadcn primitive — going forward.** (Reality today: of the **22**
 `Au*` that ship, exactly one wraps a lowercase primitive (`AuMentionChip` → `badge.tsx`);
 9 use `@radix-ui/*` directly (`AuButton`, `AuCheckbox`, `AuDropdownMenu`, `AuModal`,
 `AuProgress`, `AuSheet`, `AuTabs`, `AuToggle`, `AuToast`); the rest are hand-rolled in
@@ -108,13 +108,13 @@ New components from now on follow the correct flow from day one (primitive + wra
 - **Step 0: open [`docs/component-map.md`](docs/component-map.md)** — the "I need X →
   use Y → import" index. It names the canonical component, the near-duplicates to avoid
   (which card, which table), and — just as important — it is explicit about what **does not
-  exist**. Read its two layers: **Layer A** (the 21 `Au*` that ship — the builder's own UI)
+  exist**. Read its two layers: **Layer A** (the 22 `Au*` that ship — the builder's own UI)
   and **Layer B** (your product's components — empty until you build them). If your need
   isn't in Layer A, it is a Layer B component and you build it; don't guess an import.
   This is the single biggest lever against agents rebuilding what already exists — and
   against agents importing what was never here.
 - Then check, in order:
-  1. `/components/ui/Au*` (official — 31 components)
+  1. `/components/ui/Au*` (official — 22 components)
   2. `/components/ui/*.tsx` lowercase (shadcn primitives — only `badge.tsx` and
      `popover.tsx` ship today; check if an `Au` wrapper exists before importing one)
 - **Reuse > extend > create.** Extend or wrap an existing component when it's close;
@@ -182,7 +182,7 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 | Skill | When to use |
 |---|---|
 | `auis-create-ux-flow` | Create a NEW single-journey flow from a description / step list. |
-| `auis-create-ux-flow-golden-eye` | Create a COMPILED, multi-scenario "golden eye" view — several journeys merged into one deduped graph with per-scenario focus lenses (raw ReactFlow, à la `poc-visao-global`). Use when the value is overlaying scenarios + toggling between them, not one linear path. |
+| `auis-create-ux-flow-golden-eye` | Create a COMPILED, multi-scenario "golden eye" view — several journeys merged into one deduped graph with per-scenario focus lenses through the shared `GoldenEyeDiagram`. Use when the value is overlaying scenarios + toggling between them, not one linear path. |
 | `auis-update-ux-flow` | Register a structural update to an existing flow (+ changelog entry). |
 | `auis-pg-create-flow` | Create a NEW flow from a `.awflow.json` (designer/PG export). |
 | `auis-pg-merge-flow` | Merge a `.awflow.json` into a flow that already exists. |

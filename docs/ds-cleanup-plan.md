@@ -8,7 +8,7 @@
 > the **origin product** Auis was extracted from. Most of the code those sections describe
 > (the ~90-component catalog, the `tool-ui` subsystem, the `fluid/*` kit, the legacy
 > `components/` root) was **deliberately not extracted** into this public snapshot. What
-> ships here is the builder's own UI — the 31 `Au*` in `components/ui/`, indexed in
+> ships here is the builder's own UI — the 22 `Au*` in `components/ui/`, indexed in
 > [`component-map.md`](./component-map.md) → Layer A. The numeric backlog in §3 counted files
 > that are no longer here; today `npm run ds:check` reports a fraction of it. Keep the
 > **strategy** (the buckets, the icon triage, the resume checklist) — it still applies to

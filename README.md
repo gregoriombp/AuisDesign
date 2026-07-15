@@ -12,7 +12,7 @@ Instead of designing in one tool and rebuilding in another, Auis gives you:
 
 Built with **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-first.
 
-> **Origin.** Auis started as *Bombardier*, an internal builder inside a private product. This repository is that engine extracted, de-branded, and open-sourced for the first time — neutral tokens, empty catalog, ready to become **your** design system.
+> **Origin.** Auis started as *Bombardier*, an internal builder inside a private product. This repository is that engine extracted, de-branded, and open-sourced with neutral foundations and a documented builder core, ready to become **your** design system.
 
 Created by **Gregório Pinheiro** — Design Engineer UX/UI, a creator of complex AI systems.
 
@@ -27,13 +27,14 @@ Created by **Gregório Pinheiro** — Design Engineer UX/UI, a creator of comple
 ## Installation
 
 ```bash
-git clone https://github.com/gregoriombp/auis.git
-cd auis
+git clone https://github.com/gregoriombp/AuisDesign.git
+cd AuisDesign
 npm install            # postinstall generates the agent skill trees (.claude/skills, .agents/skills)
 npm run dev            # Next.js on http://127.0.0.1:3000
 ```
 
-Optional — Review Mode queue server:
+Optional — legacy standalone Review Mode queue server (the default `npm run dev`
+already serves the queue through same-origin Next.js routes):
 
 ```bash
 npm run review-bridge:install
@@ -49,8 +50,9 @@ Then open the builder surfaces:
 | Review Bridge dashboard | `/auis/review-bridge` |
 | UX Flows | `/auis/ux-flow` |
 | Projects workbench | `/auis/projects` |
+| Builder roadmap | `/auis/roadmap` |
 
-> ℹ️ The repo compiles clean (`typecheck` · `lint` · `build` all pass), but it ships **deliberately empty**: neutral tokens, no component catalog, zeroed galleries. Your product fills it — see [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
+> The repository ships a neutral, documented **Layer A**: the foundations and components used by the Auis builder itself. Your product's **Layer B** starts empty and grows through the component and page skills. See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
 ## Starting your own design system
 
@@ -97,7 +99,7 @@ npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 - [`AGENTS.md`](AGENTS.md) — **the rulebook.** Conventions any agent must follow: `Au*` prefix, shadcn-wrapper flow, tokens-are-sacred, component-lookup order.
 - [`AUIS.md`](AUIS.md) — mental model and surfaces.
 - [`PRODUCT_CONTEXT.md`](PRODUCT_CONTEXT.md) — template for **your** product's voice and vocabulary (writing skills read it).
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — engine internals; [`docs/component-map.md`](docs/component-map.md) — "need X → use Y" index.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — engine internals; [`docs/component-map.md`](docs/component-map.md) — "need X → use Y" index; [`docs/EXTRACTION-AUDIT.md`](docs/EXTRACTION-AUDIT.md) — the public/private boundary and recovery decisions.
 
 ## Security notes
 
