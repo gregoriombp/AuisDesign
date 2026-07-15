@@ -13,6 +13,7 @@ approval.
 
 | Surface | Route | Role |
 |---|---|---|
+| Welcome | `/auis/welcome` | First-run setup form: project name, a one-line "what is your product", and a logo upload. Posts to `/api/setup`, which seeds the brand overlay the builder chrome reads. Also surfaced as a soft-gate card on the hub (`/auis`) until setup is done. |
 | Styleguide | `/auis/styleguide` | Live design system source: foundations, tokens, `Au*` components, brand, patterns, and UX flows. |
 | Projects | `/auis/projects` | Workbench for imported projects/screens, design-system update requests, and build requests. |
 | UX Flow | `/auis/ux-flow` | Flow viewer/hub for presenting and navigating UX flows as prototypes. |
@@ -42,6 +43,18 @@ that runs with the Next.js app.
   rules instead of inventing file structure.
 
 ## Creating New Work
+
+### First-Run Setup (a freshly cloned Auis)
+
+Use `auis-setup` — or open `/auis/welcome` and fill the form (project name, a
+one-line "what is your product", a logo upload). `auis-setup` is a guided
+orchestrator: it sequences the three creators — `auis-brand` (name, mark, one-line
+identity), then `auis-foundation` (tokens), then `auis-voice` (voice + locale) —
+checking in between each, then flips setup to done so the hub's welcome card
+disappears. The form's `/api/setup` route writes the logo to
+`public/assets/brand/` and the brand overlay to
+`app/auis/_data/brand.runtime.json` (gitignored); `auis-brand` materializes that
+intent into `PRODUCT_CONTEXT.md` and the app chrome (`components/ui/AuLogo.tsx`).
 
 ### New Design System Component
 

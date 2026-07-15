@@ -8,7 +8,7 @@ Instead of designing in one tool and rebuilding in another, Auis gives you:
 - **Review Mode** — drop visual comments on any screen; they become a local work queue that agents resolve, and you approve or reject the result.
 - **Edit Mode** — non-destructive visual edits (text, tokens, variants, icons) that agents materialize into real code.
 - **UX Flows as code** — navigable flow diagrams that are React pages, not static pictures.
-- **36 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
+- **38 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
 
 Built with **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-first.
 
@@ -44,6 +44,7 @@ Then open the builder surfaces:
 
 | Surface | Route |
 |---|---|
+| Welcome / first-run setup | `/auis/welcome` |
 | Styleguide (design system) | `/auis/styleguide` |
 | Review Bridge dashboard | `/auis/review-bridge` |
 | UX Flows | `/auis/ux-flow` |
@@ -55,16 +56,18 @@ Then open the builder surfaces:
 
 The intended loop (each step is a skill your agent runs):
 
-1. **`auis-foundation`** — hand your agent a visual reference (screenshot, Figma URL, Dribbble/Behance/Mobbin capture). It extracts tokens (colors, typography, spacing, radius, shadows) and writes them into `globals.css`. *This is the only skill allowed to create tokens.*
-2. **`auis-voice`** — hand it your product instead: an existing app, a site, a tone-of-voice doc, or just answer six questions. It fills [`PRODUCT_CONTEXT.md`](PRODUCT_CONTEXT.md) with your product's language, voice, protected vocabulary, and a corpus of its real strings. *This is the only skill allowed to create voice* — the writing skills read it and produce generic copy until it exists.
-3. **`auis-component`** — add components. Checks the shadcn registry first, wraps/extends primitives into `Au*` components, and registers each one in the styleguide with a showcase route.
-4. **`auis-page`** — build full pages from a screenshot, Figma URL, wireframe, or written description, mapping every element to existing components first.
-5. **`auis-flow` / `auis-create-ux-flow`** — design feature flows as navigable diagrams tied to real routes and files.
-6. **`auis-ux-writing`** — make every string in a screen sound like your product, using the voice from step 2.
-7. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve.
-8. **`auis-audit`** — verify every component used in the app is documented in the styleguide.
+0. **`auis-setup`** — the recommended first move. Run `/auis-setup`, or open `/auis/welcome` and it will walk you through it: your project name, a one-line "what is your product", and a logo upload. It's a guided orchestrator — it sequences the three creators below (brand → tokens → voice), checking in between each. The hub (`/auis`) shows a "Welcome — set up your brand" card until setup is done.
+1. **`auis-brand`** — establishes your product's identity: the app name, the one-line positioning, and your logo/mark, wired into the app chrome so the builder reads as *your* product, not Auis. *This is the only skill allowed to establish brand.*
+2. **`auis-foundation`** — hand your agent a visual reference (screenshot, Figma URL, Dribbble/Behance/Mobbin capture). It extracts tokens (colors, typography, spacing, radius, shadows) and writes them into `globals.css`. *This is the only skill allowed to create tokens.*
+3. **`auis-voice`** — hand it your product instead: an existing app, a site, a tone-of-voice doc, or just answer six questions. It fills [`PRODUCT_CONTEXT.md`](PRODUCT_CONTEXT.md) with your product's language, voice, protected vocabulary, and a corpus of its real strings. *This is the only skill allowed to create voice* — the writing skills read it and produce generic copy until it exists.
+4. **`auis-component`** — add components. Checks the shadcn registry first, wraps/extends primitives into `Au*` components, and registers each one in the styleguide with a showcase route.
+5. **`auis-page`** — build full pages from a screenshot, Figma URL, wireframe, or written description, mapping every element to existing components first.
+6. **`auis-flow` / `auis-create-ux-flow`** — design feature flows as navigable diagrams tied to real routes and files.
+7. **`auis-ux-writing`** — make every string in a screen sound like your product, using the voice from step 3.
+8. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve.
+9. **`auis-audit`** — verify every component used in the app is documented in the styleguide.
 
-Tokens and voice are the two things Auis will never invent for you: `auis-foundation` derives one from a design you show it, `auis-voice` derives the other from a product you show it. Everything downstream consumes them.
+Brand, tokens, and voice are the three things Auis will never invent for you — the three creators `auis-setup` sequences: `auis-brand` derives your identity from the name and logo you give it, `auis-foundation` derives the tokens from a design you show it, `auis-voice` derives the voice from a product you show it. Everything downstream consumes them.
 
 Full walkthrough: [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
@@ -77,7 +80,7 @@ npm run skills:sync      # regenerate .claude/skills (Claude Code) + .agents/ski
 npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 ```
 
-36 skills across 6 capabilities — design system, UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
+38 skills across 6 capabilities — design system, UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
 
 ## Commands
 
