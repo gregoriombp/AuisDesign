@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { createPortal } from "react-dom"
 import { AuButton } from "@/components/ui/AuButton"
 import { Icon } from "@/components/ui/Icon"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useStopDismiss } from "@/lib/auis-review/useStopDismiss"
 import {
   attachMobbinImage,
@@ -97,11 +97,17 @@ export function ReviewMobbinPanel({
 
   // On open: prefill + focus. On close: cancel any pending wait.
   React.useEffect(() => {
+    let frame: number | null = null
     if (open) {
-      setQuery((prev) => prev || buildDefaultQuery(element, page))
-      requestAnimationFrame(() => inputRef.current?.focus())
+      frame = requestAnimationFrame(() => {
+        setQuery((prev) => prev || buildDefaultQuery(element, page))
+        inputRef.current?.focus()
+      })
     } else {
       cancelPending()
+    }
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame)
     }
   }, [open, element, page, cancelPending])
 
@@ -175,29 +181,35 @@ export function ReviewMobbinPanel({
     [attachingId, attachedIds, canAttachMore, onAttach]
   )
 
-  if (!open || typeof document === "undefined") return null
-
-  // Horizontal: to the right of the composer; no room, to the left; otherwise flush.
-  let left = anchorCenterX + anchorWidth / 2 + GAP
-  if (left + PANEL_WIDTH > window.innerWidth - 8) {
-    const leftSide = anchorCenterX - anchorWidth / 2 - GAP - PANEL_WIDTH
-    left = leftSide >= 8 ? leftSide : Math.max(8, window.innerWidth - 8 - PANEL_WIDTH)
-  }
-  // Vertical: near the pin, keeping a minimum visible; it scrolls internally.
-  let top = Math.max(8, anchorY - 180)
-  top = Math.min(top, Math.max(8, window.innerHeight - 8 - MIN_PANEL_HEIGHT))
-  const maxHeight = window.innerHeight - top - 8
+  const viewportWidth = typeof window === "undefined" ? 1440 : window.innerWidth
+  const viewportHeight = typeof window === "undefined" ? 900 : window.innerHeight
+  const roomOnRight =
+    anchorCenterX + anchorWidth / 2 + GAP + PANEL_WIDTH <= viewportWidth - 8
+  const side = roomOnRight ? "right" : "left"
+  const maxHeight = Math.max(MIN_PANEL_HEIGHT, viewportHeight - 16)
 
   const hint = contextHint(element, page)
 
-  return createPortal(
-    <div
-      {...{ [OVERLAY_DATA_ATTR]: "" }}
-      ref={stopDismiss}
-      role="dialog"
-      aria-label="Find similar designs on Mobbin"
-      className="fixed pointer-events-auto rounded-lg bg-(--bg-raised) border border-(--border-subtle) shadow-lg flex flex-col overflow-hidden"
-      style={{ zIndex: REVIEW_Z.modal, left, top, width: PANEL_WIDTH, maxHeight }}
+  return (
+    <Popover open={open} onOpenChange={(next) => !next && onClose()}>
+      <PopoverTrigger asChild>
+        <span
+          aria-hidden="true"
+          tabIndex={-1}
+          className="pointer-events-none fixed h-px w-px"
+          style={{ left: anchorCenterX, top: anchorY, zIndex: REVIEW_Z.modal }}
+        />
+      </PopoverTrigger>
+      <PopoverContent
+        {...{ [OVERLAY_DATA_ATTR]: "" }}
+        ref={stopDismiss}
+        aria-label="Find similar designs on Mobbin"
+        side={side}
+        align="center"
+        sideOffset={anchorWidth / 2 + GAP}
+        collisionPadding={8}
+        className="pointer-events-auto flex w-auto flex-col overflow-hidden rounded-lg border border-subtle bg-raised p-0 shadow-lg"
+        style={{ zIndex: REVIEW_Z.modal, width: PANEL_WIDTH, maxHeight }}
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           e.stopPropagation()
@@ -392,7 +404,7 @@ export function ReviewMobbinPanel({
           </>
         )}
       </div>
-    </div>,
-    document.body
+      </PopoverContent>
+    </Popover>
   )
 }

@@ -168,7 +168,7 @@ export interface ReviewReply {
 export type ReviewCommentOrigin = "page" | "ux-flow" | "backlog"
 
 export interface ReviewFlowRef {
-  /** Flow slug, e.g. "primeiro-acesso". */
+  /** Flow slug, e.g. "checkout-review". */
   flow: string
   /** Anchored node id in the diagram, when the comment targets a specific node. */
   nodeId?: string
