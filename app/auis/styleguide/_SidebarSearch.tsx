@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Icon } from "@/components/ui/Icon"
-import { navigation } from "./navigation"
+import { navigation, type NavSection } from "./navigation"
 
 type Hit = {
   name: string
@@ -13,39 +13,42 @@ type Hit = {
   aliases?: string[]
 }
 
-const ALL_ITEMS: Hit[] = navigation.flatMap((section) =>
-  section.items.flatMap((item) => {
-    const parent = {
-      name: item.name,
-      href: item.href,
-      section: section.title,
-      aliases: item.aliases,
-    }
-    const children =
-      item.children?.map((child) => ({
-        name: child.name,
-        href: child.href,
-        section: `${section.title} / ${item.name}`,
-        aliases: child.aliases,
-      })) ?? []
-    return [parent, ...children]
-  })
-)
+function buildItems(sections: NavSection[]): Hit[] {
+  return sections.flatMap((section) =>
+    section.items.flatMap((item) => {
+      const parent = {
+        name: item.name,
+        href: item.href,
+        section: section.title,
+        aliases: item.aliases,
+      }
+      const children =
+        item.children?.map((child) => ({
+          name: child.name,
+          href: child.href,
+          section: `${section.title} / ${item.name}`,
+          aliases: child.aliases,
+        })) ?? []
+      return [parent, ...children]
+    }),
+  )
+}
 
 function normalize(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
 }
 
-export function SidebarSearch() {
+export function SidebarSearch({ sections }: { sections?: NavSection[] }) {
   const router = useRouter()
   const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
   const [cursor, setCursor] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLUListElement>(null)
+  const allItems = useMemo(() => buildItems(sections ?? navigation), [sections])
 
   const q = normalize(query.trim())
-  const hits: Hit[] = q.length < 1 ? [] : ALL_ITEMS.filter((item) =>
+  const hits: Hit[] = q.length < 1 ? [] : allItems.filter((item) =>
     normalize(item.name).includes(q) ||
     normalize(item.section).includes(q) ||
     item.aliases?.some((alias) => normalize(alias).includes(q))

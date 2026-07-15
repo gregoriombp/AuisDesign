@@ -14,9 +14,14 @@ type FlowData = { nodes: Node[]; edges: Edge[] }
 // Lazy loaders — dynamic import code-splits each flow; loaded only on expand.
 // Register your flows here so "other flow" diamonds can expand them inline:
 //   "my-flow": () => import("../my-flow/page").then((m) => ({ nodes: m.NODES, edges: m.EDGES })),
-// The flow page must export NODES and EDGES. Empty by default in this
-// de-branded snapshot (origin-product flows were removed).
-const LOADERS: Record<string, () => Promise<FlowData>> = {}
+// The flow page must export NODES and EDGES. Product flows register themselves
+// here; the public example is kept as a working reference.
+const LOADERS: Record<string, () => Promise<FlowData>> = {
+  example: () => import("../example/page").then((module) => ({
+    nodes: module.NODES,
+    edges: module.EDGES,
+  })),
+}
 
 export function flowSlugFromHref(href: string): string | null {
   const m = href.match(/ux-flows\/([^/?#]+)/)

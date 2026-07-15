@@ -1030,7 +1030,7 @@ export function FlowDiagram({
               ? "overflow-hidden"
               : "rounded-lg border border-(--border-subtle) overflow-hidden"
           }
-          style={{ backgroundColor: "var(--bg-muted)", height: isFullscreen ? "100vh" : 800 }}
+          style={{ backgroundColor: "var(--bg-muted)", height: isFullscreen ? "100vh" : height }}
         >
           <ReactFlow
             nodes={renderedNodes}
@@ -1055,7 +1055,7 @@ export function FlowDiagram({
             proOptions={{ hideAttribution: true }}
             minZoom={0.3}
             maxZoom={1.5}
-            style={{ background: "#fafafa" }}
+            style={{ background: "var(--bg-muted)" }}
           >
             <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="var(--border-default)" />
             <Controls showInteractive={false}>

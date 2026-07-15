@@ -6,7 +6,6 @@ import * as Collapsible from "@radix-ui/react-collapsible"
 import { navigation } from "./navigation"
 import ThemeToggle from "./ThemeToggle"
 import { AuLogo } from "@/components/ui/AuLogo"
-import { AuToastProvider } from "@/components/ui/AuToast"
 import { Icon } from "@/components/ui/Icon"
 import { SidebarSearch } from "./_SidebarSearch"
 import { useBrand } from "@/app/auis/_data/BrandProvider"
@@ -28,7 +27,6 @@ export default function StyleguideLayout({
   const brand = useBrand()
 
   return (
-    <AuToastProvider>
     <div className="flex min-h-screen bg-(--bg-canvas) text-(--fg-primary)">
       <aside className="au-sg-sidebar w-64 border-r border-(--border-subtle) p-6 flex flex-col gap-8 fixed top-0 left-0 h-screen overflow-y-auto">
         <Link
@@ -143,6 +141,5 @@ export default function StyleguideLayout({
         {children}
       </main>
     </div>
-    </AuToastProvider>
   )
 }

@@ -14,15 +14,8 @@ export interface NavSection {
   items: NavItem[]
 }
 
-// Auis — styleguide navigation (ZEROED template).
-//
-// The origin design system's catalog (~90 component showcases + foundation/brand
-// pages) was intentionally NOT extracted — it belonged to the source product.
-// Populate this as you build YOUR design system:
-//   • `auis-foundation` bootstraps the foundations (color, type, spacing, …)
-//   • `auis-component`  adds a component + its showcase + an entry here
-//
-// Keep links pointing only to pages that actually exist, or the sidebar 404s.
+// Auis styleguide navigation. Layer A documents the builder itself; append the
+// user's Layer B component families after these sections as they are created.
 export const navigation: NavSection[] = [
   {
     title: "Introduction",
@@ -31,32 +24,68 @@ export const navigation: NavSection[] = [
     ],
   },
   {
-    group: "Auis",
-    title: "Review Mode",
+    group: "Foundation",
+    title: "Design foundations",
     items: [
+      { name: "Color", href: "/auis/styleguide/foundation/color" },
+      { name: "Typography", href: "/auis/styleguide/foundation/typography" },
+      { name: "Spacing", href: "/auis/styleguide/foundation/spacing" },
+      { name: "Radius", href: "/auis/styleguide/foundation/radius" },
+      { name: "Shadows", href: "/auis/styleguide/foundation/shadows" },
+      { name: "Motion", href: "/auis/styleguide/foundation/motion" },
+      { name: "Iconography", href: "/auis/styleguide/foundation/iconography" },
+      { name: "Accessibility", href: "/auis/styleguide/foundation/accessibility" },
+    ],
+  },
+  {
+    group: "Design system",
+    title: "Primitives",
+    items: [
+      { name: "Button", href: "/auis/styleguide/components/au-button" },
+      { name: "Input and field", href: "/auis/styleguide/components/au-input" },
+      { name: "Checkbox", href: "/auis/styleguide/components/au-checkbox" },
+      { name: "Toggle", href: "/auis/styleguide/components/au-toggle" },
+      { name: "Slider", href: "/auis/styleguide/components/au-slider" },
+      { name: "Pill", href: "/auis/styleguide/components/au-pill" },
+      { name: "Progress", href: "/auis/styleguide/components/au-progress" },
+      { name: "Alert", href: "/auis/styleguide/components/au-alert" },
+      { name: "Toast", href: "/auis/styleguide/components/au-toast" },
+      { name: "Empty state", href: "/auis/styleguide/components/au-empty" },
+      { name: "Tabs", href: "/auis/styleguide/components/au-tabs" },
+      { name: "Dropdown menu", href: "/auis/styleguide/components/au-dropdown-menu" },
+      { name: "Breadcrumb", href: "/auis/styleguide/components/au-breadcrumb" },
+      { name: "Icon", href: "/auis/styleguide/components/icon" },
+    ],
+  },
+  {
+    group: "Design system",
+    title: "Components",
+    items: [
+      { name: "Card", href: "/auis/styleguide/components/au-card" },
+      { name: "Stat card", href: "/auis/styleguide/components/au-stat-card" },
+      { name: "Table", href: "/auis/styleguide/components/au-table" },
+      { name: "Modal", href: "/auis/styleguide/components/au-modal" },
+      { name: "Sheet", href: "/auis/styleguide/components/au-sheet" },
+      { name: "Breadcrumbs bar", href: "/auis/styleguide/components/au-breadcrumbs-bar" },
+    ],
+  },
+  {
+    group: "Auis",
+    title: "UX flows",
+    items: [
+      { name: "Example flow", href: "/auis/styleguide/ux-flows/example" },
+      { name: "Golden-eye example", href: "/auis/styleguide/ux-flows/example-golden-eye" },
+    ],
+  },
+  {
+    group: "Auis",
+    title: "Builder components",
+    items: [
+      { name: "Auis logo", href: "/auis/styleguide/components/au-logo" },
+      { name: "Mention chip", href: "/auis/styleguide/components/au-mention-chip" },
+      { name: "Mention menu", href: "/auis/styleguide/components/au-mention-menu" },
       { name: "About Review Mode", href: "/auis/styleguide/foundation/review-mode" },
       { name: "Inbox", href: "/auis/styleguide/review" },
     ],
   },
-
-  // ── Populate below as you build (templates) ──────────────────────────────
-  //
-  // Foundations (via `auis-foundation`):
-  // {
-  //   group: "Base",
-  //   title: "Foundations",
-  //   items: [
-  //     { name: "Color", href: "/auis/styleguide/foundation/color" },
-  //     { name: "Typography", href: "/auis/styleguide/foundation/typography" },
-  //   ],
-  // },
-  //
-  // Components (each `auis-component` run appends one entry):
-  // {
-  //   group: "Design System",
-  //   title: "Components",
-  //   items: [
-  //     { name: "Button", href: "/auis/styleguide/components/au-button" },
-  //   ],
-  // },
 ]
