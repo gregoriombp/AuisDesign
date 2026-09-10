@@ -2,9 +2,9 @@
 // in a Review Bridge comment. Single source of truth for the "/" autocomplete
 // menu AND documentation of which skills each agent (see ./agents) may run.
 //
-// Intentionally a small, hand-picked subset of `.claude/skills/auis-*` —
-// only the ones meaningful as a *live command* inside a comment. The full skill
-// catalog lives on disk; this list is the product-facing surface.
+// Intentionally a small, hand-picked subset of `skills/**/auis-*` — only the
+// ones meaningful as a *live command* inside a comment. The full skill catalog
+// lives on disk; this list is the product-facing surface.
 
 export type ReviewSkillSlug =
   | "auis-review-bridge-solve"
@@ -14,7 +14,7 @@ export type ReviewSkillSlug =
   | "auis-review-bridge-germano-audit"
 
 export interface ReviewSkill {
-  /** Exact skill name under `.claude/skills` — what "/" inserts into the text. */
+  /** Exact skill name under `skills/` — what "/" inserts into the text. */
   slug: ReviewSkillSlug
   /** Short human label for the picker row. */
   label: string
@@ -24,7 +24,7 @@ export interface ReviewSkill {
   blurb: string
   /** Agent that owns/runs this skill (see ./agents), or null if generic. */
   ownerId: "claude" | "germano" | null
-  /** True when running it mutates the prototype (gated behind #now + Auto Construct). */
+  /** True when running it mutates the prototype — gated by Auto Construct. */
   acts: boolean
 }
 
@@ -79,4 +79,16 @@ export function getReviewSkill(slug: string): ReviewSkill | undefined {
 
 export function isReviewSkillSlug(slug: string): slug is ReviewSkillSlug {
   return BY_SLUG.has(slug)
+}
+
+/** Codex shares Claude's executor contracts; Germano keeps his own. */
+const CLAUDE_EXECUTOR_ALIASES = new Set(["codex"])
+
+export function isReviewSkillAvailableToAgent(
+  skill: ReviewSkill,
+  agentId: string,
+): boolean {
+  if (!skill.ownerId) return true
+  if (skill.ownerId === agentId) return true
+  return skill.ownerId === "claude" && CLAUDE_EXECUTOR_ALIASES.has(agentId)
 }

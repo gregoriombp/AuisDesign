@@ -7,8 +7,9 @@ Instead of designing in one tool and rebuilding in another, Auis gives you:
 - **A living styleguide** (`/auis/styleguide`) — tokens, foundations, components, and patterns rendered from the real code.
 - **Review Mode** — drop visual comments on any screen; they become a local work queue that agents resolve, and you approve or reject the result.
 - **Edit Mode** — non-destructive visual edits (text, tokens, variants, icons) that agents materialize into real code.
-- **UX Flows as code** — navigable flow diagrams that are React pages, not static pictures.
-- **38 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
+- **UX Flows as code** — a dedicated hub (`/auis/ux-flow`) of navigable flow diagrams that are React pages, not static pictures, with comments, structural suggestions and compiled multi-scenario views.
+- **State Mode** — every registered screen rendered in every state, side by side (`/auis/states`), driven by URL params; switch states in place on any screen with ⌘⇧S.
+- **37 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
 
 Built with **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-first.
 
@@ -33,22 +34,17 @@ npm install            # postinstall generates the agent skill trees (.claude/sk
 npm run dev            # Next.js on http://127.0.0.1:3000
 ```
 
-Optional — legacy standalone Review Mode queue server (the default `npm run dev`
-already serves the queue through same-origin Next.js routes):
-
-```bash
-npm run review-bridge:install
-npm run dev:bridge     # Next + local Express review bridge on 127.0.0.1:9878
-```
-
-Then open the builder surfaces:
+The Review Bridge, the Flow Bridge and the State Mode API are same-origin Next.js
+routes — `npm run dev` is all you need. Then open the builder surfaces:
 
 | Surface | Route |
 |---|---|
 | Welcome / first-run setup | `/auis/welcome` |
 | Styleguide (design system) | `/auis/styleguide` |
 | Review Bridge dashboard | `/auis/review-bridge` |
-| UX Flows | `/auis/ux-flow` |
+| Review inbox | `/auis/styleguide/review` |
+| UX Flow hub | `/auis/ux-flow` |
+| State Mode matrix | `/auis/states` |
 | Projects workbench | `/auis/projects` |
 | Builder roadmap | `/auis/roadmap` |
 
@@ -60,13 +56,13 @@ The intended loop (each step is a skill your agent runs):
 
 0. **`auis-setup`** — the recommended first move. Run `/auis-setup`, or open `/auis/welcome` and it will walk you through it: your project name, a one-line "what is your product", and a logo upload. It's a guided orchestrator — it sequences the three creators below (brand → tokens → voice), checking in between each. The hub (`/auis`) shows a "Welcome — set up your brand" card until setup is done.
 1. **`auis-brand`** — establishes your product's identity: the app name, the one-line positioning, and your logo/mark, wired into the app chrome so the builder reads as *your* product, not Auis. *This is the only skill allowed to establish brand.*
-2. **`auis-foundation`** — hand your agent a visual reference (screenshot, Figma URL, Dribbble/Behance/Mobbin capture). It extracts tokens (colors, typography, spacing, radius, shadows) and writes them into `globals.css`. *This is the only skill allowed to create tokens.*
+2. **`auis-foundation`** — hand your agent a visual reference (screenshot, Figma URL, Dribbble/Behance capture). It extracts tokens (colors, typography, spacing, radius, shadows) and writes them into `globals.css`. *This is the only skill allowed to create tokens.*
 3. **`auis-voice`** — hand it your product instead: an existing app, a site, a tone-of-voice doc, or just answer six questions. It fills [`PRODUCT_CONTEXT.md`](PRODUCT_CONTEXT.md) with your product's language, voice, protected vocabulary, and a corpus of its real strings. *This is the only skill allowed to create voice* — the writing skills read it and produce generic copy until it exists.
 4. **`auis-component`** — add components. Checks the shadcn registry first, wraps/extends primitives into `Au*` components, and registers each one in the styleguide with a showcase route.
 5. **`auis-page`** — build full pages from a screenshot, Figma URL, wireframe, or written description, mapping every element to existing components first.
-6. **`auis-flow` / `auis-create-ux-flow`** — design feature flows as navigable diagrams tied to real routes and files.
+6. **`auis-flow` / `auis-create-ux-flow`** — design feature flows as navigable diagrams tied to real routes and files, listed in the UX Flow hub; `auis-create-ux-flow-golden-eye` compiles several journeys into one view, and `auis-update-states` registers each screen's states for the State Mode matrix.
 7. **`auis-ux-writing`** — make every string in a screen sound like your product, using the voice from step 3.
-8. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve.
+8. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve. Mention `@claude`, `@codex` or `@germano` in a comment and, with the agent's toggles on in the floating dot, `auis-review-bridge-dispatch` (under `/loop`) replies or acts on it.
 9. **`auis-audit`** — verify every component used in the app is documented in the styleguide.
 
 Brand, tokens, and voice are the three things Auis will never invent for you — the three creators `auis-setup` sequences: `auis-brand` derives your identity from the name and logo you give it, `auis-foundation` derives the tokens from a design you show it, `auis-voice` derives the voice from a product you show it. Everything downstream consumes them.
@@ -75,21 +71,22 @@ Full walkthrough: [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
 ## Skills
 
-**Source of truth:** `skills/<capability>/<name>/SKILL.md` (with a `SKILL.codex.md` variant where Codex diverges — 13 cases). The `.claude/skills/` and `.agents/skills/` discovery trees are **generated** — never edit them.
+**Source of truth:** `skills/<capability>/<name>/SKILL.md` (with a `SKILL.codex.md` variant where Codex diverges — 10 cases). The `.claude/skills/` and `.agents/skills/` discovery trees are **generated** — never edit them.
 
 ```bash
 npm run skills:sync      # regenerate .claude/skills (Claude Code) + .agents/skills (Codex/Cursor)
 npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 ```
 
-38 skills across 6 capabilities — design system, UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
+37 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
 
 ## Commands
 
 | Command | What it does |
 |---|---|
 | `npm run dev` | Dev server (predev syncs skills) |
-| `npm run dev:bridge` | Dev server + local review-queue server |
+| `npm test` | Node unit tests (review identities, flow-suggestion integrity) |
+| `npm run states:pdf` | Print the State Mode matrix to `auis-states-matrix.pdf` (needs a Chromium; see the script) |
 | `npm run build` / `typecheck` / `lint` | Build / types / lint |
 | `npm run ds:check` | Design-system lint (hardcode debt, hand-rolled overlays) |
 | `npm run skills:sync` / `skills:catalog` | Regenerate agent discovery trees / registry + catalog |
@@ -103,7 +100,7 @@ npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 
 ## Security notes
 
-The review bridge binds to `127.0.0.1` only — never expose it on a LAN or bind to `0.0.0.0`. Runtime data dirs (`flow-bridge/`, `page-editor/`, `review-bridge/data/`) are gitignored.
+The bridges are same-origin routes of the dev server, which binds to `127.0.0.1` only — never expose it on a LAN or bind to `0.0.0.0`. Runtime data dirs (`flow-bridge/data/`, `page-editor/`, `review-bridge/data/`) are gitignored. Set `BRIDGE_AGENT_TOKEN` only on a deployment that must accept agent writes over the network.
 
 ## Contributing
 

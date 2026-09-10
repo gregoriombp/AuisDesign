@@ -4,6 +4,8 @@ import {
   listSuggestions,
   type FlowSuggestionStatus,
 } from "./_store";
+import { flowActorForSession } from "./_integrity";
+import { getBridgeSession } from "../review-bridge/_session";
 
 // Touches the filesystem (flow-bridge/data/*.json) — must run on Node, never
 // cached.
@@ -23,10 +25,18 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const session = await getBridgeSession(request);
+  if (session.role === "agent") {
+    return NextResponse.json(
+      { error: "Agents materialize existing proposals; they do not create one on behalf of a reviewer." },
+      { status: 403 },
+    );
+  }
   let body: {
     flow?: unknown;
     description?: unknown;
-    authorName?: unknown;
+    baseNodes?: unknown;
+    baseEdges?: unknown;
     nodes?: unknown;
     edges?: unknown;
   };
@@ -41,10 +51,31 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
+  if (!Array.isArray(body.baseNodes) || !Array.isArray(body.baseEdges)) {
+    return NextResponse.json(
+      { error: "baseNodes and baseEdges are required to record the base revision." },
+      { status: 400 },
+    );
+  }
+  if (
+    !Array.isArray(body.nodes) ||
+    body.nodes.length === 0 ||
+    /^\s*\[?ge(?::|\])/i.test(body.description)
+  ) {
+    return NextResponse.json(
+      {
+        error:
+          "Golden-eye comments belong to the Review Bridge; flow-suggestions only accepts structural proposals with nodes.",
+      },
+      { status: 400 },
+    );
+  }
   const suggestion = await createSuggestion({
     flow: body.flow,
     description: body.description,
-    authorName: typeof body.authorName === "string" ? body.authorName : undefined,
+    authorName: flowActorForSession(session).name,
+    baseNodes: body.baseNodes,
+    baseEdges: body.baseEdges,
     nodes: Array.isArray(body.nodes) ? body.nodes : [],
     edges: Array.isArray(body.edges) ? body.edges : [],
   });

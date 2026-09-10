@@ -21,6 +21,7 @@ interface SuggestBody {
     label?: string
     text?: string
     selector?: string
+    location?: string
   }
   page?: string
 }
@@ -85,14 +86,15 @@ export async function POST(request: NextRequest) {
   const elementLine = elementCtx
     ? `Element selected on screen — ${elementCtx}.`
     : "No specific element selected."
+  const locationLine = el?.location ? `Where it is: ${el.location}.` : null
   const pageLine = body.page ? `Screen: ${body.page}.` : null
 
   const userMsg =
     mode === "complete"
-      ? [elementLine, pageLine, `Text so far: "${body.draft}"`, "Continue."]
+      ? [elementLine, locationLine, pageLine, `Text so far: "${body.draft}"`, "Continue."]
           .filter(Boolean)
           .join("\n")
-      : [elementLine, pageLine, `Reviewer's draft: "${draft}"`, "Rewrite the comment."]
+      : [elementLine, locationLine, pageLine, `Reviewer's draft: "${draft}"`, "Rewrite the comment."]
           .filter(Boolean)
           .join("\n")
 

@@ -10,28 +10,58 @@ import { AuLogo } from "@/components/ui/AuLogo";
 import { useBrand } from "@/app/auis/_data/BrandProvider";
 import { useReviewStore } from "@/lib/auis-review/store";
 import { useEditStore } from "@/lib/auis-edit/store";
+import { useStatesStore } from "@/lib/auis-states/store";
 import {
   useAgentSettingsStore,
   agentSettingsOf,
 } from "@/lib/auis-review/agentSettingsStore";
 import { REVIEW_AGENTS } from "@/lib/auis-review/agents";
+import { useBuilderChromeHidden } from "@/lib/auis/useBuilderChromeHidden";
 
+/**
+ * The persistent Auis dot (bottom-right corner): navigation shortcuts, the
+ * three modes (Review / Edit / States) and the per-agent toggles that are the
+ * dispatcher's permission.
+ */
 export function AuisDot() {
+  // useSearchParams (through useBuilderChromeHidden) requires Suspense on prerender.
+  return (
+    <React.Suspense fallback={null}>
+      <AuisDotGate />
+    </React.Suspense>
+  );
+}
+
+/** `?chrome=0` (state matrix iframes, the PDF generator) hides the dot. */
+function AuisDotGate() {
+  const chromeHidden = useBuilderChromeHidden();
+  if (chromeHidden) return null;
+  return <AuisDotInner />;
+}
+
+function AuisDotInner() {
   const router = useRouter();
   const brand = useBrand();
   const [visible, setVisible] = React.useState(true);
   const reviewActive = useReviewStore((s) => s.active);
   const toggleReview = useReviewStore((s) => s.toggleActive);
-  const backend = useReviewStore((s) => s.backend);
+  const sessionRole = useReviewStore((s) => s.sessionRole);
+  const hydrateSession = useReviewStore((s) => s.hydrateSession);
   const editActive = useEditStore((s) => s.active);
   const toggleEdit = useEditStore((s) => s.toggleActive);
+  const statesActive = useStatesStore((s) => s.active);
+  const toggleStates = useStatesStore((s) => s.toggleActive);
   const agentSettings = useAgentSettingsStore((s) => s.settings);
   const hydrateAgents = useAgentSettingsStore((s) => s.hydrate);
   const toggleAgent = useAgentSettingsStore((s) => s.toggle);
+  // Agents obey only the admin — the toggles do not even show for a reviewer
+  // (and the server refuses the PUT anyway).
+  const isAdmin = sessionRole === "admin";
 
   React.useEffect(() => {
     void hydrateAgents();
-  }, [hydrateAgents]);
+    void hydrateSession();
+  }, [hydrateAgents, hydrateSession]);
 
   if (!visible) return null;
 
@@ -40,21 +70,23 @@ export function AuisDot() {
   // Agent control panel — Live Response / Auto Construct per agent.
   // Toggles keep the menu open (closeOnSelect: false) so you can flip several
   // of them in one go.
-  const agentItems: AuDropdownItem[] = [
-    { id: "sep-agents", separator: true },
-    { id: "label-agents", isLabel: true, label: "Agents" },
-    ...REVIEW_AGENTS.flatMap((agent): AuDropdownItem[] => {
-      const s = agentSettingsOf(agentSettings, agent.id);
-      return agent.capabilities.map((cap): AuDropdownItem => ({
-        id: `${agent.id}-${cap.key}`,
-        label: `${agent.handle} · ${cap.label}`,
-        icon: cap.icon,
-        checked: s[cap.key],
-        closeOnSelect: false,
-        onSelect: () => void toggleAgent(agent.id, cap.key),
-      }));
-    }),
-  ];
+  const agentItems: AuDropdownItem[] = !isAdmin
+    ? []
+    : [
+        { id: "sep-agents", separator: true },
+        { id: "label-agents", isLabel: true, label: "Agents" },
+        ...REVIEW_AGENTS.flatMap((agent): AuDropdownItem[] => {
+          const s = agentSettingsOf(agentSettings, agent.id);
+          return agent.capabilities.map((cap): AuDropdownItem => ({
+            id: `${agent.id}-${cap.key}`,
+            label: `${agent.handle} · ${cap.label}`,
+            icon: cap.icon,
+            checked: s[cap.key],
+            closeOnSelect: false,
+            onSelect: () => void toggleAgent(agent.id, cap.key),
+          }));
+        }),
+      ];
 
   const items: AuDropdownItem[] = [
     { id: "label-nav", isLabel: true, label: "Auis" },
@@ -77,6 +109,18 @@ export function AuisDot() {
       onSelect: () => go("/auis/ux-flow"),
     },
     {
+      id: "states-matrix",
+      label: "State matrix",
+      icon: "grid_view",
+      onSelect: () => go("/auis/states"),
+    },
+    {
+      id: "review-bridge",
+      label: "Review Bridge",
+      icon: "inbox",
+      onSelect: () => go("/auis/review-bridge"),
+    },
+    {
       id: "design-tweaks",
       label: "Design tweaks",
       icon: "tune",
@@ -94,15 +138,8 @@ export function AuisDot() {
       icon: "flag",
       onSelect: () => go("/auis/roadmap"),
     },
-    { id: "sep-review", separator: true },
-    {
-      id: "review-status",
-      isLabel: true,
-      label:
-        backend === "bridge"
-          ? "Review · local bridge"
-          : "Review · local (this browser)",
-    },
+    { id: "sep-modes", separator: true },
+    { id: "label-modes", isLabel: true, label: "Modes" },
     {
       id: "review",
       label: reviewActive ? "Exit Review Mode" : "Enter Review Mode",
@@ -116,6 +153,13 @@ export function AuisDot() {
       icon: editActive ? "edit_off" : "edit",
       checked: editActive,
       onSelect: () => toggleEdit(),
+    },
+    {
+      id: "states",
+      label: statesActive ? "Exit State Mode" : "Enter State Mode",
+      icon: "instant_mix",
+      checked: statesActive,
+      onSelect: () => toggleStates(),
     },
     ...agentItems,
     { id: "sep-hide", separator: true },

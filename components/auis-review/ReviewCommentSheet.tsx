@@ -13,18 +13,27 @@ import { AuSheet } from "@/components/ui/AuSheet"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { useCurrentUrl } from "@/lib/auis-review/hooks"
+import { canonicalizeReviewUrl } from "@/lib/auis-review/urlMatch"
+import {
+  DEFAULT_REVIEW_FILTERS,
+  applyReviewFilters,
+  collectAuthorOptions,
+  collectPageOptions,
+  type ReviewListFilters,
+} from "@/lib/auis-review/commentFilters"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
-import { BacklogComposer } from "./BacklogComposer"
 import { ReviewCommentCard } from "./ReviewCommentCard"
+import { ReviewFilterControls } from "./ReviewFilterBar"
 import type { ReviewComment } from "./types"
 
-type Tab = "open" | "in_review" | "backlog" | "archive"
+// "Future ideas" (backlog) no longer lives in the drawer — its home is the
+// Review Bridge page (/auis/review-bridge), which has room to compose and triage.
+type Tab = "open" | "in_review" | "archive"
 type Scope = "page" | "all"
 
 const TAB_LABEL: Record<Tab, string> = {
   open: "Open",
   in_review: "In review",
-  backlog: "Future ideas",
   archive: "Archived",
 }
 
@@ -37,14 +46,20 @@ export function ReviewCommentSheet() {
   const archiveLoaded = useReviewStore((s) => s.archiveLoaded)
   const loadArchivePage = useReviewStore((s) => s.loadArchivePage)
   const setExportOpen = useReviewStore((s) => s.setExportOpen)
+  const selectedCommentId = useReviewStore((s) => s.selectedCommentId)
   const approveComment = useReviewStore((s) => s.approveComment)
   const rejectComment = useReviewStore((s) => s.rejectComment)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
+  const isAdmin = sessionRole === "admin"
 
   const currentUrl = useCurrentUrl()
 
   const [scope, setScope] = React.useState<Scope>("page")
   const [tab, setTab] = React.useState<Tab>("open")
   const [query, setQuery] = React.useState("")
+  const [filters, setFilters] = React.useState<ReviewListFilters>(
+    DEFAULT_REVIEW_FILTERS
+  )
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
   const [bulkBusy, setBulkBusy] = React.useState(false)
 
@@ -59,11 +74,29 @@ export function ReviewCommentSheet() {
     setSelectedIds(new Set())
   }, [tab, scope])
 
+  // Arriving through a permalink on a comment that lives in another tab opened
+  // the drawer on "Open" and the targeted comment was not even listed. Follow
+  // the tab of its status, and widen the scope if it is not on this screen.
+  //
+  // Depends on the IDENTITY of the selection, not on the `visible` recompute:
+  // the store re-fetches every 4s, and reacting to that would pull the tab
+  // back every time the reviewer navigated away from the comment.
+  React.useEffect(() => {
+    if (!selectedCommentId) return
+    const target =
+      allComments.find((c) => c.id === selectedCommentId) ??
+      archivedComments.find((c) => c.id === selectedCommentId)
+    if (!target) return
+    setTab(target.status === "in_review" ? "in_review" : target.status === "open" ? "open" : "archive")
+    if (canonicalizeReviewUrl(target.url) !== currentUrl) setScope("all")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCommentId])
+
   const sourceMain = scope === "page"
-    ? allComments.filter((c) => c.url === currentUrl)
+    ? allComments.filter((c) => canonicalizeReviewUrl(c.url) === currentUrl)
     : allComments
   const sourceArchive = scope === "page"
-    ? archivedComments.filter((c) => c.url === currentUrl)
+    ? archivedComments.filter((c) => canonicalizeReviewUrl(c.url) === currentUrl)
     : archivedComments
 
   const visible: ReviewComment[] = React.useMemo(() => {
@@ -72,20 +105,30 @@ export function ReviewCommentSheet() {
         ? sourceMain.filter((c) => c.status === "open")
         : tab === "in_review"
         ? sourceMain.filter((c) => c.status === "in_review")
-        : tab === "backlog"
-        ? // A future idea is global (not pinned to a screen) — ignore the scope.
-          allComments.filter((c) => c.status === "backlog")
         : sourceArchive
     const q = query.trim().toLowerCase()
-    if (!q) return base
-    return base.filter(
-      (c) =>
-        c.text?.toLowerCase().includes(q) ||
-        c.authorName?.toLowerCase().includes(q) ||
-        c.url?.toLowerCase().includes(q) ||
-        c.replies?.some((r) => r.text.toLowerCase().includes(q))
-    )
-  }, [tab, sourceMain, sourceArchive, allComments, query])
+    const searched = !q
+      ? base
+      : base.filter(
+          (c) =>
+            c.text?.toLowerCase().includes(q) ||
+            c.authorName?.toLowerCase().includes(q) ||
+            c.url?.toLowerCase().includes(q) ||
+            c.replies?.some((r) => r.text.toLowerCase().includes(q))
+        )
+    return applyReviewFilters(searched, filters)
+  }, [tab, sourceMain, sourceArchive, query, filters])
+
+  // Dropdown options come from the tab's universe (before filters), otherwise
+  // the filter would hide its own alternatives.
+  const authorOptions = React.useMemo(
+    () => collectAuthorOptions([...allComments, ...archivedComments]),
+    [allComments, archivedComments]
+  )
+  const pageOptions = React.useMemo(
+    () => collectPageOptions([...allComments, ...archivedComments]),
+    [allComments, archivedComments]
+  )
 
   const inReviewCount = allComments.filter((c) => c.status === "in_review").length
 
@@ -122,7 +165,7 @@ export function ReviewCommentSheet() {
     }
   }
 
-  const showBulkBar = tab === "in_review" && selectedIds.size > 0
+  const showBulkBar = tab === "in_review" && selectedIds.size > 0 && isAdmin
 
   return (
     <AuSheet
@@ -132,12 +175,8 @@ export function ReviewCommentSheet() {
       title="Comments"
       meta={
         <span className="body-xs text-(--fg-tertiary)">
-          {tab === "backlog"
-            ? "Future ideas"
-            : scope === "page"
-            ? "On this screen"
-            : "On every screen"}{" "}
-          · {visible.length}
+          {scope === "page" ? "On this screen" : "Across all screens"} ·{" "}
+          {visible.length}
         </span>
       }
       footer={
@@ -189,28 +228,26 @@ export function ReviewCommentSheet() {
           )}
         </div>
 
-        {tab !== "backlog" && (
-          <div className="flex items-center gap-1 p-1 rounded-full bg-(--bg-muted) self-start body-xs font-medium">
-            {(["page", "all"] as Scope[]).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setScope(s)}
-                className={[
-                  "px-3 py-1 rounded-full transition-colors",
-                  scope === s
-                    ? "bg-(--bg-raised) text-(--fg-primary) shadow-sm"
-                    : "text-(--fg-secondary) hover:text-(--fg-primary)",
-                ].join(" ")}
-              >
-                {s === "page" ? "This screen" : "Everything"}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="flex items-center gap-1 p-1 rounded-full bg-(--bg-muted) self-start body-xs font-medium">
+          {(["page", "all"] as Scope[]).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setScope(s)}
+              className={[
+                "px-3 py-1 rounded-full transition-colors",
+                scope === s
+                  ? "bg-(--bg-raised) text-(--fg-primary) shadow-sm"
+                  : "text-(--fg-secondary) hover:text-(--fg-primary)",
+              ].join(" ")}
+            >
+              {s === "page" ? "This screen" : "Everything"}
+            </button>
+          ))}
+        </div>
 
         <div className="flex items-center gap-1 body-xs font-medium">
-          {(["open", "in_review", "backlog", "archive"] as Tab[]).map((t) => (
+          {(["open", "in_review", "archive"] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
@@ -237,6 +274,16 @@ export function ReviewCommentSheet() {
               )}
             </button>
           ))}
+          {/* Filter (mega menu) + ordering, discreet at the end of the row. */}
+          <div className="ml-auto">
+            <ReviewFilterControls
+              filters={filters}
+              onChange={setFilters}
+              authors={authorOptions}
+              // In the "This screen" scope the screen filter is redundant — hide it.
+              pages={scope === "all" ? pageOptions : undefined}
+            />
+          </div>
         </div>
 
         {showBulkBar && (
@@ -268,8 +315,6 @@ export function ReviewCommentSheet() {
           </div>
         )}
 
-        {tab === "backlog" && <BacklogComposer />}
-
         <div className="flex-1 overflow-y-auto -mx-1 px-1">
           {visible.length === 0 ? (
             <AuEmpty>
@@ -279,20 +324,18 @@ export function ReviewCommentSheet() {
                 </AuEmptyMedia>
                 <AuEmptyTitle>
                   {query.trim()
-                    ? "Nothing matches that search"
+                    ? "Nothing found for that search"
                     : tab === "archive"
                     ? "Nothing archived here"
                     : tab === "in_review"
                     ? "Nothing waiting for review"
-                    : tab === "backlog"
-                    ? "No future ideas yet"
                     : scope === "page"
                     ? "No comments on this screen"
                     : "No open comments"}
                 </AuEmptyTitle>
                 {tab === "open" && scope === "page" && (
                   <AuEmptyDescription>
-                    Use the freehand mark or the pin in the bottom bar to leave
+                    Use the freehand mark or the pin on the bottom bar to leave
                     the first comment.
                   </AuEmptyDescription>
                 )}
@@ -306,7 +349,7 @@ export function ReviewCommentSheet() {
                   comment={c}
                   context="sheet"
                   archived={tab === "archive"}
-                  selectable={tab === "in_review"}
+                  selectable={tab === "in_review" && isAdmin}
                   selected={selectedIds.has(c.id)}
                   onToggleSelected={() => toggleSelected(c.id)}
                 />

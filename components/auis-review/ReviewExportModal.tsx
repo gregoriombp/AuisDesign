@@ -118,8 +118,9 @@ export function ReviewExportModal() {
             className="text-(--fg-tertiary) mt-0.5"
           />
           <span>
-            This data stays in your browser only. Share the JSON by hand until
-            the local server v2 ships.
+            A full snapshot of the bridge (open, in review and archived
+            comments). Import it on another checkout through the Review Bridge
+            page to merge without duplicates.
           </span>
         </p>
         <pre className="rounded-sm bg-(--bg-muted) border border-(--border-subtle) p-3 max-h-[40vh] overflow-auto body-xs mono text-(--fg-primary) whitespace-pre">

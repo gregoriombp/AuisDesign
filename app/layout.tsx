@@ -7,6 +7,7 @@ import { AuisDot } from "@/components/auis/AuisDot"
 import { FlowStateDriver } from "@/components/auis/FlowStateDriver"
 import { EditModeProvider } from "@/components/auis-edit/EditModeProvider"
 import { ReviewModeProvider } from "@/components/auis-review/ReviewModeProvider"
+import { StatesModeProvider } from "@/components/auis-states/StatesModeProvider"
 import { AuToastProvider } from "@/components/ui/AuToast"
 
 export const metadata: Metadata = {
@@ -52,6 +53,7 @@ export default async function RootLayout({
             {children}
             <ReviewModeProvider />
             <EditModeProvider />
+            <StatesModeProvider />
             <FlowStateDriver />
             {dotEnabled ? <AuisDot /> : null}
           </AuToastProvider>

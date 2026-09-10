@@ -1,11 +1,11 @@
 "use client"
 
-// Inline "@ / / / #" autocomplete for the Review Bridge composers. Detects a
+// Inline "@" / "/" autocomplete for the Review Bridge composers. Detects a
 // trigger token immediately before the caret in a <textarea>, surfaces the
-// matching agents / skills / directives, and inserts the canonical token on
-// pick. Presentation is the shared AuMentionMenu (see ReviewCommandMenu);
-// keyboard UX follows the standard inline-picker conventions (↑↓ cycle,
-// Enter/Tab select, Esc close).
+// matching agents / people / skills, and inserts the canonical token on pick.
+// Presentation is the shared AuMentionMenu (see ReviewCommandMenu); keyboard
+// UX follows the standard inline-picker conventions (↑↓ cycle, Enter/Tab
+// select, Esc close).
 //
 // Reads value + caret straight from the DOM element (not React state) so it
 // never lags a keystroke. The composer keeps owning the text; this hook only
@@ -14,10 +14,12 @@
 import * as React from "react"
 import type { AuMentionMenuSection } from "@/components/ui/AuMentionMenu"
 import { REVIEW_AGENTS } from "./agents"
-import { REVIEW_SKILLS } from "./skills"
+import { parseReviewCommand } from "./commandParse"
+import { isReviewSkillAvailableToAgent, REVIEW_SKILLS } from "./skills"
+import { foldAscii, useReviewers } from "./reviewers"
 import { getCaretCoordinates } from "./textareaCaret"
 
-type Sigil = "@" | "/" | "#"
+type Sigil = "@" | "/"
 
 interface TriggerState {
   sigil: Sigil
@@ -61,14 +63,15 @@ export interface ReviewCommandAutocomplete {
 }
 
 // A sigil at start-or-after-whitespace, then word chars up to the caret. The
-// leading boundary keeps emails (joao@x) and paths (a/b) from triggering.
-const TRIGGER_RE = /(^|\s)([@/#])([\w-]*)$/
+// leading boundary keeps emails (jane@x) and paths (a/b) from triggering.
+const TRIGGER_RE = /(^|\s)([@/])([\w-]*)$/
 
 export function useReviewCommandAutocomplete({
   textareaRef,
   value,
   setValue,
   enabled = true,
+  allowAgents = true,
 }: {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
   /** The composer's current text — used to re-sync on any external change
@@ -76,10 +79,16 @@ export function useReviewCommandAutocomplete({
   value: string
   setValue: (next: string) => void
   enabled?: boolean
+  /** false = a session without command power (reviewer): "@" only suggests
+   *  PEOPLE and "/" suggests no skills — agents obey the admin only, so do not
+   *  even offer them. */
+  allowAgents?: boolean
 }): ReviewCommandAutocomplete {
   const [trigger, setTrigger] = React.useState<TriggerState | null>(null)
   const [activeIndex, setActiveIndex] = React.useState(0)
   const [anchor, setAnchor] = React.useState<ReviewCommandAnchor | null>(null)
+  // Mentionable humans (the bridge identities) — see lib/auis-review/reviewers.
+  const reviewers = useReviewers()
   // Set right before a pick rewrites the value. On a controlled <textarea>,
   // React RESTORES the previous (now stale) caret across the re-render, so the
   // value-effect would re-sync with new text + old caret, re-match the token we
@@ -138,71 +147,88 @@ export function useReviewCommandAutocomplete({
     const q = trigger.query.toLowerCase()
 
     if (trigger.sigil === "@") {
-      const agents = REVIEW_AGENTS.filter(
-        (a) =>
-          a.handle.toLowerCase().startsWith(q) ||
-          a.name.toLowerCase().includes(q),
+      const agents = allowAgents
+        ? REVIEW_AGENTS.filter(
+            (a) =>
+              a.handle.toLowerCase().startsWith(q) ||
+              a.name.toLowerCase().includes(q),
+          )
+        : []
+      // People (human reviewers) — accent-insensitive comparison on the name,
+      // since the handle itself is already ASCII-folded (see
+      // deriveReviewerHandles). The "person:" prefix keeps them from colliding
+      // with the agent ids ("claude"/"germano") in the key space the sections
+      // share.
+      const people = reviewers.filter(
+        (p) =>
+          p.handle.toLowerCase().startsWith(q) ||
+          foldAscii(p.name).includes(q),
       )
       return {
-        items: agents.map((a) => ({ key: a.id, token: `@${a.handle}` })),
-        sections: [
-          {
-            label: "Agents",
-            entries: agents.map((a) => ({
-              key: a.id,
-              label: a.name,
-              icon: a.icon,
-            })),
-          },
+        items: [
+          ...agents.map((a) => ({ key: a.id, token: `@${a.handle}` })),
+          ...people.map((p) => ({ key: `person:${p.id}`, token: `@${p.handle}` })),
         ],
-        ariaLabel: "Agent suggestions",
-      }
-    }
-
-    if (trigger.sigil === "/") {
-      const skills = REVIEW_SKILLS.filter(
-        (s) =>
-          s.slug.toLowerCase().includes(q) ||
-          s.label.toLowerCase().includes(q),
-      )
-      return {
-        items: skills.map((s) => ({ key: s.slug, token: `/${s.slug}` })),
         sections: [
-          {
-            label: "Skills",
-            entries: skills.map((s) => ({
-              key: s.slug,
-              label: s.label,
-              icon: s.icon,
-            })),
-          },
-        ],
-        ariaLabel: "Skill suggestions",
-      }
-    }
-
-    // "#": only the action directive.
-    const showNow = "now".startsWith(q)
-    return {
-      items: showNow ? [{ key: "now", token: "#now" }] : [],
-      sections: showNow
-        ? [
-            {
-              label: "Action",
-              entries: [
+          ...(agents.length > 0
+            ? [
                 {
-                  key: "now",
-                  label: "now — allow execution",
-                  icon: "bolt",
-                  accent: "purple" as const,
+                  label: "Agents",
+                  entries: agents.map((a) => ({
+                    key: a.id,
+                    label: a.name,
+                    icon: a.icon,
+                  })),
                 },
-              ],
-            },
-          ]
-        : [],
-      ariaLabel: "Comment action",
+              ]
+            : []),
+          {
+            label: "People",
+            entries: people.map((p) => ({
+              key: `person:${p.id}`,
+              label: p.name,
+              icon: "person",
+            })),
+          },
+        ],
+        ariaLabel: allowAgents
+          ? "Agent and people suggestions"
+          : "People suggestions",
+      }
     }
-  }, [trigger])
+
+    // "/": skills belong to a valid agent mention already present before the
+    // trigger. This keeps `/` from becoming a generic command palette and only
+    // offers contracts the addressed agent can actually run.
+    const mentionedAgents = parseReviewCommand(
+      value.slice(0, trigger.start),
+    ).mentions
+    const skills = allowAgents
+      ? REVIEW_SKILLS.filter(
+          (s) =>
+            mentionedAgents.length > 0 &&
+            mentionedAgents.some((agentId) =>
+              isReviewSkillAvailableToAgent(s, agentId),
+            ) &&
+            (s.slug.toLowerCase().includes(q) ||
+              s.label.toLowerCase().includes(q)),
+        )
+      : []
+    return {
+      items: skills.map((s) => ({ key: s.slug, token: `/${s.slug}` })),
+      sections: [
+        {
+          label: "Skills",
+          entries: skills.map((s) => ({
+            key: s.slug,
+            label: s.label,
+            icon: s.icon,
+          })),
+        },
+      ],
+      ariaLabel: "Skill suggestions",
+    }
+  }, [trigger, reviewers, allowAgents, value])
 
   // Reset the active row whenever the typed token changes.
   const tokenSig = trigger ? `${trigger.sigil}${trigger.query}` : ""

@@ -2,16 +2,16 @@
 name: auis-pg-merge-flow
 description: >
   Merges a `.awflow.json` (exported from the PG repo) with a flow that
-  already exists at `/auis/styleguide/ux-flows/[slug]`. Reads the
-  file, compares it against the page's current `NODES`/`EDGES`, generates
-  a readable diff, analyzes the UX viability of each change, asks for
-  selective approval, and applies it. Always records an entry in
-  `updates[]` when there is a structural change. Use when the user says
-  "merge the PG flow", "update the flow with the .awflow", "apply the
-  design changes to flow X", "diff between the local flow and the PG one",
-  or attaches a `.awflow.json` whose slug already exists in `ux-flows/`. Do
-  NOT use when the flow does not yet exist locally — for that case, use
-  `auis-pg-create-flow`.
+  already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`,
+  `app/auis/ux-flow/[slug]/page.tsx`). Reads the file, compares it against
+  the page's exported `NODES`/`EDGES`, generates a readable diff, analyzes
+  the UX viability of each change, asks for selective approval, and applies
+  it. Always records an entry in `updates[]` when there is a structural
+  change. Use when the user says "merge the PG flow", "update the flow with
+  the .awflow", "apply the design changes to flow X", "diff between the
+  local flow and the PG one", or attaches a `.awflow.json` whose slug
+  already exists under `app/auis/ux-flow/`. Do NOT use when the flow does
+  not yet exist locally — for that case, use `auis-pg-create-flow`.
 ---
 
 # Auis PG — Merge `.awflow.json` into existing flow
@@ -23,8 +23,9 @@ there is a structural change.
 
 ## Prerequisites
 
-- `app/auis/styleguide/ux-flows/_lib/awflow-import.ts` exists.
-- The target flow already exists at `app/auis/styleguide/ux-flows/<slug>/page.tsx`.
+- `app/auis/ux-flow/_lib/awflow-import.ts` exists.
+- The target flow already exists at `app/auis/ux-flow/<slug>/page.tsx` and
+  has an entry in `app/auis/ux-flow/_data/flow-meta.ts`.
 - If it doesn't exist, stop and redirect to
   [`auis-pg-create-flow`](../auis-pg-create-flow/SKILL.md).
 
@@ -38,15 +39,16 @@ there is a structural change.
    - default: `file.flow.id`
    - if the user uses a different slug (e.g. PG `login` → local
      `login-auth`), confirm it.
-3. Read the local flow's `page.tsx` and extract `NODES` and `EDGES`
-   (parse the array literal by hand — don't try to execute the file).
+3. Read the local flow's `page.tsx` and extract the exported `NODES` and
+   `EDGES` (parse the array literals by hand — don't try to execute the
+   file).
 
 ---
 
 ## Step 2 — Compute the diff
 
 Compare by `id` (nodes) and by `from+to+label` (edges, since edges have no
-stable id in PG nor in the local styleguide).
+stable id in PG nor in the local hub).
 
 ### Node diff
 
@@ -96,8 +98,10 @@ For **each item** in the diff, classify:
   was terminal, a flow that lost its way back, a decision with no error
   branch, a new branch that diverges a lot from the local pattern).
 - 🔴 **Block** — blocks until justified (e.g. removes a screen that has open
-  suggestions in the flow-bridge, an edge points at a nonexistent node, the
-  new flow ends on a decision with no terminal).
+  suggestions in the flow bridge — check
+  `GET /api/flow-suggestions?flow=<slug>&status=open`, never read
+  `flow-bridge/data/suggestions.json` directly —, an edge points at a
+  nonexistent node, the new flow ends on a decision with no terminal).
 
 **Don't invent rules** — use common sense. When in doubt, mark it 🟡.
 
@@ -113,16 +117,16 @@ Diff: <slug> (local) vs <PG repo>
 Screens:
   + 3 new:
     🟢 sso-connecting — "Connecting to the IdP" (SSO · screen)
-    🟢 2fa-backup    — "Backup codes" (screen)
-    🟡 sem-acesso    — "No access via this method" (terminal, no way back)
+    🟢 2fa-backup     — "Backup codes" (screen)
+    🟡 no-access      — "No access via this method" (terminal, no way back)
   - 1 removed:
-    🟡 erro-generico — was linked to [email, password]; orphan afterwards
+    🟡 generic-error  — was linked to [email, password]; orphan afterwards
 
 Decisions:
   + 1 new:
-    🟢 dec-auth-compat — "Org compatible w/ method?" (filters anti-enumeration)
+    🟢 dec-auth-compat — "Workspace compatible with method?" (filters anti-enumeration)
   ~ 1 changed:
-    🟢 dec-multiorg — question changed from "1 org?" to "1+ compatible org?"
+    🟢 dec-multi-workspace — question changed from "1 workspace?" to "1+ compatible workspaces?"
 
 Edges:
   + 5 new (3 amber branches)
@@ -158,7 +162,7 @@ on.
 
 ## Step 6 — Apply it to `page.tsx`
 
-Edit `NODES` and `EDGES` in the flow's file:
+Edit the exported `NODES` and `EDGES` in `app/auis/ux-flow/<slug>/page.tsx`:
 
 - Add new nodes/edges respecting the existing pattern (`edgeBase`,
   `branchEdge`, `sourceHandle` on decisions).
@@ -169,6 +173,10 @@ Edit `NODES` and `EDGES` in the flow's file:
   the same way the `auis-pg-create-flow` skill does in Step 4.
 - Update the `position` when approved — don't touch layout without the user
   confirming (geometry decisions are expensive to redo).
+- If the export renamed the flow (`meta.title`) or its summary and the user
+  approves, update the flow's entry in `app/auis/ux-flow/_data/flow-meta.ts`
+  (`title` / `description`) — the hub sidebar and gallery derive from it.
+  The `slug` never changes: it is the route and the suggestions key.
 
 ---
 
@@ -193,9 +201,10 @@ The summary is ONE sentence describing the set, not item-by-item. E.g.:
 - "Generic error screen removed; every decision now has its own error
   path."
 
-If the page does **not yet have** the updates scaffolding (import,
-`const updates`, badge + history section render), add it following what the
-`auis-update-ux-flow` skill describes in Step 4.
+If the page does **not yet have** the updates scaffolding (import from
+`../_components/flow-updates`, `const updates`, badge + history section
+render), add it following the updates wiring that `auis-update-ux-flow`
+describes.
 
 ---
 
@@ -205,13 +214,14 @@ If the page does **not yet have** the updates scaffolding (import,
 npm run typecheck
 ```
 
-Visual:
+Visual (open `/auis/ux-flow/<slug>` on the dev server):
 
 - The "Updated on <date>" badge updated.
 - The "Update history" section lists the new entry at the top
   with the correct tags (colored pills).
 - The diagram reflects the new structure.
-- The cards of the new screens show the right href.
+- Clicking a new screen opens the right href in the side panel.
+- The hub (`/auis/ux-flow`) still lists the flow under its group.
 
 For every screen that was 🟡 or 🔴, offer a preview with extra care.
 
@@ -222,7 +232,7 @@ For every screen that was 🟡 or 🔴, offer a preview with extra care.
 ```md
 Flow updated: <meta.title>
 
-Route: /auis/styleguide/ux-flows/<slug>
+Route: /auis/ux-flow/<slug>
 
 Applied:
   + N nodes / + N edges
@@ -236,7 +246,8 @@ Tags: [new-page, new-branch, ...]
 Summary: <line recorded in the changelog>
 
 Files:
-- app/auis/styleguide/ux-flows/<slug>/page.tsx — NODES/EDGES + updates
+- app/auis/ux-flow/<slug>/page.tsx — NODES/EDGES + updates
+- app/auis/ux-flow/_data/flow-meta.ts — only if title/description changed
 
 Validation:
 - typecheck: passed
@@ -256,6 +267,6 @@ Validation:
 - **Don't delete previous updates.** Only prepend; never rewrite history.
 - **Don't combine this with create.** If the flow doesn't exist, it's
   `auis-pg-create-flow`.
-- **Don't try to "merge" flow-bridge comments.** That's another domain —
+- **Don't try to "merge" flow-bridge suggestions.** That's another domain —
   open suggestions in the bridge must be resolved separately via
   `auis-flow-bridge-solve`, before or after this merge.

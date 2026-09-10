@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAgentSettings, setAgentSettings } from "../_store";
+import { getBridgeSession } from "../_session";
 import type { ReviewAgentSettings } from "@/components/auis-review/types";
+import { withBridgeErrors } from "../_errors";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+async function handleGET() {
   const settings = await getAgentSettings();
   return NextResponse.json({ settings });
 }
 
-export async function PUT(request: NextRequest) {
+async function handlePUT(request: NextRequest) {
+  // Turning an agent on/off is the dispatcher's master lock — admin only.
+  const session = await getBridgeSession(request);
+  if (session.role === "reviewer") {
+    return NextResponse.json({ error: "forbidden_role" }, { status: 403 });
+  }
   let body: unknown;
   try {
     body = await request.json();
@@ -36,3 +43,6 @@ export async function PUT(request: NextRequest) {
   await setAgentSettings(agentId, settings as ReviewAgentSettings);
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withBridgeErrors(handleGET);
+export const PUT = withBridgeErrors(handlePUT);

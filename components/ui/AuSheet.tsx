@@ -24,6 +24,8 @@ export type AuSheetProps = {
   /** Override the default stacking (content `1001`, scrim `1000`). The scrim
    * is placed one below. Used by Review Mode to sit above app-level modals. */
   zIndex?: number
+  /** Escape hatch for compound layouts that own their inner padding/scroll. */
+  bodyClassName?: string
 }
 
 export function AuSheet({
@@ -39,6 +41,7 @@ export function AuSheet({
   onPrev,
   onNext,
   zIndex,
+  bodyClassName,
 }: AuSheetProps) {
   React.useEffect(() => {
     if (!open) return
@@ -76,7 +79,7 @@ export function AuSheet({
           style={zIndex !== undefined ? { zIndex } : undefined}
         >
           <DialogPrimitive.Content
-            aria-label={typeof title === "string" ? title : "Painel lateral"}
+            aria-label={typeof title === "string" ? title : "Side panel"}
             className={cn(
               "au-sheet pointer-events-auto",
               `au-sheet--${size}`
@@ -113,11 +116,11 @@ export function AuSheet({
             )}
             {!title && !meta && (
               <DialogPrimitive.Title className="sr-only">
-                Painel lateral
+                Side panel
               </DialogPrimitive.Title>
             )}
             {tabs && <div className="au-sheet__tabs">{tabs}</div>}
-            <div className="au-sheet__body">{children}</div>
+            <div className={cn("au-sheet__body", bodyClassName)}>{children}</div>
             {footer && <footer className="au-sheet__foot">{footer}</footer>}
           </DialogPrimitive.Content>
         </div>

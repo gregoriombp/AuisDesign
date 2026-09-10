@@ -15,14 +15,7 @@ Thanks for your interest in contributing! Auis is an agent-first design builder 
 git clone https://github.com/<you>/auis.git
 cd auis
 npm install          # postinstall runs skills:sync
-npm run dev          # Next.js on 127.0.0.1:3000
-```
-
-Optional (Review Mode queue server):
-
-```bash
-npm run review-bridge:install
-npm run dev:bridge   # Next + Express review bridge on 127.0.0.1:9878
+npm run dev          # Next.js on 127.0.0.1:3000 (the Review/Flow bridges are same-origin routes)
 ```
 
 ## Before you open a PR
@@ -32,9 +25,10 @@ npm run typecheck    # tsc --noEmit
 npm run lint         # eslint
 npm run build        # next build
 npm run ds:check     # design-system lint (hardcode debt)
+npm test             # node unit tests
 ```
 
-All four must pass. If you touched skills, also run `npm run skills:catalog` and commit the regenerated `skills/registry.json` / `skills/CATALOG.md`.
+All five must pass. If you touched skills, also run `npm run skills:catalog` and commit the regenerated `skills/registry.json` / `skills/CATALOG.md`.
 
 ## Commit style
 

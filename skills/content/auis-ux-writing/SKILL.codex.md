@@ -206,7 +206,7 @@ Close with **"Left as is (already on tone):"** + 2-3 examples, to show you didn'
 - **Format-on-save linter** may rewrite mid-flight → re-read the file before the next Edit.
 - **String repeated in N places** (same label across several files) → change it everywhere so you don't create an inconsistency; list them all in the report.
 - **Copy that came from Figma** is canonical → align the route to Figma, not the other way around; if they diverge, ask.
-- **Mobbin/Dribbble** as a reference → WebFetch fails (paywall). Ask for a screenshot or use declared inference. But the reference here is **voice/principle**, not visual.
+- **Dribbble/Behance** as a reference → WebFetch fails (paywall). Ask for a screenshot or use declared inference. But the reference here is **voice/principle**, not visual.
 - **Route is a redirect** (`page.tsx` that only calls `redirect()`) → work on the sub-routes, not on the redirect.
 
 ## Voice references (declared, not copied)

@@ -31,11 +31,15 @@ import { AuMentionMenu } from "@/components/ui/AuMentionMenu"
 import { AuModal } from "@/components/ui/AuModal"
 import { AuPill } from "@/components/ui/AuPill"
 import { AuProgress } from "@/components/ui/AuProgress"
+import { AuRadioGroup, AuRadioGroupItem } from "@/components/ui/AuRadioGroup"
+import { AuSegmented } from "@/components/ui/AuSegmented"
 import { AuSheet, AuSheetRow } from "@/components/ui/AuSheet"
 import { AuSlider } from "@/components/ui/AuSlider"
+import { AuSpinner } from "@/components/ui/AuSpinner"
 import { AuStatCard } from "@/components/ui/AuStatCard"
 import { AuTable } from "@/components/ui/AuTable"
 import { AuTabs } from "@/components/ui/AuTabs"
+import { AuTextarea } from "@/components/ui/AuTextarea"
 import { useToast } from "@/components/ui/AuToast"
 import { AuToggle, AuToggleRow } from "@/components/ui/AuToggle"
 import { Icon } from "@/components/ui/Icon"
@@ -51,16 +55,20 @@ export const COMPONENTS = {
   AuEmpty: "Composable zero-state content for empty results and first-use moments.",
   AuInput: "Input and field primitives, including search and password affordances.",
   AuLogo: "The Auis builder mark and the configured project-brand renderer.",
-  AuMentionChip: "Inline @agent, /skill, and #directive tokens used by Review Mode.",
+  AuMentionChip: "Inline @agent and /skill tokens used by Review Mode.",
   AuMentionMenu: "The presentational inline picker used by Review Mode composers.",
   AuModal: "The accessible dialog primitive with enter and exit motion.",
   AuPill: "Compact status and metadata labels.",
   AuProgress: "Determinate progress with semantic variants.",
+  AuRadioGroup: "Exclusive selection with labeled items and optional descriptions.",
+  AuSegmented: "A single-choice pill switch with a sliding thumb and an optional pending state.",
   AuSheet: "The accessible side-panel primitive with enter and exit motion.",
   AuSlider: "A labeled range input with a filled track.",
+  AuSpinner: "The indeterminate loading indicator, in three sizes.",
   AuStatCard: "A focused KPI card for one value, label, and optional hint.",
   AuTable: "The styled static-table primitive.",
   AuTabs: "Segmented, standalone, and underline tab navigation.",
+  AuTextarea: "The multi-line text field, sharing the input frame and states.",
   AuToast: "Transient feedback dispatched through the global toast provider.",
   AuToggle: "A controlled switch and its labeled row recipe.",
   Icon: "Material Symbols Rounded with optical defaults tuned by size.",
@@ -73,11 +81,15 @@ const USAGE_IMPORTS: Partial<Record<ComponentName, string>> = {
   AuSheet: 'import { AuSheet, AuSheetRow } from "@/components/ui/AuSheet"',
   AuToast: 'import { AuToastProvider, useToast } from "@/components/ui/AuToast"',
   AuToggle: 'import { AuToggle, AuToggleRow } from "@/components/ui/AuToggle"',
+  AuRadioGroup: 'import { AuRadioGroup, AuRadioGroupItem } from "@/components/ui/AuRadioGroup"',
 }
 
 function Demo({ component }: { component: ComponentName }) {
   const toast = useToast()
   const [checked, setChecked] = React.useState(true)
+  const [segment, setSegment] = React.useState("default")
+  const [radio, setRadio] = React.useState("flow-update")
+  const [note, setNote] = React.useState("")
   const [enabled, setEnabled] = React.useState(true)
   const [slider, setSlider] = React.useState(64)
   const [tab, setTab] = React.useState("overview")
@@ -114,7 +126,7 @@ function Demo({ component }: { component: ComponentName }) {
     case "AuLogo":
       return <div className="flex items-center gap-10"><AuLogo variant="mark" height={40} /><AuLogo variant="wordmark" height={28} /><AuLogo variant="horizontal" height={32} /></div>
     case "AuMentionChip":
-      return <div className="flex flex-wrap gap-2"><AuMentionChip tone="inverse" icon="terminal">@codex</AuMentionChip><AuMentionChip tone="purple" icon="bolt">/auis-page</AuMentionChip><AuMentionChip tone="amber" icon="schedule">#now</AuMentionChip></div>
+      return <div className="flex flex-wrap gap-2"><AuMentionChip tone="inverse" icon="terminal">@codex</AuMentionChip><AuMentionChip tone="purple" icon="bolt">/auis-page</AuMentionChip><AuMentionChip tone="blue" icon="agent">@germano</AuMentionChip></div>
     case "AuMentionMenu":
       return <AuMentionMenu aria-label="Mention example" activeKey={mention} onHover={setMention} onPick={setMention} sections={[{ label: "Agents", entries: [{ key: "codex", label: "@codex", icon: "terminal" }, { key: "claude", label: "@claude", icon: "smart_toy" }] }, { label: "Skills", entries: [{ key: "page", label: "/auis-page", icon: "web" }, { key: "audit", label: "/auis-audit", icon: "fact_check" }] }]} />
     case "AuModal":
@@ -123,16 +135,24 @@ function Demo({ component }: { component: ComponentName }) {
       return <div className="flex flex-wrap gap-2"><AuPill variant="live">Live</AuPill><AuPill variant="draft">Draft</AuPill><AuPill variant="beta">Beta</AuPill><AuPill variant="warning">Warning</AuPill><AuPill variant="error">Error</AuPill><AuPill variant="ai">AI</AuPill></div>
     case "AuProgress":
       return <div className="grid w-full grid-cols-2 gap-6"><AuProgress label="Default" value={72} /><AuProgress label="Success" value={100} variant="success" /><AuProgress label="Warning" value={58} variant="warning" /><AuProgress label="Danger" value={28} variant="danger" /></div>
+    case "AuRadioGroup":
+      return <AuRadioGroup value={radio} onChange={setRadio} label="Delivery" className="w-full max-w-md"><AuRadioGroupItem value="flow-update" label="Update the flow" description="Replaces NODES and EDGES in the flow page and logs the change." /><AuRadioGroupItem value="product-routes" label="Create the product routes" description="Scaffolds one page per screen node with an internal href." /><AuRadioGroupItem value="later" label="Decide later" disabled /></AuRadioGroup>
+    case "AuSegmented":
+      return <div className="flex w-full max-w-xl flex-col items-start gap-4"><AuSegmented ariaLabel="Screen state" options={[{ value: "default", label: "Default" }, { value: "empty", label: "Empty" }, { value: "loading", label: "Loading" }]} value={segment} onChange={setSegment} /><AuSegmented size="sm" ariaLabel="Density" options={[{ value: "compact", label: "Compact" }, { value: "comfortable", label: "Comfortable" }]} value="compact" pendingValue="comfortable" onChange={() => undefined} /><p className="text-sm text-fg-secondary">Selected: <code>{segment}</code> · the second one shows a pending value while a route change settles.</p></div>
     case "AuSheet":
       return <><AuButton variant="primary" onClick={() => setSheetOpen(true)}>Open sheet</AuButton><AuSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Component details" meta="AuSheet · default width" footer={<AuButton block variant="primary" onClick={() => setSheetOpen(false)}>Done</AuButton>}><AuSheetRow label="Layer">Component</AuSheetRow><AuSheetRow label="Primitive">Radix Dialog</AuSheetRow><AuSheetRow label="Status">Ready</AuSheetRow></AuSheet></>
     case "AuSlider":
       return <div className="w-full max-w-xl"><AuSlider label="Intensity" min={0} max={100} value={slider} valueDisplay={`${slider}%`} onChange={(event) => setSlider(Number(event.target.value))} help="Use the keyboard arrows for precise changes." /></div>
+    case "AuSpinner":
+      return <div className="flex items-center gap-8"><AuSpinner size="sm" label="Loading, small" /><AuSpinner size="md" label="Loading, medium" /><AuSpinner size="lg" label="Loading, large" /></div>
     case "AuStatCard":
       return <div className="grid w-full grid-cols-2 gap-4"><AuStatCard icon="widgets" label="Components" value="22" hint="Documented in the styleguide" /><AuStatCard icon="auto_awesome" label="Coverage" value="100%" hint="Core Auis surface" variant="ai" /></div>
     case "AuTable":
       return <AuTable><thead><tr><th>Component</th><th>Layer</th><th>Status</th></tr></thead><tbody><tr><td>AuButton</td><td>Primitive</td><td><AuPill variant="live">Ready</AuPill></td></tr><tr><td>AuModal</td><td>Component</td><td><AuPill variant="live">Ready</AuPill></td></tr><tr><td>AuMentionMenu</td><td>Domain</td><td><AuPill variant="beta">Auis</AuPill></td></tr></tbody></AuTable>
     case "AuTabs":
       return <div className="flex w-full flex-col gap-5"><AuTabs aria-label="Example tabs" items={[{ value: "overview", label: "Overview" }, { value: "comments", label: "Comments", count: 4 }, { value: "history", label: "History" }]} value={tab} onChange={setTab} /><p className="text-sm text-fg-secondary">Active value: <code>{tab}</code></p></div>
+    case "AuTextarea":
+      return <div className="flex w-full max-w-xl flex-col gap-4"><AuTextarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Describe the change for the agent…" rows={3} /><AuTextarea value="Something the form could not accept." invalid readOnly rows={2} /></div>
     case "AuToast":
       return <div className="flex flex-wrap gap-3"><AuButton onClick={() => toast.push({ title: "Saved", description: "The change is ready for review.", variant: "success" })}>Success toast</AuButton><AuButton variant="ai" onClick={() => toast.push({ title: "Agent finished", description: "Inspect the result before approving.", variant: "ai" })}>AI toast</AuButton><AuButton variant="danger" onClick={() => toast.push({ title: "Could not save", variant: "error" })}>Error toast</AuButton></div>
     case "AuToggle":

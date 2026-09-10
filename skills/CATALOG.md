@@ -1,10 +1,10 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **38 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **37 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
-## Design System (10)
+## Design System (11)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
@@ -18,31 +18,30 @@
 | `auis-new-component` | 🟣🟠 | repo | — | Add or update an Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation. |
 | `auis-new-page` | 🟣🟠 | repo | — | Build or rework a product page in this Next.js app using the Auis design system, existing components, existing tokens, and desktop-only constraints. |
 | `auis-page` | 🟣🟠🌐 | cowork | ⭐ | Builds a full page in a Auis design system project (Next.js + shadcn/ui) from a screenshot, Figma URL, wireframe, or written description. Maps every v |
+| `auis-update-states` | 🟣🟠 | repo | — | Maps product screens into Auis State Mode: registers new screens, axes, states and `?ge=` interactions in `lib/auis-states/registry.ts` and keeps the  |
 
 ## UX Flows (7)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
-| `auis-create-ux-flow` | 🟣🟠 | repo | — | Builds a UX flow diagram page in the Auis styleguide (/auis/styleguide/ux-flows/[name]) from a flow description, a list of steps, or any written brief |
-| `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Builds a compiled, multi-scenario golden-eye UX flow page in the Auis styleguide. Merges several product journeys into one deduplicated ReactFlow grap |
+| `auis-create-ux-flow` | 🟣🟠 | repo | — | Creates a new single-journey UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>) from a written br |
+| `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Creates a compiled, multi-scenario "golden eye" UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug> |
 | `auis-flow` | 🟣🟠🌐 | cowork | ⭐ | Designs a feature's user flow as a FigJam board using the Auis convention: every screen becomes a card with name + route + file path + status; every t |
 | `auis-import-figma-flow` | 🟣🟠 | repo | ◐ | Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as  |
-| `auis-pg-create-flow` | 🟣🟠 | repo | ◐ | Creates a NEW UX flow in the styleguide (`/auis/styleguide/ux-flows/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads t |
-| `auis-pg-merge-flow` | 🟣🟠 | repo | — | Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists at `/auis/styleguide/ux-flows/[slug]`. Reads the file, compares it |
-| `auis-update-ux-flow` | 🟣🟠 | repo | ◐ | Registers a structural update to an existing UX flow page in the Auis styleguide (`/auis/styleguide/ux-flows/[slug]`). Applies the requested change to |
+| `auis-pg-create-flow` | 🟣🟠 | repo | ◐ | Creates a NEW UX flow in the Auis UX Flow hub (`/auis/ux-flow/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the fil |
+| `auis-pg-merge-flow` | 🟣🟠 | repo | — | Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`, `app/auis/ux-flow |
+| `auis-update-ux-flow` | 🟣🟠 | repo | ◐ | Registers a structural update to an existing UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>).  |
 
-## Bridges (review / flow / edit / project) (8)
+## Bridges (review / flow / edit / project) (6)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
-| `auis-edit-bridge-solve` | 🟣 | repo | — | Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, token/style, variant, icon, hide, and sibling order), p |
-| `auis-flow-bridge` | 🟣🟠 | repo | — | [OBSOLETE] The styleguide UX flow editor went serverless — suggestions now go to a same-origin route (/api/flow-suggestions) that writes to flow-bridg |
-| `auis-flow-bridge-solve` | 🟣🟠 | repo | — | Reads and applies UX flow edit suggestions stored in the flow-bridge (`/auis/styleguide/ux-flows/[flow]`). Pulls from the bridge using a filter chosen |
-| `auis-review-bridge` | 🟣🟠 | repo | ◐ | Explains that the Auis Review Mode bridge is now serverless and embedded in the Next app at `/api/review-bridge/*` — `npm run dev` already brings ever |
-| `auis-review-bridge-dispatch` | 🟣 | repo | — | Runs the /loop dispatcher for Auis Review Bridge mentions. Reads the dispatch queue, routes enabled @Claude and @Germano items, replies when Live Resp |
-| `auis-review-bridge-germano-audit` | 🟣🟠 | repo | ◐ | Runs Germano Faccio as a critical UI/UX second opinion on Review Bridge items already in_review. Compares the request with the delivery and posts one  |
-| `auis-review-bridge-germano-explore` | 🟣🟠 | repo | ◐ | Runs Germano Faccio in proactive UI/UX patrol mode. Navigates the requested pages, opens states and overlays, judges appearance and behavior, and drop |
-| `auis-review-bridge-solve` | 🟣🟠 | repo | ⭐ ◐ | Resolves Auis Review Mode comments in bulk. Reads from the local review-bridge using a filter chosen by the user (all of them, only today's, only open |
+| `auis-edit-bridge-solve` | 🟣 | repo | — | Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, style tokens, typography classes, variant, icon, hide,  |
+| `auis-flow-bridge-solve` | 🟣🟠 | repo | — | Materializes UX flow edit suggestions filed from the flow editor ("Suggest edit" on /auis/ux-flow/<slug>) into the canonical page code. Pulls them fro |
+| `auis-review-bridge-dispatch` | 🟣🟠 | repo | ◐ | Runs one pass of the Auis Review Bridge dispatcher — the motor that turns agent mentions in Review Mode comments into action. Reads /api/review-bridge |
+| `auis-review-bridge-germano-audit` | 🟣🟠 | repo | — | Runs Germano Faccio as a critical UI/UX second opinion on Auis Review Bridge items already in_review — what an executor (Claude or Codex) sent for app |
+| `auis-review-bridge-germano-explore` | 🟣🟠 | repo | — | Runs Germano Faccio on a proactive UI/UX patrol of the routes the user names: he navigates, clicks buttons, opens modals and sub-routes, triggers empt |
+| `auis-review-bridge-solve` | 🟣🟠 | repo | ⭐ | Resolves Auis Review Mode comments in bulk. Reads from the review-bridge using a filter chosen by the user (all of them, only today's, only open ones, |
 
 ## Build & Handoff (3)
 
@@ -92,4 +91,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 38: 36 on Claude+Codex, 2 Claude-only (`auis-edit-bridge-solve`, `auis-review-bridge-dispatch`). 13 have their own Codex variant (◐).
+Of the 37: 36 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 10 have their own Codex variant (◐).

@@ -8,7 +8,10 @@ import { AuPill } from "@/components/ui/AuPill"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { useCurrentUrl } from "@/lib/auis-review/hooks"
-import { findPrimaryScrollContainer } from "@/lib/auis-review/scrollOffset"
+import {
+  findPrimaryScrollContainer,
+  useLayoutVersion,
+} from "@/lib/auis-review/scrollOffset"
 import {
   formatFullTimestamp,
   formatRelative,
@@ -18,14 +21,13 @@ import { ReviewAvatar } from "./ReviewAvatar"
 import { ReplyComposer } from "./ReplyComposer"
 import { UxFlowChip } from "./UxFlowChip"
 import { CommentText } from "./CommentText"
+import { AuthorName } from "./PersonHover"
 import { useImageAttach } from "@/lib/auis-review/useImageAttach"
+import { elementFromCommentContext } from "@/lib/auis-review/elementContext"
+import { permalinkPath } from "@/lib/auis-review/permalink"
+import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
+import { canonicalizeReviewUrl } from "@/lib/auis-review/urlMatch"
 import type { ReviewComment, ReviewReply } from "./types"
-
-/** Builds the comment's screen URL with the ?reviewCommentId=… permalink. */
-function permalinkPath(comment: ReviewComment): string {
-  const sep = comment.url.includes("?") ? "&" : "?"
-  return `${comment.url}${sep}reviewCommentId=${encodeURIComponent(comment.id)}`
-}
 
 function isStale(comment: ReviewComment, currentDocHeight: number): boolean {
   if (!comment.documentHeight) return false
@@ -55,10 +57,63 @@ function targetSummary(comment: ReviewComment): string | null {
   return `${target.tag} · ${detail}`
 }
 
-export function ReplyRow({ reply }: { reply: ReviewReply }) {
+/**
+ * Where the pin was dropped, in words: the landmark trail and, when the target
+ * was inside an overlay, how one got there. Only shows when the anchor does not
+ * resolve — the pin is not drawn then, and without this the comment vanishes
+ * from the screen with no explanation.
+ */
+function whereItWas(comment: ReviewComment): string | null {
+  const trail = comment.context?.location
+  const place = trail && trail.length > 0 ? trail.join(" › ") : null
+  const steps = (comment.revealPath ?? [])
+    .map((step) => step.label?.trim())
+    .filter((label): label is string => !!label)
+  const how = steps.length > 0 ? `by opening ${steps.join(" › ")}` : null
+  if (place && how) return `${place} — ${how}`
+  return place ?? how
+}
+
+export function ReplyRow({
+  reply,
+  commentId,
+}: {
+  reply: ReviewReply
+  commentId: string
+}) {
+  const editReply = useReviewStore((s) => s.editReply)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
+  const sessionEmail = useReviewStore((s) => s.sessionEmail)
   const isAgent = reply.authorKind === "agent"
+  // A reviewer only edits their own reply; an admin edits any human reply.
+  const canEdit =
+    !isAgent &&
+    (sessionRole === "admin" ||
+      (!!sessionEmail &&
+        reply.authorEmail?.toLowerCase() === sessionEmail.toLowerCase()))
+  const [editing, setEditing] = React.useState(false)
+  const [editText, setEditText] = React.useState(reply.text)
+  const [saving, setSaving] = React.useState(false)
+  const editImg = useImageAttach(reply.images ?? [])
+
+  const startEdit = () => {
+    setEditText(reply.text)
+    editImg.reset(reply.images ?? [])
+    setEditing(true)
+  }
+  const saveEdit = async () => {
+    if (editText.trim().length === 0) return
+    setSaving(true)
+    try {
+      await editReply(commentId, reply.id, editText, editImg.images)
+      setEditing(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
-    <div className="flex items-start gap-2 py-1.5">
+    <div className="group/reply flex items-start gap-2 py-1.5">
       <ReviewAvatar
         authorKind={reply.authorKind}
         authorId={reply.authorId}
@@ -68,47 +123,124 @@ export function ReplyRow({ reply }: { reply: ReviewReply }) {
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 leading-tight">
-          <span className="body-xs font-medium text-(--fg-primary) truncate">
-            {reply.authorName}
-          </span>
+          <AuthorName
+            name={reply.authorName}
+            email={reply.authorEmail}
+            role={reply.authorRole}
+            className="body-xs font-medium text-(--fg-primary) truncate"
+          />
           {isAgent && (
-            <span className="body-xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
+            <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
               agent
             </span>
           )}
-          <span className="body-xs text-(--fg-tertiary)">
+          <span className="text-2xs text-(--fg-tertiary) tabular-nums">
             {formatRelative(reply.createdAt)}
+            {reply.editedAt ? " · edited" : ""}
           </span>
+          {canEdit && !editing && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                startEdit()
+              }}
+              aria-label="Edit reply"
+              title="Edit reply"
+              className="ml-auto shrink-0 h-5 w-5 inline-flex items-center justify-center rounded-xs text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) opacity-0 group-hover/reply:opacity-100 focus-visible:opacity-100 transition-opacity"
+            >
+              <Icon name="edit" size={11} />
+            </button>
+          )}
         </div>
-        {reply.text.length > 0 && (
-          <CommentText
-            className="m-0 body-sm text-(--fg-primary) whitespace-pre-wrap leading-relaxed"
-            text={reply.text}
-          />
-        )}
-        {reply.images && reply.images.length > 0 && (
+
+        {editing ? (
           <div
-            className={[
-              "flex flex-wrap gap-1.5",
-              reply.text.length > 0 ? "mt-1.5" : "mt-0.5",
-            ].join(" ")}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1 flex flex-col gap-1.5"
           >
-            {reply.images.map((src, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  window.open(src, "_blank", "noopener")
-                }}
-                className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
-                aria-label={`View image ${idx + 1}`}
+            <textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onPaste={editImg.onPaste}
+              rows={2}
+              autoFocus
+              className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void saveEdit()
+                if (e.key === "Escape") setEditing(false)
+              }}
+            />
+            {editImg.images.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {editImg.images.map((src, idx) => (
+                  <div key={idx} className="relative group/rethumb">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={src}
+                      alt=""
+                      className="h-14 w-14 rounded-sm object-cover border border-(--border-subtle)"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => editImg.remove(idx)}
+                      aria-label="Remove image"
+                      className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/rethumb:opacity-100 transition-opacity"
+                    >
+                      <Icon name="close" size={9} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center justify-end gap-1">
+              <AuButton variant="ghost" size="sm" onClick={() => setEditing(false)}>
+                Cancel
+              </AuButton>
+              <AuButton
+                variant="primary"
+                size="sm"
+                loading={saving}
+                disabled={saving || editText.trim().length === 0}
+                onClick={() => void saveEdit()}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" className="h-16 w-16 object-cover" />
-              </button>
-            ))}
+                Save
+              </AuButton>
+            </div>
           </div>
+        ) : (
+          <>
+            {reply.text.length > 0 && (
+              <CommentText
+                className="m-0 body-sm text-(--fg-primary) whitespace-pre-wrap leading-relaxed"
+                text={reply.text}
+              />
+            )}
+            {reply.images && reply.images.length > 0 && (
+              <div
+                className={[
+                  "flex flex-wrap gap-1.5",
+                  reply.text.length > 0 ? "mt-1.5" : "mt-0.5",
+                ].join(" ")}
+              >
+                {reply.images.map((src, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      window.open(src, "_blank", "noopener")
+                    }}
+                    className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
+                    aria-label={`View image ${idx + 1}`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="h-16 w-16 object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -142,6 +274,8 @@ export function ReviewCommentCard({
   const selectComment = useReviewStore((s) => s.selectComment)
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
   const setActive = useReviewStore((s) => s.setActive)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
+  const sessionEmail = useReviewStore((s) => s.sessionEmail)
   const archiveDirect = useReviewStore((s) => s.archiveDirect)
   const approveComment = useReviewStore((s) => s.approveComment)
   const rejectComment = useReviewStore((s) => s.rejectComment)
@@ -151,6 +285,7 @@ export function ReviewCommentCard({
   const restoreFromBacklog = useReviewStore((s) => s.restoreFromBacklog)
   const deleteComment = useReviewStore((s) => s.deleteComment)
   const currentUrl = useCurrentUrl()
+  const layoutVersion = useLayoutVersion()
 
   const [historyOpen, setHistoryOpen] = React.useState(false)
   const [replyOpen, setReplyOpen] = React.useState(false)
@@ -160,7 +295,17 @@ export function ReviewCommentCard({
   const editImg = useImageAttach(comment.images ?? [])
 
   const selected = selectedId === comment.id
-  const isOnThisPage = comment.url === currentUrl
+  const isOnThisPage = canonicalizeReviewUrl(comment.url) === currentUrl
+  // Only matters when the comment IS on this screen: elsewhere there is never a
+  // pin. `layoutVersion` is a dependency because it is what observes portals
+  // mounting — without it the card would not notice the modal reopening.
+  const anchorLost = React.useMemo(() => {
+    if (!isOnThisPage || comment.status === "backlog") return false
+    if (!comment.anchor?.el) return false
+    return !resolveAnchoredElement(comment.anchor)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnThisPage, comment.anchor, comment.status, layoutVersion])
+  const lostWhere = anchorLost ? whereItWas(comment) : null
   const stale =
     isOnThisPage &&
     typeof window !== "undefined" &&
@@ -168,10 +313,10 @@ export function ReviewCommentCard({
 
   const navigateToAnchor = () => {
     selectComment(comment.id)
-    // A future idea is standalone (no pin) — just select it, don't scroll/navigate.
+    // A future idea is standalone (no pin) — only select, never scroll/navigate.
     if (comment.status === "backlog") return
-    // Keeps review active and the drawer open while moving to another screen —
-    // navigation is client-side, so it stays smooth (no reload).
+    // Keep the review active and the drawer open while taking you to another
+    // screen — the navigation is client-side, so it is smooth (no reload).
     setActive(true)
     setSheetOpen(true)
     if (!isOnThisPage) {
@@ -194,10 +339,7 @@ export function ReviewCommentCard({
   const copyPermalink = () => {
     if (typeof window === "undefined") return
     const base = window.location.origin
-    const pathWithQuery = comment.url.includes("?")
-      ? `${comment.url}&reviewCommentId=${encodeURIComponent(comment.id)}`
-      : `${comment.url}?reviewCommentId=${encodeURIComponent(comment.id)}`
-    const fullUrl = `${base}${pathWithQuery}`
+    const fullUrl = `${base}${permalinkPath(comment)}`
     void navigator.clipboard?.writeText(fullUrl)
   }
 
@@ -217,47 +359,68 @@ export function ReviewCommentCard({
   }
 
   const isBacklog = comment.status === "backlog"
+  // Hierarchy (UI mirror; the server re-validates): an admin moderates; a
+  // reviewer edits/deletes only what is theirs and toggles open ↔ future idea
+  // on their own pin.
+  const isAdmin = sessionRole === "admin"
+  const ownComment =
+    isAdmin ||
+    (!!sessionEmail &&
+      comment.authorEmail?.toLowerCase() === sessionEmail.toLowerCase())
   const dropdownItems: AuDropdownItem[] = [
-    {
-      id: "edit",
-      label: "Edit",
-      icon: "edit",
-      onSelect: startEdit,
-    },
+    ...(ownComment
+      ? [
+          {
+            id: "edit",
+            label: "Edit",
+            icon: "edit",
+            onSelect: startEdit,
+          } as AuDropdownItem,
+        ]
+      : []),
     {
       id: "copy-link",
       label: "Copy link",
       icon: "link",
       onSelect: copyPermalink,
     },
-    isBacklog
-      ? {
-          id: "restore-backlog",
-          label: "Remove from backlog",
-          icon: "outbox",
-          onSelect: () => void restoreFromBacklog(comment.id),
-        }
-      : archived
-      ? {
-          id: "reopen",
-          label: "Reopen",
-          icon: "refresh",
-          onSelect: () => void reopenFromArchive(comment.id),
-        }
-      : comment.status === "open"
-      ? {
-          id: "archive",
-          label: "Mark as resolved",
-          icon: "check_circle",
-          onSelect: () => void archiveDirect(comment.id),
-        }
-      : {
-          id: "reject",
-          label: "Reopen (reject review)",
-          icon: "refresh",
-          onSelect: () => void rejectComment(comment.id),
-        },
-    ...(!isBacklog && !archived
+    ...(isBacklog && ownComment
+      ? [
+          {
+            id: "restore-backlog",
+            label: "Take out of the backlog",
+            icon: "outbox",
+            onSelect: () => void restoreFromBacklog(comment.id),
+          } as AuDropdownItem,
+        ]
+      : []),
+    ...(isAdmin && !isBacklog
+      ? [
+          archived
+            ? ({
+                id: "reopen",
+                label: "Reopen",
+                icon: "refresh",
+                onSelect: () => void reopenFromArchive(comment.id),
+              } as AuDropdownItem)
+            : comment.status === "open"
+            ? ({
+                id: "archive",
+                label: "Mark as resolved",
+                icon: "check_circle",
+                onSelect: () => void archiveDirect(comment.id),
+              } as AuDropdownItem)
+            : ({
+                id: "reject",
+                label: "Reopen (reject review)",
+                icon: "refresh",
+                onSelect: () => void rejectComment(comment.id),
+              } as AuDropdownItem),
+        ]
+      : []),
+    ...(!isBacklog &&
+    !archived &&
+    (isAdmin || (ownComment && comment.status === "open"))
       ? [
           {
             id: "to-backlog",
@@ -267,19 +430,26 @@ export function ReviewCommentCard({
           } as AuDropdownItem,
         ]
       : []),
-    { id: "sep", separator: true },
-    {
-      id: "delete",
-      label: "Delete",
-      icon: "delete",
-      danger: true,
-      onSelect: () => void deleteComment(comment.id),
-    },
+    ...(ownComment
+      ? [
+          { id: "sep", separator: true } as AuDropdownItem,
+          {
+            id: "delete",
+            label: "Delete",
+            icon: "delete",
+            danger: true,
+            onSelect: () => void deleteComment(comment.id),
+          } as AuDropdownItem,
+        ]
+      : []),
   ]
 
   const replies = Array.isArray(comment.replies) ? comment.replies : []
   const showApprovalButtons =
-    !archived && comment.status === "in_review" && (context === "sheet" || context === "inbox")
+    !archived &&
+    comment.status === "in_review" &&
+    (context === "sheet" || context === "inbox") &&
+    isAdmin
   const target = targetSummary(comment)
 
   return (
@@ -307,17 +477,28 @@ export function ReviewCommentCard({
           />
         )}
         <ReviewAvatar
+          authorKind={comment.authorKind}
           authorId={comment.authorId}
           authorName={comment.authorName}
           colorToken={comment.authorColorToken}
           size={24}
         />
         <div className="flex flex-col leading-tight min-w-0">
-          <span className="body-xs font-medium text-(--fg-primary) truncate">
-            {comment.authorName}
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <AuthorName
+              name={comment.authorName}
+              email={comment.authorEmail}
+              role={comment.authorRole}
+              className="body-xs font-medium text-(--fg-primary) truncate"
+            />
+            {comment.authorKind === "agent" && (
+              <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
+                agent
+              </span>
+            )}
+          </div>
           <span
-            className="body-xs text-(--fg-tertiary) tabular-nums"
+            className="text-2xs text-(--fg-tertiary) tabular-nums"
             title={new Date(comment.createdAt).toISOString()}
           >
             {formatFullTimestamp(comment.createdAt)}
@@ -325,6 +506,15 @@ export function ReviewCommentCard({
         </div>
         {comment.origin === "ux-flow" && <UxFlowChip flowRef={comment.flowRef} />}
         <div className="ml-auto flex items-center gap-1">
+          {comment.visibility === "admins" && (
+            <span
+              className="inline-flex items-center gap-1 body-xs text-(--fg-tertiary)"
+              title="Visible to admins only"
+            >
+              <Icon name="lock" size={11} />
+              Private
+            </span>
+          )}
           <StatusPill status={comment.status} />
           {stale && (
             <AuPill variant="draft" dot={false}>
@@ -445,6 +635,16 @@ export function ReviewCommentCard({
         </div>
       )}
 
+      {anchorLost && (
+        <div className="mt-2 flex items-start gap-1 body-xs text-(--fg-tertiary)">
+          <Icon name="location_off" size={11} className="mt-0.5 shrink-0" />
+          <span>
+            The pin is not drawn on this screen.
+            {lostWhere ? ` It was dropped at ${lostWhere}.` : ""}
+          </span>
+        </div>
+      )}
+
       <button
         type="button"
         onClick={(e) => {
@@ -481,7 +681,7 @@ export function ReviewCommentCard({
       {replies.length > 0 && (
         <div className="mt-3 pt-2 border-t border-(--border-subtle) flex flex-col divide-y divide-(--border-subtle)">
           {replies.map((r) => (
-            <ReplyRow key={r.id} reply={r} />
+            <ReplyRow key={r.id} reply={r} commentId={comment.id} />
           ))}
         </div>
       )}
@@ -539,6 +739,7 @@ export function ReviewCommentCard({
         <div onClick={(e) => e.stopPropagation()} className="mt-2">
           <ReplyComposer
             commentId={comment.id}
+            element={elementFromCommentContext(comment.context)}
             autoFocus
             onDone={() => setReplyOpen(false)}
           />

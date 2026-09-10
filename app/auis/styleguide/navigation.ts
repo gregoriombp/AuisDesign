@@ -44,8 +44,12 @@ export const navigation: NavSection[] = [
       { name: "Button", href: "/auis/styleguide/components/au-button" },
       { name: "Input and field", href: "/auis/styleguide/components/au-input" },
       { name: "Checkbox", href: "/auis/styleguide/components/au-checkbox" },
+      { name: "Radio group", href: "/auis/styleguide/components/au-radio-group" },
       { name: "Toggle", href: "/auis/styleguide/components/au-toggle" },
       { name: "Slider", href: "/auis/styleguide/components/au-slider" },
+      { name: "Segmented", href: "/auis/styleguide/components/au-segmented" },
+      { name: "Textarea", href: "/auis/styleguide/components/au-textarea" },
+      { name: "Spinner", href: "/auis/styleguide/components/au-spinner" },
       { name: "Pill", href: "/auis/styleguide/components/au-pill" },
       { name: "Progress", href: "/auis/styleguide/components/au-progress" },
       { name: "Alert", href: "/auis/styleguide/components/au-alert" },
@@ -73,8 +77,9 @@ export const navigation: NavSection[] = [
     group: "Auis",
     title: "UX flows",
     items: [
-      { name: "Example flow", href: "/auis/styleguide/ux-flows/example" },
-      { name: "Golden-eye example", href: "/auis/styleguide/ux-flows/example-golden-eye" },
+      { name: "UX Flow hub", href: "/auis/ux-flow" },
+      { name: "Example flow", href: "/auis/ux-flow/example" },
+      { name: "Golden-eye example", href: "/auis/ux-flow/example-golden-eye" },
     ],
   },
   {
@@ -86,6 +91,7 @@ export const navigation: NavSection[] = [
       { name: "Mention menu", href: "/auis/styleguide/components/au-mention-menu" },
       { name: "About Review Mode", href: "/auis/styleguide/foundation/review-mode" },
       { name: "Inbox", href: "/auis/styleguide/review" },
+      { name: "State Mode matrix", href: "/auis/states" },
     ],
   },
 ]

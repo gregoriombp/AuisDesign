@@ -1,6 +1,6 @@
 ---
 name: ux-page-rework
-description: Audits a product page (and its subpages) and delivers TWO different improvement directions — one refinement (keeps the structure, polishes components and UX writing) and one restructuring (reorganizes the information hierarchy, proposes new patterns) — each on its own branch, no merge. Use whenever the user asks to "improve this page", "rework this page", "refine this page", "audit the UX of this screen", "create 2 improvement versions", "redesign /[route]", "propose improvements for this page", or pastes a URL/route and asks for a UX audit/improvement. Also applies when the user says "compare it with Mobbin/Dribbble/competitor X" about an existing page. Ideal for UI/UX preview repos (Next.js + design system) that need two implementable directions for the same screen.
+description: Audits a product page (and its subpages) and delivers TWO different improvement directions — one refinement (keeps the structure, polishes components and UX writing) and one restructuring (reorganizes the information hierarchy, proposes new patterns) — each on its own branch, no merge. Use whenever the user asks to "improve this page", "rework this page", "refine this page", "audit the UX of this screen", "create 2 improvement versions", "redesign /[route]", "propose improvements for this page", or pastes a URL/route and asks for a UX audit/improvement. Also applies when the user says "compare it with Dribbble/competitor X" about an existing page. Ideal for UI/UX preview repos (Next.js + design system) that need two implementable directions for the same screen.
 ---
 
 # UX Page Rework
@@ -12,7 +12,7 @@ Two improvement directions for a product page, each on its own branch, no merge.
 - `ux/<slug>-refinement` — preserves structure and routes; polishes components, visual hierarchy within each page, copy.
 - `ux/<slug>-restructure` — reorganizes the information hierarchy; proposes new interaction patterns.
 
-Where `<slug>` is the last meaningful segment of the path (`/settings/financeiro/` → `financeiro`; `/dashboard/billing` → `billing`). Never the whole URL.
+Where `<slug>` is the last meaningful segment of the path (`/auis/styleguide/components/au-button/` → `au-button`; `/dashboard/billing` → `billing`). Never the whole URL.
 
 Branches stay local, no push and no merge. The user compares, picks one (or cherry-picks), and moves on.
 
@@ -40,12 +40,12 @@ Before touching any file:
 
 ### Phase 2 — External references (optional, non-blocking)
 
-Reference sites like **Mobbin, Dribbble, Behance, public Mobbin** have a paywall or block scraping. `WebFetch` fails. Don't insist.
+Reference galleries like **Dribbble and Behance** have a paywall or block scraping. `WebFetch` fails. Don't insist.
 
 Two paths:
 
 - **A — the user sends material.** Ask for 1-3 screenshots or written notes about the flows they want to absorb. Ask explicitly which ones are "visual" (component, elegance) and which are "content" (hierarchy, copy) — because you will treat them differently.
-- **B — inference fallback.** If the user mentioned apps you know (OpenAI Platform, Stripe, Intercom, Linear, etc.), use prior knowledge of their patterns and **flag that it is inference**, not fresh research. Example: "I couldn't access Mobbin (paywall). I'll use what I know about these companies' billing patterns — correct me if I'm out of date."
+- **B — inference fallback.** If the user mentioned apps you know (OpenAI Platform, Stripe, Intercom, Linear, etc.), use prior knowledge of their patterns and **flag that it is inference**, not fresh research. Example: "I couldn't access the reference gallery (paywall). I'll use what I know about these companies' billing patterns — correct me if I'm out of date."
 
 When the user sends material, split it into two buckets and treat them differently:
 
@@ -153,6 +153,6 @@ If you catch yourself doing one of these, stop and reconsider — it's almost al
 - **Working tree dirty from another agent.** Don't include it in your commits. `git add <file>` file by file. If you need to switch branches and the parallel agent is writing, avoid switching — just create the next branch straight from the current state with `git checkout -b`.
 - **The linter rewrites your code mid-work.** Some editors run format-on-save independently of your session. Re-read the file before the next Edit — what is on disk may have changed after your last Write.
 - **Dev server already running.** Don't kill it. Hot reload picks up your changes. To see two versions simultaneously, use worktrees (Phase 5).
-- **Mobbin/Dribbble/Behance.** WebFetch fails. Don't keep trying. Ask for a screenshot or use declared inference.
+- **Dribbble/Behance.** WebFetch fails. Don't keep trying. Ask for a screenshot or use declared inference.
 - **Subpages that don't exist in the sidebar but do exist in the app router** (e.g. orphan pages). `find <app-dir>/<slug> -name "page.tsx"` to make sure you got them all.
 - **The route is a redirect** (e.g. a `page.tsx` that only does `redirect("/sub")`). You want to work on the subpages, not the redirect.

@@ -60,6 +60,14 @@ const sections: HubSection[] = [
     status: "ready",
   },
   {
+    title: "State Mode",
+    description:
+      "Every registered screen in every scenario, side by side — the URL is the source of truth, no simulated data.",
+    icon: "instant_mix",
+    href: "/auis/states",
+    status: "ready",
+  },
+  {
     title: "Roadmap",
     description:
       "A lightweight parking lot for ideas and follow-ups that belong to the builder itself.",

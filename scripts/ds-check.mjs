@@ -29,7 +29,7 @@ const MAX_PER_RULE = 40;
 
 const KNOWN_PRIMITIVES = [
   "accordion", "badge", "button", "calendar", "card", "chart", "collapsible",
-  "dropdown-menu", "popover", "separator", "table", "tooltip",
+  "dropdown-menu", "popover", "radio-group", "separator", "table", "tooltip",
 ];
 
 // Primitives with a TRUE drop-in Au wrapper — importing the raw one in product
@@ -45,6 +45,7 @@ const AU_EQUIVALENT = {
   button: "AuButton",
   badge: "AuPill",
   "dropdown-menu": "AuDropdownMenu",
+  "radio-group": "AuRadioGroup",
 };
 
 // Files where a raw <svg> or a hex literal is legitimately expected: Auis's own

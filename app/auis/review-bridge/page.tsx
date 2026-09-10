@@ -6,12 +6,14 @@ import { AuButton } from "@/components/ui/AuButton"
 import { Icon } from "@/components/ui/Icon"
 import { CommentsPanel } from "./_components/CommentsPanel"
 import { SuggestionsPanel } from "./_components/SuggestionsPanel"
+import { MembersPanel } from "./_components/MembersPanel"
 
-type Category = "comments" | "suggestions"
+type Category = "comments" | "suggestions" | "team"
 
 const CATEGORIES: { id: Category; label: string; icon: string }[] = [
   { id: "comments", label: "Comments", icon: "forum" },
   { id: "suggestions", label: "Flow suggestions", icon: "lightbulb" },
+  { id: "team", label: "Team", icon: "group" },
 ]
 
 export default function ReviewBridgePage() {
@@ -30,8 +32,9 @@ export default function ReviewBridgePage() {
           <p className="au-eyebrow mb-3">Review Bridge</p>
           <h1 className="text-5xl font-semibold tracking-tight mb-3">Pending</h1>
           <p className="text-lg text-(--fg-secondary) max-w-2xl">
-            Everything waiting on a decision in one place: Review Mode comments and
-            edit suggestions from the UX Flows. Approve, reject or discard.
+            Everything waiting on a decision in one place: Review Mode comments,
+            edit suggestions from the UX Flows and the people who review.
+            Approve, reject or discard.
           </p>
         </header>
 
@@ -54,7 +57,13 @@ export default function ReviewBridgePage() {
           ))}
         </div>
 
-        {category === "comments" ? <CommentsPanel /> : <SuggestionsPanel />}
+        {category === "comments" ? (
+          <CommentsPanel />
+        ) : category === "suggestions" ? (
+          <SuggestionsPanel />
+        ) : (
+          <MembersPanel />
+        )}
       </div>
     </main>
   )

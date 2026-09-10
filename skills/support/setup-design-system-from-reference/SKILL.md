@@ -15,7 +15,7 @@ description: >
 # Design System Setup — Reference Image
 
 This skill takes **a reference image** (a screenshot from Dribbble,
-Behance, Mobbin, or any visual inspiration) and sets up a
+Behance, or any visual inspiration) and sets up a
 **Next.js + shadcn/ui** project with an `/auis/styleguide` route documenting the
 extracted/inferred tokens.
 
@@ -29,7 +29,7 @@ extracted/inferred tokens.
 
 An image (PNG, JPG, WebP). It can be:
 
-- A screenshot from Dribbble/Behance/Mobbin.
+- A screenshot from Dribbble/Behance.
 - A screen grab of a real product.
 - A Figma mockup exported as an image.
 - A photograph of printed graphic material.

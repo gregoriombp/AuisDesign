@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-07-15",
-  "count": 38,
+  "generated": "2026-09-10",
+  "count": 37,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -13,20 +13,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, token/style, variant, icon, hide, and sibling order), plans once, waits for approval, applies the changes, and marks each op "
-    },
-    {
-      "name": "auis-flow-bridge",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "[OBSOLETE] The styleguide UX flow editor went serverless — suggestions now go to a same-origin route (/api/flow-suggestions) that writes to flow-bridge/data/suggestions.json, with no separate server, no token, and no env"
+      "description": "Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, style tokens, typography classes, variant, icon, hide, and sibling order), plans once, waits for approval, applies the change"
     },
     {
       "name": "auis-flow-bridge-solve",
@@ -39,10 +26,10 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Reads and applies UX flow edit suggestions stored in the flow-bridge (`/auis/styleguide/ux-flows/[flow]`). Pulls from the bridge using a filter chosen by the user (all of them, only one flow, only open ones, a specific I"
+      "description": "Materializes UX flow edit suggestions filed from the flow editor (\"Suggest edit\" on /auis/ux-flow/<slug>) into the canonical page code. Pulls them from the same-origin /api/flow-suggestions route with a filter chosen by "
     },
     {
-      "name": "auis-review-bridge",
+      "name": "auis-review-bridge-dispatch",
       "capability": "bridges",
       "origin": "repo",
       "platforms": [
@@ -52,19 +39,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": true,
-      "description": "Explains that the Auis Review Mode bridge is now serverless and embedded in the Next app at `/api/review-bridge/*` — `npm run dev` already brings everything up, there is no separate process to start, no token, no env. Us"
-    },
-    {
-      "name": "auis-review-bridge-dispatch",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Runs the /loop dispatcher for Auis Review Bridge mentions. Reads the dispatch queue, routes enabled @Claude and @Germano items, replies when Live Response is enabled, and acts only when Auto Construct plus #now are both "
+      "description": "Runs one pass of the Auis Review Bridge dispatcher — the motor that turns agent mentions in Review Mode comments into action. Reads /api/review-bridge/dispatch-queue (already gated by the per-agent Live Response / Auto C"
     },
     {
       "name": "auis-review-bridge-germano-audit",
@@ -76,8 +51,8 @@
       ],
       "recommended": false,
       "legacy": false,
-      "divergent": true,
-      "description": "Runs Germano Faccio as a critical UI/UX second opinion on Review Bridge items already in_review. Compares the request with the delivery and posts one reply: good to proceed, or ask for improvement with a ready correction"
+      "divergent": false,
+      "description": "Runs Germano Faccio as a critical UI/UX second opinion on Auis Review Bridge items already in_review — what an executor (Claude or Codex) sent for approval. Compares the request with the delivery and posts one reply per "
     },
     {
       "name": "auis-review-bridge-germano-explore",
@@ -89,8 +64,8 @@
       ],
       "recommended": false,
       "legacy": false,
-      "divergent": true,
-      "description": "Runs Germano Faccio in proactive UI/UX patrol mode. Navigates the requested pages, opens states and overlays, judges appearance and behavior, and drops a concrete Review Mode pin for each real issue. It never edits code,"
+      "divergent": false,
+      "description": "Runs Germano Faccio on a proactive UI/UX patrol of the routes the user names: he navigates, clicks buttons, opens modals and sub-routes, triggers empty, loading, error and disabled states, and pins one concrete suggestio"
     },
     {
       "name": "auis-review-bridge-solve",
@@ -102,8 +77,8 @@
       ],
       "recommended": true,
       "legacy": false,
-      "divergent": true,
-      "description": "Resolves Auis Review Mode comments in bulk. Reads from the local review-bridge using a filter chosen by the user (all of them, only today's, only open ones, a specific page, explicit IDs, etc.), makes ONE PLAN BEFORE tou"
+      "divergent": false,
+      "description": "Resolves Auis Review Mode comments in bulk. Reads from the review-bridge using a filter chosen by the user (all of them, only today's, only open ones, a specific page, a UX flow, explicit IDs, etc.), makes ONE PLAN BEFOR"
     },
     {
       "name": "auis-handoff",
@@ -246,7 +221,7 @@
       "recommended": true,
       "legacy": false,
       "divergent": false,
-      "description": "Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Behance post, Mobbin capture, or any other design inspiration. Extracts "
+      "description": "Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Behance post, or any other design inspiration. Extracts or infers tokens"
     },
     {
       "name": "auis-foundation-update",
@@ -299,6 +274,19 @@
       "legacy": false,
       "divergent": false,
       "description": "Builds a full page in a Auis design system project (Next.js + shadcn/ui) from a screenshot, Figma URL, wireframe, or written description. Maps every visual element to existing Auis components first, falls back to shadcn/"
+    },
+    {
+      "name": "auis-update-states",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Maps product screens into Auis State Mode: registers new screens, axes, states and `?ge=` interactions in `lib/auis-states/registry.ts` and keeps the `/auis/states` matrix honest after a page changes. Use after adding or"
     },
     {
       "name": "commit",
@@ -415,7 +403,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Builds a UX flow diagram page in the Auis styleguide (/auis/styleguide/ux-flows/[name]) from a flow description, a list of steps, or any written brief. Maps every screen, decision point, branch, and convergence into a Re"
+      "description": "Creates a new single-journey UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>) from a written brief, a step list, or a meeting decision. Maps every screen, decision, "
     },
     {
       "name": "auis-create-ux-flow-golden-eye",
@@ -428,7 +416,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Builds a compiled, multi-scenario golden-eye UX flow page in the Auis styleguide. Merges several product journeys into one deduplicated ReactFlow graph with per-scenario focus lenses, shared-screen dots, route previews, "
+      "description": "Creates a compiled, multi-scenario \"golden eye\" UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>): several journeys overlaid on one self-contained ReactFlow board, sh"
     },
     {
       "name": "auis-flow",
@@ -467,7 +455,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": true,
-      "description": "Creates a NEW UX flow in the styleguide (`/auis/styleguide/ux-flows/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the file (local path or pasted content), parses it via `parseAuFlowFile"
+      "description": "Creates a NEW UX flow in the Auis UX Flow hub (`/auis/ux-flow/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the file (local path or pasted content), parses it via `parseAuFlowFile`, map"
     },
     {
       "name": "auis-pg-merge-flow",
@@ -480,7 +468,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists at `/auis/styleguide/ux-flows/[slug]`. Reads the file, compares it against the page's current `NODES`/`EDGES`, generates a readable diff"
+      "description": "Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`, `app/auis/ux-flow/[slug]/page.tsx`). Reads the file, compares it against the page's exp"
     },
     {
       "name": "auis-update-ux-flow",
@@ -493,7 +481,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": true,
-      "description": "Registers a structural update to an existing UX flow page in the Auis styleguide (`/auis/styleguide/ux-flows/[slug]`). Applies the requested change to the ReactFlow diagram (new screen, new branch, removed node, rework) "
+      "description": "Registers a structural update to an existing UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>). Applies the requested change to the ReactFlow diagram (new screen, new"
     }
   ]
 }

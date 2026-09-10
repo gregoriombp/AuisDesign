@@ -4,6 +4,9 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ReviewAvatar } from "@/components/auis-review/ReviewAvatar"
+import { AuthorName } from "@/components/auis-review/PersonHover"
+import { BacklogComposer } from "@/components/auis-review/BacklogComposer"
+import { ReviewFilterControls } from "@/components/auis-review/ReviewFilterBar"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuDropdownMenu, type AuDropdownItem } from "@/components/ui/AuDropdownMenu"
 import {
@@ -18,9 +21,18 @@ import { AuPill } from "@/components/ui/AuPill"
 import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
+import { permalinkPath } from "@/lib/auis-review/permalink"
+import {
+  DEFAULT_REVIEW_FILTERS,
+  applyReviewFilters,
+  collectAuthorOptions,
+  collectPageOptions,
+  type ReviewListFilters,
+} from "@/lib/auis-review/commentFilters"
 import type { ReviewComment } from "@/components/auis-review/types"
 
-type Tab = "open" | "in_review" | "archive"
+// "backlog" = Future ideas — their home is HERE now (they left the drawer).
+type Tab = "open" | "in_review" | "backlog" | "archive"
 
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n)
@@ -36,6 +48,12 @@ function formatTimestamp(ts: number): string {
 function StatusPill({ status }: { status: ReviewComment["status"] }) {
   if (status === "in_review") return <AuPill variant="beta">In review</AuPill>
   if (status === "resolved") return <AuPill variant="live">Resolved</AuPill>
+  if (status === "backlog")
+    return (
+      <AuPill variant="draft" dot={false}>
+        Future idea
+      </AuPill>
+    )
   return <AuPill variant="draft">Open</AuPill>
 }
 
@@ -57,21 +75,37 @@ function CommentCard({
   const approveComment = useReviewStore((s) => s.approveComment)
   const rejectComment = useReviewStore((s) => s.rejectComment)
   const reopenFromArchive = useReviewStore((s) => s.reopenFromArchive)
+  const moveToBacklog = useReviewStore((s) => s.moveToBacklog)
+  const restoreFromBacklog = useReviewStore((s) => s.restoreFromBacklog)
   const deleteComment = useReviewStore((s) => s.deleteComment)
   const selectComment = useReviewStore((s) => s.selectComment)
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
   const setActive = useReviewStore((s) => s.setActive)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
+  const sessionEmail = useReviewStore((s) => s.sessionEmail)
 
-  // Opens the comment's screen with Review Mode still on and the comment
-  // highlighted (permalink), via client-side navigation — no reload.
+  // Hierarchy (UI mirror; the server re-validates): status is admin; delete is
+  // admin or owner.
+  const isAdmin = sessionRole === "admin"
+  const ownComment =
+    isAdmin ||
+    (!!sessionEmail &&
+      comment.authorEmail?.toLowerCase() === sessionEmail.toLowerCase())
+
+  // Opens the comment's screen keeping Review Mode on and the comment
+  // highlighted (permalink), through client-side navigation — no reload.
+  // The URL alone does not say whether the pin was inside a modal. The trail
+  // is already recorded and comes back in the lean projection.
+  const place = comment.context?.location?.join(" › ")
+
   const openOnScreen = () => {
     selectComment(comment.id)
     setActive(true)
     setSheetOpen(true)
-    const sep = comment.url.includes("?") ? "&" : "?"
-    router.push(`${comment.url}${sep}reviewCommentId=${encodeURIComponent(comment.id)}`)
+    router.push(permalinkPath(comment))
   }
 
+  const isBacklog = comment.status === "backlog"
   const items: AuDropdownItem[] = [
     {
       id: "open",
@@ -80,46 +114,66 @@ function CommentCard({
       onSelect: openOnScreen,
     },
   ]
-  if (archived) {
+  if (isBacklog && ownComment) {
     items.push({
-      id: "reopen",
-      label: "Reopen",
-      icon: "refresh",
-      onSelect: () => void reopenFromArchive(comment.id),
-    })
-  } else if (comment.status === "in_review") {
-    items.push(
-      {
-        id: "approve",
-        label: "Approve",
-        icon: "check_circle",
-        onSelect: () => void approveComment(comment.id),
-      },
-      {
-        id: "reject",
-        label: "Reject",
-        icon: "undo",
-        onSelect: () => void rejectComment(comment.id),
-      }
-    )
-  } else {
-    items.push({
-      id: "archive",
-      label: "Mark as resolved",
-      icon: "check_circle",
-      onSelect: () => void archiveDirect(comment.id),
+      id: "restore-backlog",
+      label: "Take out of the backlog",
+      icon: "outbox",
+      onSelect: () => void restoreFromBacklog(comment.id),
     })
   }
-  items.push(
-    { id: "sep", separator: true },
-    {
-      id: "delete",
-      label: "Delete",
-      icon: "delete",
-      danger: true,
-      onSelect: () => void deleteComment(comment.id),
+  if (isAdmin && !isBacklog) {
+    if (archived) {
+      items.push({
+        id: "reopen",
+        label: "Reopen",
+        icon: "refresh",
+        onSelect: () => void reopenFromArchive(comment.id),
+      })
+    } else if (comment.status === "in_review") {
+      items.push(
+        {
+          id: "approve",
+          label: "Approve",
+          icon: "check_circle",
+          onSelect: () => void approveComment(comment.id),
+        },
+        {
+          id: "reject",
+          label: "Reject",
+          icon: "undo",
+          onSelect: () => void rejectComment(comment.id),
+        }
+      )
+    } else {
+      items.push(
+        {
+          id: "archive",
+          label: "Mark as resolved",
+          icon: "check_circle",
+          onSelect: () => void archiveDirect(comment.id),
+        },
+        {
+          id: "to-backlog",
+          label: "Move to future ideas",
+          icon: "lightbulb",
+          onSelect: () => void moveToBacklog(comment.id),
+        }
+      )
     }
-  )
+  }
+  if (ownComment) {
+    items.push(
+      { id: "sep", separator: true },
+      {
+        id: "delete",
+        label: "Delete",
+        icon: "delete",
+        danger: true,
+        onSelect: () => void deleteComment(comment.id),
+      }
+    )
+  }
 
   return (
     <div className="flex items-start gap-3 px-4 py-3 rounded-md border border-(--border-subtle) bg-(--bg-raised) hover:bg-(--bg-hover)">
@@ -133,6 +187,7 @@ function CommentCard({
         />
       )}
       <ReviewAvatar
+        authorKind={comment.authorKind}
         authorId={comment.authorId}
         authorName={comment.authorName}
         colorToken={comment.authorColorToken}
@@ -141,32 +196,58 @@ function CommentCard({
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm font-medium text-(--fg-primary) truncate">
-            {comment.authorName}
-          </span>
+          <AuthorName
+            name={comment.authorName}
+            email={comment.authorEmail}
+            role={comment.authorRole}
+            className="text-sm font-medium text-(--fg-primary) truncate"
+          />
+          {comment.authorKind === "agent" && (
+            <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
+              agent
+            </span>
+          )}
           <StatusPill status={comment.status} />
-          <span className="text-[11px] text-(--fg-tertiary) tabular-nums ml-auto">
+          {comment.visibility === "admins" && (
+            <span
+              className="inline-flex items-center gap-1 text-2xs text-(--fg-tertiary)"
+              title="Visible to admins only"
+            >
+              <Icon name="lock" size={11} />
+              Private
+            </span>
+          )}
+          <span className="text-2xs text-(--fg-tertiary) tabular-nums ml-auto">
             {formatTimestamp(comment.createdAt)}
           </span>
         </div>
-        <p className="m-0 text-sm text-(--fg-primary) whitespace-pre-wrap line-clamp-3">
+        <p className="m-0 body-sm text-(--fg-primary) whitespace-pre-wrap line-clamp-3">
           {comment.text}
         </p>
         {comment.resolution?.summary && (
-          <p className="m-0 mt-1 text-[11px] text-(--fg-tertiary) italic">
+          <p className="m-0 mt-1 text-2xs text-(--fg-tertiary) italic">
             {comment.resolution.summary}
           </p>
         )}
         <button
           type="button"
           onClick={openOnScreen}
-          className="mt-1 inline-flex items-center gap-1 text-[11px] text-(--fg-tertiary) hover:text-(--accent-brand)"
+          className="mt-1 inline-flex items-center gap-1 text-2xs text-(--fg-tertiary) hover:text-(--accent-brand)"
           title={`Go to ${comment.url}`}
         >
           <Icon name="web_asset" size={11} />
           <span className="truncate max-w-[280px]">{comment.url}</span>
           <Icon name="arrow_outward" size={11} />
         </button>
+        {place && (
+          <p
+            className="m-0 mt-1 flex items-center gap-1 text-2xs text-(--fg-tertiary)"
+            title={place}
+          >
+            <Icon name="my_location" size={11} className="shrink-0" />
+            <span className="truncate max-w-[280px]">{place}</span>
+          </p>
+        )}
       </div>
       <AuDropdownMenu
         align="end"
@@ -194,7 +275,6 @@ export function CommentsPanel() {
   const loadArchivePage = useReviewStore((s) => s.loadArchivePage)
   const approveComment = useReviewStore((s) => s.approveComment)
   const rejectComment = useReviewStore((s) => s.rejectComment)
-  const backend = useReviewStore((s) => s.backend)
   const storage = useReviewStore((s) => s.storage)
 
   React.useEffect(() => {
@@ -209,9 +289,14 @@ export function CommentsPanel() {
 
   const [tab, setTab] = React.useState<Tab>("open")
   const [search, setSearch] = React.useState("")
+  const [filters, setFilters] = React.useState<ReviewListFilters>(
+    DEFAULT_REVIEW_FILTERS
+  )
   const [groupByUrl, setGroupByUrl] = React.useState(true)
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
   const [bulkBusy, setBulkBusy] = React.useState(false)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
+  const isAdmin = sessionRole === "admin"
 
   React.useEffect(() => {
     setSelectedIds(new Set())
@@ -224,18 +309,36 @@ export function CommentsPanel() {
   const source: ReviewComment[] = React.useMemo(() => {
     if (tab === "open") return comments.filter((c) => c.status === "open")
     if (tab === "in_review") return comments.filter((c) => c.status === "in_review")
+    if (tab === "backlog") return comments.filter((c) => c.status === "backlog")
     return archivedComments
   }, [tab, comments, archivedComments])
 
   const filtered = React.useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return source
-    return source.filter((c) => c.text.toLowerCase().includes(q))
+    return source.filter(
+      (c) =>
+        c.text.toLowerCase().includes(q) ||
+        c.authorName?.toLowerCase().includes(q) ||
+        c.url?.toLowerCase().includes(q) ||
+        c.replies?.some((r) => r.text.toLowerCase().includes(q))
+    )
   }, [source, search])
 
   const sorted = React.useMemo(
-    () => [...filtered].sort((a, b) => b.createdAt - a.createdAt),
-    [filtered]
+    () => applyReviewFilters(filtered, filters),
+    [filtered, filters]
+  )
+
+  // Dropdown options come from the whole universe (active + archived),
+  // otherwise the filter itself would hide the alternatives.
+  const authorOptions = React.useMemo(
+    () => collectAuthorOptions([...comments, ...archivedComments]),
+    [comments, archivedComments]
+  )
+  const pageOptions = React.useMemo(
+    () => collectPageOptions([...comments, ...archivedComments]),
+    [comments, archivedComments]
   )
 
   const grouped = React.useMemo(() => {
@@ -249,7 +352,7 @@ export function CommentsPanel() {
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]))
   }, [sorted, groupByUrl])
 
-  const selectableTab = tab === "in_review"
+  const selectableTab = tab === "in_review" && isAdmin
 
   const toggleSelected = (id: string) => {
     setSelectedIds((prev) => {
@@ -288,10 +391,10 @@ export function CommentsPanel() {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <AuStatCard icon="forum" label="Active total" value={comments.length} />
-        <AuStatCard icon="pending" label="Open" value={openCount} />
-        <AuStatCard icon="hourglass_top" label="In review" value={inReviewCount} />
-        <AuStatCard icon="archive" label="Archived" value={archivedCount} />
+        <AuStatCard size="sm" icon="forum" label="Total active" value={comments.length} />
+        <AuStatCard size="sm" icon="pending" label="Open" value={openCount} />
+        <AuStatCard size="sm" icon="hourglass_top" label="In review" value={inReviewCount} />
+        <AuStatCard size="sm" icon="archive" label="Archived" value={archivedCount} />
       </div>
 
       <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-4 flex flex-wrap items-center gap-3">
@@ -304,8 +407,8 @@ export function CommentsPanel() {
           />
         </div>
 
-        <div className="flex items-center gap-1 p-1 rounded-full bg-(--bg-muted) text-[11px] font-medium">
-          {(["open", "in_review", "archive"] as Tab[]).map((t) => (
+        <div className="flex items-center gap-1 p-1 rounded-full bg-(--bg-muted) text-2xs font-medium">
+          {(["open", "in_review", "backlog", "archive"] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
@@ -317,9 +420,15 @@ export function CommentsPanel() {
                   : "text-(--fg-secondary) hover:text-(--fg-primary)",
               ].join(" ")}
             >
-              {t === "open" ? "Open" : t === "in_review" ? "In review" : "Archived"}
+              {t === "open"
+                ? "Open"
+                : t === "in_review"
+                ? "In review"
+                : t === "backlog"
+                ? "Future ideas"
+                : "Archived"}
               {t === "in_review" && inReviewCount > 0 && (
-                <span className="min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-[10px] font-semibold bg-(--au-amber-100) text-(--au-amber-700) tabular-nums">
+                <span className="min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-3xs font-semibold bg-(--au-amber-100) text-(--au-amber-700) tabular-nums">
                   {inReviewCount}
                 </span>
               )}
@@ -327,7 +436,14 @@ export function CommentsPanel() {
           ))}
         </div>
 
-        <label className="flex items-center gap-2 text-xs text-(--fg-secondary) cursor-pointer">
+        <ReviewFilterControls
+          filters={filters}
+          onChange={setFilters}
+          authors={authorOptions}
+          pages={pageOptions}
+        />
+
+        <label className="flex items-center gap-2 body-xs text-(--fg-secondary) cursor-pointer">
           <input
             type="checkbox"
             checked={groupByUrl}
@@ -337,9 +453,9 @@ export function CommentsPanel() {
           Group by screen
         </label>
 
-        <span className="ml-auto inline-flex items-center gap-2 text-[11px] text-(--fg-tertiary)">
-          <Icon name={backend === "bridge" ? "cloud_done" : "save"} size={13} />
-          {backend === "bridge" ? "Local bridge" : "localStorage"}
+        <span className="ml-auto inline-flex items-center gap-2 text-2xs text-(--fg-tertiary)">
+          <Icon name="cloud_done" size={13} />
+          Serverless bridge
         </span>
 
         <AuButton
@@ -355,9 +471,16 @@ export function CommentsPanel() {
         </AuButton>
       </div>
 
+      {/* Compose a future idea — the backlog's home is this page. */}
+      {tab === "backlog" && (
+        <div className="max-w-xl">
+          <BacklogComposer />
+        </div>
+      )}
+
       {selectableTab && selectedIds.size > 0 && (
         <div className="flex items-center justify-between gap-3 px-4 py-2 rounded-md bg-(--bg-muted) border border-(--border-subtle)">
-          <span className="text-sm text-(--fg-secondary)">
+          <span className="body-sm text-(--fg-secondary)">
             {selectedIds.size} selected
           </span>
           <div className="flex items-center gap-2">
@@ -395,17 +518,21 @@ export function CommentsPanel() {
                 ? "Loading archived…"
                 : tab === "in_review"
                 ? "Nothing waiting for review"
+                : tab === "backlog"
+                ? "No future ideas yet"
                 : tab === "archive"
                 ? "Nothing archived yet"
                 : comments.length === 0
                 ? "No comments yet"
-                : "Nothing matches these filters"}
+                : "Nothing with these filters"}
             </AuEmptyTitle>
             <AuEmptyDescription>
               {tab === "open" && comments.length === 0
-                ? "Turn on Review Mode (⌘⇧Y) on any screen and draw your first comment."
+                ? "Turn on Review Mode (⌘⇧Y) on any screen and draw the first comment."
                 : tab === "in_review"
                 ? "When an agent marks something as resolved, it shows up here for you to approve or reject."
+                : tab === "backlog"
+                ? "Write down above what is not for now — or move an open comment here."
                 : "Try loosening the search."}
             </AuEmptyDescription>
           </AuEmptyHeader>
@@ -418,11 +545,11 @@ export function CommentsPanel() {
                 <Icon name="web_asset" size={14} className="text-(--fg-tertiary) shrink-0" />
                 <Link
                   href={url}
-                  className="text-sm text-(--fg-primary) hover:text-(--accent-brand) truncate"
+                  className="body-sm text-(--fg-primary) hover:text-(--accent-brand) truncate"
                 >
                   {url}
                 </Link>
-                <span className="text-xs text-(--fg-tertiary) shrink-0">
+                <span className="body-xs text-(--fg-tertiary) shrink-0">
                   {items.length} in total
                 </span>
               </header>

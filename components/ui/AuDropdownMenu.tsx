@@ -63,6 +63,11 @@ export type AuDropdownMenuProps = {
   className?: string
   /** Optional aria-label for the menu surface. */
   "aria-label"?: string
+  /** Controlled open state. Pair with `onOpenChange`. Use when the trigger
+   *  must open on `click` (e.g. inside a surface that stops `pointerdown`),
+   *  since Radix's default trigger opens on pointerdown. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 function isSeparator(it: AuDropdownItem): it is AuDropdownSeparatorItem {
@@ -80,9 +85,11 @@ export function AuDropdownMenu({
   sideOffset = 4,
   className,
   "aria-label": ariaLabel,
+  open,
+  onOpenChange,
 }: AuDropdownMenuProps) {
   return (
-    <DropdownPrimitive.Root>
+    <DropdownPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DropdownPrimitive.Trigger asChild>{trigger}</DropdownPrimitive.Trigger>
       <DropdownPrimitive.Portal>
         <DropdownPrimitive.Content

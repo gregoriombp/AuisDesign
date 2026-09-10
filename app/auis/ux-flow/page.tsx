@@ -2,11 +2,6 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuCard } from "@/components/ui/AuCard"
-import { AuPill } from "@/components/ui/AuPill"
-import { AuStatCard } from "@/components/ui/AuStatCard"
-import { Icon } from "@/components/ui/Icon"
-import { CollapsibleGroup } from "./_components/CollapsibleGroup"
-import { FLOW_GROUPS, FLOW_META, type FlowGroup } from "./_data/flow-meta"
 import {
   AuEmpty,
   AuEmptyContent,
@@ -15,51 +10,40 @@ import {
   AuEmptyMedia,
   AuEmptyTitle,
 } from "@/components/ui/AuEmpty"
+import { Icon } from "@/components/ui/Icon"
+import { PageHero, Section } from "../styleguide/_primitives"
+import { FLOW_GROUPS, FLOW_META } from "./_data/flow-meta"
 
 export const metadata: Metadata = {
   title: "UX Flows",
-  description: "Navigable product flows that stay versioned with the code.",
+  description:
+    "Product experience flows: journeys and chained screens, navigable like a prototype.",
 }
 
-function formatDate(iso: string): string {
-  const [y, m, d] = iso.split("-")
-  if (!y || !m || !d) return iso
-  return `${d}/${m}/${y}`
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
 }
 
 export default function UxFlowIndex() {
-  const totalScreens = FLOW_META.reduce((sum, f) => sum + f.screens, 0)
+  const hasFlows = FLOW_META.length > 0
 
   return (
-    <main className="min-h-screen bg-(--bg-canvas) text-(--fg-primary)">
-      <div className="max-w-5xl mx-auto px-8 py-16">
-        <Link href="/auis" className="no-underline">
-          <AuButton variant="ghost" size="sm" iconLeft="arrow_back">
-            Auis
-          </AuButton>
-        </Link>
+    <>
+      <PageHero title="UX Flows">
+        Each flow connects the product&apos;s screens into a navigable map, prototype
+        style. Open one to explore it, comment or suggest changes — {FLOW_META.length}{" "}
+        {FLOW_META.length === 1 ? "flow" : "flows"} in {FLOW_GROUPS.length}{" "}
+        {FLOW_GROUPS.length === 1 ? "group" : "groups"}, built with the same components
+        and tokens as the design system.
+      </PageHero>
 
-        <header className="mt-6 mb-10">
-          <p className="au-eyebrow mb-3">UX Flow</p>
-          <h1 className="text-5xl font-semibold tracking-tight mb-3">Flows</h1>
-          <p className="text-lg text-(--fg-secondary) max-w-2xl">
-            Each flow connects the product&apos;s screens into a navigable map,
-            Figma-prototype style. Open one to explore it, comment or suggest changes.
-          </p>
-        </header>
-
-        <div className="grid grid-cols-3 gap-4 mb-12">
-          <AuStatCard icon="account_tree" label="Flows" value={FLOW_META.length} />
-          <AuStatCard icon="web_asset" label="Screens mapped" value={totalScreens} />
-          <AuStatCard
-            icon="palette"
-            label="Source"
-            value="Styleguide"
-            hint="The same NODES/EDGES as the design system"
-          />
-        </div>
-
-        {FLOW_META.length === 0 ? (
+      <div className="mx-auto flex max-w-7xl flex-col gap-16 px-10 pb-14">
+        {!hasFlows ? (
           <AuEmpty>
             <AuEmptyHeader>
               <AuEmptyMedia variant="icon">
@@ -67,9 +51,8 @@ export default function UxFlowIndex() {
               </AuEmptyMedia>
               <AuEmptyTitle>No flows yet</AuEmptyTitle>
               <AuEmptyDescription>
-                Run <code>/auis-create-ux-flow</code> with a journey or step list.
-                Auis will create the flow page, register its metadata, and make it
-                available here.
+                Run <code>/auis-create-ux-flow</code> with a journey or a step list. The
+                skill creates the flow page, registers its metadata and lists it here.
               </AuEmptyDescription>
             </AuEmptyHeader>
             <AuEmptyContent>
@@ -80,41 +63,36 @@ export default function UxFlowIndex() {
           </AuEmpty>
         ) : null}
 
-        {FLOW_GROUPS.map((group: FlowGroup) => {
+        {FLOW_GROUPS.map((group) => {
           const flows = FLOW_META.filter((f) => f.group === group)
           if (flows.length === 0) return null
           return (
-            <CollapsibleGroup key={group} title={group} count={flows.length}>
-              <div className="grid grid-cols-2 gap-6">
+            <Section
+              key={group}
+              id={slugify(group)}
+              title={group}
+              lead={
+                group === "Examples"
+                  ? "Product-neutral references shipped with Auis. Copy them when authoring a new flow, then remove them from the metadata once your own flows exist."
+                  : undefined
+              }
+            >
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {flows.map((f) => (
-                  <AuCard
-                    key={f.slug}
-                    interactive
-                    className="p-6 flex flex-col gap-4"
-                  >
+                  <AuCard key={f.slug} interactive className="flex flex-col gap-4 p-6">
                     <div className="flex items-start justify-between">
-                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-md bg-surface">
+                      <span className="inline-flex size-11 items-center justify-center rounded-md bg-surface">
                         <Icon name="account_tree" size={24} />
                       </span>
-                      <AuPill variant="neutral">
-                        {f.screens} {f.screens === 1 ? "screen" : "screens"}
-                      </AuPill>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <h3 className="text-xl font-semibold">{f.title}</h3>
-                      <p className="text-sm text-(--fg-secondary) leading-relaxed">
+                      <h3 className="m-0 text-xl font-semibold">{f.title}</h3>
+                      <p className="m-0 text-sm leading-relaxed text-fg-secondary">
                         {f.description}
                       </p>
                     </div>
-                    <div className="mt-auto pt-2 flex items-center justify-between gap-3">
-                      <span className="inline-flex items-center gap-1.5 text-2xs text-fg-tertiary">
-                        <Icon name="schedule" size={13} />
-                        Updated on {formatDate(f.updatedAt)}
-                      </span>
-                      <Link
-                        href={`/auis/ux-flow/${f.slug}`}
-                        className="no-underline"
-                      >
+                    <div className="mt-auto flex items-center justify-end pt-2">
+                      <Link href={`/auis/ux-flow/${f.slug}`} className="no-underline">
                         <AuButton variant="primary" iconRight="arrow_forward">
                           Open
                         </AuButton>
@@ -123,10 +101,43 @@ export default function UxFlowIndex() {
                   </AuCard>
                 ))}
               </div>
-            </CollapsibleGroup>
+            </Section>
           )
         })}
+
+        <Section
+          id="authoring"
+          title="Authoring a flow"
+          lead="Flows are TypeScript pages: nodes and edges live next to the code they describe."
+        >
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <AuCard className="p-5">
+              <h3 className="text-base font-medium text-fg-primary">1. Describe the journey</h3>
+              <p className="mt-2 text-sm leading-relaxed text-fg-secondary">
+                Run <code>/auis-create-ux-flow</code> with the steps, decisions and terminal
+                states. The skill writes <code>NODES</code> and <code>EDGES</code> into a new
+                page under <code>app/auis/ux-flow/&lt;slug&gt;</code>.
+              </p>
+            </AuCard>
+            <AuCard className="p-5">
+              <h3 className="text-base font-medium text-fg-primary">2. Review on the canvas</h3>
+              <p className="mt-2 text-sm leading-relaxed text-fg-secondary">
+                Click a screen to preview its route in the side panel. Use the editor to
+                comment on nodes or suggest structural changes — both land in the Review
+                Bridge for an agent to resolve.
+              </p>
+            </AuCard>
+            <AuCard className="p-5">
+              <h3 className="text-base font-medium text-fg-primary">3. Compile scenarios</h3>
+              <p className="mt-2 text-sm leading-relaxed text-fg-secondary">
+                When several journeys share screens, run{" "}
+                <code>/auis-create-ux-flow-golden-eye</code> to overlay them in one graph
+                with a focus lens per scenario and state deep links.
+              </p>
+            </AuCard>
+          </div>
+        </Section>
       </div>
-    </main>
+    </>
   )
 }
