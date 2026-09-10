@@ -19,12 +19,10 @@ import type {
 
 /**
  * Serverless backend for Review Mode: talks to the same-origin
- * `/api/review-bridge/*` routes (no token, no env) that persist to the SAME
- * `review-bridge/data/*.json` files. It replaces RemoteBridgeReview (the
- * standalone Express server on 9878) as the default — `next dev` alone already
- * serves everything. No SSE: it lightly polls `/version` (the files' mtime) to
- * pick up external writes (e.g. the agent's solve skill) without re-rendering
- * for nothing.
+ * `/api/review-bridge/*` routes (no token, no env) that persist to
+ * `review-bridge/data/*.json` — `next dev` alone already serves everything.
+ * No SSE: it lightly polls `/version` (the files' mtime) to pick up external
+ * writes (e.g. the agent's solve skill) without re-rendering for nothing.
  */
 const BASE = "/api/review-bridge"
 const POLL_MS = 4000
@@ -67,6 +65,8 @@ export class ServerlessReview implements ReviewStorage {
     const params = new URLSearchParams()
     if (filter?.url) params.set("url", filter.url)
     if (filter?.status) params.set("status", filter.status)
+    if (filter?.origin) params.set("origin", filter.origin)
+    if (filter?.flow) params.set("flow", filter.flow)
     const qs = params.toString()
     const res = await fetch(`${BASE}/comments${qs ? `?${qs}` : ""}`, { cache: "no-store" })
     if (!res.ok) throw new Error(await readBodyError(res))
@@ -132,6 +132,21 @@ export class ServerlessReview implements ReviewStorage {
     return data.reply
   }
 
+  async editReply(
+    commentId: string,
+    replyId: string,
+    patch: { text: string; images?: string[] }
+  ): Promise<ReviewReply | null> {
+    const res = await fetch(
+      `${BASE}/comments/${encodeURIComponent(commentId)}/replies/${encodeURIComponent(replyId)}`,
+      { method: "PATCH", headers: JSON_HEADERS, body: JSON.stringify(patch) }
+    )
+    if (res.status === 404) return null
+    if (!res.ok) throw new Error(await readBodyError(res))
+    const data = (await res.json()) as { reply: ReviewReply }
+    return data.reply
+  }
+
   async deleteComment(id: string): Promise<void> {
     const res = await fetch(`${BASE}/comments/${encodeURIComponent(id)}`, { method: "DELETE" })
     if (!res.ok && res.status !== 404) throw new Error(await readBodyError(res))
@@ -156,6 +171,10 @@ export class ServerlessReview implements ReviewStorage {
   // No SSE: poll /version (the files' mtime). Fires onChange only when the
   // signature changes — picks up external writes (the agent's skill) without
   // re-rendering for nothing.
+  //
+  // The poll PAUSES while the tab is hidden: a forgotten background tab should
+  // not hit the bridge every 4s. On return, an immediate tick compares against
+  // the previous signature, so nothing that changed meanwhile is lost.
   subscribe(onChange: () => void): () => void {
     if (typeof window === "undefined") return () => {}
     let last: string | null = null
@@ -171,13 +190,19 @@ export class ServerlessReview implements ReviewStorage {
         /* offline/transient — ignore */
       }
     }
+    const active = () => !stopped && document.visibilityState === "visible"
     void tick()
     const interval = window.setInterval(() => {
-      if (!stopped) void tick()
+      if (active()) void tick()
     }, POLL_MS)
+    const onVisibility = () => {
+      if (active()) void tick()
+    }
+    document.addEventListener("visibilitychange", onVisibility)
     return () => {
       stopped = true
       window.clearInterval(interval)
+      document.removeEventListener("visibilitychange", onVisibility)
     }
   }
 }

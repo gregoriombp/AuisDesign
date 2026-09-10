@@ -13,6 +13,7 @@ import {
 import { AuPill } from "@/components/ui/AuPill"
 import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
+import { useReviewStore } from "@/lib/auis-review/store"
 import { getFlowMeta } from "../../ux-flow/_data/flow-meta"
 
 type SuggestionStatus = "open" | "in_review" | "applied" | "discarded"
@@ -27,9 +28,14 @@ type FlowSuggestion = {
   authorName?: string
   status: SuggestionStatus
   resolution?: { summary: string }
+  baseRevision?: string
+  baseHash?: string
+  materializationReceipt?: {
+    summary: string
+    files: string[]
+    validations: string[]
+  }
 }
-
-const USER_ACTOR = { kind: "user", id: "user", name: "User" } as const
 
 function pad2(n: number): string {
   return n < 10 ? `0${n}` : String(n)
@@ -49,10 +55,12 @@ function StatusPill({ status }: { status: SuggestionStatus }) {
 function SuggestionCard({
   suggestion,
   busy,
+  canModerate,
   onTransition,
 }: {
   suggestion: FlowSuggestion
   busy: boolean
+  canModerate: boolean
   onTransition: (id: string, t: Transition) => void
 }) {
   const meta = getFlowMeta(suggestion.flow)
@@ -67,16 +75,26 @@ function SuggestionCard({
             </span>
             <StatusPill status={suggestion.status} />
           </div>
-          <p className="m-0 text-sm text-(--fg-primary) whitespace-pre-wrap">
+          <p className="m-0 body-sm text-(--fg-primary) whitespace-pre-wrap">
             {suggestion.description}
           </p>
           {suggestion.resolution?.summary && (
-            <p className="m-0 mt-1 text-[11px] text-(--fg-tertiary) italic">
+            <p className="m-0 mt-1 text-2xs text-(--fg-tertiary) italic">
               {suggestion.resolution.summary}
             </p>
           )}
+          {!suggestion.baseRevision && (
+            <p className="m-0 mt-1 text-2xs text-(--fg-tertiary)">
+              Legacy: read the content, but recreate the proposal on top of the current flow to materialize it.
+            </p>
+          )}
+          {suggestion.materializationReceipt && (
+            <p className="m-0 mt-1 text-2xs text-(--fg-tertiary)">
+              {suggestion.materializationReceipt.summary} · {suggestion.materializationReceipt.validations.length} validation(s)
+            </p>
+          )}
         </div>
-        <span className="text-[11px] text-(--fg-tertiary) tabular-nums shrink-0">
+        <span className="text-2xs text-(--fg-tertiary) tabular-nums shrink-0">
           {formatTimestamp(suggestion.createdAt)}
         </span>
       </div>
@@ -87,49 +105,52 @@ function SuggestionCard({
             Open flow
           </AuButton>
         </Link>
-        <span className="text-[11px] text-(--fg-tertiary)">
+        <span className="text-2xs text-(--fg-tertiary)">
           {meta?.title ?? suggestion.flow}
         </span>
         <div className="ml-auto flex items-center gap-2">
-          {inReview ? (
-            <AuButton
-              variant="ghost"
-              size="sm"
-              iconLeft="undo"
-              disabled={busy}
-              onClick={() => onTransition(suggestion.id, "reject")}
-            >
-              Reopen
-            </AuButton>
-          ) : (
-            <AuButton
-              variant="ghost"
-              size="sm"
-              iconLeft="hourglass_top"
-              disabled={busy}
-              onClick={() => onTransition(suggestion.id, "in_review")}
-            >
-              In review
-            </AuButton>
+          {!canModerate && (
+            <span className="text-2xs text-(--fg-tertiary)">Waiting for an admin</span>
           )}
-          <AuButton
-            variant="secondary"
-            size="sm"
-            iconLeft="delete"
-            disabled={busy}
-            onClick={() => onTransition(suggestion.id, "discard")}
-          >
-            Discard
-          </AuButton>
-          <AuButton
-            variant="primary"
-            size="sm"
-            iconLeft="check_circle"
-            disabled={busy}
-            onClick={() => onTransition(suggestion.id, "apply")}
-          >
-            Apply
-          </AuButton>
+          {canModerate && (
+            <>
+              {inReview ? (
+                <AuButton
+                  variant="ghost"
+                  size="sm"
+                  iconLeft="undo"
+                  disabled={busy}
+                  onClick={() => onTransition(suggestion.id, "reject")}
+                >
+                  Reopen
+                </AuButton>
+              ) : (
+                <span className="text-2xs text-(--fg-tertiary)">
+                  {suggestion.baseRevision
+                    ? "Waiting for materialization"
+                    : "Read-only"}
+                </span>
+              )}
+              <AuButton
+                variant="secondary"
+                size="sm"
+                iconLeft="delete"
+                disabled={busy}
+                onClick={() => onTransition(suggestion.id, "discard")}
+              >
+                Discard
+              </AuButton>
+              <AuButton
+                variant="primary"
+                size="sm"
+                iconLeft="check_circle"
+                disabled={busy || !inReview || !suggestion.materializationReceipt}
+                onClick={() => onTransition(suggestion.id, "apply")}
+              >
+                Apply
+              </AuButton>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -137,10 +158,16 @@ function SuggestionCard({
 }
 
 export function SuggestionsPanel() {
+  const sessionRole = useReviewStore((state) => state.sessionRole)
+  const hydrateSession = useReviewStore((state) => state.hydrateSession)
   const [suggestions, setSuggestions] = React.useState<FlowSuggestion[]>([])
   const [loaded, setLoaded] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [busyId, setBusyId] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    void hydrateSession()
+  }, [hydrateSession])
 
   const refresh = React.useCallback(async () => {
     try {
@@ -171,7 +198,7 @@ export function SuggestionsPanel() {
         const res = await fetch(`/api/flow-suggestions/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transition, actor: USER_ACTOR }),
+          body: JSON.stringify({ transition }),
         })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         await refresh()
@@ -204,15 +231,15 @@ export function SuggestionsPanel() {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <AuStatCard icon="lightbulb" label="Pending" value={suggestions.length} />
-        <AuStatCard icon="pending" label="Open" value={openCount} />
-        <AuStatCard icon="hourglass_top" label="In review" value={inReviewCount} />
+        <AuStatCard size="sm" icon="lightbulb" label="Pending" value={suggestions.length} />
+        <AuStatCard size="sm" icon="pending" label="Open" value={openCount} />
+        <AuStatCard size="sm" icon="hourglass_top" label="In review" value={inReviewCount} />
       </div>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="m-0 text-xs text-(--fg-tertiary)">
-          Edit suggestions coming from the UX Flow editor. Apply/Discard archives the
-          suggestion; the actual node changes are made by a skill.
+        <p className="m-0 body-xs text-(--fg-tertiary)">
+          Structural suggestions from the UX Flow editor. A skill materializes
+          them and attaches the receipt; only then can an admin apply or reopen.
         </p>
         <AuButton variant="ghost" size="sm" iconLeft="refresh" onClick={() => void refresh()}>
           Refresh
@@ -220,7 +247,7 @@ export function SuggestionsPanel() {
       </div>
 
       {error && (
-        <div className="px-4 py-2 rounded-md border border-(--border-subtle) bg-(--bg-muted) text-sm text-(--fg-secondary)">
+        <div className="px-4 py-2 rounded-md border border-(--border-subtle) bg-(--bg-muted) body-sm text-(--fg-secondary)">
           <Icon name="error" size={14} className="mr-1 align-text-bottom" />
           {error}
         </div>
@@ -236,8 +263,8 @@ export function SuggestionsPanel() {
               {!loaded ? "Loading suggestions…" : "No pending suggestions"}
             </AuEmptyTitle>
             <AuEmptyDescription>
-              Open a flow, hit &quot;Suggest edit&quot; in the editor, and the proposals
-              show up here for you to triage.
+              Open a flow, turn on &quot;Suggest edit&quot; in the editor, and the
+              proposals show up here for you to triage.
             </AuEmptyDescription>
           </AuEmptyHeader>
         </AuEmpty>
@@ -255,11 +282,11 @@ export function SuggestionsPanel() {
                   />
                   <Link
                     href={`/auis/ux-flow/${flow}`}
-                    className="text-sm text-(--fg-primary) hover:text-(--accent-brand) truncate"
+                    className="body-sm text-(--fg-primary) hover:text-(--accent-brand) truncate"
                   >
                     {meta?.title ?? flow}
                   </Link>
-                  <span className="text-xs text-(--fg-tertiary) shrink-0">
+                  <span className="body-xs text-(--fg-tertiary) shrink-0">
                     {items.length} {items.length === 1 ? "suggestion" : "suggestions"}
                   </span>
                 </header>
@@ -269,6 +296,7 @@ export function SuggestionsPanel() {
                       key={s.id}
                       suggestion={s}
                       busy={busyId === s.id}
+                      canModerate={sessionRole === "admin"}
                       onTransition={onTransition}
                     />
                   ))}

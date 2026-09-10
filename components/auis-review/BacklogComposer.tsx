@@ -9,22 +9,25 @@ import { useReviewCommandAutocomplete } from "@/lib/auis-review/useReviewCommand
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
 
 /**
- * "Add future idea" in the review drawer — creates a standalone backlog card (no
- * pin) through store.addBacklogIdea. Collapsed it is a dashed button; open, it is
- * a mini composer with text + an optional image (paste or attach).
+ * "Add future idea" — creates a standalone backlog card (no pin) through
+ * store.addBacklogIdea. Collapsed it is a dashed button; open, a mini composer
+ * with text + optional image (paste or attach).
  */
 export function BacklogComposer() {
   const addBacklogIdea = useReviewStore((s) => s.addBacklogIdea)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
   const [open, setOpen] = React.useState(false)
   const [text, setText] = React.useState("")
   const [saving, setSaving] = React.useState(false)
   const img = useImageAttach()
   const fileRef = React.useRef<HTMLInputElement>(null)
   const taRef = React.useRef<HTMLTextAreaElement>(null)
+  // A reviewer does not command agents — their "@" only suggests people.
   const commands = useReviewCommandAutocomplete({
     textareaRef: taRef,
     value: text,
     setValue: setText,
+    allowAgents: sessionRole === "admin",
   })
 
   React.useEffect(() => {
@@ -71,7 +74,7 @@ export function BacklogComposer() {
         onChange={(e) => setText(e.target.value)}
         onPaste={img.onPaste}
         rows={3}
-        placeholder="Describe the future idea… or paste an image"
+        placeholder="Describe the future idea… paste an image"
         className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
         onKeyDown={(e) => {
           if (commands.onKeyDown(e)) return

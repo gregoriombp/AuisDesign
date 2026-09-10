@@ -1,157 +1,140 @@
 "use client"
 
-import * as React from "react"
-
-/**
- * Replays a short click recipe from `?ge=` so a UX-flow node can deep-link to
- * a real screen with a modal, drawer, menu, or wizard step already open.
+/* ─────────────────────────────────────────────────────────────────────
+ * FlowStateDriver — STATE deep-links for state-driven screens.
+ *
+ * The UX flows (golden eyes) open the real screens in an iframe, but almost
+ * every interesting state (open modal, wizard on step 2, drawer, kebab menu)
+ * lives in a local useState and has no URL. This driver gives those states a
+ * URL WITHOUT touching the product pages: it reads the `?ge=` param and
+ * replays the user's click path after hydration.
  *
  * Grammar (steps separated by `>>`):
- * - `t:Button label` clicks a visible interactive element by text/aria label.
- * - `c:[data-demo=open]` clicks the first match for a CSS selector.
- * - `w:400` waits for the given number of milliseconds.
- */
+ *   t:<text>   → clicks the first clickable whose text/aria-label/title
+ *                matches (exact first, then `includes`, case-insensitive)
+ *   c:<css>    → clicks the first match of the CSS selector
+ *   w:<ms>     → waits <ms> milliseconds
+ *
+ * E.g. /settings/organization?ge=t%3AEdit%20organization
+ *      /settings/password?ge=t%3AReset>>w%3A400>>t%3AContinue
+ *
+ * Always mounted (like the ReviewModeProvider): without `?ge=` it renders
+ * nothing and does nothing. REACTIVE to the param: beyond the initial load, a
+ * client-side navigation that changes `?ge=` re-drives — that is how State
+ * Mode fires the `interactions` declared in the registry without remounting
+ * the screen. Each step waits for its target to appear (portals/modals mount
+ * async) for up to 5s; if it never shows up, it stops and says so in the badge.
+ * ──────────────────────────────────────────────────────────────────── */
 
-type DriveStatus = "driving" | "failed"
+import { Suspense, useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
+
+import { fireClick } from "@/lib/auis/fireClick"
+import { findClickableByText } from "@/lib/auis/findClickable"
+
+type DriveStatus = "driving" | "done" | "failed"
 
 const STEP_TIMEOUT_MS = 5000
 const POLL_MS = 120
 const SETTLE_MS = 350
-const CLICKABLE_SELECTOR = [
-  "button",
-  "a[href]",
-  "summary",
-  "label",
-  '[role="button"]',
-  '[role="menuitem"]',
-  '[role="menuitemradio"]',
-  '[role="menuitemcheckbox"]',
-  '[role="tab"]',
-  '[role="option"]',
-  '[role="switch"]',
-  '[role="radio"]',
-  '[role="checkbox"]',
-].join(", ")
 
-const normalize = (value: string | null | undefined) =>
-  (value ?? "").replace(/\s+/g, " ").trim().toLowerCase()
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms))
-
-function findByText(text: string): HTMLElement | null {
-  const wanted = normalize(text)
-  if (!wanted) return null
-  const candidates = Array.from(
-    document.querySelectorAll<HTMLElement>(CLICKABLE_SELECTOR),
-  ).filter(
-    (element) =>
-      element.offsetParent !== null ||
-      element.closest("[data-radix-popper-content-wrapper]") !== null,
-  )
-  const labels = (element: HTMLElement) => [
-    normalize(element.innerText),
-    normalize(element.getAttribute("aria-label")),
-    normalize(element.getAttribute("title")),
-  ]
-  return (
-    candidates.find((element) => labels(element).some((label) => label === wanted)) ??
-    candidates.find((element) => labels(element).some((label) => label.includes(wanted))) ??
-    null
-  )
-}
-
-function fireClick(element: HTMLElement) {
-  element.scrollIntoView({ block: "center", behavior: "instant" as ScrollBehavior })
-  const options = { bubbles: true, cancelable: true, view: window }
-  element.dispatchEvent(new PointerEvent("pointerdown", { ...options, pointerId: 1 }))
-  element.dispatchEvent(new MouseEvent("mousedown", options))
-  element.dispatchEvent(new PointerEvent("pointerup", { ...options, pointerId: 1 }))
-  element.dispatchEvent(new MouseEvent("mouseup", options))
-  element.click()
-}
-
-async function waitFor(find: () => HTMLElement | null) {
+async function waitFor(find: () => HTMLElement | null): Promise<HTMLElement | null> {
   const deadline = Date.now() + STEP_TIMEOUT_MS
   while (Date.now() < deadline) {
-    const element = find()
-    if (element) return element
+    const el = find()
+    if (el) return el
     await sleep(POLL_MS)
   }
   return null
 }
 
-async function drive(recipe: string, onFailure: (step: string) => void) {
-  const steps = recipe.split(">>").map((step) => step.trim()).filter(Boolean)
+async function drive(recipe: string, onFail: (step: string) => void): Promise<boolean> {
+  const steps = recipe.split(">>").map((s) => s.trim()).filter(Boolean)
   for (const step of steps) {
-    const separator = step.indexOf(":")
-    const kind = separator === -1 ? step : step.slice(0, separator)
-    const argument = separator === -1 ? "" : step.slice(separator + 1).trim()
+    const sep = step.indexOf(":")
+    const kind = sep === -1 ? step : step.slice(0, sep)
+    const arg = sep === -1 ? "" : step.slice(sep + 1).trim()
     if (kind === "w") {
-      await sleep(Number(argument) || SETTLE_MS)
+      await sleep(Number(arg) || SETTLE_MS)
       continue
     }
-    const element = await waitFor(() =>
-      kind === "c"
-        ? document.querySelector<HTMLElement>(argument)
-        : findByText(argument),
+    const el = await waitFor(() =>
+      kind === "c" ? document.querySelector<HTMLElement>(arg) : findClickableByText(arg, { fuzzy: true }),
     )
-    if (!element) {
-      onFailure(step)
+    if (!el) {
+      onFail(step)
       return false
     }
-    fireClick(element)
+    fireClick(el)
     await sleep(SETTLE_MS)
   }
   return true
 }
 
+// useSearchParams requires Suspense on prerender — the wrapper keeps the layout
+// mount identical to its siblings (ReviewModeProvider does the same inside).
 export function FlowStateDriver() {
-  const [status, setStatus] = React.useState<DriveStatus | null>(null)
-  const [failedStep, setFailedStep] = React.useState<string | null>(null)
+  return (
+    <Suspense fallback={null}>
+      <FlowStateDriverInner />
+    </Suspense>
+  )
+}
 
-  React.useEffect(() => {
-    const recipe = new URLSearchParams(window.location.search).get("ge")
-    if (!recipe) return
-    let active = true
-    void sleep(0).then(() => {
-      if (active) setStatus("driving")
-    })
-    void sleep(400)
+function FlowStateDriverInner() {
+  const searchParams = useSearchParams()
+  const recipe = searchParams.get("ge")
+  const [status, setStatus] = useState<DriveStatus | null>(null)
+  const [failedStep, setFailedStep] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!recipe) {
+      // Param removed (scenario change, mode exit) — just clear the badge.
+      setStatus(null)
+      setFailedStep(null)
+      return
+    }
+    let alive = true
+    setStatus("driving")
+    setFailedStep(null)
+    // Post-hydration (or post-navigation) breather before the first click.
+    sleep(400)
       .then(() =>
         drive(recipe, (step) => {
-          if (!active) return
+          if (!alive) return
           setFailedStep(step)
-          console.warn(`[FlowStateDriver] step not found: "${step}"`)
+          console.warn(`[FlowStateDriver] step not found: "${step}" (recipe: "${recipe}")`)
         }),
       )
-      .then((succeeded) => {
-        if (!active) return
-        if (succeeded) {
-          setStatus(null)
-        } else {
-          setStatus("failed")
-        }
+      .then((ok) => {
+        if (!alive) return
+        setStatus(ok ? "done" : "failed")
+        if (ok) setTimeout(() => alive && setStatus(null), 1200)
       })
     return () => {
-      active = false
+      alive = false
     }
-  }, [])
+  }, [recipe])
 
-  if (!status) return null
+  if (!status || status === "done") return null
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-4 z-90 flex items-center gap-2 rounded-full border border-default bg-raised px-3 py-1.5 text-xs font-medium shadow-md">
-      <span
-        className={[
-          "inline-block h-2 w-2 rounded-full",
-          status === "driving" ? "animate-pulse bg-accent-brand" : "bg-accent-warning",
-        ].join(" ")}
-      />
-      <span className="text-fg-secondary">
-        {status === "driving"
-          ? "Replaying state…"
-          : `Could not reach state${failedStep ? ` at “${failedStep}”` : ""}.`}
-      </span>
+    <div className="pointer-events-none fixed bottom-4 left-4 z-90 flex items-center gap-2 rounded-full border border-(--border-default) bg-(--bg-raised)/95 px-3 py-1.5 body-xs font-medium shadow-(--shadow-md) backdrop-blur">
+      {status === "driving" ? (
+        <>
+          <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-(--accent-brand)" />
+          <span className="text-(--fg-secondary)">Replaying state…</span>
+        </>
+      ) : (
+        <>
+          <span className="inline-block h-2 w-2 rounded-full bg-(--au-amber-500)" />
+          <span className="text-(--fg-secondary)">
+            Could not reach the state — step {failedStep ? `“${failedStep}”` : "unknown"} not found
+          </span>
+        </>
+      )}
     </div>
   )
 }

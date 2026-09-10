@@ -2721,7 +2721,9 @@
  * AuModal size variants — cockpit extends width for configuration
  * screens (settings inspector, multi-panel dialogs).
  * ============================================================ */
+.au-modal--sm     { max-width: 448px; }
 .au-modal--md     { max-width: 520px; }
+.au-modal--lg     { max-width: 672px; }
 .au-modal--cockpit {
   max-width: 760px;
   border-radius: 18px;

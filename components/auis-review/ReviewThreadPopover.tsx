@@ -18,12 +18,16 @@ import {
   resolveElementPoint,
 } from "@/lib/auis-review/elementAnchor"
 import { formatFullTimestamp } from "@/lib/auis-review/format"
+import { elementFromCommentContext } from "@/lib/auis-review/elementContext"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReplyRow } from "./ReviewCommentCard"
 import { ReplyComposer } from "./ReplyComposer"
 import { UxFlowChip } from "./UxFlowChip"
+import { ReviewAvatar } from "./ReviewAvatar"
 import { CommentText } from "./CommentText"
+import { AuthorName } from "./PersonHover"
 import { useImageAttach } from "@/lib/auis-review/useImageAttach"
+import { permalinkHref } from "@/lib/auis-review/permalink"
 import type { ReviewComment, ReviewPoint } from "./types"
 
 const THREAD_WIDTH = 360
@@ -52,6 +56,8 @@ export function ReviewThreadPopover() {
   const comments = useReviewStore((s) => s.comments)
   const archivedComments = useReviewStore((s) => s.archivedComments)
   const pendingAnchor = useReviewStore((s) => s.pendingAnchor)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
+  const sessionEmail = useReviewStore((s) => s.sessionEmail)
 
   const closeThread = useReviewStore((s) => s.closeThread)
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
@@ -102,8 +108,8 @@ export function ReviewThreadPopover() {
   // While composing a new comment, the compose popover takes over.
   if (!comment || pendingAnchor || typeof window === "undefined") return null
 
-  // Follow the marker when it tracks reflow/zoom (a resolved anchor):
-  // pin → the element's point; stroke → the centroid of the re-resolved points.
+  // Follow the marker when it tracks reflow/zoom (resolved anchor):
+  // pin → element point; stroke → centroid of the re-resolved points.
   void layoutVersion
   const anchorEl = comment.anchor.el
   let elPoint: ReviewPoint | null = null
@@ -117,7 +123,7 @@ export function ReviewThreadPopover() {
       elPoint = { x: cx, y: cy }
     }
   }
-  // Comment anchored to an element that no longer exists (a modal closed): the
+  // Comment anchored to an element that no longer exists (modal closed): the
   // marker disappears from the canvas, so the thread must not float loose over
   // the content/sidebar either. It comes back when the element reappears.
   if (anchorEl && !elPoint) return null
@@ -151,6 +157,15 @@ export function ReviewThreadPopover() {
   const isInReview = comment.status === "in_review"
   const target = targetSummary(comment)
 
+  // Hierarchy: an admin moderates (status/visibility); a reviewer only touches
+  // what is theirs. The server re-validates everything — here it only keeps the
+  // UI from offering what would return 403.
+  const isAdmin = sessionRole === "admin"
+  const ownComment =
+    isAdmin ||
+    (!!sessionEmail &&
+      comment.authorEmail?.toLowerCase() === sessionEmail.toLowerCase())
+
   const startEdit = () => {
     setEditText(comment.text)
     editImg.reset(comment.images ?? [])
@@ -167,47 +182,54 @@ export function ReviewThreadPopover() {
   }
 
   const copyPermalink = () => {
-    const base = window.location.origin
-    const pathWithQuery = comment.url.includes("?")
-      ? `${comment.url}&reviewCommentId=${encodeURIComponent(comment.id)}`
-      : `${comment.url}?reviewCommentId=${encodeURIComponent(comment.id)}`
-    void navigator.clipboard?.writeText(`${base}${pathWithQuery}`)
+    void navigator.clipboard?.writeText(permalinkHref(comment))
   }
 
   const dropdownItems: AuDropdownItem[] = [
-    { id: "edit", label: "Edit", icon: "edit", onSelect: startEdit },
+    ...(ownComment
+      ? [{ id: "edit", label: "Edit", icon: "edit", onSelect: startEdit } as AuDropdownItem]
+      : []),
     { id: "copy-link", label: "Copy link", icon: "link", onSelect: copyPermalink },
-    isInReview
-      ? {
-          id: "reject",
-          label: "Reopen (reject review)",
-          icon: "refresh",
-          onSelect: () => void rejectComment(comment.id),
-        }
-      : {
-          id: "archive",
-          label: "Mark as resolved",
-          icon: "check_circle",
-          onSelect: () => void archiveDirect(comment.id),
-        },
-    ...(!isResolved
+    // Changing status is an admin decision — a reviewer asks, does not resolve.
+    ...(isAdmin
       ? [
+          isInReview
+            ? ({
+                id: "reject",
+                label: "Reopen (reject review)",
+                icon: "refresh",
+                onSelect: () => void rejectComment(comment.id),
+              } as AuDropdownItem)
+            : ({
+                id: "archive",
+                label: "Mark as resolved",
+                icon: "check_circle",
+                onSelect: () => void archiveDirect(comment.id),
+              } as AuDropdownItem),
+          ...(!isResolved
+            ? [
+                {
+                  id: "to-backlog",
+                  label: "Move to future ideas",
+                  icon: "lightbulb",
+                  onSelect: () => void moveToBacklog(comment.id),
+                } as AuDropdownItem,
+              ]
+            : []),
+        ]
+      : []),
+    ...(ownComment
+      ? [
+          { id: "sep", separator: true } as AuDropdownItem,
           {
-            id: "to-backlog",
-            label: "Move to future ideas",
-            icon: "lightbulb",
-            onSelect: () => void moveToBacklog(comment.id),
+            id: "delete",
+            label: "Delete",
+            icon: "delete",
+            danger: true,
+            onSelect: () => void deleteComment(comment.id),
           } as AuDropdownItem,
         ]
       : []),
-    { id: "sep", separator: true },
-    {
-      id: "delete",
-      label: "Delete",
-      icon: "delete",
-      danger: true,
-      onSelect: () => void deleteComment(comment.id),
-    },
   ]
 
   return (
@@ -222,34 +244,54 @@ export function ReviewThreadPopover() {
       >
         {/* Header */}
         <header className="flex items-center gap-2 px-3 py-2.5 border-b border-(--border-subtle)">
-          <span
-            className="h-6 w-6 shrink-0 rounded-full flex items-center justify-center body-xs font-semibold text-(--fg-on-inverse)"
-            style={{ background: comment.authorColorToken }}
-          >
-            {comment.authorName.charAt(0).toUpperCase()}
-          </span>
+          <ReviewAvatar
+            authorKind={comment.authorKind}
+            authorId={comment.authorId}
+            authorName={comment.authorName}
+            colorToken={comment.authorColorToken}
+            size={24}
+          />
           <div className="flex flex-col leading-tight min-w-0">
-            <span className="body-xs font-medium text-(--fg-primary) truncate">
-              {comment.authorName}
-            </span>
-            <span className="body-xs text-(--fg-tertiary) tabular-nums">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <AuthorName
+                name={comment.authorName}
+                email={comment.authorEmail}
+                role={comment.authorRole}
+                className="body-xs font-medium text-(--fg-primary) truncate"
+              />
+              {comment.authorKind === "agent" && (
+                <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
+                  agent
+                </span>
+              )}
+            </div>
+            <span className="text-2xs text-(--fg-tertiary) tabular-nums">
               {formatFullTimestamp(comment.createdAt)}
             </span>
           </div>
           {comment.origin === "ux-flow" && <UxFlowChip flowRef={comment.flowRef} />}
 
           <div className="ml-auto flex items-center gap-0.5">
+            {comment.visibility === "admins" && (
+              <span
+                className="inline-flex items-center gap-1 body-xs text-(--fg-tertiary)"
+                title="Visible to admins only"
+              >
+                <Icon name="lock" size={11} />
+                Private
+              </span>
+            )}
             {isInReview && <AuPill variant="beta">In review</AuPill>}
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
-              className="inline-flex items-center gap-1 px-1.5 h-7 rounded-sm body-xs text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
-              title="Open in the side panel"
+              aria-label="See more"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
+              title="See more (open in the side panel)"
             >
-              <Icon name="open_in_full" size={11} />
-              See more
+              <Icon name="open_in_full" size={13} />
             </button>
-            {!isResolved && !isInReview && (
+            {!isResolved && !isInReview && isAdmin && (
               <button
                 type="button"
                 onClick={() => void archiveDirect(comment.id)}
@@ -390,7 +432,7 @@ export function ReviewThreadPopover() {
           {replies.length > 0 && (
             <div className="mt-2 pt-1 border-t border-(--border-subtle) flex flex-col divide-y divide-(--border-subtle)">
               {replies.map((r) => (
-                <ReplyRow key={r.id} reply={r} />
+                <ReplyRow key={r.id} reply={r} commentId={comment.id} />
               ))}
             </div>
           )}
@@ -398,7 +440,7 @@ export function ReviewThreadPopover() {
 
         {/* Footer: approve/reject when in review, then the reply composer */}
         <div className="border-t border-(--border-subtle) p-2 flex flex-col gap-2">
-          {isInReview && (
+          {isInReview && isAdmin && (
             <div className="flex items-center gap-1.5">
               <AuButton
                 variant="primary"
@@ -419,7 +461,11 @@ export function ReviewThreadPopover() {
             </div>
           )}
 
-          <ReplyComposer key={comment.id} commentId={comment.id} />
+          <ReplyComposer
+            key={comment.id}
+            commentId={comment.id}
+            element={elementFromCommentContext(comment.context)}
+          />
         </div>
       </div>
     </div>

@@ -4,21 +4,27 @@ import * as React from "react"
 import { Icon } from "@/components/ui/Icon"
 
 /**
- * Avatar for the Review Mode actors. Three cases:
- *  · Claude agent   → amber circle with a neutral agent glyph
+ * Avatar for the Review Mode actors:
+ *  · Claude agent   → amber circle with the asterisk glyph
+ *  · Codex agent    → teal circle with the terminal glyph
  *  · Germano agent  → graphite circle (slate-900) with the "GF" monogram
  *  · any human      → circle in the author's color with their initial
+ *
+ * Token-only (no raw hex, no inline SVG marks) so it survives every brand
+ * theme Auis renders under.
  */
 
 const GERMANO_INK = "var(--au-slate-900)"
 
-// `kind !== "user"` (rather than `=== "agent"`) because top-level comments do
-// not carry authorKind — only replies do. That way the avatar of the AUTHOR of a
-// comment created by an agent (e.g. a bonus pin from Germano) also resolves
-// through the stable id/name, without misfiring on a human reviewer
-// (kind === "user").
+// `kind !== "user"` (rather than `=== "agent"`) preserves the visual identity of
+// older records that do not carry authorKind yet. New comments and replies are
+// stamped by the server.
 function isClaude(kind: string | undefined, id: string | undefined, name: string): boolean {
   return kind !== "user" && (id === "claude" || name.trim().toLowerCase() === "claude")
+}
+
+function isCodex(kind: string | undefined, id: string | undefined, name: string): boolean {
+  return kind !== "user" && (id === "codex" || name.trim().toLowerCase() === "codex")
 }
 
 function isGermano(kind: string | undefined, id: string | undefined, name: string): boolean {
@@ -55,6 +61,19 @@ export function ReviewAvatar({
         aria-label={label}
       >
         <Icon name="asterisk" size={Math.round(size * 0.64)} weight={500} />
+      </span>
+    )
+  }
+
+  if (isCodex(authorKind, authorId, authorName)) {
+    return (
+      <span
+        className={`${base} bg-au-teal-600 text-fg-on-inverse`}
+        style={dim}
+        title={label}
+        aria-label={label}
+      >
+        <Icon name="terminal" size={Math.round(size * 0.6)} weight={500} />
       </span>
     )
   }

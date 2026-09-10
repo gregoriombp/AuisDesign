@@ -7,7 +7,7 @@
 > lives in within the styleguide sidebar (`app/auis/styleguide/navigation.ts`).
 >
 > **This is a classification yardstick, not an inventory.** It applies to both layers of the
-> [component map](./component-map.md): the 22 `Au*` that ship (Layer A — the builder's own UI)
+> [component map](./component-map.md): the 26 `Au*` that ship (Layer A — the builder's own UI)
 > and, above all, **the components you are about to build** (Layer B). Layer A is registered
 > in the styleguide today; this taxonomy also tells you where *your* next component goes.
 

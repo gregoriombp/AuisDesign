@@ -19,6 +19,10 @@ import { Icon } from "./Icon"
 
 export type AuStatCardVariant = "default" | "ai"
 
+/** Tile density — `sm` tightens padding, radius and the value scale for dense
+ *  grids (inbox counters); `md` (default) is the dashboard tile. */
+export type AuStatCardSize = "sm" | "md"
+
 export type AuStatCardProps = React.HTMLAttributes<HTMLDivElement> & {
   /** Material Symbol shown in the eyebrow line, before the label. */
   icon?: string
@@ -30,11 +34,12 @@ export type AuStatCardProps = React.HTMLAttributes<HTMLDivElement> & {
   hint?: React.ReactNode
   /** Variant — `ai` paints the soft mesh used elsewhere in the DS. */
   variant?: AuStatCardVariant
+  size?: AuStatCardSize
 }
 
 export const AuStatCard = React.forwardRef<HTMLDivElement, AuStatCardProps>(
   function AuStatCard(
-    { icon, label, value, hint, variant = "default", className, ...rest },
+    { icon, label, value, hint, variant = "default", size = "md", className, ...rest },
     ref,
   ) {
     return (
@@ -42,7 +47,8 @@ export const AuStatCard = React.forwardRef<HTMLDivElement, AuStatCardProps>(
         ref={ref}
         data-slot="stat-card"
         className={cn(
-          "flex flex-col gap-1.5 rounded-2xl border border-subtle bg-raised p-5",
+          "flex flex-col gap-1.5 border border-subtle bg-raised",
+          size === "sm" ? "rounded-xl p-4" : "rounded-2xl p-5",
           variant === "ai" && "au-card--ai",
           className,
         )}
@@ -52,7 +58,12 @@ export const AuStatCard = React.forwardRef<HTMLDivElement, AuStatCardProps>(
           {icon && <Icon name={icon} size={16} />}
           <span>{label}</span>
         </div>
-        <div className="text-(length:--h3-size) font-semibold leading-none tracking-heading-tighter text-fg-primary">
+        <div
+          className={cn(
+            "font-semibold leading-none tracking-heading-tighter text-fg-primary",
+            size === "sm" ? "text-(length:--h4-size)" : "text-(length:--h3-size)",
+          )}
+        >
           {value}
         </div>
         {hint && (

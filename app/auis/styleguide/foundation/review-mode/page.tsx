@@ -4,7 +4,7 @@ import { PageHero, Section } from "../../_primitives"
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="inline-flex items-center px-1.5 py-0.5 rounded-sm bg-(--bg-muted) border border-(--border-subtle) text-(--fg-primary) text-[11px] mx-0.5">
+    <kbd className="inline-flex items-center px-1.5 py-0.5 rounded-sm bg-(--bg-muted) border border-(--border-subtle) text-(--fg-primary) text-2xs mx-0.5">
       {children}
     </kbd>
   )
@@ -36,159 +36,180 @@ function Step({
   )
 }
 
+function Card({
+  pill,
+  variant = "neutral",
+  meta,
+  children,
+}: {
+  pill: string
+  variant?: "neutral" | "beta" | "ai" | "error" | "draft" | "live"
+  meta?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5">
+      <div className="flex items-center gap-2 mb-2">
+        <AuPill variant={variant} dot={false}>
+          {pill}
+        </AuPill>
+        {meta && <span className="text-xs text-(--fg-tertiary)">{meta}</span>}
+      </div>
+      <div className="m-0 text-sm text-(--fg-secondary) leading-relaxed">{children}</div>
+    </div>
+  )
+}
+
 export default function ReviewModeFoundationPage() {
   return (
     <div className="flex flex-col gap-12">
       <PageHero title="Review Mode">
-        Auis&apos; internal tool for annotating screens during live reviews. Freehand
-        marks and pins with a comment, saved in the browser or in a local bridge
-        for an agent to resolve and hand back for approval.
+        Auis&apos; built-in tool for annotating screens during live reviews.
+        Freehand marks and pins with a comment, saved by the serverless Review
+        Bridge for an agent to resolve and hand back for approval.
       </PageHero>
 
       <Section
-        id="ativar"
+        id="turn-on"
         title="How to turn it on"
         lead="Review Mode is always mounted — no env flag. It gates itself on the store's state, so you just open it."
       >
         <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5 flex flex-col gap-4">
           <div className="flex items-start gap-3">
-            <Icon
-              name="draw"
-              size={20}
-              className="text-(--fg-tertiary) mt-0.5"
-            />
+            <Icon name="draw" size={20} className="text-(--fg-tertiary) mt-0.5" />
             <p className="m-0 text-sm text-(--fg-secondary)">
-              Open the <strong>Auis dot</strong> (bottom corner) and pick{" "}
-              <strong>Enter Review Mode</strong> — or hit <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+
-              <Kbd>Y</Kbd>. No env flag, no rebuild.
+              Open the <strong>Auis dot</strong> (bottom-right corner) and pick{" "}
+              <strong>Enter Review Mode</strong>, click the <strong>Review</strong>{" "}
+              pill at the bottom of the screen, or hit <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+
+              <Kbd>Y</Kbd>. Review, Edit and State modes are mutually exclusive —
+              the switch on the left of the pill jumps between them.
             </p>
           </div>
           <p className="m-0 text-sm text-(--fg-secondary)">
-            In the normal flow, <code className="font-mono text-xs">npm run dev</code>{" "}
-            prepares the token, starts the local bridge and points the frontend at{" "}
-            <code className="font-mono text-xs">127.0.0.1:9878</code>. Without the
-            bridge, comments stay in the browser&apos;s{" "}
-            <code className="font-mono text-xs">localStorage</code>.
+            <code className="font-mono text-xs">npm run dev</code> already brings up
+            the bridge: the routes live in the Next app under{" "}
+            <code className="font-mono text-xs">/api/review-bridge/*</code> and
+            persist to <code className="font-mono text-xs">review-bridge/data/</code>.
+            No second process, no port, no token.
           </p>
         </div>
       </Section>
 
       <Section
-        id="usar"
+        id="use"
         title="How to use it"
-        lead="Freehand marks to circle regions; a pin to point at an exact spot."
+        lead="Freehand marks to circle regions; a pin to point at an exact spot; the magic pointer to snap the pin to an element."
       >
         <ol className="list-none p-0 m-0 flex flex-col gap-5">
           <Step number={1} title="Identify yourself">
-            The first time you turn it on, pick a name and a color. Both are saved
-            in your browser and show up on comments and approvals.
+            The first time you turn it on, pick a name, a color and an optional
+            e-mail. Several accounts can live in the same browser — switch or add
+            one from the avatar in the pill.
           </Step>
           <Step number={2} title="Pick a mode">
             In the bottom bar: <Kbd>cursor</Kbd> captures nothing,{" "}
-            <Kbd>freehand</Kbd> lets you draw with the mouse, <Kbd>pin</Kbd> drops a
-            marker on a click. <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+<Kbd>K</Kbd> cycles through
-            the modes.
+            <Kbd>freehand</Kbd> lets you draw, <Kbd>pin</Kbd> drops a marker on a
+            click and the <Kbd>magic pointer</Kbd> highlights the element under the
+            cursor and anchors the pin to it, so it follows reflow and zoom.{" "}
+            <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+<Kbd>K</Kbd> cycles through the modes.
           </Step>
           <Step number={3} title="Annotate">
-            Release the mouse (or click the pin) and the popover appears. Write the
-            feedback and <Kbd>⌘</Kbd>+<Kbd>↵</Kbd> to save. <Kbd>Esc</Kbd> cancels.
+            Release the mouse (or click the pin) and the composer appears. Type,
+            paste images, dictate by voice or let the wand rewrite the draft into
+            something an agent can act on. <Kbd>⌘</Kbd>+<Kbd>↵</Kbd> saves,{" "}
+            <Kbd>Esc</Kbd> cancels. The lock keeps a comment between admins.
           </Step>
-          <Step number={4} title="Review in the side panel">
-            The <Icon name="forum" size={14} /> icon opens the list. Filter by open /
-            in review / archived, jump between screens, approve or reject agent
-            deliveries and delete comments. Clicking a card smooth-scrolls to the
-            anchor on the screen itself.
+          <Step number={4} title="Mention people and agents">
+            <code className="font-mono text-xs">@</code> lists the reviewers and
+            the agents (<strong>@Claude</strong>, <strong>@Codex</strong>,{" "}
+            <strong>@Germano</strong>); <code className="font-mono text-xs">/</code>{" "}
+            lists the skills the mentioned agent can run. Nothing else is needed:
+            the agent toggles in the dot decide whether the agent replies or acts.
           </Step>
-          <Step number={5} title="Export">
-            <Icon name="ios_share" size={14} /> opens a modal with the full JSON.
-            Handy for archiving a review session or inspecting the payload the agent
-            is receiving.
+          <Step number={5} title="Follow the thread">
+            Clicking a pin opens the thread next to it: replies, edits, approve or
+            reject a delivery. The <Icon name="forum" size={14} /> icon opens the
+            side panel with search, filters and bulk approval; the inbox and the
+            Review Bridge page list everything across screens.
+          </Step>
+          <Step number={6} title="Share a permalink">
+            Every comment has a link with <code className="font-mono text-xs">?reviewCommentId=</code>.
+            Opening it turns Review Mode on, replays the clicks that opened the
+            modal or drawer holding the pin, and scrolls to it.
           </Step>
         </ol>
       </Section>
 
       <Section
+        id="agents"
+        title="Agents"
+        lead="The toggle is the permission. Turn an agent on in the Auis dot and mention it — no directive in the text."
+      >
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Card pill="Live Response" variant="beta">
+            When on, the mentioned agent replies in the thread — an answer, a
+            question back, a UX opinion — without touching code.
+          </Card>
+          <Card pill="Auto Construct" variant="ai" meta="Auto Design · Auto Review">
+            When on, the agent acts on the mention: runs the referenced (or
+            inferred) skill, moves the comment to <strong>in review</strong> and
+            replies a summary. You approve or reject the delivery.
+          </Card>
+          <Card pill="@Claude · @Codex" variant="live">
+            Executors. They resolve comments (<code className="font-mono text-xs">auis-review-bridge-solve</code>),
+            run the UX writing pass and materialize live edits.
+          </Card>
+          <Card pill="@Germano" variant="neutral">
+            Critical UI/UX designer. Patrols pages and pins issues, or audits what
+            is waiting for approval. Comment-only: never changes status or code.
+          </Card>
+        </div>
+        <p className="mt-4 mb-0 text-sm text-(--fg-secondary) leading-relaxed">
+          The queue lives at{" "}
+          <code className="font-mono text-xs">/api/review-bridge/dispatch-queue</code>{" "}
+          and the <code className="font-mono text-xs">auis-review-bridge-dispatch</code>{" "}
+          skill consumes it under <code className="font-mono text-xs">/loop</code>.
+          Only admin messages command agents; agents never trigger each other.
+        </p>
+      </Section>
+
+      <Section
         id="bridge"
-        title="Local bridge (agent queue)"
-        lead="The bridge runs on your own machine, on 127.0.0.1, and persists the queue that local agents read to resolve comments. It is not a server for other people on the network."
+        title="Serverless bridge"
+        lead="Same-origin routes, JSON on disk, backups before every write. Agents on this machine read the same files."
       >
         <div className="flex flex-col gap-5">
-          <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <AuPill variant="ai" dot={false}>
-                Server
-              </AuPill>
-              <span className="text-xs text-(--fg-tertiary)">
-                review-bridge/
-              </span>
-            </div>
-            <ol className="list-decimal pl-5 m-0 text-sm text-(--fg-secondary) space-y-1.5 leading-relaxed">
-              <li>
-                <code className="font-mono text-xs">npm install</code> installs the
-                root deps. If the bridge is missing its deps, run{" "}
-                <code className="font-mono text-xs">npm run review-bridge:install</code>.
-              </li>
-              <li>
-                <code className="font-mono text-xs">npm run dev</code> runs{" "}
-                <code className="font-mono text-xs">review-bridge:prepare</code>,
-                generates or reuses the token and starts the bridge on{" "}
-                <code className="font-mono text-xs">127.0.0.1:9878</code>.
-              </li>
-            </ol>
-          </div>
-
-          <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <AuPill variant="beta" dot={false}>
-                Frontend
-              </AuPill>
-              <span className="text-xs text-(--fg-tertiary)">
-                .env.local
-              </span>
-            </div>
-            <p className="m-0 text-sm text-(--fg-secondary)">
-              The prepare step in <code className="font-mono text-xs">npm run dev</code>{" "}
-              keeps the two vars below in <code className="font-mono text-xs">.env.local</code>.
-              With them, the overlay uses the bridge instead of localStorage.
-            </p>
-            <pre className="m-0 rounded-sm bg-(--bg-muted) border border-(--border-subtle) p-3 text-[12px] font-mono whitespace-pre-wrap">
-              {`NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL=http://127.0.0.1:9878
-NEXT_PUBLIC_AUIS_REVIEW_TOKEN=<same-token-as-the-server>`}
-            </pre>
-            <p className="m-0 text-xs text-(--fg-tertiary) flex items-start gap-1.5">
-              <Icon name="info" size={13} className="mt-0.5" />
-              <span>
-                If you already had comments in localStorage, the overlay detects them
-                the first time it opens and offers an <strong>Import</strong> toast to
-                push everything to the bridge.
-              </span>
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5 flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <AuPill variant="error" dot={false}>
-                Security
-              </AuPill>
-              <span className="text-xs text-(--fg-tertiary)">
-                Local-only, don&apos;t expose it to the network
-              </span>
-            </div>
-            <p className="m-0 text-sm text-(--fg-secondary) leading-relaxed">
-              Auth is a token in a header (
-              <code className="font-mono text-xs">X-Review-Token</code>). That is
-              enough for the local development flow, but it is not a public product
-              model. The server must listen on{" "}
-              <code className="font-mono text-xs">127.0.0.1</code>; don&apos;t use{" "}
-              <code className="font-mono text-xs">0.0.0.0</code>, don&apos;t port
-              forward, and don&apos;t put sensitive data in these comments.
-            </p>
-          </div>
+          <Card pill="Routes" variant="ai" meta="app/api/review-bridge/">
+            <code className="font-mono text-xs">GET /comments?view=lean</code> for
+            triage, <code className="font-mono text-xs">PUT /comments/:id</code> with
+            a transition to move status, <code className="font-mono text-xs">POST …/replies</code>{" "}
+            to answer. The full contract is in{" "}
+            <code className="font-mono text-xs">review-bridge/README.md</code>.
+          </Card>
+          <Card pill="Data" variant="beta" meta="review-bridge/data/">
+            <code className="font-mono text-xs">comments.json</code> (open, in
+            review, future ideas, identities, agent settings),{" "}
+            <code className="font-mono text-xs">comments.archive.json</code>{" "}
+            (resolved) and <code className="font-mono text-xs">images/</code>{" "}
+            (content-addressed attachments). Snapshots go to{" "}
+            <code className="font-mono text-xs">~/.auis/review-bridge-backups</code>.
+          </Card>
+          <Card pill="Hierarchy" variant="draft" meta="app/api/review-bridge/_session.ts">
+            Locally every browser is an admin. Put Auis behind a login and resolve
+            the session in one file: admins command agents and approve, reviewers
+            comment, agents authenticate with{" "}
+            <code className="font-mono text-xs">x-bridge-agent-token</code>.
+          </Card>
+          <Card pill="Security" variant="error" meta="Local-only">
+            The bridge is a development tool. Keep the dev server on{" "}
+            <code className="font-mono text-xs">127.0.0.1</code>, don&apos;t expose it
+            to the network and don&apos;t put sensitive data in the comments.
+          </Card>
         </div>
       </Section>
 
       <Section
-        id="atalhos"
+        id="shortcuts"
         title="Shortcuts"
         lead="Everything from the keyboard, so it never gets in the way of navigating the product."
       >
@@ -201,7 +222,7 @@ NEXT_PUBLIC_AUIS_REVIEW_TOKEN=<same-token-as-the-server>`}
                     <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+<Kbd>Y</Kbd>
                   </>
                 ),
-                desc: "Turns the overlay on/off",
+                desc: "Turns Review Mode on/off",
               },
               {
                 keys: (
@@ -209,7 +230,23 @@ NEXT_PUBLIC_AUIS_REVIEW_TOKEN=<same-token-as-the-server>`}
                     <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+<Kbd>K</Kbd>
                   </>
                 ),
-                desc: "Cycles cursor → freehand → pin",
+                desc: "Cycles cursor → freehand → pin → magic pointer",
+              },
+              {
+                keys: (
+                  <>
+                    <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+<Kbd>E</Kbd>
+                  </>
+                ),
+                desc: "Edit Mode (live edits materialized by a skill)",
+              },
+              {
+                keys: (
+                  <>
+                    <Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+<Kbd>S</Kbd>
+                  </>
+                ),
+                desc: "State Mode (switch the screen's registered scenarios)",
               },
               {
                 keys: (
@@ -217,23 +254,19 @@ NEXT_PUBLIC_AUIS_REVIEW_TOKEN=<same-token-as-the-server>`}
                     <Kbd>⌘</Kbd>+<Kbd>↵</Kbd>
                   </>
                 ),
-                desc: "Saves the comment in the open popover",
+                desc: "Saves the comment or reply in the open composer",
               },
               {
                 keys: <Kbd>Esc</Kbd>,
-                desc: "Cancels the popover; back to cursor; closes the panel",
+                desc: "Cancels the composer; back to cursor; closes the thread or panel",
               },
             ].map((row, i) => (
               <li
                 key={i}
                 className="flex items-center justify-between gap-4 px-5 py-3"
               >
-                <span className="text-sm text-(--fg-secondary)">
-                  {row.desc}
-                </span>
-                <span className="flex items-center text-[11px]">
-                  {row.keys}
-                </span>
+                <span className="text-sm text-(--fg-secondary)">{row.desc}</span>
+                <span className="flex items-center text-2xs">{row.keys}</span>
               </li>
             ))}
           </ul>
@@ -241,75 +274,33 @@ NEXT_PUBLIC_AUIS_REVIEW_TOKEN=<same-token-as-the-server>`}
       </Section>
 
       <Section
-        id="limitacoes"
+        id="limitations"
         title="Known limitations"
-        lead="v1 favors simplicity — a few documented trade-offs so you can decide when to trust it."
+        lead="A few documented trade-offs so you can decide when to trust it."
       >
         <div className="grid sm:grid-cols-2 gap-4">
-          <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <AuPill variant="draft" dot={false}>
-                Stale
-              </AuPill>
-              <span className="text-xs text-(--fg-tertiary)">
-                The anchor can drift
-              </span>
-            </div>
-            <p className="m-0 text-sm text-(--fg-secondary) leading-relaxed">
-              Coords are saved as a % of the viewport + scrollY. If the screen&apos;s
-              content changed (a list grew, new data loaded), the anchor can end up in
-              the wrong place. We mark it <strong>stale</strong> when the document
-              height changed by more than 20%.
-            </p>
-          </div>
-          <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <AuPill variant="neutral" dot={false}>
-                Local bridge
-              </AuPill>
-              <span className="text-xs text-(--fg-tertiary)">
-                Local agent queue
-              </span>
-            </div>
-            <p className="m-0 text-sm text-(--fg-secondary) leading-relaxed">
-              With no bridge configured, everything stays in the browser&apos;s
-              localStorage. With the bridge, comments go to local JSON files and can be
-              consumed by agents on the same machine. Other machines are not supported
-              in this mode.
-            </p>
-          </div>
-          <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <AuPill variant="neutral" dot={false}>
-                Local identity
-              </AuPill>
-              <span className="text-xs text-(--fg-tertiary)">
-                Identity is just a name
-              </span>
-            </div>
-            <p className="m-0 text-sm text-(--fg-secondary) leading-relaxed">
-              You type the name once. There is no real login; the identity only exists
-              to attribute comments and to approve or reject agent deliveries.
-            </p>
-          </div>
-          <div className="rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <AuPill variant="neutral" dot={false}>
-                Coexistence
-              </AuPill>
-              <span className="text-xs text-(--fg-tertiary)">
-                Lives alongside Claude Edit
-              </span>
-            </div>
-            <p className="m-0 text-sm text-(--fg-secondary) leading-relaxed">
-              Every Review layer carries{" "}
-              <code className="font-mono text-xs">
-                data-auis-review
-              </code>{" "}
-              so that the Claude Edit picker (<Kbd>⌘</Kbd>+<Kbd>⇧</Kbd>+<Kbd>L</Kbd>)
-              ignores the canvas, and vice versa.
-            </p>
-          </div>
+          <Card pill="Stale" variant="draft" meta="The anchor can drift">
+            Pins remember the element they were dropped on (selector + text
+            fingerprint) and re-resolve on render. When the element is gone the
+            pin is hidden and the card says where it was; when the document height
+            changed by more than 20% the comment is marked <strong>stale</strong>.
+          </Card>
+          <Card pill="Local identity" meta="Identity is just a name">
+            You type the name once. There is no login; the identity attributes
+            comments and approvals. A deployment can adopt a session identity
+            through the same store.
+          </Card>
+          <Card pill="One machine" meta="Files on disk">
+            The bridge writes JSON files in the checkout. Agents on the same
+            machine read them; other machines are not supported without a
+            different store driver.
+          </Card>
+          <Card pill="Coexistence" meta="Lives alongside Edit and State modes">
+            Every Review layer carries{" "}
+            <code className="font-mono text-xs">data-auis-review</code> so the Edit
+            picker ignores the canvas, and vice versa. Turning one mode on turns
+            the others off.
+          </Card>
         </div>
       </Section>
     </div>

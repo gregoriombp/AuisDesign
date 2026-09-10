@@ -3,7 +3,7 @@ name: auis-foundation
 description: >
   Sets up a complete Auis design system in a Next.js + shadcn/ui project
   starting from any visual reference — a screenshot, Figma URL, Dribbble shot,
-  Behance post, Mobbin capture, or any other design inspiration. Extracts or
+  Behance post, or any other design inspiration. Extracts or
   infers tokens (colors, typography, spacing, radius, shadows), initializes
   shadcn/ui, writes the tokens into globals.css, installs the foundation
   components, and scaffolds the canonical /auis/styleguide route. Use
@@ -27,7 +27,7 @@ foundation is already in place.
 Either a visual reference or a target project (or both):
 
 - **Design source:** screenshot, Figma URL, Dribbble shot, Behance post,
-  Mobbin capture, exported mockup, or product photo.
+  exported mockup, or product photo.
 - **Target project:** path to the repository, or "current repo".
 - **Product namespace:** `Auis` (default — only change if the user explicitly asks).
 

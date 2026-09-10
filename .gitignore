@@ -62,12 +62,11 @@ next-env.d.ts
 
 # review bridge runtime state (grows unbounded — not source code)
 review-bridge/data/*.json
+review-bridge/data/images/
 review-bridge/data/.backups/
-review-bridge/node_modules/
 
 # flow-bridge runtime state (grows unbounded — not source code)
 flow-bridge/data/*.json
-flow-bridge/node_modules/
 
 # page-editor runtime state — Live Edit Mode persisted edits (not source code)
 page-editor/data/*.json
@@ -78,6 +77,9 @@ app/auis/_data/brand.runtime.json
 
 # Playwright MCP verification artifacts (snapshots/console logs)
 .playwright-mcp/
+
+# State Mode matrix export (`npm run states:pdf`)
+auis-states-matrix.pdf
 
 # Local session captures (screenshots + cap JSON refs — not product source)
 /g-*.png

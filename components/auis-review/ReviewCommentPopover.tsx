@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { AuButton } from "@/components/ui/AuButton"
+import { AuSpinner } from "@/components/ui/AuSpinner"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { useCumulativeScrollOffset } from "@/lib/auis-review/scrollOffset"
@@ -17,7 +18,6 @@ import { useReviewCommandAutocomplete } from "@/lib/auis-review/useReviewCommand
 import { fetchRewrite } from "@/lib/auis-review/commentAssist"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
-import { ReviewMobbinPanel } from "./ReviewMobbinPanel"
 import type { ReviewPoint } from "./types"
 
 const POPOVER_WIDTH = 360
@@ -40,14 +40,19 @@ export function ReviewCommentPopover() {
   const identity = useReviewStore((s) => s.identity)
   const saveComment = useReviewStore((s) => s.saveComment)
   const cancelPending = useReviewStore((s) => s.cancelPending)
+  const sessionRole = useReviewStore((s) => s.sessionRole)
+  const sessionShared = useReviewStore((s) => s.sessionShared)
+  const openIdentityModal = useReviewStore((s) => s.openIdentityModal)
+  const isAdmin = sessionRole === "admin"
 
   const [text, setText] = React.useState("")
   const [images, setImages] = React.useState<string[]>([])
-  const [mobbinOpen, setMobbinOpen] = React.useState(false)
+  const [adminsOnly, setAdminsOnly] = React.useState(false)
   const [submitting, setSubmitting] = React.useState(false)
   const [caretAtEnd, setCaretAtEnd] = React.useState(true)
   const [rewriting, setRewriting] = React.useState(false)
   const [assistError, setAssistError] = React.useState<string | null>(null)
+  const [saveError, setSaveError] = React.useState<string | null>(null)
   const [undoText, setUndoText] = React.useState<string | null>(null)
   const [elementCtx, setElementCtx] =
     React.useState<ReviewElementContext | null>(null)
@@ -66,9 +71,9 @@ export function ReviewCommentPopover() {
     }, [])
   )
 
-  // Stable refs so we can stop voice capture on unmount / outside-click without
-  // re-firing effects on every render (the hook object changes identity per
-  // render). Synced in an effect — never write a ref during render.
+  // Stable refs to stop the voice on unmount / click-outside without re-firing
+  // effects every render (the hook's object changes identity per render).
+  // Synced inside an effect — never write a ref during render.
   const voiceStatusRef = React.useRef(voice.status)
   const voiceCancelRef = React.useRef(voice.cancel)
   const pendingSubmitRef = React.useRef(false)
@@ -77,16 +82,18 @@ export function ReviewCommentPopover() {
     voiceCancelRef.current = voice.cancel
   })
 
-  // Command autocomplete (@agent, /skill, #now) — Figma-style little menu.
+  // Command autocomplete (@agent, /skill) — Figma-style box. A reviewer does
+  // not command agents: only people suggestions.
   const commands = useReviewCommandAutocomplete({
     textareaRef,
     value: text,
     setValue: setText,
+    allowAgents: isAdmin,
   })
 
   // Inline autocomplete (ghost text). Only active with the caret at the end of
-  // the text — the continuation is appended at the end, like in Cursor. It yields
-  // to the command menu so they don't fight over the same key (Tab/Enter).
+  // the text — the continuation glues to the end. Yields to the command menu so
+  // they never compete for the same key (Tab/Enter).
   const { ghost, clear: clearGhost } = useInlineCompletion(
     text,
     elementCtx,
@@ -127,11 +134,11 @@ export function ReviewCommentPopover() {
     const r = await fetchRewrite({ draft: text, element: elementCtx })
     setRewriting(false)
     if (r.status === 503) {
-      setAssistError("Set OPENAI_API_KEY to use the magic wand.")
+      setAssistError("Set OPENAI_API_KEY to use the wand.")
       return
     }
     if (!r.ok || !r.text) {
-      setAssistError("Could not improve the comment. Try again.")
+      setAssistError("Could not improve it right now. Try again.")
       return
     }
     setUndoText(text)
@@ -156,11 +163,12 @@ export function ReviewCommentPopover() {
     if (pendingAnchor) {
       setText("")
       setImages([])
-      setMobbinOpen(false)
+      setAdminsOnly(false)
       setSubmitting(false)
       setCaretAtEnd(true)
       setUndoText(null)
       setAssistError(null)
+      setSaveError(null)
       clearGhost()
       // Context of the anchored element — stable identity for the assist hook.
       setElementCtx(describeAnchorElement(pendingAnchor))
@@ -168,20 +176,40 @@ export function ReviewCommentPopover() {
     }
   }, [pendingAnchor, clearGhost])
 
-  // #3 Saving while voice is on: stop the recording first and only actually save
-  // once the transcribed text settles (status goes back to "idle").
+  // Actually saves. The `finally` is mandatory: without it a bridge error
+  // (bridge down, expired session, large payload) left the button spinning
+  // forever — and, since `canSubmit` looks at `submitting`, without even
+  // allowing a retry. Now the error shows and the text stays in the box.
+  const runSave = React.useCallback(async () => {
+    setSaveError(null)
+    try {
+      await saveComment(
+        text,
+        images.length > 0 ? images : undefined,
+        adminsOnly ? { visibility: "admins" } : undefined
+      )
+    } catch (err) {
+      setSaveError(
+        err instanceof Error && err.message
+          ? `Not saved: ${err.message}`
+          : "Could not save the comment. Try again."
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }, [saveComment, text, images, adminsOnly])
+
+  // Saving with the voice active: stop the recording first and only save for
+  // real once the transcribed text settles (status back to "idle").
   React.useEffect(() => {
     if (!pendingSubmitRef.current || voice.status !== "idle") return
     pendingSubmitRef.current = false
-    void (async () => {
-      await saveComment(text, images.length > 0 ? images : undefined)
-      setSubmitting(false)
-    })()
-  }, [voice.status, text, images, saveComment])
+    void runSave()
+  }, [voice.status, runSave])
 
-  // #4 Leaving/clicking outside stops the voice capture (discards it). Unmount
-  // covers Save/Cancel/Esc (they close the popover); the pointerdown covers a
-  // click outside any review surface while recording.
+  // Leaving/clicking outside interrupts the voice (discards). Unmount covers
+  // Save/Cancel/Esc (they close the popover); the pointerdown covers a click
+  // outside any review surface while recording.
   React.useEffect(() => () => voiceCancelRef.current(), [])
   React.useEffect(() => {
     if (typeof document === "undefined") return
@@ -250,7 +278,7 @@ export function ReviewCommentPopover() {
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault()
     if (submitting) return
-    // #3 Voice is on: stop it first; the effect saves once the text settles.
+    // Voice active: stop first; the effect saves once the text settles.
     if (voice.status === "recording" || voice.status === "transcribing") {
       setSubmitting(true)
       pendingSubmitRef.current = true
@@ -259,8 +287,7 @@ export function ReviewCommentPopover() {
     }
     if (!canSubmit) return
     setSubmitting(true)
-    await saveComment(text, images.length > 0 ? images : undefined)
-    setSubmitting(false)
+    await runSave()
   }
 
   const recording = voice.status === "recording"
@@ -293,16 +320,31 @@ export function ReviewCommentPopover() {
           <span className="body-xs font-medium text-(--fg-primary)">
             {identity.name}
           </span>
-          <span className="body-xs text-(--fg-tertiary) ml-auto">
+          {sessionShared && (
+            <button
+              type="button"
+              onClick={() => openIdentityModal("new")}
+              title="Shared account — comment as someone else"
+              className="body-xs text-(--fg-tertiary) hover:text-(--fg-primary) underline underline-offset-2 decoration-dotted"
+            >
+              switch
+            </button>
+          )}
+          <span className="body-xs text-(--fg-tertiary) ml-auto inline-flex items-center gap-1.5">
+            {adminsOnly && (
+              <span className="inline-flex items-center gap-0.5 text-(--fg-secondary)">
+                <Icon name="lock" size={10} />
+                Private
+              </span>
+            )}
             {pendingAnchor.kind === "draw" ? "Freehand mark" : "Pin"}
           </span>
         </div>
 
-        {/* Textarea + a mirror layer that paints the ghost text ahead of the
-            caret. The mirror sits BEHIND (transparent text, only there to push
-            the ghost into the right spot); the textarea, with a transparent
-            background, shows the real text on top. Identical metrics keep
-            everything aligned. */}
+        {/* Textarea + mirror layer that draws the ghost text ahead of the
+            caret. The mirror sits BEHIND (transparent text only to push the
+            ghost into position); the textarea, with a transparent background,
+            shows the real text on top. Identical metrics keep it aligned. */}
         <div className="relative">
           <div
             ref={mirrorRef}
@@ -348,16 +390,19 @@ export function ReviewCommentPopover() {
                   e.stopPropagation()
                   clearGhost()
                 }
-                // no ghost: let the provider handle it (cancels the pending)
+                // no ghost: let the provider handle it (cancels the pending anchor)
               }
             }}
-            placeholder="Write your feedback… paste an image, or dictate it"
+            placeholder="Write the feedback… paste an image, or dictate"
             rows={3}
             className="relative w-full resize-none px-3 py-2 bg-transparent body-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:outline-hidden"
             style={{ zIndex: 1 }}
           />
         </div>
 
+        {saveError && (
+          <p className="mx-3 mb-2 body-xs text-(--accent-danger)">{saveError}</p>
+        )}
         {assistError && (
           <p className="mx-3 mb-2 body-xs text-(--accent-danger)">
             {assistError}
@@ -394,7 +439,7 @@ export function ReviewCommentPopover() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="h-16 w-16 rounded-sm border border-dashed border-(--border-default) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) hover:border-(--border-strong) transition-colors"
-                aria-label="Attach image"
+                aria-label="Add image"
               >
                 <Icon name="add" size={16} />
               </button>
@@ -428,15 +473,16 @@ export function ReviewCommentPopover() {
                   : "text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)",
               ].join(" ")}
             >
-              <Icon
-                name={
-                  recording ? "stop" : transcribing ? "progress_activity" : "mic"
-                }
-                size={14}
-                fill={recording ? 1 : 0}
-                weight={600}
-                className={transcribing ? "animate-spin" : ""}
-              />
+              {transcribing ? (
+                <AuSpinner size="sm" aria-hidden="true" />
+              ) : (
+                <Icon
+                  name={recording ? "stop" : "mic"}
+                  size={14}
+                  fill={recording ? 1 : 0}
+                  weight={600}
+                />
+              )}
             </button>
             <button
               type="button"
@@ -446,28 +492,35 @@ export function ReviewCommentPopover() {
               title="Improve the comment (magic wand)"
               className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors disabled:opacity-50"
             >
-              <Icon
-                name={rewriting ? "progress_activity" : "auto_fix_high"}
-                size={14}
-                weight={600}
-                className={rewriting ? "animate-spin" : ""}
-              />
+              {rewriting ? (
+                <AuSpinner size="sm" aria-hidden="true" />
+              ) : (
+                <Icon name="auto_fix_high" size={14} weight={600} />
+              )}
             </button>
-            <button
-              type="button"
-              onClick={() => setMobbinOpen((v) => !v)}
-              aria-label="Find similar designs on Mobbin"
-              aria-pressed={mobbinOpen}
-              title="Find similar designs on Mobbin"
-              className={[
-                "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors",
-                mobbinOpen
-                  ? "bg-(--bg-hover) text-(--fg-primary)"
-                  : "text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)",
-              ].join(" ")}
-            >
-              <Icon name="image_search" size={14} weight={600} />
-            </button>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setAdminsOnly((v) => !v)}
+                aria-label={
+                  adminsOnly ? "Make visible to the team" : "Visible to admins only"
+                }
+                aria-pressed={adminsOnly}
+                title={
+                  adminsOnly
+                    ? "Private: only admins see it — click to open it to the team"
+                    : "Visible to the team — click to keep it between admins"
+                }
+                className={[
+                  "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors",
+                  adminsOnly
+                    ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
+                    : "text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)",
+                ].join(" ")}
+              >
+                <Icon name={adminsOnly ? "lock" : "lock_open"} size={14} weight={600} />
+              </button>
+            )}
 
             {recording ? (
               <span className="body-xs text-(--accent-danger) flex items-center gap-1">
@@ -528,20 +581,6 @@ export function ReviewCommentPopover() {
         multiple
         className="hidden"
         onChange={handleFileChange}
-      />
-
-      <ReviewMobbinPanel
-        open={mobbinOpen}
-        onClose={() => setMobbinOpen(false)}
-        element={elementCtx}
-        page={typeof window !== "undefined" ? window.location.pathname : ""}
-        onAttach={(dataUrl) =>
-          setImages((prev) => [...prev, dataUrl].slice(0, MAX_IMAGES))
-        }
-        canAttachMore={images.length < MAX_IMAGES}
-        anchorCenterX={left}
-        anchorWidth={POPOVER_WIDTH}
-        anchorY={pxY}
       />
 
       <ReviewCommandMenu ac={commands} />

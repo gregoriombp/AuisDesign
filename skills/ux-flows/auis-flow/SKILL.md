@@ -154,6 +154,11 @@ playground at `/auis/styleguide/components/[component-name]`. The sticky
 exists so the team can see at a glance which screens have heavy state coverage
 and which are happy-path only.
 
+Once a screen ships, every state on its sticky should be one URL away: register
+it in State Mode (`lib/auis-states/registry.ts`, matrix at `/auis/states`) with
+`auis-update-states`, so the sticky and the `?state=` deep links name the same
+scenarios.
+
 ### 7. Generate the FigJam
 
 Use `mcp__Figma__use_figma` (with `figma-use-figjam` already loaded). Create:
@@ -282,6 +287,10 @@ Next steps:
 
 - The flow is the source of truth for navigation **intent**. The code is the
   source of truth for navigation **execution**. Don't conflate them.
+- This skill draws in FigJam. The code-side diagram of the same journey — a
+  ReactFlow page at `app/auis/ux-flow/<slug>/page.tsx`, listed in the UX Flow
+  hub (`/auis/ux-flow`) through `_data/flow-meta.ts` — is `auis-create-ux-flow`'s
+  job. Keep the two consistent; don't maintain screen metadata in both by hand.
 - States live in the playground. Never redraw them in FigJam.
 - One feature per FigJam unless it grows past ~15 screens.
 - Ask before inventing a new product namespace. Re-use what's already in the

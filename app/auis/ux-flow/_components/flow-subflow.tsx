@@ -1,0 +1,177 @@
+"use client"
+
+import { MarkerType, type Edge, type Node, type NodeProps } from "@xyflow/react"
+import { Icon } from "@/components/ui/Icon"
+
+/* ─────────────────────────────────────────────────────────────────────
+ * Inline sub-flow expansion. Instead of navigating away, clicking a purple
+ * "other flow" diamond expands the referenced flow's cards INLINE, inside a
+ * framed group (like a FigJam frame). Click again to collapse. The expanded
+ * cards are a display-only overlay — never part of a saved suggestion.
+ * ──────────────────────────────────────────────────────────────────── */
+
+type FlowData = { nodes: Node[]; edges: Edge[] }
+
+// Lazy loaders — dynamic import code-splits each flow; loaded only on expand.
+const LOADERS: Record<string, () => Promise<FlowData>> = {
+  // Register your flows here so "other flow" diamonds can expand them inline:
+  //   "my-flow": () => import("../my-flow/page").then((m) => ({ nodes: m.NODES, edges: m.EDGES })),
+  // The flow page must export NODES and EDGES. The example is kept as a
+  // working reference.
+  example: () => import("../example/page").then((m) => ({ nodes: m.NODES, edges: m.EDGES })),
+}
+
+export function flowSlugFromHref(href: string): string | null {
+  // Accepts the hub prefix (/auis/ux-flow/) and the legacy one (…/ux-flows/):
+  // some versioned NODES may still carry hrefs from before the migration.
+  const m = href.match(/ux-flows?\/([^/?#]+)/)
+  return m ? m[1] : null
+}
+
+export function isExpandableFlow(slug: string | null): slug is string {
+  return !!slug && slug in LOADERS
+}
+
+export async function loadFlowData(slug: string): Promise<FlowData | null> {
+  const loader = LOADERS[slug]
+  if (!loader) return null
+  try {
+    return await loader()
+  } catch (e) {
+    console.error("[subflow] load failed:", slug, e)
+    return null
+  }
+}
+
+/* ── Group container node ─────────────────────────────────────────── */
+
+export type SubflowGroupData = {
+  label: string
+  onOpen: () => void
+  onCollapse: () => void
+}
+
+export function SubflowGroupNode({ data }: NodeProps<Node<SubflowGroupData>>) {
+  return (
+    <div
+      className="relative h-full w-full rounded-lg border-2 border-dashed border-(--au-purple-300)"
+      style={{ background: "color-mix(in srgb, var(--au-purple-100) 55%, transparent)" }}
+    >
+      <div className="absolute -top-3.5 left-4 flex items-center gap-2 rounded-full bg-(--au-purple-600) px-2.5 py-1 text-white shadow-(--shadow-sm)">
+        <Icon name="open_in_new" size={12} />
+        <span className="text-2xs font-semibold leading-none">{data.label}</span>
+        <button
+          onClick={(e) => { e.stopPropagation(); data.onOpen() }}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="text-3xs font-medium text-white/80 hover:text-white"
+          title="Open the full flow on its own page"
+        >
+          <span className="inline-flex items-center gap-0.5">
+            open flow
+            <Icon name="arrow_outward" size={12} />
+          </span>
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); data.onCollapse() }}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-white/80 hover:bg-white/20 hover:text-white"
+          aria-label="Collapse"
+          title="Collapse"
+        >
+          <Icon name="close" size={12} />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ── Build the expansion (group + prefixed children + bridge edge) ──── */
+
+const HEADER_H = 28
+const PAD = 24
+const GAP_X = 200
+// Rough node footprint so the frame encloses the cards (positions are top-left).
+const NODE_W = 240
+const NODE_H = 150
+
+export function buildExpansion(
+  diamond: Node,
+  data: FlowData,
+  label: string,
+  handlers: { onOpen: () => void; onCollapse: () => void },
+): FlowData {
+  const src = data.nodes
+  if (src.length === 0) return { nodes: [], edges: [] }
+
+  const prefix = `sub:${diamond.id}:`
+  const groupId = `${prefix}__group`
+
+  const xs = src.map((n) => n.position.x)
+  const ys = src.map((n) => n.position.y)
+  const minX = Math.min(...xs)
+  const minY = Math.min(...ys)
+  const maxX = Math.max(...xs)
+  const maxY = Math.max(...ys)
+
+  const groupW = maxX - minX + NODE_W + PAD * 2
+  const groupH = maxY - minY + NODE_H + PAD * 2 + HEADER_H
+  const groupX = diamond.position.x + GAP_X
+  // Anchor the frame top just above the diamond so it grows down-and-right —
+  // never up into the parent flow above.
+  const groupY = diamond.position.y - 24
+
+  const group: Node = {
+    id: groupId,
+    type: "subflowGroup",
+    position: { x: groupX, y: groupY },
+    style: { width: groupW, height: groupH },
+    selectable: false,
+    draggable: false,
+    zIndex: 900,
+    data: { label, ...handlers },
+  }
+
+  const children: Node[] = src.map((n) => ({
+    ...n,
+    id: prefix + n.id,
+    parentId: groupId,
+    extent: "parent" as const,
+    selectable: false,
+    draggable: false,
+    zIndex: 901,
+    position: {
+      x: n.position.x - minX + PAD,
+      y: n.position.y - minY + PAD + HEADER_H,
+    },
+  }))
+
+  const childEdges: Edge[] = data.edges.map((e) => ({
+    ...e,
+    id: prefix + e.id,
+    source: prefix + e.source,
+    target: prefix + e.target,
+    selectable: false,
+  }))
+
+  // Bridge: diamond → the sub-flow's entry node ("entrada" by convention).
+  const entryId = src.some((n) => n.id === "entrada")
+    ? prefix + "entrada"
+    : children[0]?.id
+  const bridge: Edge | null = entryId
+    ? {
+        id: `${prefix}__bridge`,
+        source: diamond.id,
+        target: entryId,
+        type: "smoothstep",
+        animated: true,
+        selectable: false,
+        style: { stroke: "var(--au-purple-500)", strokeWidth: 1.5, strokeDasharray: "5 3" },
+        markerEnd: { type: MarkerType.ArrowClosed, width: 18, height: 18, color: "var(--au-purple-500)" },
+      }
+    : null
+
+  return {
+    nodes: [group, ...children],
+    edges: bridge ? [...childEdges, bridge] : childEdges,
+  }
+}

@@ -29,8 +29,8 @@ Then let your agent finish the job in one guided pass:
 
 The engine was extracted from a private product; it **compiles clean** (`typecheck`, `lint`, `build` all pass) but some content was deliberately emptied:
 
-- `app/auis/projects/_data/projects.ts`, `app/auis/ux-flow/_data/flow-meta.ts`, `app/auis/ux-flow/[slug]/flow-data.ts` are **empty stubs** — galleries render empty until skills populate them.
-- The inline sub-flow loader registry (`app/auis/styleguide/ux-flows/_components/flow-subflow.tsx`) includes the public example — register product flows there as you create them.
+- `app/auis/projects/_data/projects.ts` is an **empty stub**; `app/auis/ux-flow/_data/flow-meta.ts` and `lib/auis-states/registry.ts` ship only the product-neutral examples (`/auis/ux-flow/example`, `/auis/ux-flow/example-golden-eye`, `/auis/states/example`) — the skills add your own flows and screens next to them.
+- The inline sub-flow loader registry (`app/auis/ux-flow/_components/flow-subflow.tsx`) includes the public example — register product flows there as you create them.
 - Two React 19 hooks lint rules are temporarily downgraded to warnings (see `eslint.config.mjs` TODO).
 
 ## 2. Point your agent at the rulebook
@@ -41,7 +41,7 @@ Fill in [`PRODUCT_CONTEXT.md`](../PRODUCT_CONTEXT.md) with your product's voice 
 
 ## 3. Build the foundation (tokens)
 
-Give your agent a visual reference — a screenshot of a product you admire, a Figma URL, a Dribbble/Behance/Mobbin capture — and run:
+Give your agent a visual reference — a screenshot of a product you admire, a Figma URL, a Dribbble/Behance capture — and run:
 
 ```
 /auis-foundation <reference>
@@ -72,30 +72,32 @@ The agent maps every visual element to your existing `Au*` components first, fal
 ## 6. Design flows
 
 ```
-/auis-flow <feature description>          # FigJam-convention flow board
-/auis-create-ux-flow <steps or brief>     # navigable flow page in the styleguide
+/auis-flow <feature description>                 # FigJam-convention flow board
+/auis-create-ux-flow <steps or brief>            # navigable flow page in the UX Flow hub
+/auis-create-ux-flow-golden-eye <scenarios>      # compiled view: several journeys in one graph
+/auis-update-ux-flow <slug> <change>             # structural update + changelog entry
 ```
 
-Flows are React pages with structured nodes/edges under `app/auis/styleguide/ux-flows/[slug]/`, cross-linked to real routes and files.
+Flows are React pages with structured nodes/edges under `app/auis/ux-flow/[slug]/page.tsx`, registered in `app/auis/ux-flow/_data/flow-meta.ts` and listed at `/auis/ux-flow`. Click a screen to preview its real route; comment on a node or suggest a structural change straight from the canvas — both land in the Review Bridge.
 
 ## 7. Review loop
 
-The default `npm run dev` command serves the Review Bridge through same-origin
-Next.js routes. If you need the legacy standalone Express bridge instead:
-
-```bash
-npm run review-bridge:install   # once
-npm run dev:bridge              # Next + legacy bridge on 127.0.0.1:9878
-```
+`npm run dev` serves the Review Bridge through same-origin Next.js routes
+(`/api/review-bridge/*`) — nothing else to start, no token locally.
 
 1. Browse your app, enter **Review Mode**, drop pin comments on anything ("this spacing is off", "wrong icon", "rewrite this empty state").
 2. Comments land in a local queue (dashboard at `/auis/review-bridge`).
 3. Your agent runs `/auis-review-bridge-solve` — it pulls the queue, applies scoped fixes, and moves items to *in review*.
 4. You approve or reject each result from the inbox at `/auis/styleguide/review`.
+5. Or let the agents come to you: mention `@claude`, `@codex` or `@germano` (and optionally a `/skill`) in a comment, switch the agent's **Live Response** / **Auto Construct** toggles on in the floating dot, and run `/loop /auis-review-bridge-dispatch`. The toggle is the permission: Live Response replies, Auto Construct acts and sends the result to review.
 
-There is also an adversarial reviewer: `/auis-review-bridge-germano-audit` unleashes a hyper-critical UX persona on a route and files its complaints into the same queue.
+There is also an adversarial reviewer: `/auis-review-bridge-germano-audit` unleashes a hyper-critical UX persona on a route and files its complaints into the same queue, and `/auis-review-bridge-germano-explore` lets it patrol a route and pin suggestions.
 
-## 8. Audit
+## 8. State Mode
+
+Every screen has more states than the happy path. Register them once in `lib/auis-states/registry.ts` (`/auis-update-states`) and Auis renders **every registered screen in every state, side by side** at `/auis/states` — URL query params are the source of truth, so each cell is a real deep link (`/auis/states/example?state=empty`). On any registered screen press ⌘⇧S (or use the floating dot → Modes) to switch states in place; `npm run states:pdf` exports the matrix for a design review.
+
+## 9. Audit
 
 ```
 /auis-audit
@@ -103,10 +105,10 @@ There is also an adversarial reviewer: `/auis-review-bridge-germano-audit` unlea
 
 Scans the repo for every component that's used but missing from the styleguide, and can create the missing showcase stubs. Run it periodically — it keeps the styleguide honest.
 
-## 9. Verify
+## 10. Verify
 
 ```bash
-npm run typecheck && npm run lint && npm run build && npm run ds:check
+npm run typecheck && npm run lint && npm run build && npm run ds:check && npm test
 ```
 
 `ds:check` reports design-system debt (hardcoded values, hand-rolled overlays) so you can feed it back into the review loop.

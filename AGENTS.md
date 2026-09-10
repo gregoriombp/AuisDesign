@@ -4,7 +4,7 @@ Conventions for any AI Agent (Claude Code, Codex, Cursor, etc.) working in this 
 
 > For product context (what Auis is, voice, vocabulary) see `PRODUCT_CONTEXT.md`. For styleguide page structure see `docs/`. The conventions, tokens, stack rules and skills below are authoritative.
 >
-> **Before building anything, open [`docs/component-map.md`](docs/component-map.md)** — the index of "I need X → use Y → import path → when not to". It has **two layers**, and the distinction matters: **Layer A** is the 22 `Au*` in `components/ui/` — the UI the **Auis builder itself** is made of (the Review Bridge, Auis's own mark, and the primitives those stand on). They are importable and reusable, but they are not a catalog for your product. Auis ships **no application shell and no AI copilot** — no dashboard layout, sidebar, header, nav rail, or notifications panel. **Layer B** — your product's own components — **ships empty on purpose**; you populate it with the `auis-component` skill. So the map is the fastest way to find the right `Au*` **and** to see, honestly, when a thing doesn't exist yet and you have to build it.
+> **Before building anything, open [`docs/component-map.md`](docs/component-map.md)** — the index of "I need X → use Y → import path → when not to". It has **two layers**, and the distinction matters: **Layer A** is the 26 `Au*` in `components/ui/` — the UI the **Auis builder itself** is made of (the Review Bridge, Auis's own mark, and the primitives those stand on). They are importable and reusable, but they are not a catalog for your product. Auis ships **no application shell and no AI copilot** — no dashboard layout, sidebar, header, nav rail, or notifications panel. **Layer B** — your product's own components — **ships empty on purpose**; you populate it with the `auis-component` skill. So the map is the fastest way to find the right `Au*` **and** to see, honestly, when a thing doesn't exist yet and you have to build it.
 >
 > Continuing the design-system cleanup? Read [`docs/ds-cleanup-plan.md`](docs/ds-cleanup-plan.md) (what's done, what's left, how to resume) and run `npm run ds:check` for the live debt count.
 
@@ -108,7 +108,7 @@ New components from now on follow the correct flow from day one (primitive + wra
 - **Step 0: open [`docs/component-map.md`](docs/component-map.md)** — the "I need X →
   use Y → import" index. It names the canonical component, the near-duplicates to avoid
   (which card, which table), and — just as important — it is explicit about what **does not
-  exist**. Read its two layers: **Layer A** (the 22 `Au*` that ship — the builder's own UI)
+  exist**. Read its two layers: **Layer A** (the 26 `Au*` that ship — the builder's own UI)
   and **Layer B** (your product's components — empty until you build them). If your need
   isn't in Layer A, it is a Layer B component and you build it; don't guess an import.
   This is the single biggest lever against agents rebuilding what already exists — and
@@ -176,13 +176,14 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 | `auis-new-component` | Add a new component to the DS using existing tokens (shadcn wrapper + showcase + nav). Always `Au*` in `components/ui/`. |
 | `auis-new-page` | Build a full page from a screenshot/Figma/brief, reusing DS components. |
 | `auis-design-system-audit` | Audit consistency (tokens/components/showcases/nav); optionally sync against a reference. |
+| `auis-update-states` | Register a screen's states in State Mode (`lib/auis-states/registry.ts`): axes (`?state=`, `?plan=`…), `?ge=` interactions, `previewPath`. Run after adding/removing a page state, modal, redirect or whole screen so `/auis/states` stays honest. Rules: `AUIS.md` → "State Mode" (the URL is the source of truth). |
 | `shadcn` | Consult shadcn docs/registry/CLI for primitives. It is a support skill only: all repo rules above still win (`Au*` wrapper, existing tokens, Material Symbols by default). |
 
-**UX Flows** (`/auis/styleguide/ux-flows`)
+**UX Flows** (`/auis/ux-flow` — hub + one page per flow at `app/auis/ux-flow/<slug>/page.tsx`, registered in `_data/flow-meta.ts`)
 | Skill | When to use |
 |---|---|
 | `auis-create-ux-flow` | Create a NEW single-journey flow from a description / step list. |
-| `auis-create-ux-flow-golden-eye` | Create a COMPILED, multi-scenario "golden eye" view — several journeys merged into one deduped graph with per-scenario focus lenses through the shared `GoldenEyeDiagram`. Use when the value is overlaying scenarios + toggling between them, not one linear path. |
+| `auis-create-ux-flow-golden-eye` | Create a COMPILED, multi-scenario "golden eye" view — several journeys merged into one deduped graph with per-scenario focus lenses, as a self-contained page (template: `app/auis/ux-flow/example-golden-eye/page.tsx`). Use when the value is overlaying scenarios + toggling between them, not one linear path. |
 | `auis-update-ux-flow` | Register a structural update to an existing flow (+ changelog entry). |
 | `auis-pg-create-flow` | Create a NEW flow from a `.awflow.json` (designer/PG export). |
 | `auis-pg-merge-flow` | Merge a `.awflow.json` into a flow that already exists. |
@@ -195,11 +196,12 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 **Local bridges**
 | Skill | When to use |
 |---|---|
-| `auis-review-bridge-solve` | Batch-resolve comments from the local Review Bridge queue. `npm run dev` already starts/prepares the bridge; do not use a skill just to turn it on. |
-| `auis-review-bridge-dispatch` | **The `/loop` motor** — turns `@agent /skill #now` mentions into live action. One pass reads `/api/review-bridge/dispatch-queue` (gated by the per-agent toggles in the Auis dot + the `#now` double-lock) and routes each item: Live Response → reply; Auto Construct + `#now` → run the skill, mark `in_review`, reply a summary. Run under `/loop`. The runtime side of the agent-mentions feature. |
-| `auis-review-bridge-germano-audit` | **Germano Faccio** — critical second-opinion auditor on the `in_review` queue (what `solve` sent for review). Compares the request vs. the delivery and posts ONE reply per item ("good to go" / "not yet — ask for an improvement" + correction prompt). Comment-only: never transitions status, never edits code. Greg still approves/rejects in the inbox. |
-| `auis-flow-bridge-solve` | Apply UX-flow suggestions (read from `flow-bridge/data/suggestions.json` via the same-origin `/api/flow-suggestions` route). |
-| `auis-flow-bridge` | **Obsolete** — the flow editor is serverless now (no server to start); the skill just explains the cutover. |
+| `auis-review-bridge-solve` | Batch-resolve comments from the local Review Bridge queue (same-origin `/api/review-bridge/*`; `npm run dev` is the only prerequisite). Moves each resolved item to `in_review`; the user approves in the inbox. |
+| `auis-review-bridge-dispatch` | **The `/loop` motor** — turns `@claude` / `@codex` / `@germano` (+ `/skill`) mentions in Review Mode comments into live action. One pass reads `/api/review-bridge/dispatch-queue`, already gated by the per-agent toggles in the floating dot: **Live Response** → reply; **Auto Construct** → run the skill, mark `in_review`, reply a summary. The toggle is the permission — there is no extra directive. Germano runs as a real subagent (`.claude/agents/germano.md`, `.codex/agents/germano.toml`). Run under `/loop`. |
+| `auis-review-bridge-germano-audit` | **Germano Faccio** — critical second-opinion auditor on the `in_review` queue (what `solve` sent for review). Compares the request vs. the delivery and posts ONE reply per item ("good to go" / "not yet — ask for an improvement" + correction prompt). Comment-only: never transitions status, never edits code. The user still approves/rejects in the inbox. |
+| `auis-review-bridge-germano-explore` | **Germano Faccio** patrols a route (states, modals, sub-routes) and pins suggestions as new comments. Comment-only. |
+| `auis-flow-bridge-solve` | Apply UX-flow suggestions from `/api/flow-suggestions` (never the raw `flow-bridge/data/*.json`): materialize into `app/auis/ux-flow/<slug>/page.tsx`, then transition with the materialization receipt. |
+| `auis-edit-bridge-solve` | Materialize Edit Mode ops (`/api/page-edits`) into real TSX after approval. |
 
 The DS skills are **generic and Au-prefix-blind** — they emit `components/CustomWidget.tsx`-style output (root zone, no prefix, showcase at `components/[name]/`). So you MUST apply this file's convention on top of their output: rename → `Au[Name]`, move to `components/ui/`, showcase at `au-[name]/`, import only `Au*`.
 

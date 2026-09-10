@@ -1,32 +1,44 @@
 /**
- * Lightweight metadata for the styleguide's UX flows (ZEROED).
+ * Lightweight metadata for the UX flows — the single source for the sidebar
+ * (`../navigation.ts`), the hub gallery (`../page.tsx`) and for flow titles
+ * outside the hub (e.g. the Review Bridge suggestions panel).
  *
- * The origin product's sample flows were removed. This is the engine's API with
- * an empty list — populate it as you create flows (e.g. via
- * `auis-create-ux-flow` / `auis-pg-create-flow`), adding an entry here and the
- * flow-data in `[slug]/flow-data.ts`.
+ * Deliberately does NOT import the flow pages (they pull `@xyflow/react`
+ * through the FlowDiagram) — strings only, so the gallery and external
+ * consumers keep light bundles.
  *
- * `screens` = screen count ("screen" nodes); `updatedAt` = last update.
+ * Add one entry per flow page under `app/auis/ux-flow/<slug>/page.tsx`. The
+ * `auis-create-ux-flow` and `auis-create-ux-flow-golden-eye` skills register
+ * the entry for you.
  */
 
-export type FlowGroup = string
+export type FlowGroup = "Examples" | (string & {})
 
 export type FlowMeta = {
   slug: string
   title: string
   description: string
   group: FlowGroup
-  /** Canvas height used on the styleguide page — reused in the viewer. */
-  height: number
-  /** Screens ("screen" nodes) in the flow. */
-  screens: number
-  /** Last update recorded in the page's `updates[]`. */
-  updatedAt: string
 }
 
-export const FLOW_META: FlowMeta[] = []
+export const FLOW_META: FlowMeta[] = [
+  {
+    slug: "example",
+    title: "Example flow",
+    description:
+      "A small, product-neutral reference: screen nodes, one decision, two branches and a convergence — with the real flow editor, comments and suggestions.",
+    group: "Examples",
+  },
+  {
+    slug: "example-golden-eye",
+    title: "Golden-eye example",
+    description:
+      "Two journeys compiled into a single graph with a focus lens per scenario, shared-screen dots, click-to-open previews and state deep links.",
+    group: "Examples",
+  },
+]
 
-export const FLOW_GROUPS: FlowGroup[] = []
+export const FLOW_GROUPS: FlowGroup[] = ["Examples"]
 
 export function getFlowMeta(slug: string): FlowMeta | undefined {
   return FLOW_META.find((f) => f.slug === slug)

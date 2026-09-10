@@ -54,7 +54,7 @@ starting line, not a gap.
 
 # Layer A — Auis builder components (what ships)
 
-The 22 `Au*` in `components/ui/`. They exist because the **Auis builder** needed them: the
+The 26 `Au*` in `components/ui/`. They exist because the **Auis builder** needed them: the
 Review Bridge is built out of them, and the primitives underneath exist to serve it. You may
 import and reuse any of them in your own screens — just don't mistake this for a product
 catalog.
@@ -91,6 +91,7 @@ build it (see [Genuinely missing something?](#genuinely-missing-something)).
 | Button | `AuButton` | `@/components/ui/AuButton` | has `intent`/`size`/an `Icon` slot. Don't style a `<button>` by hand. |
 | Form field | `AuField` (or `AuInput`) | `@/components/ui/AuInput` | `AuField` (label + error + `framed` variant) and `AuInput` are exported from the **same file**. Use `AuField` when you need a label/error; bare `AuInput` otherwise. |
 | Checkbox / toggle / slider | `AuCheckbox` · `AuToggle` · `AuSlider` | `@/components/ui/AuCheckbox` · `@/components/ui/AuToggle` · `@/components/ui/AuSlider` | Don't hand-roll a styled `<input type=checkbox>`. |
+| Exclusive choice with descriptions | `AuRadioGroup` (+`AuRadioGroupItem`) | `@/components/ui/AuRadioGroup` | Vertical list of 2–6 options that need a description line. Short horizontal choices → `AuSegmented`. |
 | Tag / chip / badge | `AuPill` | `@/components/ui/AuPill` | There is a raw shadcn `badge.tsx` — it is the base of `AuMentionChip`, not for product use. Prefer `AuPill`. |
 | Generic card | `AuCard` | `@/components/ui/AuCard` | Sub-exports: `AuCardHeader`/`Title`/`Description`/`Content`/`Footer`/`Action`. For a single metric → `AuStatCard`. |
 | Metric card | `AuStatCard` | `@/components/ui/AuStatCard` | Number + delta + icon. Anything richer is a plain `AuCard`. |
@@ -101,6 +102,9 @@ build it (see [Genuinely missing something?](#genuinely-missing-something)).
 | Mention menu | `AuMentionMenu` | `@/components/ui/AuMentionMenu` | The `@`/`/` picker of the Review Bridge. It is a mention surface, not a generic dropdown → `AuDropdownMenu`. |
 | Mention / skill chip | `AuMentionChip` | `@/components/ui/AuMentionChip` | The `@agent`, `/skill` and `#directive` chips inside Review-Bridge comment text. Not a generic tag → `AuPill`. |
 | Tabs | `AuTabs` | `@/components/ui/AuTabs` | |
+| Single-choice pill switch | `AuSegmented` | `@/components/ui/AuSegmented` | 2–4 options, one visible at a time (State Mode axes, view toggles). More than that → `AuDropdownMenu`. |
+| Multi-line text | `AuTextarea` | `@/components/ui/AuTextarea` | Same frame and states as `AuInput`. Don't hand-roll a styled `<textarea>`. |
+| Loading indicator | `AuSpinner` | `@/components/ui/AuSpinner` | Indeterminate only; `sm` inside buttons and pills, `md`/`lg` on empty surfaces. |
 | Empty state | `AuEmpty` | `@/components/ui/AuEmpty` | Slots: `AuEmptyTitle` / `AuEmptyMedia` / `AuEmptyDescription` / `AuEmptyContent` / `AuEmptyHeader`. |
 | Inline alert | `AuAlert` | `@/components/ui/AuAlert` | Persistent, in-flow feedback. Transient feedback → `AuToast`. |
 | Toast | `AuToast` | `@/components/ui/AuToast` | Mount `AuToastProvider` at the top of the tree (already done in the root layout). |
@@ -109,15 +113,17 @@ build it (see [Genuinely missing something?](#genuinely-missing-something)).
 | Breadcrumb bar | `AuBreadcrumbsBar` | `@/components/ui/AuBreadcrumbsBar` | Full-width navigation trail with an optional trailing action. Use the atom when you do not need the strip. |
 | Side navigation / app shell / notifications | *(nothing ships)* | — | **Layer B.** Auis ships no sidebar, nav rail, header, dashboard layout, or notifications panel. Build what your product needs on `AuButton` + `Icon` + tokens. |
 
-## Full Layer A inventory (22)
+## Full Layer A inventory (26)
 
 Terse on purpose (name · import `@/components/ui/<Name>` · role). Every name below resolves to
 a file in `components/ui/`. Mirrors the taxonomy in
 [`component-layers.md`](./component-layers.md).
 
-### Primitives (13 `Au*`, + `Icon`)
-`AuButton` button · `AuInput`/`AuField` input/field (same file) · `AuCheckbox` checkbox ·
-`AuToggle` switch (+`AuToggleRow`) · `AuSlider` slider · `AuPill` tag/chip ·
+### Primitives (17 `Au*`, + `Icon`)
+`AuButton` button · `AuInput`/`AuField` input/field (same file) · `AuTextarea` textarea ·
+`AuCheckbox` checkbox · `AuRadioGroup` radio group (+`AuRadioGroupItem`) ·
+`AuToggle` switch (+`AuToggleRow`) · `AuSlider` slider ·
+`AuSegmented` segmented switch · `AuSpinner` spinner · `AuPill` tag/chip ·
 `AuProgress` progress · `AuAlert` alert · `AuToast` toast (+`AuToastProvider`) ·
 `AuEmpty` empty state (+ slots) · `AuTabs` tabs · `AuDropdownMenu` dropdown ·
 `AuBreadcrumb` breadcrumb (atom) · `Icon` base icon.
@@ -267,11 +273,12 @@ pass them in as props (see AGENTS.md §4).
 subsystem. Don't import one; it isn't there.
 
 - **`badge.tsx`** — the base of `AuMentionChip` (its only consumer). In product code use **`AuPill`**.
-- **`popover.tsx`** — sanctioned for direct use (the styleguide flow editor uses it).
-- **The 22 `Au*` are not shadcn wrappers today.** Nine of them use `@radix-ui/*` directly
-  (`AuButton`, `AuCheckbox`, `AuDropdownMenu`, `AuModal`, `AuProgress`, `AuSheet`, `AuTabs`,
-  `AuToggle`, `AuToast`); the rest are hand-rolled in Tailwind + tokens. This is known debt,
-  not a pattern to copy — see AGENTS.md §1.
+- **`popover.tsx`** — sanctioned for direct use (the UX flow editor uses it).
+- **`radio-group.tsx`** — the base of `AuRadioGroup` (its only consumer). In product code use **`AuRadioGroup`**.
+- **Most of the 26 `Au*` are not shadcn wrappers today.** `AuRadioGroup` follows the wrapper
+  flow; nine others use `@radix-ui/*` directly (`AuButton`, `AuCheckbox`, `AuDropdownMenu`,
+  `AuModal`, `AuProgress`, `AuSheet`, `AuTabs`, `AuToggle`, `AuToast`); the rest are hand-rolled
+  in Tailwind + tokens. This is known debt, not a pattern to copy — see AGENTS.md §1.
 - **New components follow the wrapper flow.** Install the primitive on demand
   (`npx shadcn@latest add [name]` → `components/ui/[name].tsx`, lowercase), then wrap it in
   `components/ui/Au[Name].tsx`. Pages import only `Au[Name]`. `ds:check` warns if a raw

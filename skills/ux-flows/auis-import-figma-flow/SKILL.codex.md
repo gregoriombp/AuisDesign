@@ -70,12 +70,12 @@ root = ET.fromstring("<root>"+xml+"</root>")
 ```
 
 - The **sections** (`<section>`) are the flow's groupers.
-- The **screens** are the child `<frame>`s with a screen size (in Memory
-  Base, 1920×1080 — adjust the filter to the size of the file at hand).
-- The frame's name usually carries the order embedded: `... | Tela NN | Área | NN`.
-  Derive `step` ("Tela NN"), `section` (the `<section>`'s name), `name`
-  (clean label, e.g. "Homepage 01"), and `order` (flow order:
-  step → section → number).
+- The **screens** are the child `<frame>`s with a screen size (typically
+  1920×1080 — adjust the filter to the frame size of the file at hand).
+- The frame's name usually carries the order embedded (e.g.
+  `Flow | Screen 03 | Checkout | 02`). Derive `step` ("Screen 03"),
+  `section` (the `<section>`'s name), `name` (clean label, e.g.
+  "Homepage 01"), and `order` (flow order: step → section → number).
 
 **Count and CONFIRM with the user before the bulk download** (e.g. "That's
 73 screens across 16 sections, ~1.5 MB in .webp — do I go with all of them,

@@ -4,7 +4,12 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import { useGlobalHotkey } from "@/lib/hooks/useGlobalHotkey"
 import { useReviewStore } from "@/lib/auis-review/store"
-import { findPrimaryScrollContainer } from "@/lib/auis-review/scrollOffset"
+import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
+import {
+  revealAnchor,
+  startRevealTrail,
+  resetRevealTrail,
+} from "@/lib/auis-review/revealTrail"
 import { OVERLAY_DATA_ATTR } from "./constants"
 import { ReviewCanvas } from "./ReviewCanvas"
 import { ReviewMagicCursor } from "./ReviewMagicCursor"
@@ -17,6 +22,7 @@ import { ReviewToolbar } from "./ReviewToolbar"
 
 export function ReviewModeProvider() {
   const hydrateIdentity = useReviewStore((s) => s.hydrateIdentity)
+  const hydrateSession = useReviewStore((s) => s.hydrateSession)
   const refreshFromStorage = useReviewStore((s) => s.refreshFromStorage)
   const storage = useReviewStore((s) => s.storage)
 
@@ -32,52 +38,87 @@ export function ReviewModeProvider() {
   const comments = useReviewStore((s) => s.comments)
   const sheetOpen = useReviewStore((s) => s.sheetOpen)
   const permalinkHandledRef = React.useRef<string | null>(null)
+  // Separate from "already handled": marking before the async work blocked the
+  // second attempt, and the effect re-runs on every store poll (4s).
+  const permalinkRunningRef = React.useRef<string | null>(null)
   const pathname = usePathname()
+
+  // Record the reveal trail (clicks on triggers: buttons that open modals,
+  // wizard options, tabs) all the time — review active or not — so a comment
+  // dropped inside an overlay knows how to reopen it on focus. Always mounted
+  // together with the provider (see layout.tsx).
+  React.useEffect(() => startRevealTrail(), [])
 
   // Every new screen can carry its own ?reviewCommentId — release the permalink
   // so it gets reprocessed when the pathname changes (client-side navigation).
+  // Also reset the trail: on a route change the overlays reset, so the previous
+  // screen's trail no longer applies.
   React.useEffect(() => {
     permalinkHandledRef.current = null
+    permalinkRunningRef.current = null
+    resetRevealTrail()
   }, [pathname])
 
   React.useEffect(() => {
     void hydrateIdentity()
+    void hydrateSession()
     void refreshFromStorage()
     const unsubscribe = storage.subscribe?.(() => {
       void refreshFromStorage()
     })
     return unsubscribe
-  }, [hydrateIdentity, refreshFromStorage, storage])
+  }, [hydrateIdentity, hydrateSession, refreshFromStorage, storage])
 
-  // Permalink: open the review overlay and focus the pin when ?reviewCommentId=… is present.
+  // Permalink: open the review overlay and focus the pin when ?reviewCommentId=…
+  // is present. If the pin lives inside a closed overlay (modal/drawer/tab), we
+  // first REPLAY the comment's recorded reveal path to re-open it, so clicking a
+  // comment lands you exactly where the pin is instead of on a bare screen with
+  // a hidden pin you can't find.
   React.useEffect(() => {
     if (typeof window === "undefined") return
     const params = new URLSearchParams(window.location.search)
     const id = params.get("reviewCommentId")
     if (!id) return
     if (permalinkHandledRef.current === id) return
+    if (permalinkRunningRef.current === id) return
     if (comments.length === 0) return
     const match = comments.find((c) => c.id === id)
     if (!match) return
-    permalinkHandledRef.current = id
+    permalinkRunningRef.current = id
     setActive(true)
-    setSheetOpen(true)
     selectComment(id)
-    const anchorY =
-      match.anchor.kind === "pin"
-        ? match.anchor.position.y
-        : match.anchor.centroid.y
-    const targetY = Math.max(0, anchorY - 120)
-    const scroll = () => {
-      const container = findPrimaryScrollContainer()
-      if (container) {
-        container.scrollTo({ top: targetY, behavior: "smooth" })
-      } else {
-        window.scrollTo({ top: targetY, behavior: "smooth" })
+
+    const controller = new AbortController()
+    const focus = async () => {
+      // Re-open the overlay holding the pin (no-op if it's plain page content
+      // or there's no recorded path). Pins re-resolve once the overlay mounts
+      // (useLayoutVersion observes the portal), so the marker then paints.
+      await revealAnchor(match.anchor, match.revealPath, controller.signal)
+      if (controller.signal.aborted) return
+      setSheetOpen(true)
+      const el = resolveAnchoredElement(match.anchor)
+      if (el) {
+        // Prefer the live element — survives layout shifts and scrolls inside
+        // a modal's own scroll container.
+        el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" })
+        // Only here has the trip really finished. Marking before this (or at
+        // the start of the effect) made a slow reveal lose its only chance.
+        permalinkHandledRef.current = id
+        return
       }
+      // Did not resolve. We used to scroll to the saved Y — but the canvas hides
+      // the pin exactly in this case, so the scroll led somewhere nothing would
+      // be drawn, which from the outside looks like "the pin showed up in the
+      // wrong place". Better not to touch the screen: the drawer stays open
+      // with the comment highlighted, and the card says where the pin was.
+      permalinkHandledRef.current = id
     }
-    // Defer scroll until after the overlay mounts.
-    requestAnimationFrame(scroll)
+    void focus().finally(() => {
+      if (permalinkRunningRef.current === id) permalinkRunningRef.current = null
+    })
+    return () => {
+      controller.abort()
+    }
   }, [comments, pathname, setActive, setSheetOpen, selectComment])
 
   // A Radix Dialog (AuModal/AuSheet) with `modal` keeps a focus trap that pulls

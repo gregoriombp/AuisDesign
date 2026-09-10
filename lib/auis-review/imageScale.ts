@@ -1,11 +1,10 @@
-// Review Mode attachments are stored as base64 data URLs INSIDE the comment,
-// which travels through the review-bridge (JSON/SSE) and, in local mode, lands
-// in localStorage (~5MB total). We keep the resolution HIGH but cap the longest
-// side so a 4K/Retina screenshot doesn't blow past the storage budget. Images
-// already under the cap pass through untouched (no re-encode), preserving the
-// sharpness of text.
-const MAX_DIM = 2400
-const JPEG_QUALITY = 0.92
+// Review Mode attachments are written to disk (content-addressed) by the
+// serverless bridge and referenced by URL in the JSON — see
+// app/api/review-bridge/_images.ts. Here we only prepare the upload: cap the
+// longest side + re-encode as JPEG so a UI screenshot never travels as a giant
+// PNG/4K image. 1600px @ 0.82 keeps text legible at a fraction of the weight.
+const MAX_DIM = 1600
+const JPEG_QUALITY = 0.82
 
 export function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -26,8 +25,10 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Reads the file at full resolution; only resizes when the longest side exceeds
- * MAX_DIM (keeping the aspect ratio). Below that it returns the original intact.
+ * Normalizes the attachment into a lean JPEG: scales down when the longest side
+ * exceeds MAX_DIM and ALWAYS re-encodes as JPEG (even images under the cap), so
+ * a PNG screenshot does not travel 3-5x heavier than needed. On any failure it
+ * returns the original.
  */
 export async function fileToHighResDataUrl(file: File): Promise<string> {
   const original = await fileToDataUrl(file)
@@ -39,9 +40,7 @@ export async function fileToHighResDataUrl(file: File): Promise<string> {
     return original
   }
   const longest = Math.max(img.naturalWidth, img.naturalHeight)
-  if (longest <= MAX_DIM) return original
-
-  const scale = MAX_DIM / longest
+  const scale = longest > MAX_DIM ? MAX_DIM / longest : 1
   const w = Math.round(img.naturalWidth * scale)
   const h = Math.round(img.naturalHeight * scale)
   const canvas = document.createElement("canvas")
@@ -52,5 +51,8 @@ export async function fileToHighResDataUrl(file: File): Promise<string> {
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = "high"
   ctx.drawImage(img, 0, 0, w, h)
-  return canvas.toDataURL("image/jpeg", JPEG_QUALITY)
+  const encoded = canvas.toDataURL("image/jpeg", JPEG_QUALITY)
+  // If for some reason the JPEG ends up larger than the original (rare, tiny
+  // images), keep the smaller of the two.
+  return encoded.length < original.length ? encoded : original
 }

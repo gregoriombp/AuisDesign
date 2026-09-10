@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuDropdownMenu, type AuDropdownItem } from "@/components/ui/AuDropdownMenu"
 import {
@@ -16,6 +17,7 @@ import { AuPill } from "@/components/ui/AuPill"
 import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
+import { permalinkPath } from "@/lib/auis-review/permalink"
 import type { ReviewComment } from "@/components/auis-review/types"
 import { PageHero } from "../_primitives"
 
@@ -66,7 +68,7 @@ function SortHeader({
       type="button"
       onClick={() => onClick(sortKey)}
       className={[
-        "inline-flex items-center gap-1 text-[11px] uppercase tracking-wide font-medium",
+        "inline-flex items-center gap-1 text-2xs uppercase tracking-wide font-medium",
         active
           ? "text-(--fg-primary)"
           : "text-(--fg-tertiary) hover:text-(--fg-secondary)",
@@ -109,6 +111,8 @@ function CommentRow({
   const deleteComment = useReviewStore((s) => s.deleteComment)
   const selectComment = useReviewStore((s) => s.selectComment)
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
+  const setActive = useReviewStore((s) => s.setActive)
+  const router = useRouter()
 
   const dropdownItems: AuDropdownItem[] = [
     {
@@ -116,9 +120,13 @@ function CommentRow({
       label: "Open screen",
       icon: "open_in_new",
       onSelect: () => {
+        // Client-side navigation WITH the permalink: a full reload threw away
+        // the selectComment that had just run, and without ?reviewCommentId=
+        // Review Mode would not even turn on on the other side.
         selectComment(comment.id)
+        setActive(true)
         setSheetOpen(true)
-        window.location.href = comment.url
+        router.push(permalinkPath(comment))
       },
     },
   ]
@@ -182,9 +190,20 @@ function CommentRow({
         <StatusPill status={comment.status} />
       </td>
       <td className="px-3 py-3 align-top">
+        {comment.context?.location?.length ? (
+          <p
+            className="m-0 mb-0.5 flex items-center gap-1 text-2xs text-(--fg-tertiary)"
+            title={comment.context.location.join(" › ")}
+          >
+            <Icon name="my_location" size={11} className="shrink-0" />
+            <span className="truncate max-w-[200px]">
+              {comment.context.location.join(" › ")}
+            </span>
+          </p>
+        ) : null}
         <Link
           href={comment.url}
-          className="inline-flex items-center gap-1 text-[11px] text-(--fg-secondary) hover:text-(--accent-brand)"
+          className="inline-flex items-center gap-1 text-2xs text-(--fg-secondary) hover:text-(--accent-brand)"
           title={comment.url}
         >
           <Icon name="open_in_new" size={11} />
@@ -194,7 +213,7 @@ function CommentRow({
       <td className="px-3 py-3 align-top">
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="h-6 w-6 shrink-0 rounded-full flex items-center justify-center text-[11px] font-semibold text-(--fg-on-inverse)"
+            className="h-6 w-6 shrink-0 rounded-full flex items-center justify-center text-2xs font-semibold text-(--fg-on-inverse)"
             style={{ background: comment.authorColorToken }}
           >
             {comment.authorName.charAt(0).toUpperCase()}
@@ -209,7 +228,7 @@ function CommentRow({
           {comment.text}
         </p>
         {comment.resolution?.summary && (
-          <p className="m-0 mt-1 text-[11px] text-(--fg-tertiary) italic">
+          <p className="m-0 mt-1 text-2xs text-(--fg-tertiary) italic">
             {comment.resolution.summary}
           </p>
         )}
@@ -221,7 +240,7 @@ function CommentRow({
         >
           {formatTimestamp(comment.createdAt)}
         </div>
-        <div className="text-[11px] text-(--fg-tertiary)">
+        <div className="text-2xs text-(--fg-tertiary)">
           {relative(comment.createdAt)}
         </div>
       </td>
@@ -252,7 +271,6 @@ export default function ReviewInboxPage() {
   const loadArchivePage = useReviewStore((s) => s.loadArchivePage)
   const approveComment = useReviewStore((s) => s.approveComment)
   const rejectComment = useReviewStore((s) => s.rejectComment)
-  const backend = useReviewStore((s) => s.backend)
   const storage = useReviewStore((s) => s.storage)
 
   React.useEffect(() => {
@@ -452,7 +470,7 @@ export default function ReviewInboxPage() {
               />
             </th>
             <th className="px-3 py-2 text-left">
-              <span className="text-[11px] uppercase tracking-wide font-medium text-(--fg-tertiary)">
+              <span className="text-2xs uppercase tracking-wide font-medium text-(--fg-tertiary)">
                 Comment
               </span>
             </th>
@@ -487,19 +505,21 @@ export default function ReviewInboxPage() {
   return (
     <>
       <PageHero title="Review · Inbox">
-        The full panel of Review Mode comments. Filter by author, status or text,
-        group by screen, and bulk-approve/reject the ones in review. Reads from the
-        same storage as the overlay (localStorage or the local bridge).
+        Full panel of the Review Mode comments. Filter by author, status or
+        text, group by screen, approve/reject in bulk what is in review. Reads
+        from the same serverless bridge as the overlay.
       </PageHero>
 
       <div className="max-w-[1200px] mx-auto px-10 pb-14 flex flex-col gap-8">
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <AuStatCard
+          size="sm"
           icon="forum"
-          label="Active total"
+          label="Total active"
           value={comments.length}
         />
         <AuStatCard
+          size="sm"
           icon="pending"
           label="Open"
           value={openCount}
@@ -510,11 +530,13 @@ export default function ReviewInboxPage() {
           }
         />
         <AuStatCard
+          size="sm"
           icon="hourglass_top"
           label="In review"
           value={inReviewCount}
         />
         <AuStatCard
+          size="sm"
           icon="archive"
           label="Archived"
           value={archivedCount}
@@ -531,7 +553,7 @@ export default function ReviewInboxPage() {
           />
         </div>
 
-        <div className="flex items-center gap-1 p-1 rounded-full bg-(--bg-muted) text-[11px] font-medium">
+        <div className="flex items-center gap-1 p-1 rounded-full bg-(--bg-muted) text-2xs font-medium">
           {(["open", "in_review", "archive"] as Tab[]).map((t) => (
             <button
               key={t}
@@ -546,7 +568,7 @@ export default function ReviewInboxPage() {
             >
               {t === "open" ? "Open" : t === "in_review" ? "In review" : "Archived"}
               {t === "in_review" && inReviewCount > 0 && (
-                <span className="min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-[10px] font-semibold bg-(--au-amber-100) text-(--au-amber-700) tabular-nums">
+                <span className="min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full text-3xs font-semibold bg-(--au-amber-100) text-(--au-amber-700) tabular-nums">
                   {inReviewCount}
                 </span>
               )}
@@ -579,12 +601,9 @@ export default function ReviewInboxPage() {
           Group by screen
         </label>
 
-        <span className="ml-auto inline-flex items-center gap-2 text-[11px] text-(--fg-tertiary)">
-          <Icon
-            name={backend === "bridge" ? "cloud_done" : "save"}
-            size={13}
-          />
-          {backend === "bridge" ? "Local bridge" : "localStorage"}
+        <span className="ml-auto inline-flex items-center gap-2 text-2xs text-(--fg-tertiary)">
+          <Icon name="cloud_done" size={13} />
+          Serverless bridge
         </span>
 
         <AuButton
@@ -650,11 +669,11 @@ export default function ReviewInboxPage() {
                 ? "Nothing archived yet"
                 : comments.length === 0
                 ? "No comments yet"
-                : "Nothing matches these filters"}
+                : "Nothing with these filters"}
             </AuEmptyTitle>
             <AuEmptyDescription>
               {tab === "open" && comments.length === 0
-                ? "Turn on Review Mode (⌘⇧Y) on any screen and draw your first comment."
+                ? "Turn on Review Mode (⌘⇧Y) on any screen and draw the first comment."
                 : tab === "in_review"
                 ? "When an agent marks something as resolved, it shows up here for you to approve or reject."
                 : "Try loosening the filters or switching the author."}

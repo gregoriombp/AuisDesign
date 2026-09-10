@@ -12,7 +12,7 @@ Auis is a **Next.js product** (not documentation): the design system runs alongs
 
 1. **Design system as code** — primitives in `components/ui/`, tokens in `app/globals.css`, documented in the styleguide.
 2. **Builder by composition** — new screens start from existing components; a reusable pattern becomes an official component.
-3. **Review/Edit as a queue** — comments and visual edits carry route/target context, so agents resolve them with enough context.
+3. **Review/Edit/State as modes** — comments and visual edits carry route/target context, so agents resolve them with enough context; screen states are URL params, so every scenario is a deep link.
 4. **Skills as an execution contract** — agents follow the repo's rules via skills instead of inventing structure.
 
 ## Surfaces (routes)
@@ -23,7 +23,8 @@ Auis is a **Next.js product** (not documentation): the design system runs alongs
 | Styleguide | `/auis/styleguide` | Living foundations and component showcases; Layer B grows with the product |
 | Review Bridge (dashboard) | `/auis/review-bridge` | Local queue of comments + suggestions |
 | Review Inbox | `/auis/styleguide/review` | Inbox for Review Mode comments |
-| UX Flow | `/auis/ux-flow` | Flow viewer/hub as a prototype |
+| UX Flow hub | `/auis/ux-flow` | Gallery + sidebar; one page per flow (`/auis/ux-flow/<slug>`) with the editor, comments, suggestions and compiled views |
+| State Mode matrix | `/auis/states` | Every registered screen in every URL-driven state; `npm run states:pdf` exports it |
 | Projects | `/auis/projects` | Workbench for imported screens/projects |
 | Design System Tweaks | `/auis/design-system-tweaks` | Controlled token experiments |
 | Roadmap | `/auis/roadmap` | Non-authoritative parking lot for builder ideas |
@@ -32,22 +33,23 @@ Auis is a **Next.js product** (not documentation): the design system runs alongs
 
 Dependency is **one-way** (upper layers consume lower ones — see [`component-layers.md`](component-layers.md)):
 
-- **Builder chrome** — `components/auis-review/` (canvas, pins, popovers, command menu), `components/auis-edit/` (toolbar, inspector, controls), `components/auis/` (AuisDot, ModeFamilySwitch, FlowStateDriver). The root layout mounts Review, Edit, the state driver, and the dot globally.
-- **Primitives** — `components/ui/` (25 `.tsx`: **22** `Au*` + `Icon.tsx` + two shadcn primitives, `badge.tsx` and `popover.tsx`): the subset the chrome imports (`AuButton`, `AuModal`, `AuSheet`, `AuDropdownMenu`, `AuInput`, `Icon`, …), plus the Review Bridge's own surfaces (`AuMentionMenu`/`AuMentionChip`) and Auis's mark (`AuLogo`). The origin product's full catalog was **not** brought over.
-- **State/logic** — `lib/auis-review/`, `lib/auis-edit/`, `lib/hooks/` (Zustand stores, element anchoring, command parsing, voice, AI assist).
+- **Builder chrome** — `components/auis-review/` (canvas, pins, popovers, command menu), `components/auis-edit/` (toolbar, inspector, controls), `components/auis-states/` (State Mode provider + toolbar), `components/auis/` (AuisDot, ModeFamilySwitch, FlowStateDriver). The root layout mounts Review, Edit, State Mode, the state driver, and the dot globally; the three modes are mutually exclusive.
+- **Primitives** — `components/ui/` (30 `.tsx`: **26** `Au*` + `Icon.tsx` + three shadcn primitives, `badge.tsx`, `popover.tsx` and `radio-group.tsx`): the subset the chrome imports (`AuButton`, `AuModal`, `AuSheet`, `AuDropdownMenu`, `AuInput`, `Icon`, …), plus the Review Bridge's own surfaces (`AuMentionMenu`/`AuMentionChip`) and Auis's mark (`AuLogo`). The origin product's full catalog was **not** brought over.
+- **State/logic** — `lib/auis-review/`, `lib/auis-edit/`, `lib/auis-states/` (registry, store, `useScreenStateOverride`), `lib/bridge-store/` (fs document store shared by the bridges), `lib/hooks/` (Zustand stores, element anchoring, command parsing, voice, AI assist).
 
 ## Bridges (runtime)
 
 ```
 Review Mode (UI)  ──creates comment──▶  /api/review-bridge/*  ──▶  review-bridge/data/*.json
                                                   │
-   agent (skill auis-review-bridge-solve) reads the queue  ◀───┘
+   agent (auis-review-bridge-solve, or the /loop dispatcher) reads the queue  ◀───┘
                                                   │
                      resolves → marks in_review → you approve/reject in the inbox
 ```
 
-- **Review Bridge** — **serverless** (same-origin routes `app/api/review-bridge/*`, the `npm run dev` default) or **opt-in legacy Express** (`review-bridge/`, `npm run dev:bridge`, `127.0.0.1:9878`). Both write the same JSONs with atomic writes.
-- **Flow Bridge** — suggestions via `/api/flow-suggestions` → `flow-bridge/data/`.
+- **Review Bridge** — **serverless**: same-origin routes `app/api/review-bridge/*` persist to `review-bridge/data/` through `lib/bridge-store` (atomic writes + lock). Roles admin / reviewer / agent are resolved in `_session.ts` (always admin locally; `x-bridge-agent-token` for agents when a deployment enables auth). Agents are `claude`, `codex` and `germano`; the per-agent toggles in the floating dot (Live Response / Auto Construct) gate `/dispatch-queue`.
+- **Flow Bridge** — suggestions via `/api/flow-suggestions` → `flow-bridge/data/`, with an integrity layer (base revision/hash, materialization receipts, `409` on a stale base).
+- **State Mode API** — `/api/screen-states` exposes `lib/auis-states/registry.ts` to the matrix page and the PDF script.
 - **Edit Bridge** — non-destructive "ops" via `/api/page-edits` → `page-editor/data/`; `auis-edit-bridge-solve` materializes them into code.
 - **Project Builds** — `/api/project-builds` feeds `auis-project-build-solve`.
 - **Brand setup** — the `/auis/welcome` form posts to `/api/setup`, which writes the logo to `public/assets/brand/` and the brand overlay to `app/auis/_data/brand.runtime.json`; `auis-brand` (sequenced by `auis-setup`) materializes that intent into `PRODUCT_CONTEXT.md` and `AuLogo`.
@@ -59,21 +61,21 @@ The `*/data/` directories are **runtime state** (gitignored), not source code.
 
 ```
 skills/<cap>/<name>/SKILL.md            (Claude — canonical)
-skills/<cap>/<name>/SKILL.codex.md      (Codex — only when it diverges; 13 cases)
+skills/<cap>/<name>/SKILL.codex.md      (Codex — only when it diverges; 10 cases)
         │  npm run skills:catalog                 │  npm run skills:sync
         ▼                                         ▼
 skills/registry.json + CATALOG.md        .claude/skills/<name>/   (Claude Code)
                                          .agents/skills/<name>/   (Codex/Cursor; applies SKILL.codex.md)
 ```
 
-- **Capabilities:** Design System (10), UX Flows (7), Bridges (8), Build & Handoff (3), Content (2), Support (8). **38 total.**
-- **Platforms:** 36 on Claude+Codex, 2 Claude-only (`auis-review-bridge-dispatch`, `auis-edit-bridge-solve`).
-- **Origin:** 6 generic (Cowork, "zeroed" core) + 24 repo-local (rich variants: onboarding, bridges, ux-flow, audit) + 8 support.
+- **Capabilities:** Design System (11), UX Flows (7), Bridges (6), Build & Handoff (3), Content (2), Support (8). **37 total.**
+- **Platforms:** 36 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). Germano runs as a real subagent on both: `.claude/agents/germano.md` and `.codex/agents/germano.toml`.
+- **Origin:** 6 generic (Cowork, "zeroed" core) + 23 repo-local (rich variants: onboarding, bridges, ux-flow, states, audit) + 8 support.
 - `scripts/skills-sync.mjs` does a manual recursive copy (avoids permission-mode problems on restricted mounts) and applies the Codex variant where one exists.
 
 ## Stack
 
-Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `globals.css`, no `tailwind.config`) · shadcn/ui (lowercase primitives + `Au*` wrapper) · Material Symbols via `components/ui/Icon.tsx` · Zustand · `@xyflow/react` (flows). MCPs in `.mcp.json` (figma, shadcn, playwright, mobbin).
+Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `globals.css`, no `tailwind.config`) · shadcn/ui (lowercase primitives + `Au*` wrapper) · Material Symbols via `components/ui/Icon.tsx` · Zustand · `@xyflow/react` (flows). MCPs in `.mcp.json` (figma, shadcn, playwright, and a UI-pattern reference server).
 
 ## Branding & theming
 

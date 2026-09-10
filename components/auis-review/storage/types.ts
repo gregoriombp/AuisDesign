@@ -1,6 +1,7 @@
 import type {
   ReviewActor,
   ReviewComment,
+  ReviewCommentOrigin,
   ReviewCommentStatus,
   ReviewExportPayload,
   ReviewIdentity,
@@ -10,6 +11,8 @@ import type {
 export interface ReviewStorageFilter {
   url?: string
   status?: ReviewCommentStatus
+  origin?: ReviewCommentOrigin
+  flow?: string
 }
 
 export interface ReviewArchiveFilter {
@@ -35,6 +38,8 @@ export interface ReviewReplyInput {
   authorId: string
   authorName: string
   authorColorToken?: string
+  /** E-mail of the session author, when known. */
+  authorEmail?: string
   text: string
   images?: string[]
 }
@@ -55,6 +60,12 @@ export interface ReviewStorage {
     actor?: ReviewActor
   ): Promise<ReviewComment | null>
   addReply?(commentId: string, reply: ReviewReplyInput): Promise<ReviewReply | null>
+  /** Edits the text/images of a reply. `images: undefined` keeps the current ones. */
+  editReply?(
+    commentId: string,
+    replyId: string,
+    patch: { text: string; images?: string[] }
+  ): Promise<ReviewReply | null>
 
   exportAll(): Promise<ReviewExportPayload>
   importMerge(

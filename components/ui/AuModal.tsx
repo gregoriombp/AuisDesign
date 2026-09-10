@@ -5,7 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { cn } from "@/lib/utils"
 import { Icon } from "./Icon"
 
-export type AuModalSize = "md" | "cockpit"
+export type AuModalSize = "sm" | "md" | "lg" | "cockpit"
 
 export type AuModalProps = {
   open: boolean
@@ -25,6 +25,8 @@ export type AuModalProps = {
    * transition without the caller asking for it. Without `stepKey`, behavior is
    * unchanged. */
   stepKey?: string | number
+  /** Extra class on the modal panel (e.g. cap the height of a long list). */
+  className?: string
 }
 
 export function AuModal({
@@ -38,6 +40,7 @@ export function AuModal({
   size = "md",
   zIndex,
   stepKey,
+  className,
 }: AuModalProps) {
   return (
     <DialogPrimitive.Root
@@ -61,7 +64,8 @@ export function AuModal({
           <DialogPrimitive.Content
             className={cn(
               "au-modal pointer-events-auto",
-              `au-modal--${size}`
+              `au-modal--${size}`,
+              className
             )}
             onPointerDownOutside={(e) => {
               if (!dismissible) e.preventDefault()

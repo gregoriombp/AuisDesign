@@ -2,13 +2,13 @@
 name: auis-edit-bridge-solve
 description: >
   Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered
-  page-editor ops (text, token/style, variant, icon, hide, and sibling order),
-  plans once, waits for approval, applies the changes, and marks each op
-  in_review so the user can approve or reject it in the edit inbox. Use for
-  /auis-edit-bridge-solve, "materialize the edits", "turn the overlay into
-  code", "apply the edits from page X", "promote the live edits", or "resolve
-  page-edits". Do not use to author browser edits or resolve Review Mode
-  comments.
+  page-editor ops (text, style tokens, typography classes, variant, icon,
+  hide, and sibling order), plans once, waits for approval, applies the
+  changes, and marks each op in_review so the user can approve or reject it
+  in the edit inbox. Use for /auis-edit-bridge-solve, "materialize the
+  edits", "turn the overlay into code", "apply the edits from page X",
+  "promote the live edits", or "resolve page-edits". Do not use to author
+  browser edits or resolve Review Mode comments.
 ---
 
 # Auis Edit Bridge — Materialize overlays into code
@@ -23,7 +23,8 @@ for the user to approve from the page's inbox.
 > part of Next — same origin, no token, no separate process).
 >
 > Contract/payloads: `app/api/page-edits/_store.ts` (types `PageEditOp`,
-> `PageEditPayload`). Live apply engine: `lib/auis-edit/applier.ts`.
+> `PageEditPayload`; browser-safe twin in `lib/auis-edit/types.ts`). Live
+> apply engine: `lib/auis-edit/applier.ts`.
 
 ## Golden rule
 
@@ -44,11 +45,29 @@ applied/discarded → ignore (already in the archive)
 
 ## Actor identity
 
-On EVERY call that writes to the bridge:
+On EVERY call that writes to the bridge, post as the executor you are. The two
+executors Auis ships are registered in `lib/auis-review/agentIdentity.ts`:
 
 ```json
 { "kind": "agent", "id": "claude", "name": "Claude" }
 ```
+
+```json
+{ "kind": "agent", "id": "codex", "name": "Codex" }
+```
+
+Never post as a user, and never invent a third agent id.
+
+## Auto mode
+
+Normally you present the plan and **wait for approval** (§3). The only time
+you proceed without asking is when this skill is run by the dispatcher
+(`auis-review-bridge-dispatch`) because the mentioning agent's **Auto
+Construct** toggle (labelled "Auto Design" on the executor rows) in the
+floating dot (AuisDot) is on — the toggle IS the permission; there is no extra
+directive to type. In that case proceed with
+"everything", keep the same skip rules, and flag in the summary that the run
+was automatic.
 
 ---
 
@@ -65,7 +84,7 @@ curl -s "$BASE/api/page-edits?route=%2F" >/dev/null || echo "Start 'npm run dev'
 
 You can also read the files straight from disk (you do not need the dev server to
 READ): `page-editor/data/<encoded-route>.json` (+ `.archive.json`), where the key is
-`encodeURIComponent(pathname)` — e.g. `/integrations` → `%2Fintegrations.json`.
+`encodeURIComponent(pathname)` — e.g. `/auis/projects` → `%2Fauis%2Fprojects.json`.
 To TRANSITION (`in_review`) use the API's `PUT` (that needs the dev server).
 
 **Formats (they are not raw arrays/fields — they are wrapped):**
@@ -87,7 +106,7 @@ To TRANSITION (`in_review`) use the API's `PUT` (that needs the dev server).
 
 ```bash
 # List the open ops of a route
-ROUTE="/integrations"
+ROUTE="/auis/projects"
 ENC=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$ROUTE")
 curl -s "$BASE/api/page-edits?route=$ENC&status=open" | python3 -m json.tool
 ```
@@ -110,7 +129,7 @@ target in the code:
 - `payload` — what to change.
 
 ```
-- <id> · /url · type=<text|style|variant|icon|hide|move>
+- <id> · /url · type=<text|style|variant|class|icon|iconStyle|hide|move|token>
   target: <component/element + domText>   (move: the PARENT container)
   proposal: <code edit in 1 line>
   file: <file:line> (if you already found it)
@@ -126,9 +145,10 @@ by `component` + `domText` + surrounding text. If the target is rendered inside
 a `.map()` (the edit would have to touch DATA, not literal JSX), lower the
 confidence and propose skipping/asking.
 
-Present the consolidated plan (total, how many to materialize/skip) and **wait
-for approval** (AskUserQuestion: "materialize everything" / "only high confidence" /
-"cancel"). In auto mode, proceed with "everything" and flag it in the summary.
+Present the consolidated plan (total, how many to materialize/skip) and
+**wait for approval** (AskUserQuestion: "materialize everything" / "only high
+confidence" / "cancel"). In auto mode (see above), proceed with "everything"
+and flag it in the summary.
 
 ### 4. Map op → TSX edit
 
@@ -138,6 +158,7 @@ for approval** (AskUserQuestion: "materialize everything" / "only high confidenc
 | `icon` | Swap the icon prop — `iconLeft`/`iconRight`/`iconOnly`/`name` — from `prevName` to `payload.name`. The component is the span's parent (e.g. `<AuButton iconLeft="add" …>`). |
 | `iconStyle` | Override of the optical axes → `<Icon>` props: `payload.weight`→`weight={N}`, `payload.fill`→`fill={0\|1}`, `payload.grade`→`grade={N}`, `payload.opticalSize`→`opticalSize={N}`. Emit **only** the axis/axes that differ from `Icon`'s per-size default (do not dump all 4). Target: the `<Icon>` parent of the `.material-symbols-rounded` span. |
 | `variant` | Swap the axis prop on the `<Au… >`: `payload.axis="variant"` → `variant="<value>"`; `payload.axis="size"` → `size="<value>"`. Do NOT touch className (the class is derived from the prop). |
+| `class` | Typography utility swap on ANY text element (groups `scale` / `weight` / `align`, curated in `lib/auis-edit/typography-registry.ts`): in the element's `className`, drop the classes in `payload.remove` and add `payload.add` (e.g. `body-sm` → `body-md`, `font-medium` → `font-semibold`, `text-left` → `text-center`). Curated classes only — never an arbitrary value. |
 | `style` | **Read `payload.prop`** to know WHICH CSS property to tokenize, and `payload.token` (it already comes as `var(--token)`) for the value. Prefer the arbitrary Tailwind utility following the file's convention: `color`→`text-(--token)`, `background-color`→`bg-(--token)`, `border-color`→`border-(--token)` (+ make sure there is a border), `border-radius`→`rounded-(--token)`, `box-shadow`→`shadow-(--token)`, spacing (`padding`/`margin`/`gap`)→`p-(--token)`/`m-(--token)`/`gap-(--token)`; or `style={{ <prop> : "var(--token)" }}`. NEVER materialize a raw color/measurement. **If `payload.offSpec === true`** (override directly on the ROOT of the `offSpecComponent` component), flag it: ideally it should become a **variant** of the component, not a loose override — propose that or confirm before materializing it as a raw class/style. **If `payload.custom === true`** (raw color outside the palette — the "Custom color" picker lets you break the token on purpose): do NOT inline the raw value; **promote it to a `--custom-*` token** (see §4b) and apply the class/var of that new token. |
 | `token` | **GLOBAL edit of a token's value** (`anchor.selector === ":root"`): rewrites the value in `globals.css` **+ writes a backup first** (see §4b). `payload.token` = the token (e.g. `--accent-brand`), `payload.value` = the new color. Affects ALL instances — it does not touch any element/JSX. |
 | `hide` mode `hide` | Hide it idiomatically: remove the node OR wrap it in a condition. When in doubt, ask. |
@@ -179,15 +200,16 @@ but here it is an EXPLICIT user edit, reviewed in the inbox — handle with care
 After rewriting the op's TSX:
 
 ```bash
-ID="<op id>"; ROUTE="/integrations"
+ID="<op id>"; ROUTE="/auis/projects"
 curl -s -X PUT "$BASE/api/page-edits/$ID" \
   -H "Content-Type: application/json" \
   -d "{\"route\":\"$ROUTE\",\"transition\":\"in_review\",\"actor\":{\"kind\":\"agent\",\"id\":\"claude\",\"name\":\"Claude\"}}" \
   | python3 -m json.tool
 ```
 
-The response carries `resolution.summary` ("In review by Claude on DD/MM/YYYY …").
-Note the id+summary for the summary.
+(Codex runs send `"id":"codex","name":"Codex"`.) The response carries
+`resolution.summary` ("In review by Claude on DD/MM/YYYY …"). Note the
+id+summary for the summary.
 
 ### 6. Final summary (one message)
 
@@ -220,7 +242,8 @@ Note the id+summary for the summary.
   not match clearly (siblings with no text) → confirm first.
 - ✅ `style` with `offSpec` is an override directly on a component's root — materialize it,
   but prefer/suggest turning it into a variant (do not let the component drift for no reason).
-- ✅ Text/icon/variant edit inside a `.map()`: treat it as a DATA change
+- ✅ `class` swaps only the curated typography classes — never an arbitrary value.
+- ✅ Text/icon/variant/class edit inside a `.map()`: treat it as a DATA change
   (the list), not literal JSX — and only with high confidence; otherwise ask.
 - ✅ If the dev server goes down mid-run, whatever already became `in_review` is protected;
   resume by fetching `status=open` again.
@@ -229,7 +252,7 @@ Note the id+summary for the summary.
 
 | Symptom | Cause | Workaround |
 |---|---|---|
-| `400 route is required` | `route` was missing from the PUT body | always include `"route"` |
-| `404 Op not found` | op already approved/rejected/deleted | skip it in the batch |
-| GET returns `[]` | wrong route/wrongly encoded, or the ops are in `in_review`/archive | check the `ENC` and the `status` |
+| `400 route is required.` | `route` was missing from the PUT body | always include `"route"` |
+| `404 Op not found.` | op already approved/rejected/deleted | skip it in the batch |
+| GET returns `{ "ops": [] }` | wrong route/wrongly encoded, or the ops are in `in_review`/archive | check the `ENC` and the `status` |
 | I cannot find the literal in the TSX | the text comes from data/`.map()` or from another component | follow `domText`+`component`; if it is data, edit the array |
