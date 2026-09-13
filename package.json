@@ -1,6 +1,7 @@
 {
-  "name": "auis",
+  "name": "auis-design",
   "version": "1.0.0",
+  "private": true,
   "description": "Auis — code-native design builder: design system, screens, UX flows, review/edit modes, and agent skills for Next.js + shadcn/ui.",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
@@ -9,6 +10,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --import ./lib/__tests__/register-ts-loader.mjs --test \"lib/**/__tests__/*.test.ts\" \"app/**/__tests__/*.test.ts\"",
+    "test:cli": "node --test packages/auis/test/*.test.mjs",
     "skills:sync": "node scripts/skills-sync.mjs",
     "skills:catalog": "node scripts/skills-catalog.mjs",
     "predev": "node scripts/skills-sync.mjs",
