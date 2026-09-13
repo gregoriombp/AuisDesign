@@ -29,6 +29,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: CLI tests
+        run: npm run test:cli
+
+      - name: CLI end-to-end (scaffold, no install)
+        run: |
+          node packages/auis/bin/auis.mjs "$RUNNER_TEMP/auis-probe" --no-install --no-git
+          test -f "$RUNNER_TEMP/auis-probe/AGENTS.md"
+          test ! -e "$RUNNER_TEMP/auis-probe/CONTRIBUTING.md"
+          test ! -e "$RUNNER_TEMP/auis-probe/packages"
+
       - name: Design-system check
         run: npm run ds:check
         continue-on-error: true # informational: reports hardcode debt
