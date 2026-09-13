@@ -36,6 +36,12 @@ a new major of `auis`.
    packed file list, then run it again with `dry-run: false`.
 4. Repeat with `package: create-auis`.
 
+Both names were unclaimed when the CLI was written. npm also rejects names it
+considers too similar to an existing package, and it only says so at publish
+time — if `auis` is refused, publish as `@auis/cli` (scoped names skip that
+check), point `create-auis`'s dependency at it, and update the `npx` line in the
+README, `packages/auis/README.md` and `docs/GETTING-STARTED.md`.
+
 Then verify from a clean directory:
 
 ```bash
