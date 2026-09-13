@@ -28,10 +28,33 @@ Created by **Gregório Pinheiro** — Design Engineer UX/UI, a creator of comple
 ## Installation
 
 ```bash
-git clone https://github.com/gregoriombp/AuisDesign.git
-cd AuisDesign
-npm install            # postinstall generates the agent skill trees (.claude/skills, .agents/skills)
+npx auis@latest my-product
+```
+
+That one command unpacks the template, renames the project to yours, runs
+`git init` with a first commit, and installs dependencies — whose postinstall
+generates the agent skill trees (`.claude/skills`, `.agents/skills`). Then:
+
+```bash
+cd my-product
 npm run dev            # Next.js on http://127.0.0.1:3000
+```
+
+`npm create auis@latest my-product` does exactly the same thing.
+
+| Flag | What it does |
+|---|---|
+| `--pm npm\|pnpm\|yarn\|bun` | package manager (default: the one you ran it with) |
+| `--ref <branch\|tag\|commit>` | which version of the template to unpack (default: `main`) |
+| `--no-install` / `--no-git` | skip dependency installation / git init |
+| `--force` | scaffold into a directory that is not empty |
+| `-y, --yes` | take the defaults, never prompt |
+
+Full CLI docs: [`packages/auis`](packages/auis). Prefer a clone? That still works:
+
+```bash
+git clone https://github.com/gregoriombp/AuisDesign.git my-product
+cd my-product && npm install && npm run dev
 ```
 
 The Review Bridge, the Flow Bridge and the State Mode API are same-origin Next.js

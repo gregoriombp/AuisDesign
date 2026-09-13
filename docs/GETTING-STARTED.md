@@ -1,8 +1,18 @@
 # Getting started with Auis
 
-This guide takes you from `git clone` to a working design system built by your AI agent. It assumes you have **Node.js ≥ 20** and one of: **Claude Code**, **Codex**, or **Cursor**.
+This guide takes you from one command to a working design system built by your AI agent. It assumes you have **Node.js ≥ 20** and one of: **Claude Code**, **Codex**, or **Cursor**.
 
 ## 1. Install and run
+
+```bash
+npx auis@latest my-product
+cd my-product
+npm run dev        # http://127.0.0.1:3000
+```
+
+`npx auis` unpacks the template, renames the project, initializes git, and installs dependencies (postinstall generates `.claude/skills` + `.agents/skills`). `npm create auis@latest my-product` is the same command; `--pm pnpm`, `--ref <branch|tag>`, `--no-install`, `--no-git` and `--force` are there when you need them — see [`packages/auis`](../packages/auis).
+
+Cloning still works if you'd rather have the repository as-is, contributor files included:
 
 ```bash
 git clone https://github.com/gregoriombp/AuisDesign.git my-product

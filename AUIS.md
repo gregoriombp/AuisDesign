@@ -56,7 +56,9 @@ that runs with the Next.js app.
 
 ## Creating New Work
 
-### First-Run Setup (a freshly cloned Auis)
+### First-Run Setup (a fresh Auis project)
+
+A project starts with `npx auis@latest my-product` (or a clone of the repository).
 
 Use `auis-setup` — or open `/auis/welcome` and fill the form (project name, a
 one-line "what is your product", a logo upload). `auis-setup` is a guided
