@@ -1,0 +1,39 @@
+{
+  "name": "create-auis",
+  "version": "0.1.0",
+  "description": "npm create auis — scaffold the Auis code-native design builder.",
+  "type": "module",
+  "bin": {
+    "create-auis": "bin/create-auis.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "auis": "^0.1.0"
+  },
+  "keywords": [
+    "auis",
+    "create-auis",
+    "design-system",
+    "scaffold",
+    "nextjs",
+    "shadcn-ui",
+    "ai-agents"
+  ],
+  "author": "Gregório Pinheiro — Design Engineer UX/UI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoriombp/AuisDesign.git",
+    "directory": "packages/create-auis"
+  },
+  "homepage": "https://github.com/gregoriombp/AuisDesign#readme",
+  "bugs": {
+    "url": "https://github.com/gregoriombp/AuisDesign/issues"
+  }
+}

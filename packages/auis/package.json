@@ -1,0 +1,50 @@
+{
+  "name": "auis",
+  "version": "0.1.0",
+  "description": "Scaffold Auis — the code-native design builder for Next.js + Tailwind + shadcn/ui, with agent skills built in.",
+  "type": "module",
+  "bin": {
+    "auis": "bin/auis.mjs"
+  },
+  "exports": {
+    ".": "./src/cli.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "keywords": [
+    "auis",
+    "design-system",
+    "design-builder",
+    "scaffold",
+    "create",
+    "starter",
+    "nextjs",
+    "shadcn-ui",
+    "tailwindcss",
+    "ai-agents",
+    "claude-code",
+    "styleguide",
+    "design-engineering"
+  ],
+  "author": "Gregório Pinheiro — Design Engineer UX/UI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoriombp/AuisDesign.git",
+    "directory": "packages/auis"
+  },
+  "homepage": "https://github.com/gregoriombp/AuisDesign#readme",
+  "bugs": {
+    "url": "https://github.com/gregoriombp/AuisDesign/issues"
+  }
+}

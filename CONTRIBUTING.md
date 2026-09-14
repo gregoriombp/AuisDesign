@@ -30,6 +30,20 @@ npm test             # node unit tests
 
 All five must pass. If you touched skills, also run `npm run skills:catalog` and commit the regenerated `skills/registry.json` / `skills/CATALOG.md`.
 
+## The installer (`packages/`)
+
+`npx auis@latest my-product` is served by two published packages that live in this repository and are **not** part of the Next.js app:
+
+- [`packages/auis`](packages/auis) — the CLI (zero dependencies, plain `.mjs`). It downloads this repository as a tarball, drops the contributor-only files, and personalizes the result.
+- [`packages/create-auis`](packages/create-auis) — a thin alias so `npm create auis@latest` works.
+
+```bash
+npm run test:cli                                  # CLI unit tests
+node packages/auis/bin/auis.mjs /tmp/probe --no-install   # end-to-end, ~1s
+```
+
+If your change alters what a fresh project should contain, update `PRUNE` in `packages/auis/src/create.mjs`. Releasing is documented in [`docs/RELEASING.md`](docs/RELEASING.md).
+
 ## Commit style
 
 Small, atomic commits grouped by logical subject. Conventional prefixes are welcome (`feat:`, `fix:`, `docs:`, `chore:`).
