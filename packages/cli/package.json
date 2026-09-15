@@ -1,36 +1,49 @@
 {
-  "name": "create-auis",
+  "name": "@auis/cli",
   "version": "0.1.0",
-  "description": "npm create auis — scaffold the Auis code-native design builder.",
+  "description": "The Auis CLI — scaffold a code-native design builder: Next.js + Tailwind + shadcn/ui, with agent skills built in.",
   "type": "module",
   "bin": {
-    "create-auis": "bin/create-auis.mjs"
+    "auis": "bin/auis.mjs"
+  },
+  "exports": {
+    ".": "./src/cli.mjs",
+    "./package.json": "./package.json"
   },
   "files": [
     "bin",
+    "src",
     "README.md"
   ],
   "engines": {
     "node": ">=20"
   },
-  "dependencies": {
-    "auis": "^0.1.0"
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
   },
   "keywords": [
     "auis",
-    "create-auis",
     "design-system",
+    "design-builder",
     "scaffold",
+    "starter",
     "nextjs",
     "shadcn-ui",
-    "ai-agents"
+    "tailwindcss",
+    "ai-agents",
+    "claude-code",
+    "styleguide",
+    "design-engineering"
   ],
   "author": "Gregório Pinheiro — Design Engineer UX/UI",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gregoriombp/AuisDesign.git",
-    "directory": "packages/create-auis"
+    "directory": "packages/cli"
   },
   "homepage": "https://github.com/gregoriombp/AuisDesign#readme",
   "bugs": {

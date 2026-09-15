@@ -1,10 +1,10 @@
-# auis
+# @auis/cli
 
-Scaffold [**Auis**](https://github.com/gregoriombp/AuisDesign) — a code-native
+The CLI for [**Auis**](https://github.com/gregoriombp/AuisDesign) — a code-native
 design builder. One command, no clone, no config:
 
 ```bash
-npx auis@latest my-product
+npx @auis/cli my-product
 ```
 
 ```
@@ -26,8 +26,6 @@ npx auis@latest my-product
     /auis-setup   brand → tokens → voice
 ```
 
-`npm create auis@latest my-product` does the same thing.
-
 ## What you get
 
 A Next.js (App Router) + Tailwind v4 + shadcn/ui project where the design
@@ -41,10 +39,11 @@ codebase, and AI agents build against them under enforced rules:
 - **State Mode** (`/auis/states`) — every registered screen in every state, side by side.
 - **37 agent skills** — execution contracts for Claude Code, Codex and Cursor.
 
-## Options
+## Usage
 
 ```
-npx auis@latest [directory] [options]
+npx @auis/cli [directory] [options]
+npx @auis/cli new [directory] [options]     same thing
 
   -r, --ref <ref>      branch, tag or commit of the template (default: main)
       --pm <manager>   npm | pnpm | yarn | bun (default: detected)
@@ -59,10 +58,10 @@ npx auis@latest [directory] [options]
 Examples:
 
 ```bash
-npx auis@latest my-product          # new directory
-npx auis@latest .                   # current directory
-npx auis@latest my-product --pm pnpm --no-git
-npx auis@latest my-product --ref v1.0.0
+npx @auis/cli my-product            # new directory
+npx @auis/cli .                     # current directory
+npx @auis/cli my-product --pm pnpm --no-git
+npx @auis/cli my-product --ref v1.0.0
 ```
 
 Requires **Node.js ≥ 20**. The template is fetched as a GitHub tarball (`tar`),
@@ -72,8 +71,8 @@ falling back to `git clone --depth 1`. The CLI itself has zero dependencies.
 
 Everything in the repository, minus the parts that only concern contributing to
 Auis (`.github/ISSUE_TEMPLATE`, `PULL_REQUEST_TEMPLATE.md`, `CONTRIBUTING.md`,
-`CODE_OF_CONDUCT.md`, the extraction/cleanup notes, and this `packages/`
-directory), plus:
+`CODE_OF_CONDUCT.md`, the extraction/cleanup notes, and the `packages/`
+directory this CLI lives in), plus:
 
 - `package.json` renamed to your project, `0.1.0`, `private: true`, with an
   `auis` field recording the template ref it came from;

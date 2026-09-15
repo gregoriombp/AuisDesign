@@ -1,5 +1,6 @@
 /**
- * `auis [directory]` — scaffold a project from the Auis template.
+ * `auis [directory]` — the `new` command: scaffold a project from the Auis
+ * template.
  *
  * The template is the AuisDesign repository itself: it is not a library you
  * install into an app, it *is* the app (Next.js + Tailwind v4 + shadcn/ui plus
@@ -89,7 +90,7 @@ async function personalize(root, { name, ref, cliVersion }) {
   next.version = "0.1.0";
   next.description = `${name} — a design system and product surface built with Auis.`;
   next.private = true;
-  next.auis = { template: `${REPO_URL}#${ref}`, createdWith: `auis@${cliVersion}` };
+  next.auis = { template: `${REPO_URL}#${ref}`, createdWith: `@auis/cli@${cliVersion}` };
 
   await fs.writeFile(pkgPath, `${JSON.stringify(next, null, 2)}\n`);
 

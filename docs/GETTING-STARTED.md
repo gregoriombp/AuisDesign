@@ -5,12 +5,12 @@ This guide takes you from one command to a working design system built by your A
 ## 1. Install and run
 
 ```bash
-npx auis@latest my-product
+npx @auis/cli my-product
 cd my-product
 npm run dev        # http://127.0.0.1:3000
 ```
 
-`npx auis` unpacks the template, renames the project, initializes git, and installs dependencies (postinstall generates `.claude/skills` + `.agents/skills`). `npm create auis@latest my-product` is the same command; `--pm pnpm`, `--ref <branch|tag>`, `--no-install`, `--no-git` and `--force` are there when you need them — see [`packages/auis`](../packages/auis).
+The CLI unpacks the template, renames the project, initializes git, and installs dependencies (postinstall generates `.claude/skills` + `.agents/skills`). `--pm pnpm`, `--ref <branch|tag>`, `--no-install`, `--no-git` and `--force` are there when you need them — see [`packages/cli`](../packages/cli).
 
 Cloning still works if you'd rather have the repository as-is, contributor files included:
 

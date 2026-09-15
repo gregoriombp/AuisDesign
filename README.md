@@ -28,7 +28,7 @@ Created by **Gregório Pinheiro** — Design Engineer UX/UI, a creator of comple
 ## Installation
 
 ```bash
-npx auis@latest my-product
+npx @auis/cli my-product
 ```
 
 That one command unpacks the template, renames the project to yours, runs
@@ -40,8 +40,6 @@ cd my-product
 npm run dev            # Next.js on http://127.0.0.1:3000
 ```
 
-`npm create auis@latest my-product` does exactly the same thing.
-
 | Flag | What it does |
 |---|---|
 | `--pm npm\|pnpm\|yarn\|bun` | package manager (default: the one you ran it with) |
@@ -50,7 +48,7 @@ npm run dev            # Next.js on http://127.0.0.1:3000
 | `--force` | scaffold into a directory that is not empty |
 | `-y, --yes` | take the defaults, never prompt |
 
-Full CLI docs: [`packages/auis`](packages/auis). Prefer a clone? That still works:
+Full CLI docs: [`packages/cli`](packages/cli). Prefer a clone? That still works:
 
 ```bash
 git clone https://github.com/gregoriombp/AuisDesign.git my-product

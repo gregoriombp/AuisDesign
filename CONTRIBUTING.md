@@ -32,17 +32,14 @@ All five must pass. If you touched skills, also run `npm run skills:catalog` and
 
 ## The installer (`packages/`)
 
-`npx auis@latest my-product` is served by two published packages that live in this repository and are **not** part of the Next.js app:
-
-- [`packages/auis`](packages/auis) — the CLI (zero dependencies, plain `.mjs`). It downloads this repository as a tarball, drops the contributor-only files, and personalizes the result.
-- [`packages/create-auis`](packages/create-auis) — a thin alias so `npm create auis@latest` works.
+`npx @auis/cli my-product` is served by [`packages/cli`](packages/cli) — the `@auis/cli` package, which lives in this repository but is **not** part of the Next.js app. Zero dependencies, plain `.mjs`. It downloads this repository as a tarball, drops the contributor-only files, and personalizes the result.
 
 ```bash
-npm run test:cli                                  # CLI unit tests
-node packages/auis/bin/auis.mjs /tmp/probe --no-install   # end-to-end, ~1s
+npm run test:cli                                          # CLI unit tests
+node packages/cli/bin/auis.mjs /tmp/probe --no-install     # end-to-end, ~1s
 ```
 
-If your change alters what a fresh project should contain, update `PRUNE` in `packages/auis/src/create.mjs`. Releasing is documented in [`docs/RELEASING.md`](docs/RELEASING.md).
+If your change alters what a fresh project should contain, update `PRUNE` in `packages/cli/src/create.mjs`. Releasing is documented in [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## Commit style
 

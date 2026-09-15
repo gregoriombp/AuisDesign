@@ -19,6 +19,7 @@ describe("parseArgs", () => {
 
   it("reads the directory with or without an explicit command", () => {
     assert.equal(parseArgs(["my-product"]).directory, "my-product");
+    assert.equal(parseArgs(["new", "my-product"]).directory, "my-product");
     assert.equal(parseArgs(["create", "my-product"]).directory, "my-product");
     assert.equal(parseArgs(["init", "."]).directory, ".");
   });

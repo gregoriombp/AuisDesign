@@ -1,19 +1,12 @@
 name: Publish CLI
 
-# Publishes the installer packages that back `npx auis@latest`.
+# Publishes @auis/cli, the package that backs `npx @auis/cli`.
 # Manual on purpose: the app in this repository is never published, only
-# packages/auis and its packages/create-auis alias.
+# packages/cli.
 
 on:
   workflow_dispatch:
     inputs:
-      package:
-        description: Package to publish
-        type: choice
-        options:
-          - auis
-          - create-auis
-        default: auis
       dry-run:
         description: Pack and validate without publishing
         type: boolean
@@ -34,10 +27,10 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: CLI tests
-        run: node --test packages/auis/test/*.test.mjs
+        run: node --test packages/cli/test/*.test.mjs
 
-      - name: Publish ${{ inputs.package }}
-        working-directory: packages/${{ inputs.package }}
-        run: npm publish --access public --provenance ${{ inputs.dry-run && '--dry-run' || '' }}
+      - name: Publish @auis/cli
+        working-directory: packages/cli
+        run: npm publish --provenance ${{ inputs.dry-run && '--dry-run' || '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,8 +1,9 @@
 /**
- * Argument parsing and dispatch for `npx auis`.
+ * Argument parsing and dispatch for the Auis CLI.
  *
- * One command, `create` (the default), so the bare form reads as the install
- * line it is: `npx auis@latest my-product`.
+ * `new` is the default command, so the bare form reads as the install line it
+ * is: `npx @auis/cli my-product`. Commands are dispatched by name to leave room
+ * for the ones that come next without changing how people invoke the CLI.
  */
 
 import fs from "node:fs";
@@ -10,11 +11,8 @@ import { color, banner, fail, write } from "./ui.mjs";
 import { DEFAULT_REF, REPO_URL } from "./template.mjs";
 import { PACKAGE_MANAGERS, create } from "./create.mjs";
 
-// Re-exported for the create-auis alias, which imports the package root.
-export { restoreCursorOnExit } from "./ui.mjs";
-
 const MIN_NODE_MAJOR = 20;
-const COMMANDS = new Set(["create", "init", "new"]);
+const COMMANDS = new Set(["new", "create", "init"]);
 
 export const version = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -33,7 +31,8 @@ export function parseArgs(argv) {
     version: false,
   };
 
-  // `auis my-app`, `auis create my-app` and `auis new my-app` are the same call.
+  // `auis my-app`, `auis new my-app`, `auis create my-app` and `auis init my-app`
+  // are the same call: scaffolding is the default command.
   const rest = [...argv];
   if (COMMANDS.has(rest[0])) rest.shift();
 
@@ -107,7 +106,8 @@ export function help() {
   write(`  ${c.bold("auis")} — scaffold a code-native design builder`);
   write();
   write(`  ${c.bold("Usage")}`);
-  write(`    npx auis@latest ${c.dim("[directory] [options]")}`);
+  write(`    npx @auis/cli ${c.dim("[directory] [options]")}`);
+  write(`    npx @auis/cli new ${c.dim("[directory] [options]")}   ${c.dim("(same thing)")}`);
   write();
   write(`  ${c.bold("Options")}`);
   write(`    -r, --ref ${c.dim("<ref>")}      branch, tag or commit of the template ${c.dim(`(default: ${DEFAULT_REF})`)}`);
@@ -120,9 +120,9 @@ export function help() {
   write(`    -v, --version        print the CLI version`);
   write();
   write(`  ${c.bold("Examples")}`);
-  write(`    npx auis@latest my-product`);
-  write(`    npx auis@latest . --no-install`);
-  write(`    npm create auis@latest my-product`);
+  write(`    npx @auis/cli my-product`);
+  write(`    npx @auis/cli . --no-install`);
+  write(`    npx @auis/cli my-product --pm pnpm --ref v1.0.0`);
   write();
   write(`  ${c.dim(REPO_URL)}`);
   write();
@@ -139,7 +139,7 @@ export async function run(argv = []) {
   try {
     options = parseArgs(argv);
   } catch (error) {
-    fail(`${error.message}\n    Run ${color.bold("npx auis --help")} for usage.`);
+    fail(`${error.message}\n    Run ${color.bold("npx @auis/cli --help")} for usage.`);
     return 1;
   }
 
