@@ -18,7 +18,7 @@ was never here.
 
 | | **Layer A — Auis builder components** | **Layer B — your product's components** |
 |---|---|---|
-| What | The **22** `Au*` files in `components/ui/` | Whatever you build |
+| What | The **26** `Au*` files in `components/ui/`, plus 4 Patterns | Whatever you build |
 | Does it ship? | **Yes** — it is the tool's own UI | **No — empty on purpose** |
 | Why it exists | The Review Bridge, Auis's own mark, and the primitives those stand on | Your product |
 | Can I import it? | Yes — freely | — |
@@ -136,7 +136,10 @@ a file in `components/ui/`. Mirrors the taxonomy in
 `AuMentionMenu` mentions (Review Bridge) · `AuMentionChip` mention/skill chips (Review Bridge) ·
 `AuLogo` Auis mark.
 
-There is no infra/layout tier: **Auis ships no application shell.**
+Four more `Au*` ship one tier up, as **Patterns** — `AuAppShell`, `AuSideNav`,
+`AuPromptComposer`, `AuDropzone`. The builder itself imports none of them: they are composed
+starting points, not the tool's own UI. Beyond them Auis ships no product chrome — no header,
+no nav rail, no notifications panel.
 
 ---
 
@@ -267,8 +270,8 @@ pass them in as props (see AGENTS.md §4).
 
 ## shadcn primitives — what's actually here
 
-`components/ui/` ships **25** `.tsx` files: the **22** `Au*`, plus `Icon.tsx`, plus exactly
-**two** shadcn primitives — `badge.tsx` and `popover.tsx`. There is no `card.tsx`,
+`components/ui/` ships **34** `.tsx` files: the **30** `Au*`, plus `Icon.tsx`, plus exactly
+**three** shadcn primitives — `badge.tsx`, `popover.tsx` and `radio-group.tsx`. There is no `card.tsx`,
 `button.tsx`, `table.tsx`, `chart.tsx` or `calendar.tsx` in this repo, and no `tool-ui/`
 subsystem. Don't import one; it isn't there.
 
