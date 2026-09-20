@@ -86,3 +86,7 @@ auis-states-matrix.pdf
 /cap-*.json
 /germano-perfil.png
 /usado-card.png
+
+# auis install manifest — which generated skill dirs belong to Auis (see
+# scripts/skills-sync.mjs). Generated state, like the trees it tracks.
+/.auis/
