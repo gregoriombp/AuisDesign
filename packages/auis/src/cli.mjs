@@ -1,20 +1,23 @@
 /**
  * Argument parsing and dispatch for `npx auis`.
  *
- * One command, `create` (the default), so the bare form reads as the install
- * line it is: `npx auis@latest my-product`.
+ * `create` stays the default, so the bare form reads as the install line it is:
+ * `npx auis@latest my-product`. `doctor` is the other half — it reads an
+ * existing repository and reports what Auis could and could not do inside it,
+ * without writing anything.
  */
 
 import fs from "node:fs";
 import { color, banner, fail, write } from "./ui.mjs";
 import { DEFAULT_REF, REPO_URL } from "./template.mjs";
 import { PACKAGE_MANAGERS, create } from "./create.mjs";
+import { doctor } from "./doctor.mjs";
 
 // Re-exported for the create-auis alias, which imports the package root.
 export { restoreCursorOnExit } from "./ui.mjs";
 
 const MIN_NODE_MAJOR = 20;
-const COMMANDS = new Set(["create", "init", "new"]);
+const CREATE_ALIASES = new Set(["create", "init", "new"]);
 
 export const version = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -22,7 +25,9 @@ export const version = JSON.parse(
 
 export function parseArgs(argv) {
   const options = {
+    command: "create",
     directory: undefined,
+    json: false,
     ref: DEFAULT_REF,
     packageManager: undefined,
     install: true,
@@ -35,7 +40,12 @@ export function parseArgs(argv) {
 
   // `auis my-app`, `auis create my-app` and `auis new my-app` are the same call.
   const rest = [...argv];
-  if (COMMANDS.has(rest[0])) rest.shift();
+  if (rest[0] === "doctor") {
+    options.command = "doctor";
+    rest.shift();
+  } else if (CREATE_ALIASES.has(rest[0])) {
+    rest.shift();
+  }
 
   while (rest.length > 0) {
     const arg = rest.shift();
@@ -55,6 +65,9 @@ export function parseArgs(argv) {
         break;
       case "--force":
         options.force = true;
+        break;
+      case "--json":
+        options.json = true;
         break;
       case "--no-install":
       case "--skip-install":
@@ -104,12 +117,14 @@ export function parseArgs(argv) {
 export function help() {
   const c = color;
   write();
-  write(`  ${c.bold("auis")} — scaffold a code-native design builder`);
+  write(`  ${c.bold("auis")} — a code-native design builder`);
   write();
   write(`  ${c.bold("Usage")}`);
-  write(`    npx auis@latest ${c.dim("[directory] [options]")}`);
+  write(`    npx auis@latest ${c.dim("[directory] [options]")}     ${c.dim("scaffold a new project")}`);
+  write(`    npx auis@latest doctor ${c.dim("[directory]")}        ${c.dim("read an existing repo, write nothing")}`);
   write();
   write(`  ${c.bold("Options")}`);
+  write(`        --json           doctor only: the full report as JSON`);
   write(`    -r, --ref ${c.dim("<ref>")}      branch, tag or commit of the template ${c.dim(`(default: ${DEFAULT_REF})`)}`);
   write(`        --pm ${c.dim("<manager>")}   ${PACKAGE_MANAGERS.join(" | ")} ${c.dim("(default: detected)")}`);
   write(`        --no-install     skip dependency installation`);
@@ -122,6 +137,7 @@ export function help() {
   write(`  ${c.bold("Examples")}`);
   write(`    npx auis@latest my-product`);
   write(`    npx auis@latest . --no-install`);
+  write(`    npx auis@latest doctor`);
   write(`    npm create auis@latest my-product`);
   write();
   write(`  ${c.dim(REPO_URL)}`);
@@ -150,6 +166,12 @@ export async function run(argv = []) {
   if (options.help) {
     help();
     return 0;
+  }
+
+  if (options.command === "doctor") {
+    // The JSON form is somebody's stdin — keep the banner out of it.
+    if (!options.json) banner(version);
+    return doctor({ directory: options.directory ?? ".", json: options.json, cliVersion: version });
   }
 
   banner(version);
