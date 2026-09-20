@@ -3,6 +3,7 @@
 import * as React from "react"
 import { PageHero, Section, Stage } from "../_primitives"
 import { AuAlert } from "@/components/ui/AuAlert"
+import { AuAppShell } from "@/components/ui/AuAppShell"
 import { AuBreadcrumb } from "@/components/ui/AuBreadcrumb"
 import { AuBreadcrumbsBar } from "@/components/ui/AuBreadcrumbsBar"
 import { AuButton } from "@/components/ui/AuButton"
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/AuCard"
 import { AuCheckbox } from "@/components/ui/AuCheckbox"
 import { AuDropdownMenu } from "@/components/ui/AuDropdownMenu"
+import { AuDropzone } from "@/components/ui/AuDropzone"
 import {
   AuEmpty,
   AuEmptyContent,
@@ -31,9 +33,11 @@ import { AuMentionMenu } from "@/components/ui/AuMentionMenu"
 import { AuModal } from "@/components/ui/AuModal"
 import { AuPill } from "@/components/ui/AuPill"
 import { AuProgress } from "@/components/ui/AuProgress"
+import { AuPromptComposer } from "@/components/ui/AuPromptComposer"
 import { AuRadioGroup, AuRadioGroupItem } from "@/components/ui/AuRadioGroup"
 import { AuSegmented } from "@/components/ui/AuSegmented"
 import { AuSheet, AuSheetRow } from "@/components/ui/AuSheet"
+import { AuSideNav } from "@/components/ui/AuSideNav"
 import { AuSlider } from "@/components/ui/AuSlider"
 import { AuSpinner } from "@/components/ui/AuSpinner"
 import { AuStatCard } from "@/components/ui/AuStatCard"
@@ -46,12 +50,14 @@ import { Icon } from "@/components/ui/Icon"
 
 export const COMPONENTS = {
   AuAlert: "Persistent, in-flow feedback for information, success, warning, and danger.",
+  AuAppShell: "The product application shell: a floating panel split into sidebar and content.",
   AuBreadcrumb: "The compact navigation-trail primitive.",
   AuBreadcrumbsBar: "A full-width breadcrumb strip with an optional trailing action.",
   AuButton: "The system button with intent, size, icon, loading, and link composition.",
   AuCard: "The generic content container and its composable slots.",
   AuCheckbox: "A controlled binary or indeterminate selection control.",
   AuDropdownMenu: "A declarative action menu built on the Radix dropdown primitive.",
+  AuDropzone: "The file drop target: drag, click, or keyboard, handing back plain files.",
   AuEmpty: "Composable zero-state content for empty results and first-use moments.",
   AuInput: "Input and field primitives, including search and password affordances.",
   AuLogo: "The Auis builder mark and the configured project-brand renderer.",
@@ -60,9 +66,11 @@ export const COMPONENTS = {
   AuModal: "The accessible dialog primitive with enter and exit motion.",
   AuPill: "Compact status and metadata labels.",
   AuProgress: "Determinate progress with semantic variants.",
+  AuPromptComposer: "The assistant entry point: a text area with a toolbar and a submit action.",
   AuRadioGroup: "Exclusive selection with labeled items and optional descriptions.",
   AuSegmented: "A single-choice pill switch with a sliding thumb and an optional pending state.",
   AuSheet: "The accessible side-panel primitive with enter and exit motion.",
+  AuSideNav: "Grouped vertical navigation for the application shell sidebar.",
   AuSlider: "A labeled range input with a filled track.",
   AuSpinner: "The indeterminate loading indicator, in three sizes.",
   AuStatCard: "A focused KPI card for one value, label, and optional hint.",
@@ -96,6 +104,8 @@ function Demo({ component }: { component: ComponentName }) {
   const [modalOpen, setModalOpen] = React.useState(false)
   const [sheetOpen, setSheetOpen] = React.useState(false)
   const [mention, setMention] = React.useState("codex")
+  const [navKey, setNavKey] = React.useState("inbox")
+  const [picked, setPicked] = React.useState<string[]>([])
 
   switch (component) {
     case "AuAlert":
@@ -105,6 +115,26 @@ function Demo({ component }: { component: ComponentName }) {
           <AuAlert variant="success" title="Saved">The change is ready for review.</AuAlert>
           <AuAlert variant="warning" title="Check this">One dependency still needs attention.</AuAlert>
           <AuAlert variant="danger" title="Could not save">Try again or inspect the local queue.</AuAlert>
+        </div>
+      )
+    case "AuAppShell":
+      return (
+        <div className="w-full overflow-hidden">
+          <AuAppShell
+            className="h-96 p-0"
+            sidebar={
+              <div className="p-3">
+                <AuSideNav
+                  aria-label="Shell example"
+                  activeKey="today"
+                  groups={[{ label: "Today", items: [{ key: "today", label: "Weekly plan" }, { key: "notes", label: "Meeting notes" }] }]}
+                />
+              </div>
+            }
+            topBar={<AuButton size="sm" variant="ghost" iconLeft="settings">Settings</AuButton>}
+          >
+            <div className="px-6 pb-6 text-sm text-fg-secondary">Content scrolls here; the sidebar stays put.</div>
+          </AuAppShell>
         </div>
       )
     case "AuBreadcrumb":
@@ -119,6 +149,22 @@ function Demo({ component }: { component: ComponentName }) {
       return <label className="flex items-center gap-3 text-sm text-fg-primary"><AuCheckbox checked={checked} onChange={setChecked} label="Include resolved comments" />Include resolved comments</label>
     case "AuDropdownMenu":
       return <AuDropdownMenu aria-label="Example actions" trigger={<AuButton variant="secondary" iconRight="expand_more">Actions</AuButton>} items={[{ id: "open", label: "Open", icon: "open_in_new" }, { id: "duplicate", label: "Duplicate", icon: "content_copy" }, { id: "sep", separator: true }, { id: "delete", label: "Delete", icon: "delete", danger: true }]} />
+    case "AuDropzone":
+      return (
+        <div className="flex w-full max-w-md flex-col gap-3">
+          <AuDropzone
+            id="dropzone-example"
+            multiple
+            accept=".pdf,.csv,.txt,image/*"
+            label="Drop files here, or click to choose"
+            hint="PDF, CSV, text, and images"
+            onFiles={(files) => setPicked(files.map((file) => file.name))}
+          />
+          <p className="text-xs text-fg-tertiary">
+            {picked.length > 0 ? picked.join(", ") : "No file picked yet."}
+          </p>
+        </div>
+      )
     case "AuEmpty":
       return <AuEmpty><AuEmptyHeader><AuEmptyMedia variant="icon"><Icon name="search_off" size={24} /></AuEmptyMedia><AuEmptyTitle>No results</AuEmptyTitle><AuEmptyDescription>Try a broader search or clear the active filters.</AuEmptyDescription></AuEmptyHeader><AuEmptyContent><AuButton variant="secondary">Clear filters</AuButton></AuEmptyContent></AuEmpty>
     case "AuInput":
@@ -135,12 +181,35 @@ function Demo({ component }: { component: ComponentName }) {
       return <div className="flex flex-wrap gap-2"><AuPill variant="live">Live</AuPill><AuPill variant="draft">Draft</AuPill><AuPill variant="beta">Beta</AuPill><AuPill variant="warning">Warning</AuPill><AuPill variant="error">Error</AuPill><AuPill variant="ai">AI</AuPill></div>
     case "AuProgress":
       return <div className="grid w-full grid-cols-2 gap-6"><AuProgress label="Default" value={72} /><AuProgress label="Success" value={100} variant="success" /><AuProgress label="Warning" value={58} variant="warning" /><AuProgress label="Danger" value={28} variant="danger" /></div>
+    case "AuPromptComposer":
+      return (
+        <AuPromptComposer
+          className="w-full max-w-xl"
+          aria-label="Composer example"
+          placeholder="Ask a question, or describe what to save…"
+          toolbar={<AuButton size="sm" variant="ghost" iconLeft="attach_file">Attach</AuButton>}
+        />
+      )
     case "AuRadioGroup":
       return <AuRadioGroup value={radio} onChange={setRadio} label="Delivery" className="w-full max-w-md"><AuRadioGroupItem value="flow-update" label="Update the flow" description="Replaces NODES and EDGES in the flow page and logs the change." /><AuRadioGroupItem value="product-routes" label="Create the product routes" description="Scaffolds one page per screen node with an internal href." /><AuRadioGroupItem value="later" label="Decide later" disabled /></AuRadioGroup>
     case "AuSegmented":
       return <div className="flex w-full max-w-xl flex-col items-start gap-4"><AuSegmented ariaLabel="Screen state" options={[{ value: "default", label: "Default" }, { value: "empty", label: "Empty" }, { value: "loading", label: "Loading" }]} value={segment} onChange={setSegment} /><AuSegmented size="sm" ariaLabel="Density" options={[{ value: "compact", label: "Compact" }, { value: "comfortable", label: "Comfortable" }]} value="compact" pendingValue="comfortable" onChange={() => undefined} /><p className="text-sm text-fg-secondary">Selected: <code>{segment}</code> · the second one shows a pending value while a route change settles.</p></div>
     case "AuSheet":
       return <><AuButton variant="primary" onClick={() => setSheetOpen(true)}>Open sheet</AuButton><AuSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Component details" meta="AuSheet · default width" footer={<AuButton block variant="primary" onClick={() => setSheetOpen(false)}>Done</AuButton>}><AuSheetRow label="Layer">Component</AuSheetRow><AuSheetRow label="Primitive">Radix Dialog</AuSheetRow><AuSheetRow label="Status">Ready</AuSheetRow></AuSheet></>
+    case "AuSideNav":
+      return (
+        <div className="w-64 rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-3">
+          <AuSideNav
+            aria-label="Navigation example"
+            activeKey={navKey}
+            onSelect={setNavKey}
+            groups={[
+              { label: "Main", items: [{ key: "inbox", label: "Inbox", icon: "inbox", trailing: <span className="text-2xs text-fg-tertiary">3</span> }, { key: "files", label: "Files", icon: "folder" }] },
+              { label: "Today", items: [{ key: "h1", label: "Contract review" }, { key: "h2", label: "Trip planning" }] },
+            ]}
+          />
+        </div>
+      )
     case "AuSlider":
       return <div className="w-full max-w-xl"><AuSlider label="Intensity" min={0} max={100} value={slider} valueDisplay={`${slider}%`} onChange={(event) => setSlider(Number(event.target.value))} help="Use the keyboard arrows for precise changes." /></div>
     case "AuSpinner":
