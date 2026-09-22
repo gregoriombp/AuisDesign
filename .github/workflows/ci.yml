@@ -7,6 +7,9 @@ on:
     branches: [main]
 
 jobs:
+  # The app and the full suite. Node 22 because `npm test` type-strips the .ts
+  # tests, which needs --experimental-strip-types (22.6+). Node 20 could not run
+  # them, which is why they had never run here.
   verify:
     runs-on: ubuntu-latest
     steps:
@@ -14,7 +17,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install
@@ -32,17 +35,34 @@ jobs:
       - name: Tests
         run: npm test
 
+      - name: Design-system check
+        run: npm run ds:check
+        continue-on-error: true # informational: reports hardcode debt
+
+  # The CLI is what runs on other people's machines, and packages/auis declares
+  # engines.node ">=20". This job holds that floor: no type stripping here, so
+  # it is the same Node someone on the minimum would use.
+  cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
       - name: CLI tests
         run: npm run test:cli
 
-      - name: CLI end-to-end (scaffold, no install)
+      - name: Scaffold a throwaway project
         run: |
           node packages/auis/bin/auis.mjs "$RUNNER_TEMP/auis-probe" --no-install --no-git
           test -f "$RUNNER_TEMP/auis-probe/AGENTS.md"
           test ! -e "$RUNNER_TEMP/auis-probe/CONTRIBUTING.md"
           test ! -e "$RUNNER_TEMP/auis-probe/packages"
 
-      - name: Doctor end-to-end (reads the scaffold, writes nothing)
+      - name: Doctor reads it and writes nothing
         run: |
           fingerprint() { (cd "$1" && find . -type f -exec shasum {} + | sort | shasum); }
           before=$(fingerprint "$RUNNER_TEMP/auis-probe")
@@ -50,7 +70,3 @@ jobs:
           node packages/auis/bin/auis.mjs doctor "$RUNNER_TEMP/auis-probe" --json > /dev/null
           after=$(fingerprint "$RUNNER_TEMP/auis-probe")
           test "$before" = "$after" || { echo "doctor modified the repository"; exit 1; }
-
-      - name: Design-system check
-        run: npm run ds:check
-        continue-on-error: true # informational: reports hardcode debt
