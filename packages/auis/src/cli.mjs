@@ -1,8 +1,8 @@
 /**
- * Argument parsing and dispatch for `npx auis`.
+ * Argument parsing and dispatch for `npx @auis/cli`.
  *
  * `create` stays the default, so the bare form reads as the install line it is:
- * `npx auis@latest my-product`. `doctor` is the other half — it reads an
+ * `npx @auis/cli@latest my-product`. `doctor` is the other half — it reads an
  * existing repository and reports what Auis could and could not do inside it,
  * without writing anything.
  */
@@ -120,8 +120,8 @@ export function help() {
   write(`  ${c.bold("auis")} — a code-native design builder`);
   write();
   write(`  ${c.bold("Usage")}`);
-  write(`    npx auis@latest ${c.dim("[directory] [options]")}     ${c.dim("scaffold a new project")}`);
-  write(`    npx auis@latest doctor ${c.dim("[directory]")}        ${c.dim("read an existing repo, write nothing")}`);
+  write(`    npx @auis/cli@latest ${c.dim("[directory] [options]")}     ${c.dim("scaffold a new project")}`);
+  write(`    npx @auis/cli@latest doctor ${c.dim("[directory]")}        ${c.dim("read an existing repo, write nothing")}`);
   write();
   write(`  ${c.bold("Options")}`);
   write(`        --json           doctor only: the full report as JSON`);
@@ -135,10 +135,9 @@ export function help() {
   write(`    -v, --version        print the CLI version`);
   write();
   write(`  ${c.bold("Examples")}`);
-  write(`    npx auis@latest my-product`);
-  write(`    npx auis@latest . --no-install`);
-  write(`    npx auis@latest doctor`);
-  write(`    npm create auis@latest my-product`);
+  write(`    npx @auis/cli@latest my-product`);
+  write(`    npx @auis/cli@latest . --no-install`);
+  write(`    npx @auis/cli@latest doctor`);
   write();
   write(`  ${c.dim(REPO_URL)}`);
   write();
@@ -155,7 +154,7 @@ export async function run(argv = []) {
   try {
     options = parseArgs(argv);
   } catch (error) {
-    fail(`${error.message}\n    Run ${color.bold("npx auis --help")} for usage.`);
+    fail(`${error.message}\n    Run ${color.bold("npx @auis/cli --help")} for usage.`);
     return 1;
   }
 

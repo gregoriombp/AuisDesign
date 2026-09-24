@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Alias entry point, so `npm create auis@latest my-product` works.
- * All behaviour lives in the `auis` package — this only forwards.
+ * All behaviour lives in the `@auis/cli` package — this only forwards.
  */
-import { restoreCursorOnExit, run } from "auis";
+import { restoreCursorOnExit, run } from "@auis/cli";
 
 restoreCursorOnExit();
 

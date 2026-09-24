@@ -1,6 +1,6 @@
 name: Publish CLI
 
-# Publishes the installer packages that back `npx auis@latest`.
+# Publishes the installer packages that back `npx @auis/cli@latest`.
 # Manual on purpose: the app in this repository is never published, only
 # packages/auis and its packages/create-auis alias.
 
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: Package to publish
+        description: Directory under packages/ to publish (auis publishes @auis/cli)
         type: choice
         options:
           - auis
