@@ -12,13 +12,15 @@ import { withBridgeErrors } from "../_errors";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// The actionable queue for the dispatcher: open, user-authored comments that
-// mention an agent the user has ENABLED in the Auis dot. Single lock — the
-// toggle IS the permission: Auto Construct ON → "act" (run a skill, edit, send
-// to review); else Live Response ON → "respond" (reply only). No directive in
-// the comment text is needed. Encodes the gate ONCE, server-side, reusing the
-// same parser the composer/chips use — so the dispatcher skill just executes
-// the work.
+// The actionable queue: open, user-authored comments that mention an agent the
+// user has switched ON in the Auis dot. Same settings as the mention trigger:
+// ceiling Reply → "respond"; Edit → "act". Encodes the gate ONCE, server-side,
+// reusing the same parser the composer/chips use.
+//
+// NO CONSUMER: the `/loop` skill that read this queue was retired. What acts
+// today is the mention trigger (app/api/review-bridge/_mention.ts), which reads
+// the same Agents panel settings. The route stays up as a read-only view of
+// what is actionable, for a product that wants to poll instead of trigger.
 //
 // HIERARCHY: agents obey ONLY the admin. Command sources are exclusively
 // messages whose effective author role is "admin" (the pin's text and replies)
@@ -41,8 +43,8 @@ interface DispatchItem {
 }
 
 async function handleGET(request: NextRequest) {
-  // The queue is consumed by the dispatcher (agent token) or by the admin — a
-  // reviewer has nothing to do here.
+  // Readable by an agent (token) or by the admin — a reviewer has nothing to
+  // do here.
   const session = await getBridgeSession(request);
   if (session.role === "reviewer") {
     return NextResponse.json({ error: "forbidden_role" }, { status: 403 });
@@ -54,10 +56,10 @@ async function handleGET(request: NextRequest) {
 
   const items: DispatchItem[] = [];
   for (const c of open) {
-    // No self-loop: agent-authored pins (e.g. Germano's suggestions, which often
-    // say "have @Claude do it") never auto-trigger another agent. Only the
-    // user's own directives dispatch.
-    if (getReviewAgent(c.authorId)) continue;
+    // No self-loop: agent-authored pins (including retired agents' old ones,
+    // which often say "have @Claude do it") never auto-trigger another agent.
+    // Only the user's own directives dispatch.
+    if (c.authorKind === "agent" || getReviewAgent(c.authorId)) continue;
 
     const replies = c.replies ?? [];
 
@@ -86,14 +88,10 @@ async function handleGET(request: NextRequest) {
     for (const agentId of mentions) {
       const agent = getReviewAgent(agentId);
       if (!agent) continue;
-      const s = settings[agentId] ?? { liveResponse: false, autoConstruct: false };
-
-      // Single gate — the toggle IS the permission. Auto Construct wins over
-      // Live Response (acting implies replying a summary anyway).
-      let mode: DispatchMode | null = null;
-      if (s.autoConstruct) mode = "act";
-      else if (s.liveResponse) mode = "respond";
-      if (!mode) continue;
+      const s = settings[agentId];
+      if (!s?.enabled) continue;
+      // Same ceiling as the trigger: Reply answers; Edit acts.
+      const mode: DispatchMode = s.permission === "reply" ? "respond" : "act";
 
       // Idempotency, timeline-aware: the agent is "done" only if it has replied
       // AFTER the user's most recent message. This keeps it from re-running a

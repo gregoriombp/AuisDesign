@@ -14,12 +14,13 @@ import type {
   ReviewIdentity,
   ReviewReply,
 } from "@/components/auis-review/types";
+import { normalizeAgentSettingsMap } from "@/lib/auis-review/agentRuntime";
 
 /**
  * Serverless store of the Review Bridge. Review Mode posts here (same-origin)
  * and this module persists through lib/bridge-store: the disk driver keeps
  * `review-bridge/data/comments.json` + `comments.archive.json`, which is
- * exactly what the solve/germano skills read. Backup/restore hooks live next
+ * exactly what the solve skill reads. Backup/restore hooks live next
  * to the files (`_backup.ts`).
  */
 
@@ -483,12 +484,13 @@ export async function deleteIdentity(id: string): Promise<boolean> {
   return removed ?? false;
 }
 
-// ── per-agent settings (Live Response / Auto Construct) ──────────────────────
-// Co-located in comments.json so the dispatcher reads comments + the
-// permissions that gate them in a single load.
+// ── per-agent settings (Agents panel: on · ceiling · model) ─────────────────
+// Co-located in comments.json. Governs the mention trigger (gate 5 in
+// _mention.ts), the runner (through GET /agent-settings) and /dispatch-queue.
+// Always read normalized: an old or partial record becomes the runtime defaults.
 export async function getAgentSettings(): Promise<ReviewAgentSettingsMap> {
   const db = await readMain();
-  return db.agentSettings;
+  return normalizeAgentSettingsMap(db.agentSettings);
 }
 
 export async function setAgentSettings(
@@ -578,7 +580,7 @@ export async function importMerge(
 }
 
 // Cheap signature for the client's polling: the mtime of the two files. It
-// changes when the app OR a skill (solve/germano) writes.
+// changes when the app OR an agent (the solve skill, a mention run) writes.
 export async function dataSignature(): Promise<string> {
   return docs.signature([MAIN_KEY, ARCHIVE_KEY]);
 }

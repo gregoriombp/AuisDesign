@@ -1,7 +1,8 @@
-// The bridge operators — the identities the Review Bridge skills write as.
-// Auis ships two executors (Claude and Codex share the same contracts) and one
-// comment-only critic (Germano). Adding an executor for another runtime means
-// adding a row here, a row in ./agents, and a case in ReviewAvatar.
+// The bridge operators — the identities the Review Bridge agents write as.
+// Auis ships three executors that share the same contracts: Claude and Grok
+// have a CLI the mention trigger can open; Codex is registered but has no
+// engine yet (see ./agentRuntime). Adding an executor means a row here, a row
+// in ./agents, a runtime in ./agentRuntime and a case in ReviewAvatar.
 export const REVIEW_AGENT_IDENTITIES = [
   {
     id: "claude",
@@ -16,10 +17,10 @@ export const REVIEW_AGENT_IDENTITIES = [
     canSubmitForApproval: true,
   },
   {
-    id: "germano",
-    name: "Germano Faccio",
-    handle: "Germano",
-    canSubmitForApproval: false,
+    id: "grok",
+    name: "Grok",
+    handle: "Grok",
+    canSubmitForApproval: true,
   },
 ] as const
 
@@ -51,7 +52,7 @@ export function canReviewAgentSubmitForApproval(
 }
 
 /** Behind an auth layer an agent write needs the agent token; the local dev
- *  server (no auth) accepts the explicit dispatcher as is. */
+ *  server (no auth) accepts the explicit agent header as is. */
 export function canBridgeSessionWriteAsAgent(session: {
   role: "admin" | "reviewer" | "agent"
   authEnabled: boolean

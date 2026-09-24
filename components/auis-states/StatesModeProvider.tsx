@@ -55,9 +55,11 @@ export function StatesModeProvider() {
     if (entry) {
       const params = new URLSearchParams(window.location.search)
       let touched = false
-      for (const axis of entry.axes) {
-        if (params.has(axis.param)) {
-          params.delete(axis.param)
+      // The interaction recipe (`?ge=`) belongs to the mode too: left in the
+      // URL, a reload would replay it on a screen already back to its default.
+      for (const param of [...entry.axes.map((axis) => axis.param), "ge"]) {
+        if (params.has(param)) {
+          params.delete(param)
           touched = true
         }
       }

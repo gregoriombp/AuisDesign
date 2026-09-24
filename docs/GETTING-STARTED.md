@@ -99,9 +99,7 @@ Flows are React pages with structured nodes/edges under `app/auis/ux-flow/[slug]
 2. Comments land in a local queue (dashboard at `/auis/review-bridge`).
 3. Your agent runs `/auis-review-bridge-solve` — it pulls the queue, applies scoped fixes, and moves items to *in review*.
 4. You approve or reject each result from the inbox at `/auis/styleguide/review`.
-5. Or let the agents come to you: mention `@claude`, `@codex` or `@germano` (and optionally a `/skill`) in a comment, switch the agent's **Live Response** / **Auto Construct** toggles on in the floating dot, and run `/loop /auis-review-bridge-dispatch`. The toggle is the permission: Live Response replies, Auto Construct acts and sends the result to review.
-
-There is also an adversarial reviewer: `/auis-review-bridge-germano-audit` unleashes a hyper-critical UX persona on a route and files its complaints into the same queue, and `/auis-review-bridge-germano-explore` lets it patrol a route and pin suggestions.
+5. Or let the agents come to you: put `AUIS_MENTION_TRIGGER=1` in `.env.local`, open the floating dot → **Agents**, switch an agent on and pick its ceiling — **Reply** (reads and answers) or **Edit** (changes code and sends it to review) — then mention `@claude` or `@grok` (and optionally a `/skill`) in a comment or a reply. The write itself opens that agent's CLI on your machine: no loop, nothing polling. The wording can ask for less than the ceiling, never more; if the agent leaves no reply, the runner posts the failure in the thread. Claude needs the Claude Code CLI; Grok needs xAI's Grok Build (`grok login`).
 
 ## 8. State Mode
 

@@ -138,7 +138,7 @@ export type ReviewActorKind = "agent" | "user"
 
 /**
  * Role of the SESSION that authored a record, stamped by the server. Only an
- * admin dispatches agents, approves or archives. Legacy records without the
+ * admin commands agents, approves or archives. Legacy records without the
  * field go through `effectiveAuthorRole`. Auis ships without an auth
  * provider, so every local session is an admin — the field keeps the data
  * model ready for a hierarchy when one is wired in.
@@ -154,20 +154,12 @@ export interface ReviewActor {
   name: string
 }
 
-/**
- * Per-agent operating permissions for the Review Bridge, toggled from the
- * floating Auis dot and read by the dispatcher. The toggle IS the permission —
- * no directive in the comment text is needed.
- * - liveResponse: the agent may reply in-thread when mentioned (talk only).
- * - autoConstruct: the agent may ACT (run a skill, edit, send to review).
- */
-export interface ReviewAgentSettings {
-  liveResponse: boolean
-  autoConstruct: boolean
-}
-
-/** agentId → settings. Agents absent from the map are all-off by default. */
-export type ReviewAgentSettingsMap = Record<string, ReviewAgentSettings>
+/** Agents panel: on · ceiling · model. Source: lib/auis-review/agentRuntime. */
+export type {
+  ReviewAgentPermission,
+  ReviewAgentSettings,
+  ReviewAgentSettingsMap,
+} from "@/lib/auis-review/agentRuntime"
 
 export interface ReviewResolution {
   actor: ReviewActor

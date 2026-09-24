@@ -32,6 +32,7 @@ export function ReviewModeProvider() {
   const setMode = useReviewStore((s) => s.setMode)
   const cancelPending = useReviewStore((s) => s.cancelPending)
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
+  const openThread = useReviewStore((s) => s.openThread)
   const closeThread = useReviewStore((s) => s.closeThread)
   const setActive = useReviewStore((s) => s.setActive)
   const selectComment = useReviewStore((s) => s.selectComment)
@@ -95,9 +96,12 @@ export function ReviewModeProvider() {
       // (useLayoutVersion observes the portal), so the marker then paints.
       await revealAnchor(match.anchor, match.revealPath, controller.signal)
       if (controller.signal.aborted) return
-      setSheetOpen(true)
       const el = resolveAnchoredElement(match.anchor)
       if (el) {
+        // Arrived: open the bubble anchored on the pin, the same as clicking
+        // it. The drawer did its job of bringing you here — leaving it open
+        // forced you to hunt which of the screen's pins was this one.
+        openThread(id)
         // Prefer the live element — survives layout shifts and scrolls inside
         // a modal's own scroll container.
         el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" })
@@ -106,6 +110,9 @@ export function ReviewModeProvider() {
         permalinkHandledRef.current = id
         return
       }
+      // No pin drawn, nowhere to anchor the bubble: the drawer stays, and it is
+      // the drawer that shows the comment.
+      setSheetOpen(true)
       // Did not resolve. We used to scroll to the saved Y — but the canvas hides
       // the pin exactly in this case, so the scroll led somewhere nothing would
       // be drawn, which from the outside looks like "the pin showed up in the
@@ -119,7 +126,7 @@ export function ReviewModeProvider() {
     return () => {
       controller.abort()
     }
-  }, [comments, pathname, setActive, setSheetOpen, selectComment])
+  }, [comments, pathname, setActive, setSheetOpen, openThread, selectComment])
 
   // A Radix Dialog (AuModal/AuSheet) with `modal` keeps a focus trap that pulls
   // focus back inside itself whenever something outside gains focus. That would

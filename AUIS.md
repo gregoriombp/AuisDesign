@@ -118,13 +118,30 @@ separate server, no port and no token in local development.
 
 - Every comment carries the route, a human-readable location trail, the target
   element anchor and the steps needed to reveal it.
-- Mention an agent (`@claude`, `@codex`, `@germano`) or a skill (`/auis-ux-writing`)
-  in a comment. The toggles in the floating dot are the permission: **Live
-  Response** lets the agent reply, **Auto Construct** lets it act. There is no
-  extra directive to type.
-- `auis-review-bridge-dispatch` (run under `/loop`) reads `/api/review-bridge/dispatch-queue`
-  and routes each item; `auis-review-bridge-solve` batch-resolves the open queue.
-  Executors move work to `in_review`; Germano only comments and pins.
+- `auis-review-bridge-solve` batch-resolves the open queue from an agent
+  session. Executors move work to `in_review`.
+- **Mention trigger (local dev only).** With `AUIS_MENTION_TRIGGER=1` in
+  `.env.local`, writing `@Claude …` or `@Grok …` in a comment or a reply opens
+  that agent's own CLI right there, from the route that stored it
+  (`app/api/review-bridge/_mention.ts`). Nothing polls and nothing waits: the
+  write is the event. Five gates, all required — never in production, only the
+  admin's own writes, never a write authored by an agent (or agents would drive
+  each other), only on creation (re-saving an old comment does not fire), and
+  only for an agent switched on in the Auis dot.
+- The dot's **Agents** panel has one row per agent: an on/off switch and a
+  ceiling — **Reply** (read and answer) or **Edit** (change code, send to review,
+  answer) — plus the model where there is a choice. The comment's wording can
+  ask for less than the ceiling, never more; CLI flags enforce it
+  (`scripts/mention-cli.mjs`), not the prompt alone. Claude runs `claude -p`;
+  Grok runs xAI's Grok Build (`grok -p`); Codex is registered but has no engine
+  yet and stays off.
+- `scripts/mention-run.mjs` runs the mentioned agents in order: Reply starts at
+  once, Edit waits for the working-tree lock, and one editor per message. When
+  a Reply agent cannot post (its ceiling forbids it), the runner posts its final
+  message; when nothing comes back, the runner posts the failure with its
+  reason. Re-firing is a new reply, never a retry loop. The run's instructions
+  are `scripts/mention-prompt.md`. `/api/review-bridge/dispatch-queue` reads the
+  same settings as a read-only view and has no consumer.
 - The user approves or rejects afterwards from the inbox (`/auis/styleguide/review`)
   or the dashboard (`/auis/review-bridge`).
 
@@ -157,6 +174,16 @@ Two implementation patterns for a screen:
 - **Pattern B (client):** the page reads the params with `useScreenStateOverride`,
   derives the scenario during render and wraps the screen in `Suspense`. Never
   copy the override into `useState`.
+- **Flows that mirror their live step into the URL** (wizards): the remount is
+  decided by `useMirroredScenario` (`lib/auis-states/useMirroredScenario.ts`),
+  not by a server `key` — the server only sees the last navigation.
+
+A screen whose live flow keeps its step in React state has no address to
+register: every pin and every scenario collapses onto the bare path. Making the
+real flow write the params is a task of its own —
+[`docs/screen-url-mapping.md`](docs/screen-url-mapping.md) has the pattern and
+the traps it already sprung. The toolbar and Review Mode read the live address
+(`useLiveLocation`), so a `replaceState` write is seen at once.
 
 `/auis/states/example` is the worked Pattern B example (`app/auis/states/example/`).
 `auis-update-states` keeps the registry honest after a page changes; the matrix

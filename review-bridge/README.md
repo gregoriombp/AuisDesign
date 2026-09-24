@@ -52,7 +52,7 @@ Every request resolves a session on the server (`app/api/review-bridge/_session.
 | Role | Who | Can |
 |---|---|---|
 | `admin` | The local dev server — Auis ships no auth provider, so every browser is an admin | Everything: comment, command agents, approve/reject/archive, private comments, agent toggles |
-| `agent` | A request carrying a valid `x-bridge-agent-token` (skills, the dispatcher) when `BRIDGE_AGENT_TOKEN` is set | Reply and comment as an agent, move items to `in_review`; never approve/reject/delete |
+| `agent` | A request carrying a valid `x-bridge-agent-token` (the skills, the mention runner) when `BRIDGE_AGENT_TOKEN` is set | Reply and comment as an agent, move items to `in_review`; never approve/reject/delete |
 | `reviewer` | Any other session once you plug an auth layer into `_session.ts` | Comment and reply; cannot command agents, change status or see `admins`-only comments |
 
 The client mirrors the role through `GET /session` only to adapt the UI; the
@@ -71,8 +71,8 @@ Base URL: `http://127.0.0.1:3000/api/review-bridge` (or whatever port `next dev`
 | `GET` | `/comments?url=&status=&origin=&flow=&authorRole=&view=` | Active comments. `status`: `open` · `in_review` · `backlog`. `origin`: `page` · `ux-flow` · `backlog`. `authorRole`: `admin` · `reviewer` (effective role). `view`: `preview` (id/url/status/text/counts, ~95% smaller) · `lean` (+ replies, target, resolution, no geometry) · `full` (default) |
 | `GET` | `/comments/archive?url=&before=&limit=` | Resolved comments, paginated by an `updatedAt` cursor |
 | `GET` | `/comments/:id?view=` | `{ comment, location: "main" \| "archive" }` |
-| `GET` | `/dispatch-queue?url=` | Actionable items for the dispatcher (see below) |
-| `GET` | `/agent-settings` | `{ settings: { [agentId]: { liveResponse, autoConstruct } } }` |
+| `GET` | `/dispatch-queue?url=` | Read-only view of the actionable items (open admin comments mentioning an agent that is switched on); no consumer ships with Auis |
+| `GET` | `/agent-settings` | `{ settings: { [agentId]: { enabled, permission, model } }, runtime: { [agentId]: { cli, permissions, models, effort, defaults, name, handle } }, triggerEnabled }`. Admin or agent |
 | `GET` | `/session` | `{ role, email, shared, authEnabled }` |
 | `GET` | `/members` | Team directory (admin only) |
 | `GET` | `/reviewers` | Mentionable humans with derived `@handle`s (60s cache) |
@@ -87,7 +87,7 @@ Base URL: `http://127.0.0.1:3000/api/review-bridge` (or whatever port `next dev`
 | `POST` | `/comments/:id/replies` | `{ authorKind, authorId, authorName, authorColorToken?, text, images? }` |
 | `PATCH` | `/comments/:id/replies/:replyId` | `{ text, images? }` — edits a reply and stamps `editedAt` |
 | `DELETE` | `/comments/:id` | Removes it (main or archive). Admin only |
-| `PUT` | `/agent-settings` | `{ agentId, settings: { liveResponse, autoConstruct } }`. Admin only |
+| `PUT` | `/agent-settings` | `{ agentId, settings: Partial<{ enabled, permission: "reply" \| "edit", model }> }` — merged and validated against the agent's runtime (`400 invalid_settings`). Admin only |
 | `PUT` | `/identity/:id` | Upsert of a reviewer identity |
 | `DELETE` | `/identity/:id` | Removes a member from the directory (their comments stay) |
 | `POST` | `/import` | Snapshot merge, skips duplicate ids |
@@ -96,7 +96,7 @@ Base URL: `http://127.0.0.1:3000/api/review-bridge` (or whatever port `next dev`
 
 | `transition` | Effect | `actor` |
 |---|---|---|
-| `in_review` | open → in_review, writes `resolution.summary` | required; agents must be `claude` or `codex` (Germano is comment-only) |
+| `in_review` | open → in_review, writes `resolution.summary` | required; an agent actor must be `claude`, `codex` or `grok` (`403 unknown_executor` otherwise) |
 | `approve` | in_review → resolved, moves to the archive, stamps `approvedAt/approvedBy` | required, `kind: "user"` |
 | `reject` | in_review → open, clears `resolution` | required, `kind: "user"` |
 | `resolve_direct` | open → resolved directly | required, `kind: "user"` |
@@ -104,24 +104,65 @@ Base URL: `http://127.0.0.1:3000/api/review-bridge` (or whatever port `next dev`
 
 ## Agents
 
-The toggles in the Auis dot are the permission — nothing else is needed in the
-comment text:
+Agents available: `@Claude`, `@Grok` and `@Codex` — executors that share the
+same contracts (`auis-review-bridge-solve`, `auis-ux-writing`,
+`auis-edit-bridge-solve`). Claude and Grok have a CLI the mention trigger can
+open; Codex is registered but has no engine yet and stays off. The registry is
+`lib/auis-review/agents.ts`; what each one can run (CLI, ceilings, models,
+effort) is `lib/auis-review/agentRuntime.ts`.
 
-- **Live Response** on → the agent replies in the thread when mentioned.
-- **Auto Construct** (Auto Design / Auto Review) on → the agent acts: runs the
-  mentioned skill (or the inferred one), moves the item to `in_review` and
-  replies a summary.
+### The Agents panel
 
-`GET /dispatch-queue` encodes that gate once, server-side: open, user-authored
-comments whose **admin** stream (the pin text + admin replies) mentions an
-enabled agent, minus the ones the agent already answered after the latest
-admin message. Agents never trigger each other. The
-`auis-review-bridge-dispatch` skill consumes it under `/loop`.
+The Auis dot → **Agents** opens one row per agent: an on/off switch, a
+**ceiling** and, where there is a choice, the model.
 
-Agents available: `@Claude` and `@Codex` (executors, run
-`auis-review-bridge-solve`, `auis-ux-writing`, `auis-edit-bridge-solve`) and
-`@Germano` (critical UI/UX opinion, comment-only —
-`auis-review-bridge-germano-explore` / `-audit`).
+| Ceiling | Can | Cannot |
+|---|---|---|
+| **Reply** | read the code and the thread; answer | edit a file, change status, pin |
+| **Edit** | everything Reply can + edit code and mark `in_review` | commit, push, archive, approve |
+
+The comment's wording can ask for less than the ceiling, never more. The
+ceiling is enforced by the CLI flags the runner builds (`scripts/mention-cli.mjs`:
+tool allowlists, `--disallowedTools` for git, Grok's `--sandbox`), not by the
+prompt alone. The settings live in `comments.json` under `agentSettings` and
+are always read normalized: an old or partial record becomes the runtime
+defaults (Claude on in Edit, the rest off).
+
+### Mention trigger (local dev only)
+
+With `AUIS_MENTION_TRIGGER=1` in `.env.local`, writing `@Claude …` or `@Grok …`
+in a pin or a reply opens that agent's CLI right there, from the route that
+stored the write (`app/api/review-bridge/_mention.ts`). The write is the event:
+nothing polls, nothing waits. Five gates, all required:
+
+1. never in production, and never in dev without the opt-in;
+2. only the admin's own writes — a reviewer's `@Claude` stays text;
+3. never a write authored by an agent (or agents would drive each other);
+4. only on creation — re-saving an old comment that already says `@Claude`
+   does not fire again;
+5. only for an agent switched on in the Agents panel, with a CLI.
+
+The route spawns `scripts/mention-run.mjs` detached (so it survives the dev
+server's HMR) with the comment id and the mentioned agents. The runner:
+
+- reads the Agents panel through `GET /agent-settings` (now, and again after
+  waiting for the lock — switching an agent off while it is queued makes it
+  skip; lowering the ceiling applies to whoever has not started);
+- runs the agents in mention order, one editor per message (a second Edit
+  agent is demoted to Reply for that message); Reply starts at once, Edit waits
+  for the working-tree lock in `~/.auis/mention-run.lock`;
+- builds the prompt from `scripts/mention-prompt.md` with the comment in
+  `view=lean`, and opens `claude -p` or `grok -p` with the ceiling's flags and
+  an allowlisted environment (app secrets and API keys never reach the agent;
+  `BRIDGE_BASE` is pinned to the local bridge);
+- judges success the way the bridge does — a reply from this run landed in the
+  thread. Under Reply the agent cannot post, so the runner posts its final
+  message; when nothing comes back, the runner posts the failure with its reason.
+
+No automatic retry: re-firing is you replying in the thread again. The log is
+`~/.auis/mention-run.log`; `npm run mention:dry -- <commentId> claude` prints
+the command without opening a process. `GET /dispatch-queue` reads the same
+settings as a read-only view of what is actionable and has no consumer.
 
 ### How a skill resolves a comment
 

@@ -7,14 +7,12 @@ import { Icon } from "@/components/ui/Icon"
  * Avatar for the Review Mode actors:
  *  · Claude agent   → amber circle with the asterisk glyph
  *  · Codex agent    → teal circle with the terminal glyph
- *  · Germano agent  → graphite circle (slate-900) with the "GF" monogram
+ *  · Grok agent     → inverse circle with the bolt glyph
  *  · any human      → circle in the author's color with their initial
  *
- * Token-only (no raw hex, no inline SVG marks) so it survives every brand
- * theme Auis renders under.
+ * Token-only (no raw hex, no inline SVG marks, no brand assets) so it survives
+ * every brand theme Auis renders under.
  */
-
-const GERMANO_INK = "var(--au-slate-900)"
 
 // `kind !== "user"` (rather than `=== "agent"`) preserves the visual identity of
 // older records that do not carry authorKind yet. New comments and replies are
@@ -27,8 +25,8 @@ function isCodex(kind: string | undefined, id: string | undefined, name: string)
   return kind !== "user" && (id === "codex" || name.trim().toLowerCase() === "codex")
 }
 
-function isGermano(kind: string | undefined, id: string | undefined, name: string): boolean {
-  return kind !== "user" && (id === "germano" || name.trim().toLowerCase().startsWith("germano"))
+function isGrok(kind: string | undefined, id: string | undefined, name: string): boolean {
+  return kind !== "user" && (id === "grok" || name.trim().toLowerCase() === "grok")
 }
 
 export function ReviewAvatar({
@@ -78,15 +76,15 @@ export function ReviewAvatar({
     )
   }
 
-  if (isGermano(authorKind, authorId, authorName)) {
+  if (isGrok(authorKind, authorId, authorName)) {
     return (
       <span
-        className={`${base} font-semibold tracking-tight`}
-        style={{ ...dim, background: GERMANO_INK, color: "var(--fg-on-inverse)", fontSize: Math.round(size * 0.36) }}
+        className={`${base} bg-(--bg-inverse) text-(--fg-on-inverse)`}
+        style={dim}
         title={label}
         aria-label={label}
       >
-        GF
+        <Icon name="bolt" size={Math.round(size * 0.6)} weight={500} />
       </span>
     )
   }

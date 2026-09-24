@@ -16,12 +16,6 @@ function initialOf(name: string): string {
   return trimmed.charAt(0).toUpperCase()
 }
 
-/** Germano signs with the "GF" monogram (same as ReviewAvatar). Comments do not
- *  carry authorKind, so we match on the agent's stable id/name. */
-function isGermano(authorId: string | undefined, authorName: string): boolean {
-  return authorId === "germano" || authorName.trim().toLowerCase().startsWith("germano")
-}
-
 const PIN_RADIUS = 12
 const PIN_STROKE = 2
 const TEXT_SIZE = 11
@@ -33,8 +27,7 @@ export function ReviewPinMarker({
   onClick,
 }: Props) {
   const resolved = comment.status === "resolved"
-  const germano = isGermano(comment.authorId, comment.authorName)
-  const glyph = germano ? "GF" : initialOf(comment.authorName)
+  const glyph = initialOf(comment.authorName)
   return (
     <g
       transform={`translate(${position.x} ${position.y})`}
@@ -79,11 +72,10 @@ export function ReviewPinMarker({
       <text
         textAnchor="middle"
         dominantBaseline="central"
-        fontSize={germano ? 9 : TEXT_SIZE}
-        letterSpacing={germano ? -0.5 : undefined}
+        fontSize={TEXT_SIZE}
         fontFamily="Geist, sans-serif"
         fontWeight="600"
-        fill={germano ? "#fff" : "var(--fg-on-inverse)"}
+        fill="var(--fg-on-inverse)"
         style={{ pointerEvents: "none", userSelect: "none" }}
       >
         {glyph}

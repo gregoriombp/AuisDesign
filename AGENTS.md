@@ -198,10 +198,7 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 **Local bridges**
 | Skill | When to use |
 |---|---|
-| `auis-review-bridge-solve` | Batch-resolve comments from the local Review Bridge queue (same-origin `/api/review-bridge/*`; `npm run dev` is the only prerequisite). Moves each resolved item to `in_review`; the user approves in the inbox. |
-| `auis-review-bridge-dispatch` | **The `/loop` motor** — turns `@claude` / `@codex` / `@germano` (+ `/skill`) mentions in Review Mode comments into live action. One pass reads `/api/review-bridge/dispatch-queue`, already gated by the per-agent toggles in the floating dot: **Live Response** → reply; **Auto Construct** → run the skill, mark `in_review`, reply a summary. The toggle is the permission — there is no extra directive. Germano runs as a real subagent (`.claude/agents/germano.md`, `.codex/agents/germano.toml`). Run under `/loop`. |
-| `auis-review-bridge-germano-audit` | **Germano Faccio** — critical second-opinion auditor on the `in_review` queue (what `solve` sent for review). Compares the request vs. the delivery and posts ONE reply per item ("good to go" / "not yet — ask for an improvement" + correction prompt). Comment-only: never transitions status, never edits code. The user still approves/rejects in the inbox. |
-| `auis-review-bridge-germano-explore` | **Germano Faccio** patrols a route (states, modals, sub-routes) and pins suggestions as new comments. Comment-only. |
+| `auis-review-bridge-solve` | Batch-resolve comments from the local Review Bridge queue (same-origin `/api/review-bridge/*`; `npm run dev` is the only prerequisite). Moves each resolved item to `in_review`; the user approves in the inbox. Mentions (`@claude`, `@grok`) are not a skill: with `AUIS_MENTION_TRIGGER=1` the write route itself opens the agent's CLI, under the ceiling set in the dot's Agents panel — see `AUIS.md` → "Review Comments" and `scripts/mention-prompt.md`. |
 | `auis-flow-bridge-solve` | Apply UX-flow suggestions from `/api/flow-suggestions` (never the raw `flow-bridge/data/*.json`): materialize into `app/auis/ux-flow/<slug>/page.tsx`, then transition with the materialization receipt. |
 | `auis-edit-bridge-solve` | Materialize Edit Mode ops (`/api/page-edits`) into real TSX after approval. |
 

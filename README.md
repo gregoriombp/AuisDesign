@@ -85,7 +85,7 @@ The intended loop (each step is a skill your agent runs):
 5. **`auis-page`** — build full pages from a screenshot, Figma URL, wireframe, or written description, mapping every element to existing components first.
 6. **`auis-flow` / `auis-create-ux-flow`** — design feature flows as navigable diagrams tied to real routes and files, listed in the UX Flow hub; `auis-create-ux-flow-golden-eye` compiles several journeys into one view, and `auis-update-states` registers each screen's states for the State Mode matrix.
 7. **`auis-ux-writing`** — make every string in a screen sound like your product, using the voice from step 3.
-8. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve. Mention `@claude`, `@codex` or `@germano` in a comment and, with the agent's toggles on in the floating dot, `auis-review-bridge-dispatch` (under `/loop`) replies or acts on it.
+8. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve. Or mention `@claude` or `@grok` in a comment: with `AUIS_MENTION_TRIGGER=1` in `.env.local` the write itself opens that agent's CLI, under the ceiling (Reply or Edit) you set in the floating dot's Agents panel — no loop, nothing polling.
 9. **`auis-audit`** — verify every component used in the app is documented in the styleguide.
 
 Brand, tokens, and voice are the three things Auis will never invent for you — the three creators `auis-setup` sequences: `auis-brand` derives your identity from the name and logo you give it, `auis-foundation` derives the tokens from a design you show it, `auis-voice` derives the voice from a product you show it. Everything downstream consumes them.
@@ -94,7 +94,7 @@ Full walkthrough: [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
 ## Skills
 
-**Source of truth:** `skills/<capability>/<name>/SKILL.md` (with a `SKILL.codex.md` variant where Codex diverges — 10 cases). The `.claude/skills/` and `.agents/skills/` discovery trees are **generated** — never edit them.
+**Source of truth:** `skills/<capability>/<name>/SKILL.md` (with a `SKILL.codex.md` variant where Codex diverges — 9 cases). The `.claude/skills/` and `.agents/skills/` discovery trees are **generated** — never edit them.
 
 ```bash
 npm run skills:sync      # regenerate .claude/skills (Claude Code) + .agents/skills (Codex/Cursor)

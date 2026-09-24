@@ -13,7 +13,7 @@ import { AuSheet } from "@/components/ui/AuSheet"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { useCurrentUrl } from "@/lib/auis-review/hooks"
-import { canonicalizeReviewUrl } from "@/lib/auis-review/urlMatch"
+import { matchesCurrentReviewUrl } from "@/lib/auis-review/urlMatch"
 import {
   DEFAULT_REVIEW_FILTERS,
   applyReviewFilters,
@@ -88,15 +88,15 @@ export function ReviewCommentSheet() {
       archivedComments.find((c) => c.id === selectedCommentId)
     if (!target) return
     setTab(target.status === "in_review" ? "in_review" : target.status === "open" ? "open" : "archive")
-    if (canonicalizeReviewUrl(target.url) !== currentUrl) setScope("all")
+    if (!matchesCurrentReviewUrl(target.url, currentUrl)) setScope("all")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCommentId])
 
   const sourceMain = scope === "page"
-    ? allComments.filter((c) => canonicalizeReviewUrl(c.url) === currentUrl)
+    ? allComments.filter((c) => matchesCurrentReviewUrl(c.url, currentUrl))
     : allComments
   const sourceArchive = scope === "page"
-    ? archivedComments.filter((c) => canonicalizeReviewUrl(c.url) === currentUrl)
+    ? archivedComments.filter((c) => matchesCurrentReviewUrl(c.url, currentUrl))
     : archivedComments
 
   const visible: ReviewComment[] = React.useMemo(() => {

@@ -172,7 +172,7 @@ function Demo({ component }: { component: ComponentName }) {
     case "AuLogo":
       return <div className="flex items-center gap-10"><AuLogo variant="mark" height={40} /><AuLogo variant="wordmark" height={28} /><AuLogo variant="horizontal" height={32} /></div>
     case "AuMentionChip":
-      return <div className="flex flex-wrap gap-2"><AuMentionChip tone="inverse" icon="terminal">@codex</AuMentionChip><AuMentionChip tone="purple" icon="bolt">/auis-page</AuMentionChip><AuMentionChip tone="blue" icon="agent">@germano</AuMentionChip></div>
+      return <div className="flex flex-wrap gap-2"><AuMentionChip tone="teal" icon="terminal">@codex</AuMentionChip><AuMentionChip tone="purple" icon="bolt">/auis-page</AuMentionChip><AuMentionChip tone="inverse" icon="agent">@grok</AuMentionChip></div>
     case "AuMentionMenu":
       return <AuMentionMenu aria-label="Mention example" activeKey={mention} onHover={setMention} onPick={setMention} sections={[{ label: "Agents", entries: [{ key: "codex", label: "@codex", icon: "terminal" }, { key: "claude", label: "@claude", icon: "smart_toy" }] }, { label: "Skills", entries: [{ key: "page", label: "/auis-page", icon: "web" }, { key: "audit", label: "/auis-audit", icon: "fact_check" }] }]} />
     case "AuModal":

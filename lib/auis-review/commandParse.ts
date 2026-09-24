@@ -1,20 +1,20 @@
 // Pure parser that turns a Review Bridge comment's raw text into structured
 // command data + render segments. Shared by: the read views (render @mention and
-// /skill as chips), the store (persist the parsed mentions/skills on save) and
-// the /loop dispatcher (decide what each agent runs).
+// /skill as chips), the composer's autocomplete, the mention trigger
+// (app/api/review-bridge/_mention.ts) and /dispatch-queue. Nothing persists the
+// parse — every reader re-derives it from the text.
 //
 // The composer is a plain <textarea>, so commands live in the text literally as
 // the human types them: "@Claude", "/auis-ux-writing". Only KNOWN agents/skills
 // become tokens; an unknown @foo or /bar stays plain text. There is no "#now"
-// directive: whether an agent acts is decided ONLY by its Auto Construct toggle
-// in the Auis dot (see ReviewAgentSettings).
+// directive: the mention itself is the request, and how far the agent may go is
+// its ceiling in the Auis dot's Agents panel (see lib/auis-review/agentRuntime).
 //
 // @mentions of a PERSON (a human reviewer, see ./reviewers) are recognized only
 // when the CALLER passes `opts.userHandles` — without it, a "@jane" that matches
-// no agent stays plain text. That is deliberate: the /loop dispatcher
-// (app/api/review-bridge/dispatch-queue/route.ts) calls parseReviewCommand(text)
-// without opts and must only fire on agent mentions — a @person can never turn
-// into a dispatch.
+// no agent stays plain text. That is deliberate: the mention trigger and
+// /dispatch-queue call parseReviewCommand(text) without opts and must only fire
+// on agent mentions — a @person can never open a run.
 
 import { getReviewAgentByHandle } from "./agents"
 import { isReviewSkillSlug } from "./skills"

@@ -1,6 +1,6 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **37 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **34 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
@@ -32,15 +32,12 @@
 | `auis-pg-merge-flow` | 🟣🟠 | repo | — | Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`, `app/auis/ux-flow |
 | `auis-update-ux-flow` | 🟣🟠 | repo | ◐ | Registers a structural update to an existing UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>).  |
 
-## Bridges (review / flow / edit / project) (6)
+## Bridges (review / flow / edit / project) (3)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-edit-bridge-solve` | 🟣 | repo | — | Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, style tokens, typography classes, variant, icon, hide,  |
 | `auis-flow-bridge-solve` | 🟣🟠 | repo | — | Materializes UX flow edit suggestions filed from the flow editor ("Suggest edit" on /auis/ux-flow/<slug>) into the canonical page code. Pulls them fro |
-| `auis-review-bridge-dispatch` | 🟣🟠 | repo | ◐ | Runs one pass of the Auis Review Bridge dispatcher — the motor that turns agent mentions in Review Mode comments into action. Reads /api/review-bridge |
-| `auis-review-bridge-germano-audit` | 🟣🟠 | repo | — | Runs Germano Faccio as a critical UI/UX second opinion on Auis Review Bridge items already in_review — what an executor (Claude or Codex) sent for app |
-| `auis-review-bridge-germano-explore` | 🟣🟠 | repo | — | Runs Germano Faccio on a proactive UI/UX patrol of the routes the user names: he navigates, clicks buttons, opens modals and sub-routes, triggers empt |
 | `auis-review-bridge-solve` | 🟣🟠 | repo | ⭐ | Resolves Auis Review Mode comments in bulk. Reads from the review-bridge using a filter chosen by the user (all of them, only today's, only open ones, |
 
 ## Build & Handoff (3)
@@ -91,4 +88,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 37: 36 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 10 have their own Codex variant (◐).
+Of the 34: 33 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 9 have their own Codex variant (◐).

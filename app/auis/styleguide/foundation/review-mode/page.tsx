@@ -121,10 +121,11 @@ export default function ReviewModeFoundationPage() {
           </Step>
           <Step number={4} title="Mention people and agents">
             <code className="font-mono text-xs">@</code> lists the reviewers and
-            the agents (<strong>@Claude</strong>, <strong>@Codex</strong>,{" "}
-            <strong>@Germano</strong>); <code className="font-mono text-xs">/</code>{" "}
+            the agents (<strong>@Claude</strong>, <strong>@Grok</strong>,{" "}
+            <strong>@Codex</strong>); <code className="font-mono text-xs">/</code>{" "}
             lists the skills the mentioned agent can run. Nothing else is needed:
-            the agent toggles in the dot decide whether the agent replies or acts.
+            the mention is the request, and the agent&apos;s ceiling in the dot decides
+            how far it may go. An agent switched off shows &quot;off&quot; in the menu.
           </Step>
           <Step number={5} title="Follow the thread">
             Clicking a pin opens the thread next to it: replies, edits, approve or
@@ -143,33 +144,39 @@ export default function ReviewModeFoundationPage() {
       <Section
         id="agents"
         title="Agents"
-        lead="The toggle is the permission. Turn an agent on in the Auis dot and mention it — no directive in the text."
+        lead="The mention is the request. Switch an agent on in the Auis dot, set its ceiling and mention it — the write itself opens the agent."
       >
         <div className="grid sm:grid-cols-2 gap-4">
-          <Card pill="Live Response" variant="beta">
-            When on, the mentioned agent replies in the thread — an answer, a
-            question back, a UX opinion — without touching code.
+          <Card pill="Reply" variant="beta">
+            The lower ceiling: the agent reads the code and the thread and answers
+            — an answer, a question back — without touching code. Its final
+            message is posted in the thread by the runner.
           </Card>
-          <Card pill="Auto Construct" variant="ai" meta="Auto Design · Auto Review">
-            When on, the agent acts on the mention: runs the referenced (or
-            inferred) skill, moves the comment to <strong>in review</strong> and
-            replies a summary. You approve or reject the delivery.
+          <Card pill="Edit" variant="ai" meta="the model is yours to pick">
+            The higher ceiling: the agent runs the referenced (or inferred) skill,
+            moves the comment to <strong>in review</strong> and replies a summary.
+            You approve or reject the delivery. Never commit, push, archive or approve.
           </Card>
-          <Card pill="@Claude · @Codex" variant="live">
-            Executors. They resolve comments (<code className="font-mono text-xs">auis-review-bridge-solve</code>),
-            run the UX writing pass and materialize live edits.
+          <Card pill="@Claude · @Grok" variant="live">
+            Executors with a CLI (<code className="font-mono text-xs">claude -p</code>,{" "}
+            <code className="font-mono text-xs">grok -p</code>). They resolve comments
+            (<code className="font-mono text-xs">auis-review-bridge-solve</code>), run
+            the UX writing pass and materialize live edits.
           </Card>
-          <Card pill="@Germano" variant="neutral">
-            Critical UI/UX designer. Patrols pages and pins issues, or audits what
-            is waiting for approval. Comment-only: never changes status or code.
+          <Card pill="@Codex" variant="neutral">
+            Registered with the same contracts, but no engine is wired yet — the
+            row shows in the panel and stays off.
           </Card>
         </div>
         <p className="mt-4 mb-0 text-sm text-(--fg-secondary) leading-relaxed">
-          The queue lives at{" "}
-          <code className="font-mono text-xs">/api/review-bridge/dispatch-queue</code>{" "}
-          and the <code className="font-mono text-xs">auis-review-bridge-dispatch</code>{" "}
-          skill consumes it under <code className="font-mono text-xs">/loop</code>.
-          Only admin messages command agents; agents never trigger each other.
+          Local dev only, with{" "}
+          <code className="font-mono text-xs">AUIS_MENTION_TRIGGER=1</code>. Five
+          gates: never in production, only the admin&apos;s own writes, never a write
+          authored by an agent, only on creation, only for an agent switched on.{" "}
+          <code className="font-mono text-xs">scripts/mention-run.mjs</code> runs one
+          editor at a time behind a working-tree lock and posts the failure in the
+          thread when nothing comes back. The contract is in{" "}
+          <code className="font-mono text-xs">review-bridge/README.md</code>.
         </p>
       </Section>
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addReply, getCommentAny } from "../../../_store";
 import { canSeeComment, getBridgeSession } from "../../../_session";
+import { triggerMentionRun } from "../../../_mention";
 import { withBridgeErrors } from "../../../_errors";
 import {
   canBridgeSessionWriteAsAgent,
@@ -56,7 +57,7 @@ async function handlePOST(
   const requestedAgent = headerAgent ?? bodyAgent;
   // An explicit attempt at agent authorship never falls back to the human
   // identity of the session. Behind an auth layer it requires the agent token;
-  // locally without auth, the dispatcher stays available.
+  // locally without auth, the mention runner and the skills stay available.
   if (requestedAgent && !canBridgeSessionWriteAsAgent(session)) {
     return NextResponse.json({ error: "agent_auth_required" }, { status: 403 });
   }
@@ -65,7 +66,7 @@ async function handlePOST(
     return NextResponse.json({ error: "agent_author_required" }, { status: 400 });
   }
 
-  // The header is authoritative for dispatcher writes. Even if a stale caller
+  // The header is authoritative for agent writes. Even if a stale caller
   // accidentally sends a user payload, it cannot be persisted as a person.
   const kind = writingAgent ? ("agent" as const) : ("user" as const);
   const stampedEmail =
@@ -90,6 +91,9 @@ async function handlePOST(
     ...(imgs && imgs.length > 0 ? { images: imgs } : {}),
   });
   if (!result) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  // The mention almost always lands HERE, in a reply to the pin — not in the
+  // pin itself. Same reason the dispatch queue reads the whole admin stream.
+  triggerMentionRun(id, result.reply.text, result.reply);
   return NextResponse.json({ reply: result.reply, location: result.location });
 }
 

@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --import ./lib/__tests__/register-ts-loader.mjs --test \"lib/**/__tests__/*.test.ts\" \"app/**/__tests__/*.test.ts\" \"scripts/__tests__/*.test.mjs\"",
     "test:cli": "node --test packages/auis/test/*.test.mjs",
+    "mention:dry": "MENTION_DRY_RUN=1 node scripts/mention-run.mjs",
     "skills:sync": "node scripts/skills-sync.mjs",
     "skills:catalog": "node scripts/skills-catalog.mjs",
     "predev": "node scripts/skills-sync.mjs",

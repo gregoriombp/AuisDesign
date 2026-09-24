@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-09-10",
-  "count": 37,
+  "generated": "2026-09-24",
+  "count": 34,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -27,45 +27,6 @@
       "legacy": false,
       "divergent": false,
       "description": "Materializes UX flow edit suggestions filed from the flow editor (\"Suggest edit\" on /auis/ux-flow/<slug>) into the canonical page code. Pulls them from the same-origin /api/flow-suggestions route with a filter chosen by "
-    },
-    {
-      "name": "auis-review-bridge-dispatch",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": true,
-      "description": "Runs one pass of the Auis Review Bridge dispatcher — the motor that turns agent mentions in Review Mode comments into action. Reads /api/review-bridge/dispatch-queue (already gated by the per-agent Live Response / Auto C"
-    },
-    {
-      "name": "auis-review-bridge-germano-audit",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Runs Germano Faccio as a critical UI/UX second opinion on Auis Review Bridge items already in_review — what an executor (Claude or Codex) sent for approval. Compares the request with the delivery and posts one reply per "
-    },
-    {
-      "name": "auis-review-bridge-germano-explore",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Runs Germano Faccio on a proactive UI/UX patrol of the routes the user names: he navigates, clicks buttons, opens modals and sub-routes, triggers empty, loading, error and disabled states, and pins one concrete suggestio"
     },
     {
       "name": "auis-review-bridge-solve",

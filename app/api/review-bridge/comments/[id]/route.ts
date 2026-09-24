@@ -21,6 +21,7 @@ import {
   canReviewAgentSubmitForApproval,
   getReviewAgent,
 } from "@/lib/auis-review/agents";
+import { triggerMentionRun } from "../../_mention";
 import { withBridgeErrors } from "../../_errors";
 
 export const runtime = "nodejs";
@@ -140,7 +141,7 @@ async function handlePUT(
           return NextResponse.json({ error: "unknown_executor" }, { status: 403 });
         }
         if (!canReviewAgentSubmitForApproval(actor.id)) {
-          return NextResponse.json({ error: "germano_comment_only" }, { status: 403 });
+          return NextResponse.json({ error: "agent_comment_only" }, { status: 403 });
         }
         transitionActor = canonicalActor;
       }
@@ -212,7 +213,7 @@ async function handlePUT(
   const requestedAgent = headerAgent ?? bodyAgent;
   // An explicit attempt at agent authorship never falls back to the human
   // identity of the session. Behind an auth layer it requires the agent token;
-  // locally without auth, the dispatcher stays available.
+  // locally without auth, the mention runner and the skills stay available.
   if (requestedAgent && !canBridgeSessionWriteAsAgent(session)) {
     return NextResponse.json({ error: "agent_auth_required" }, { status: 403 });
   }
@@ -254,7 +255,7 @@ async function handlePUT(
       delete incoming.resolution;
     }
     // Agents author observations and replies. Status changes always use the
-    // explicit transition path; Germano is comment-only by contract.
+    // explicit transition path.
     if (writingAgent) {
       incoming.status = "open";
       delete incoming.resolution;
@@ -304,6 +305,10 @@ async function handlePUT(
   }
 
   await upsertComment(incoming);
+  // Mention trigger (gate 4): only CREATION fires. This PUT also edits, and
+  // re-saving an old comment that already says "@Claude" must not wake the
+  // agent again. Fire and forget — the browser's response does not wait for it.
+  if (!existing) triggerMentionRun(id, incoming.text, incoming);
   return NextResponse.json({ ok: true });
 }
 

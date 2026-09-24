@@ -26,7 +26,8 @@ import { useImageAttach } from "@/lib/auis-review/useImageAttach"
 import { elementFromCommentContext } from "@/lib/auis-review/elementContext"
 import { permalinkPath } from "@/lib/auis-review/permalink"
 import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
-import { canonicalizeReviewUrl } from "@/lib/auis-review/urlMatch"
+import { revealAnchor } from "@/lib/auis-review/revealTrail"
+import { matchesCurrentReviewUrl } from "@/lib/auis-review/urlMatch"
 import type { ReviewComment, ReviewReply } from "./types"
 
 function isStale(comment: ReviewComment, currentDocHeight: number): boolean {
@@ -273,6 +274,7 @@ export function ReviewCommentCard({
   const selectedId = useReviewStore((s) => s.selectedCommentId)
   const selectComment = useReviewStore((s) => s.selectComment)
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
+  const openThread = useReviewStore((s) => s.openThread)
   const setActive = useReviewStore((s) => s.setActive)
   const sessionRole = useReviewStore((s) => s.sessionRole)
   const sessionEmail = useReviewStore((s) => s.sessionEmail)
@@ -295,7 +297,7 @@ export function ReviewCommentCard({
   const editImg = useImageAttach(comment.images ?? [])
 
   const selected = selectedId === comment.id
-  const isOnThisPage = canonicalizeReviewUrl(comment.url) === currentUrl
+  const isOnThisPage = matchesCurrentReviewUrl(comment.url, currentUrl)
   // Only matters when the comment IS on this screen: elsewhere there is never a
   // pin. `layoutVersion` is a dependency because it is what observes portals
   // mounting — without it the card would not notice the modal reopening.
@@ -311,6 +313,16 @@ export function ReviewCommentCard({
     typeof window !== "undefined" &&
     isStale(comment, document.documentElement.scrollHeight)
 
+  /**
+   * Clicking the card takes you to the pin and OPENS ITS THREAD. This used to
+   * end in `setSheetOpen`, which only left the drawer open: to know which of
+   * the screen's pins was this card, you had to click them one by one.
+   * `openThread` is the same gesture as clicking the pin — it anchors the
+   * bubble and closes the drawer, which by then only blocks the view.
+   *
+   * On another screen the permalink does the work: `?reviewCommentId=` reaches
+   * the ReviewModeProvider, which reveals the overlay and opens the same bubble.
+   */
   const navigateToAnchor = () => {
     selectComment(comment.id)
     // A future idea is standalone (no pin) — only select, never scroll/navigate.
@@ -323,17 +335,34 @@ export function ReviewCommentCard({
       router.push(permalinkPath(comment))
       return
     }
-    const anchorY =
-      comment.anchor.kind === "pin"
-        ? comment.anchor.position.y
-        : comment.anchor.centroid.y
-    const targetY = Math.max(0, anchorY - 120)
-    const container = findPrimaryScrollContainer()
-    if (container) {
-      container.scrollTo({ top: targetY, behavior: "smooth" })
-    } else {
-      window.scrollTo({ top: targetY, behavior: "smooth" })
+    const scrollToStoredY = () => {
+      const anchorY =
+        comment.anchor.kind === "pin"
+          ? comment.anchor.position.y
+          : comment.anchor.centroid.y
+      const targetY = Math.max(0, anchorY - 120)
+      const container = findPrimaryScrollContainer()
+      if (container) {
+        container.scrollTo({ top: targetY, behavior: "smooth" })
+      } else {
+        window.scrollTo({ top: targetY, behavior: "smooth" })
+      }
     }
+    void (async () => {
+      // A pin inside a closed modal/tab: reopen it first, or the scroll leads
+      // to a place where nothing will be drawn.
+      await revealAnchor(comment.anchor, comment.revealPath)
+      const el = resolveAnchoredElement(comment.anchor)
+      if (!el) {
+        // No element, nowhere to anchor the bubble (the popover refuses to
+        // float loose). The drawer stays open with the card highlighted,
+        // which already says where the pin was.
+        scrollToStoredY()
+        return
+      }
+      openThread(comment.id)
+      el.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" })
+    })()
   }
 
   const copyPermalink = () => {

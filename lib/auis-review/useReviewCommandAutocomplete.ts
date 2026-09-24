@@ -14,6 +14,7 @@
 import * as React from "react"
 import type { AuMentionMenuSection } from "@/components/ui/AuMentionMenu"
 import { REVIEW_AGENTS } from "./agents"
+import { agentSettingsOf, useAgentSettingsStore } from "./agentSettingsStore"
 import { parseReviewCommand } from "./commandParse"
 import { isReviewSkillAvailableToAgent, REVIEW_SKILLS } from "./skills"
 import { foldAscii, useReviewers } from "./reviewers"
@@ -89,6 +90,13 @@ export function useReviewCommandAutocomplete({
   const [anchor, setAnchor] = React.useState<ReviewCommandAnchor | null>(null)
   // Mentionable humans (the bridge identities) — see lib/auis-review/reviewers.
   const reviewers = useReviewers()
+  // The Agents panel says who is off: "@" warns before you send.
+  const agentSettings = useAgentSettingsStore((s) => s.settings)
+  const triggerEnabled = useAgentSettingsStore((s) => s.triggerEnabled)
+  const hydrateAgents = useAgentSettingsStore((s) => s.hydrate)
+  React.useEffect(() => {
+    if (allowAgents) void hydrateAgents()
+  }, [allowAgents, hydrateAgents])
   // Set right before a pick rewrites the value. On a controlled <textarea>,
   // React RESTORES the previous (now stale) caret across the re-render, so the
   // value-effect would re-sync with new text + old caret, re-match the token we
@@ -157,7 +165,7 @@ export function useReviewCommandAutocomplete({
       // People (human reviewers) — accent-insensitive comparison on the name,
       // since the handle itself is already ASCII-folded (see
       // deriveReviewerHandles). The "person:" prefix keeps them from colliding
-      // with the agent ids ("claude"/"germano") in the key space the sections
+      // with the agent ids ("claude"/"grok") in the key space the sections
       // share.
       const people = reviewers.filter(
         (p) =>
@@ -178,6 +186,12 @@ export function useReviewCommandAutocomplete({
                     key: a.id,
                     label: a.name,
                     icon: a.icon,
+                    // Only where the trigger runs: off here means the mention
+                    // stays text, and you know before sending.
+                    meta:
+                      triggerEnabled && !agentSettingsOf(agentSettings, a.id).enabled
+                        ? "off"
+                        : undefined,
                   })),
                 },
               ]
@@ -228,7 +242,7 @@ export function useReviewCommandAutocomplete({
       ],
       ariaLabel: "Skill suggestions",
     }
-  }, [trigger, reviewers, allowAgents, value])
+  }, [trigger, reviewers, allowAgents, value, agentSettings, triggerEnabled])
 
   // Reset the active row whenever the typed token changes.
   const tokenSig = trigger ? `${trigger.sigil}${trigger.query}` : ""

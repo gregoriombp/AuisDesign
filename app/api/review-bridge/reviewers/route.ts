@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * List of HUMANS mentionable with "@" in the Review Bridge — the counterpart
- * of REVIEW_AGENTS (Claude/Codex/Germano), but for real people.
+ * of REVIEW_AGENTS (Claude/Codex/Grok), but for real people.
  *
  * Source: the identities already saved in the bridge store — every reviewer
  * who ever picked a name on this checkout. A deployment with an auth provider

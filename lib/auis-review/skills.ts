@@ -10,8 +10,6 @@ export type ReviewSkillSlug =
   | "auis-review-bridge-solve"
   | "auis-ux-writing"
   | "auis-edit-bridge-solve"
-  | "auis-review-bridge-germano-explore"
-  | "auis-review-bridge-germano-audit"
 
 export interface ReviewSkill {
   /** Exact skill name under `skills/` — what "/" inserts into the text. */
@@ -23,8 +21,8 @@ export interface ReviewSkill {
   /** One-liner shown as the picker blurb. */
   blurb: string
   /** Agent that owns/runs this skill (see ./agents), or null if generic. */
-  ownerId: "claude" | "germano" | null
-  /** True when running it mutates the prototype — gated by Auto Construct. */
+  ownerId: "claude" | null
+  /** True when running it mutates the prototype — needs the Edit ceiling. */
   acts: boolean
 }
 
@@ -53,22 +51,6 @@ export const REVIEW_SKILLS: readonly ReviewSkill[] = [
     ownerId: "claude",
     acts: true,
   },
-  {
-    slug: "auis-review-bridge-germano-explore",
-    label: "Germano · Explore",
-    icon: "travel_explore",
-    blurb: "Patrols the page, tests states and pins UI/UX suggestions.",
-    ownerId: "germano",
-    acts: true,
-  },
-  {
-    slug: "auis-review-bridge-germano-audit",
-    label: "Germano · Audit review",
-    icon: "rule",
-    blurb: "Gives a second opinion on the items already in review.",
-    ownerId: "germano",
-    acts: true,
-  },
 ]
 
 const BY_SLUG = new Map<string, ReviewSkill>(REVIEW_SKILLS.map((s) => [s.slug, s]))
@@ -81,8 +63,8 @@ export function isReviewSkillSlug(slug: string): slug is ReviewSkillSlug {
   return BY_SLUG.has(slug)
 }
 
-/** Codex shares Claude's executor contracts; Germano keeps his own. */
-const CLAUDE_EXECUTOR_ALIASES = new Set(["codex"])
+/** Codex and Grok share Claude's executor contracts. */
+const CLAUDE_EXECUTOR_ALIASES = new Set(["codex", "grok"])
 
 export function isReviewSkillAvailableToAgent(
   skill: ReviewSkill,

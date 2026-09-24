@@ -56,10 +56,10 @@ in `lib/auis-review/agentIdentity.ts` — an invented id is rejected as
 ```
 Claude  → { "kind": "agent", "id": "claude",  "name": "Claude" }
 Codex   → { "kind": "agent", "id": "codex",   "name": "Codex" }
+Grok    → { "kind": "agent", "id": "grok",    "name": "Grok" }
 ```
 
-Do not borrow another executor's identity. Germano is comment-only and never
-signs a transition. This document runs as Claude:
+Do not borrow another executor's identity. This document runs as Claude:
 
 ```bash
 AGENT_ID=claude
@@ -163,11 +163,11 @@ Present the consolidated plan to the user with:
 **Wait for explicit approval** before executing (AskUserQuestion with the
 options "run everything", "run only the high-confidence ones", "cancel").
 
-> **Auto mode.** When this skill is invoked by the dispatcher
-> (`auis-review-bridge-dispatch`, an item in mode `act`), the user's Auto
-> Construct toggle IS the approval: skip the question, proceed with "run
-> everything" scoped to the item's `url`, and flag it in the final summary. The
-> user's gate is the inbox.
+> **Auto mode.** When this skill runs inside a session the mention trigger
+> opened (`scripts/mention-prompt.md` — the agent is under the **Edit** ceiling
+> set in the Auis dot's Agents panel), the mention IS the approval: skip the
+> question, proceed with "run everything" scoped to the comment's `url`, and
+> flag it in the final summary. The user's gate is the inbox.
 
 ### 4. Execute item by item
 
@@ -369,7 +369,7 @@ for c in d['comments']:
 | `404` on a transition | comment was already archived/deleted | skip it in the batch |
 | `400 invalid_actor` | you forgot to send `actor` in the body | always include `{kind,id,name}` |
 | `400 agent_identity_mismatch` | `actor.id` differs from the `x-bridge-agent-id` header | use the same id in both |
-| `403 unknown_executor` | invented actor id | only `claude` or `codex` transition |
+| `403 unknown_executor` | invented actor id | only `claude`, `codex` or `grok` transition |
 | 0 comments returned when there should be some | the filter only took `status=open`, but what you want may be in `in_review`, `backlog` or the archive | review the filter |
 | Long batch, connection dropped | it keeps what you already marked; re-running with `status=open` will skip the ones that became `in_review` | OK by design |
 | Comment comes back as `open` even after I marked it in_review | the user rejected it — you do not need to repeat, wait for them to adjust the request | OK |

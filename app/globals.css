@@ -2596,16 +2596,20 @@
   color: var(--fg-primary);
 }
 
-/* Smooth height animation for the collapsible nav sections. Radix exposes
- * --radix-collapsible-content-height + data-state on the content node, and
- * keeps it mounted through the exit animation (same mechanism as accordion). */
-.au-sg-collapsible-content {
+/* Smooth height animation for collapsible sections (the styleguide nav, the
+ * Agents panel rows). Radix exposes --radix-collapsible-content-height +
+ * data-state on the content node, and keeps it mounted through the exit
+ * animation (same mechanism as accordion). */
+.au-sg-collapsible-content,
+.au-collapsible-content {
   overflow: hidden;
 }
-.au-sg-collapsible-content[data-state="open"] {
+.au-sg-collapsible-content[data-state="open"],
+.au-collapsible-content[data-state="open"] {
   animation: au-collapsible-down 0.2s ease-out;
 }
-.au-sg-collapsible-content[data-state="closed"] {
+.au-sg-collapsible-content[data-state="closed"],
+.au-collapsible-content[data-state="closed"] {
   animation: au-collapsible-up 0.2s ease-out;
 }
 @keyframes au-collapsible-down {

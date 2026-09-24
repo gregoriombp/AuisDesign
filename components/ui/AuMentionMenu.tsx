@@ -28,6 +28,8 @@ export type AuMentionMenuEntry = {
   chevron?: boolean;
   /** Color accent on the label (e.g. the "Custom" item). */
   accent?: "purple";
+  /** Quiet status on the right of the row (e.g. "off" for a switched-off agent). */
+  meta?: string;
 };
 
 export type AuMentionMenuSection = {
@@ -99,6 +101,16 @@ function EntryRow({
       />
 
       <span className="min-w-0 flex-1 truncate font-medium">{entry.label}</span>
+      {entry.meta && (
+        <span
+          className={cn(
+            "shrink-0 text-2xs",
+            active ? "text-(--fg-on-inverse)" : "text-(--fg-tertiary)",
+          )}
+        >
+          {entry.meta}
+        </span>
+      )}
       {entry.chevron && (
         <Icon
           name="chevron_right"

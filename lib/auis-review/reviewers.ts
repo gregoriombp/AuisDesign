@@ -1,7 +1,7 @@
 "use client"
 
 // Reviewers = the HUMANS that can be @mentioned on the Review Bridge (distinct
-// from ./agents, which are Claude/Codex/Germano). Source: the identities saved
+// from ./agents, which are Claude/Codex/Grok). Source: the identities saved
 // in the bridge store — see GET /api/review-bridge/reviewers, which derives the
 // handle and returns the list ready to use.
 //
@@ -52,7 +52,7 @@ export async function fetchReviewers(): Promise<ReviewerRef[]> {
       return list
     } catch {
       // offline / route down — keep the previous cache (if any) and return an
-      // empty list without breaking the autocomplete (@Claude/@Germano keep
+      // empty list without breaking the autocomplete (@Claude/@Grok keep
       // working; only people disappear until the next successful fetch).
       return cache?.data ?? []
     } finally {
