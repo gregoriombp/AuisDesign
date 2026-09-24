@@ -62,16 +62,16 @@ The `*/data/` directories are **runtime state** (gitignored), not source code.
 
 ```
 skills/<cap>/<name>/SKILL.md            (Claude — canonical)
-skills/<cap>/<name>/SKILL.codex.md      (Codex — only when it diverges; 9 cases)
+skills/<cap>/<name>/SKILL.codex.md      (Codex — only when it diverges; 8 cases)
         │  npm run skills:catalog                 │  npm run skills:sync
         ▼                                         ▼
 skills/registry.json + CATALOG.md        .claude/skills/<name>/   (Claude Code)
                                          .agents/skills/<name>/   (Codex/Cursor; applies SKILL.codex.md)
 ```
 
-- **Capabilities:** Design System (11), UX Flows (7), Bridges (3), Build & Handoff (3), Content (2), Support (7). **33 total.**
-- **Platforms:** 32 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`).
-- **Origin:** 6 generic (Cowork, "zeroed" core) + 20 repo-local (rich variants: onboarding, bridges, ux-flow, states, audit) + 7 support.
+- **Capabilities:** Design System (11), UX Flows (5), Bridges (3), Build & Handoff (3), Content (2), Support (7). **31 total.**
+- **Platforms:** 30 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`).
+- **Origin:** 6 generic (Cowork, "zeroed" core) + 18 repo-local (rich variants: onboarding, bridges, ux-flow, states, audit) + 7 support.
 - `scripts/skills-sync.mjs` does a manual recursive copy (avoids permission-mode problems on restricted mounts) and applies the Codex variant where one exists.
 
 ## Stack

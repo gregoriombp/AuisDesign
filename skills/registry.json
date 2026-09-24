@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated": "2026-09-24",
-  "count": 33,
+  "count": 31,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -391,32 +391,6 @@
       "legacy": false,
       "divergent": true,
       "description": "Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as a screenshot (.webp in /public), generates the typed manifest in `app/"
-    },
-    {
-      "name": "auis-pg-create-flow",
-      "capability": "ux-flows",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": true,
-      "description": "Creates a NEW UX flow in the Auis UX Flow hub (`/auis/ux-flow/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the file (local path or pasted content), parses it via `parseAuFlowFile`, map"
-    },
-    {
-      "name": "auis-pg-merge-flow",
-      "capability": "ux-flows",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`, `app/auis/ux-flow/[slug]/page.tsx`). Reads the file, compares it against the page's exp"
     },
     {
       "name": "auis-update-ux-flow",

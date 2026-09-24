@@ -186,8 +186,6 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 | `auis-create-ux-flow` | Create a NEW single-journey flow from a description / step list. |
 | `auis-create-ux-flow-golden-eye` | Create a COMPILED, multi-scenario "golden eye" view — several journeys merged into one deduped graph with per-scenario focus lenses, as a self-contained page (template: `app/auis/ux-flow/example-golden-eye/page.tsx`). Use when the value is overlaying scenarios + toggling between them, not one linear path. |
 | `auis-update-ux-flow` | Register a structural update to an existing flow (+ changelog entry). |
-| `auis-pg-create-flow` | Create a NEW flow from a `.awflow.json` (designer/PG export). |
-| `auis-pg-merge-flow` | Merge a `.awflow.json` into a flow that already exists. |
 
 **Content / UX Writing**
 | Skill | When to use |

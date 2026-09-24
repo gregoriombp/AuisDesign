@@ -95,10 +95,9 @@ When the screen has more than one state, register them with `auis-update-states`
 
 ### New UX Flow
 
-Use `auis-create-ux-flow` (single journey), `auis-create-ux-flow-golden-eye`
-(compiled view of several journeys) or the `auis-pg-*` skills (import from a
-designer export), depending on the flow source. Structural updates go through
-`auis-update-ux-flow`.
+Use `auis-create-ux-flow` (single journey) or `auis-create-ux-flow-golden-eye`
+(compiled view of several journeys), depending on the flow source. Structural
+updates go through `auis-update-ux-flow`.
 
 The editable file lives at:
 

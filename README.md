@@ -94,14 +94,14 @@ Full walkthrough: [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
 ## Skills
 
-**Source of truth:** `skills/<capability>/<name>/SKILL.md` (with a `SKILL.codex.md` variant where Codex diverges — 9 cases). The `.claude/skills/` and `.agents/skills/` discovery trees are **generated** — never edit them.
+**Source of truth:** `skills/<capability>/<name>/SKILL.md` (with a `SKILL.codex.md` variant where Codex diverges — 8 cases). The `.claude/skills/` and `.agents/skills/` discovery trees are **generated** — never edit them.
 
 ```bash
 npm run skills:sync      # regenerate .claude/skills (Claude Code) + .agents/skills (Codex/Cursor)
 npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 ```
 
-33 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
+31 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
 
 ## Commands
 

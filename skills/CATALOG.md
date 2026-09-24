@@ -1,6 +1,6 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **33 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **31 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
@@ -20,7 +20,7 @@
 | `auis-page` | 🟣🟠🌐 | cowork | ⭐ | Builds a full page in a Auis design system project (Next.js + shadcn/ui) from a screenshot, Figma URL, wireframe, or written description. Maps every v |
 | `auis-update-states` | 🟣🟠 | repo | — | Maps product screens into Auis State Mode: registers new screens, axes, states and `?ge=` interactions in `lib/auis-states/registry.ts` and keeps the  |
 
-## UX Flows (7)
+## UX Flows (5)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
@@ -28,8 +28,6 @@
 | `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Creates a compiled, multi-scenario "golden eye" UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug> |
 | `auis-flow` | 🟣🟠🌐 | cowork | ⭐ | Designs a feature's user flow as a FigJam board using the Auis convention: every screen becomes a card with name + route + file path + status; every t |
 | `auis-import-figma-flow` | 🟣🟠 | repo | ◐ | Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as  |
-| `auis-pg-create-flow` | 🟣🟠 | repo | ◐ | Creates a NEW UX flow in the Auis UX Flow hub (`/auis/ux-flow/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the fil |
-| `auis-pg-merge-flow` | 🟣🟠 | repo | — | Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`, `app/auis/ux-flow |
 | `auis-update-ux-flow` | 🟣🟠 | repo | ◐ | Registers a structural update to an existing UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>).  |
 
 ## Bridges (review / flow / edit / project) (3)
@@ -87,4 +85,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 33: 32 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 9 have their own Codex variant (◐).
+Of the 31: 30 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 8 have their own Codex variant (◐).
