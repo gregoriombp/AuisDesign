@@ -142,7 +142,7 @@ function Demo({ component }: { component: ComponentName }) {
     case "AuBreadcrumbsBar":
       return <div className="w-full overflow-hidden rounded-lg border border-subtle"><AuBreadcrumbsBar items={[{ label: "Projects", href: "#" }, { label: "Checkout", href: "#" }, "Review"]} trailing={<AuButton size="sm" variant="ghost">Share</AuButton>} /></div>
     case "AuButton":
-      return <div className="flex flex-wrap gap-3"><AuButton variant="primary">Primary</AuButton><AuButton variant="secondary">Secondary</AuButton><AuButton variant="ghost" iconLeft="add">Ghost</AuButton><AuButton variant="danger" iconLeft="delete">Danger</AuButton><AuButton variant="ai" iconLeft="auto_awesome">AI action</AuButton><AuButton loading>Loading</AuButton></div>
+      return <div className="flex flex-wrap gap-3"><AuButton variant="primary">Primary</AuButton><AuButton variant="secondary">Secondary</AuButton><AuButton variant="ghost" iconLeft="add">Ghost</AuButton><AuButton variant="danger" iconLeft="delete">Danger</AuButton><AuButton variant="ai" iconLeft="auto_awesome">AI action</AuButton><AuButton loading>Loading</AuButton><span className="inline-flex rounded-lg bg-bg-inverse p-2"><AuButton variant="inverse" iconRight="arrow_forward">On inverse</AuButton></span></div>
     case "AuCard":
       return <AuCard className="w-full max-w-xl"><AuCardHeader><AuCardTitle>Review summary</AuCardTitle><AuCardDescription>Everything the team needs before approval.</AuCardDescription></AuCardHeader><AuCardContent><p className="text-sm text-fg-secondary">Three comments resolved and one decision pending.</p></AuCardContent><AuCardFooter><AuButton size="sm" variant="primary">Open review</AuButton></AuCardFooter></AuCard>
     case "AuCheckbox":
