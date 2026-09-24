@@ -225,7 +225,7 @@ function Demo({ component }: { component: ComponentName }) {
     case "AuToast":
       return <div className="flex flex-wrap gap-3"><AuButton onClick={() => toast.push({ title: "Saved", description: "The change is ready for review.", variant: "success" })}>Success toast</AuButton><AuButton variant="ai" onClick={() => toast.push({ title: "Agent finished", description: "Inspect the result before approving.", variant: "ai" })}>AI toast</AuButton><AuButton variant="danger" onClick={() => toast.push({ title: "Could not save", variant: "error" })}>Error toast</AuButton></div>
     case "AuToggle":
-      return <div className="flex w-full max-w-xl flex-col gap-4"><label className="flex items-center gap-3 text-sm"><AuToggle checked={enabled} onChange={setEnabled} label="Live response" />Live response</label><AuToggleRow title="Auto construct" description="Allow the selected agent to build explicitly queued work." checked={enabled} onChange={setEnabled} /></div>
+      return <div className="flex w-full max-w-xl flex-col gap-4"><label className="flex items-center gap-3 text-sm"><AuToggle checked={enabled} onChange={setEnabled} label="Notifications" />Notifications</label><AuToggleRow title="Auto-save" description="Save every change as soon as it is made." checked={enabled} onChange={setEnabled} /></div>
     case "Icon":
       return <div className="grid grid-cols-6 gap-6">{["home", "palette", "account_tree", "rate_review", "edit", "auto_awesome", "search", "settings", "check_circle", "warning", "error", "more_horiz"].map((name) => <div key={name} className="flex flex-col items-center gap-2 text-xs text-fg-tertiary"><Icon name={name} size={24} /><code>{name}</code></div>)}</div>
   }

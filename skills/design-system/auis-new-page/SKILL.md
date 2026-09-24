@@ -2,7 +2,7 @@
 name: auis-new-page
 description: >
   Build or rework a product page in this Next.js app using the Auis design
-  system, existing components, existing tokens, and desktop-only constraints.
+  system, existing components and existing tokens.
 ---
 
 # Auis — New Page
@@ -18,7 +18,6 @@ Use this skill for product pages, feature screens, and substantial page reworks.
 - Reuse `components/ui/Au*` and feature modules before creating anything new.
 - Do not create Playground/quarantine pages or `components/playground`.
 - Do not create tokens or arbitrary Tailwind values.
-- Desktop-only: do not add mobile/tablet variants unless explicitly requested.
 - Product icons use `components/ui/Icon.tsx`.
 - App-feature modules under `components/` (e.g. `components/auth/`) consume `Au*`;
   they are not DS components and should not be renamed to `Au*`.

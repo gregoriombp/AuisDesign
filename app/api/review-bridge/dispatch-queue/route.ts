@@ -17,10 +17,10 @@ export const dynamic = "force-dynamic";
 // ceiling Reply → "respond"; Edit → "act". Encodes the gate ONCE, server-side,
 // reusing the same parser the composer/chips use.
 //
-// NO CONSUMER: the `/loop` skill that read this queue was retired. What acts
-// today is the mention trigger (app/api/review-bridge/_mention.ts), which reads
-// the same Agents panel settings. The route stays up as a read-only view of
-// what is actionable, for a product that wants to poll instead of trigger.
+// NO CONSUMER ships with Auis. What acts is the mention trigger
+// (app/api/review-bridge/_mention.ts), which reads the same Agents panel
+// settings. The route stays up as a read-only view of what is actionable, for
+// a product that wants to poll instead of trigger.
 //
 // HIERARCHY: agents obey ONLY the admin. Command sources are exclusively
 // messages whose effective author role is "admin" (the pin's text and replies)

@@ -76,6 +76,16 @@ test("Grok is a canonical executor with its own mention target", () => {
   assert.equal(getReviewAgent("grok")?.tone, "inverse")
 })
 
+test("every agent shows its official mark from public/assets/agents", () => {
+  const marks = REVIEW_AGENTS.map((a) => a.mark)
+  assert.deepEqual(marks, [
+    "/assets/agents/claude.svg",
+    "/assets/agents/openai.svg",
+    "/assets/agents/grok.svg",
+  ])
+  assert.equal(new Set(marks).size, marks.length)
+})
+
 test("an unknown @handle stays plain text and never becomes an actor", () => {
   assert.equal(getReviewAgent("someone"), undefined)
   assert.deepEqual(parseReviewCommand("@Someone look at this").mentions, [])

@@ -194,7 +194,6 @@ Close with **"Left as is (already on tone):"** + 2-3 examples, to show you didn'
 
 - **Tokens are sacred.** This skill neither creates nor touches a token. `text-[#hex]`, `p-[Npx]`, etc. are forbidden.
 - **Components before code.** Don't create a component to accommodate copy; report the squeeze.
-- **Desktop-only.** Don't write copy about "swipe", "tap", "on your phone".
 - **No emoji** in UI, docs, or agent output, unless explicitly asked for or already present in a source asset.
 - **Material Symbols** is the default icon; `font-mono` only for real code.
 - **The product's language** follows the existing corpus. Don't drift into another language and don't swap a term the repo already uses for a synonym you prefer — check `PRODUCT_CONTEXT.md` → § Language & locale and the strings already on the route first.

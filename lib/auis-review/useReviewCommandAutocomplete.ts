@@ -186,6 +186,7 @@ export function useReviewCommandAutocomplete({
                     key: a.id,
                     label: a.name,
                     icon: a.icon,
+                    iconSrc: a.mark,
                     // Only where the trigger runs: off here means the mention
                     // stays text, and you know before sending.
                     meta:

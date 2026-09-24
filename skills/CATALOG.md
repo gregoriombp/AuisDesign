@@ -1,6 +1,6 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **34 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **33 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
@@ -16,7 +16,7 @@
 | `auis-foundation` | 🟣🟠🌐 | cowork | ⭐ | Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Be |
 | `auis-foundation-update` | 🟣🟠 | repo | — | INCREMENTALLY updates the foundation tokens of the Auis design system in app/globals.css (color, typography, spacing, radius, shadow, motion) — additi |
 | `auis-new-component` | 🟣🟠 | repo | — | Add or update an Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation. |
-| `auis-new-page` | 🟣🟠 | repo | — | Build or rework a product page in this Next.js app using the Auis design system, existing components, existing tokens, and desktop-only constraints. |
+| `auis-new-page` | 🟣🟠 | repo | — | Build or rework a product page in this Next.js app using the Auis design system, existing components and existing tokens. |
 | `auis-page` | 🟣🟠🌐 | cowork | ⭐ | Builds a full page in a Auis design system project (Next.js + shadcn/ui) from a screenshot, Figma URL, wireframe, or written description. Maps every v |
 | `auis-update-states` | 🟣🟠 | repo | — | Maps product screens into Auis State Mode: registers new screens, axes, states and `?ge=` interactions in `lib/auis-states/registry.ts` and keeps the  |
 
@@ -55,11 +55,10 @@
 | `auis-ux-writing` | 🟣🟠 | repo | ⭐ ◐ | Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits |
 | `auis-voice` | 🟣🟠 | repo | ⭐ | Bootstraps a product's voice by filling in PRODUCT_CONTEXT.md — the file every Auis writing skill reads. Derives the copy language and locale, the sit |
 
-## Support (8)
+## Support (7)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
-| `commit` | 🟣🟠 | repo | — | Maps the pending changes and creates local atomic commits — one commit per file/area when it makes sense, without rewriting content inside a file just |
 | `design-system-new-component` | 🟣🟠 | repo | ◐ legacy | [INACTIVE in this repo — do not trigger.] Generic, Au-blind version of "new component", kept only as a record of the Auis initial setup. To add or edi |
 | `design-system-new-page` | 🟣🟠 | repo | ◐ legacy | '[INACTIVE in this repo — do not trigger.] Generic, Au-blind version |
 | `figma-code-library-import` | 🟣🟠 | repo | — | Use when implementing or updating product UI from Figma in code through Claude or Cursor, especially when the project has its own component library an |
@@ -88,4 +87,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 34: 33 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 9 have their own Codex variant (◐).
+Of the 33: 32 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 9 have their own Codex variant (◐).

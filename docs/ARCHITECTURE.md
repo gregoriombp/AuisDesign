@@ -69,9 +69,9 @@ skills/registry.json + CATALOG.md        .claude/skills/<name>/   (Claude Code)
                                          .agents/skills/<name>/   (Codex/Cursor; applies SKILL.codex.md)
 ```
 
-- **Capabilities:** Design System (11), UX Flows (7), Bridges (3), Build & Handoff (3), Content (2), Support (8). **34 total.**
-- **Platforms:** 33 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`).
-- **Origin:** 6 generic (Cowork, "zeroed" core) + 20 repo-local (rich variants: onboarding, bridges, ux-flow, states, audit) + 8 support.
+- **Capabilities:** Design System (11), UX Flows (7), Bridges (3), Build & Handoff (3), Content (2), Support (7). **33 total.**
+- **Platforms:** 32 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`).
+- **Origin:** 6 generic (Cowork, "zeroed" core) + 20 repo-local (rich variants: onboarding, bridges, ux-flow, states, audit) + 7 support.
 - `scripts/skills-sync.mjs` does a manual recursive copy (avoids permission-mode problems on restricted mounts) and applies the Codex variant where one exists.
 
 ## Stack
@@ -80,4 +80,4 @@ Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `glob
 
 ## Branding & theming
 
-Auis ships **no brand assets for your product** — it is a builder, and your product doesn't exist yet. The one mark that *ships* in `public/` is `auis-wordmark.svg`: Auis's own, rendered by `AuLogo` in the builder chrome (`/auis/*`) as the default. No logo registry, no illustration set, no integration icons. `AuLogo` is the only component allowed to render a mark — and once a user seeds their brand through `/auis/welcome` (→ `/api/setup`, materialized by `auis-brand`), it renders **their** mark instead of Auis's, read server-side from `app/auis/_data/brand.ts` (the runtime overlay is gitignored). A component in `components/ui/` must never hardcode a mark, because it lands in *your* product. The tokens sit on a neutral baseline; theming for your own product is the `auis-foundation` skill.
+Auis ships **no brand assets for your product** — it is a builder, and your product doesn't exist yet. The marks that *ship* in `public/` are Auis's own (`assets/brand/auis-wordmark.svg`, rendered by `AuLogo` in the builder chrome as the default) and the official marks of the Review Bridge agents (`assets/agents/`: Claude, OpenAI, Grok — shown by `ReviewAvatar` and the `@` menu). No logo registry, no illustration set, no integration icons. `AuLogo` is the only component allowed to render a mark — and once a user seeds their brand through `/auis/welcome` (→ `/api/setup`, materialized by `auis-brand`), it renders **their** mark instead of Auis's, read server-side from `app/auis/_data/brand.ts` (the runtime overlay is gitignored). A component in `components/ui/` must never hardcode a mark, because it lands in *your* product. The tokens sit on a neutral baseline; theming for your own product is the `auis-foundation` skill.

@@ -49,6 +49,8 @@ starting line, not a gap.
    icon lib. `react-icons` only for **brands** that Material Symbols lacks
    (Visa, Mastercard, Amex, Slack, WhatsApp). Auis ships **no** third-party logo registry
    and no brand illustrations — a DS component must never hardcode a mark (see AGENTS.md §4).
+   The only marks in `public/assets/agents/` are the Review Bridge agents' (Claude, OpenAI,
+   Grok), rendered by the feature module `ReviewAvatar`, not by a DS component.
 
 ---
 

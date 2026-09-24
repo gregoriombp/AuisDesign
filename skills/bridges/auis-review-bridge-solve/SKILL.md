@@ -281,7 +281,6 @@ Mode toolbar.
 | direct question to the agent ("@claude, which...") | reply |
 | screenshot attached + no text | reply with "what do you want to change in this annotation?" |
 | comment referring to backend/data | skip (Auis is the UI/UX layer; the backend belongs to the host product) |
-| reference to a mobile feature | skip (Auis is desktop-only — see `AGENTS.md`) |
 
 ## Constraints
 

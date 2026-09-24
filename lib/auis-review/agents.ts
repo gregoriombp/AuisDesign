@@ -4,8 +4,8 @@
 // ReviewActor identities the skills already post as (`{ kind: "agent", id, name }`).
 //
 // Single source of truth for: the "@" mention menu, the Agents panel on the
-// floating Auis dot, and chip rendering for rendered mentions. What each agent
-// can RUN (CLI, ceilings, models) lives in ./agentRuntime.
+// floating Auis dot, the avatar mark and chip rendering for rendered mentions.
+// What each agent can RUN (CLI, ceilings, models) lives in ./agentRuntime.
 
 import type { AuMentionChipTone } from "@/components/ui/AuMentionChip"
 import type { ReviewSkillSlug } from "./skills"
@@ -37,6 +37,8 @@ export interface ReviewAgent {
   accentVar: string
   /** Material Symbol glyph — the "agent" gesture, never a robot. */
   icon: string
+  /** Official mark, served from public/assets/agents/ (ReviewAvatar, the "@" menu). */
+  mark: string
   canSubmitForApproval: boolean
   /** Skills this agent can run under the Edit ceiling. */
   skillSlugs: ReviewSkillSlug[]
@@ -57,6 +59,7 @@ const AGENT_CONFIG: Record<
     tone: "purple",
     accentVar: "var(--au-purple-600)",
     icon: "agent",
+    mark: "/assets/agents/claude.svg",
     skillSlugs: EXECUTOR_SKILLS,
   },
   codex: {
@@ -64,6 +67,7 @@ const AGENT_CONFIG: Record<
     tone: "teal",
     accentVar: "var(--au-teal-600)",
     icon: "agent",
+    mark: "/assets/agents/openai.svg",
     skillSlugs: EXECUTOR_SKILLS,
   },
   grok: {
@@ -71,6 +75,7 @@ const AGENT_CONFIG: Record<
     tone: "inverse",
     accentVar: "var(--fg-primary)",
     icon: "agent",
+    mark: "/assets/agents/grok.svg",
     skillSlugs: EXECUTOR_SKILLS,
   },
 }

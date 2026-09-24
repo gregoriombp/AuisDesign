@@ -17,7 +17,7 @@ test("defaults reproduce the trigger as shipped: Claude on in Edit, the rest off
   assert.deepEqual(s.codex, { enabled: false, permission: "reply", model: null })
 })
 
-test("the previous shape (liveResponse/autoConstruct) falls back to the defaults", () => {
+test("a record in another shape falls back to the defaults", () => {
   const s = normalizeAgentSettingsMap({
     claude: { liveResponse: true, autoConstruct: true },
     codex: { liveResponse: true, autoConstruct: true },

@@ -1,8 +1,8 @@
 // Mention trigger: when the ADMIN writes "@Claude …" in a pin or a reply, the
 // very route that stored it opens a headless run of that agent's CLI. The write
-// IS the event — no queue being watched, no process asking "any work?" (that
-// was the cost of the old `/loop` skill: one agent turn per tick, almost always
-// to find an empty queue).
+// IS the event — no queue being watched, no process asking "any work?" (a
+// polling loop costs one agent turn per tick, almost always to find an empty
+// queue).
 //
 // This runs ONLY on the developer's own machine. A route that opens a process
 // must not even be attempted on a public server — see `mentionTriggerEnabled`.

@@ -84,8 +84,8 @@ export function getReviewAgentRuntime(id: string): ReviewAgentRuntime | undefine
 
 /**
  * What is stored, in the shape the panel and the runner use without thinking.
- * The previous shape (liveResponse/autoConstruct) never governed the trigger,
- * so it falls back to the defaults.
+ * A record in another shape (a settings file written before this contract, or
+ * by hand) falls back to the defaults instead of being trusted.
  */
 export function normalizeAgentSettings(
   id: string,

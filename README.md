@@ -101,7 +101,7 @@ npm run skills:sync      # regenerate .claude/skills (Claude Code) + .agents/ski
 npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 ```
 
-37 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
+33 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
 
 ## Commands
 
