@@ -993,6 +993,28 @@
   border-color: var(--au-black);
 }
 
+/* Inverse — the primary button for an inverse surface (a bg-inverse card, a
+   dark hero): primary's pair swapped, so it reads in both modes */
+.au-btn--inverse {
+  background: var(--bg-canvas);
+  color: var(--fg-primary);
+  border-color: var(--bg-canvas);
+}
+.au-btn--inverse:hover:not(:disabled) {
+  background: var(--bg-muted);
+  border-color: var(--bg-muted);
+}
+.au-btn--inverse:active:not(:disabled) {
+  background: var(--bg-pressed);
+  border-color: var(--bg-pressed);
+}
+.au-btn--inverse:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+.dark .au-btn--inverse:focus-visible {
+  box-shadow: 0 0 0 3px rgba(13, 16, 19, 0.14);
+}
+
 /* Secondary — outline, neutral */
 .au-btn--secondary {
   background: transparent;

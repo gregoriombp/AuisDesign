@@ -18,7 +18,8 @@ that agents can resolve with user approval.
 |---|---|---|
 | Welcome | `/auis/welcome` | First-run setup form: project name, a one-line "what is your product", and a logo upload. Posts to `/api/setup`, which seeds the brand overlay the builder chrome reads. Also surfaced as a soft-gate card on the hub (`/auis`) until setup is done. |
 | Styleguide | `/auis/styleguide` | Live design system source: foundations, tokens, `Au*` components, brand, patterns, the Review Mode foundation page, the review inbox and the link to the State Mode matrix. |
-| Projects | `/auis/projects` | Workbench for imported projects/screens, design-system update requests, and build requests. |
+| Projects | `/auis/projects` | Workbench for imported projects/screens, design-system update requests, and build requests. The hub card is titled "Import from Figma". |
+| Product entry | `/auis/product` | Where the hub's product card lands while the product has no page: how to create the first one. Once a page exists it forwards to the first linkable route outside `app/auis` and `app/api` (the shipped root redirect does not count) and the hub links there directly. |
 | UX Flow hub | `/auis/ux-flow` | Gallery + sidebar of every UX flow. Each flow is its own page (`/auis/ux-flow/<slug>`) with the flow editor: screen previews, comments, structural suggestions, inline sub-flow expansion, and a changelog. Compiled ("golden-eye") views overlay several journeys in one graph. |
 | State Mode matrix | `/auis/states` | Every registered screen rendered in every registered state, side by side (iframes with `?chrome=0`). Each cell is a real deep link; `npm run states:pdf` exports the matrix. |
 | Review Inbox | `/auis/styleguide/review` | Inbox for comments created through Review Mode: filters, permalinks, approve / reject / reopen. |

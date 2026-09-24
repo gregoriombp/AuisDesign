@@ -12,6 +12,7 @@ export type AuButtonVariant =
   | "ai"
   | "ai-spectrum"
   | "ai-outline"
+  | "inverse"
 
 export type AuButtonSize = "sm" | "md" | "lg"
 

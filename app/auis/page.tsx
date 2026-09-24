@@ -5,9 +5,10 @@ import { AuButton } from "@/components/ui/AuButton"
 import { AuLogo } from "@/components/ui/AuLogo"
 import { Icon } from "@/components/ui/Icon"
 import { getBrand } from "@/app/auis/_data/brand"
+import { findFirstProductPage } from "@/app/auis/_data/product"
 
-// The soft gate reads the runtime brand overlay, which changes after build —
-// render on demand so it reflects the current setup state, never a stale cache.
+// The soft gate reads the runtime brand overlay and the product's pages, both
+// of which change after build — render on demand, never a stale cache.
 export const dynamic = "force-dynamic"
 
 type HubSection = {
@@ -20,7 +21,7 @@ type HubSection = {
 
 const sections: HubSection[] = [
   {
-    title: "Projects",
+    title: "Import from Figma",
     description:
       "Flows imported from Figma — browse screen by screen, restyle them with the design system and have them built in the repo.",
     icon: "folder_open",
@@ -79,6 +80,7 @@ const sections: HubSection[] = [
 
 export default async function AuisHub() {
   const brand = await getBrand()
+  const firstPage = findFirstProductPage()
 
   return (
     <main className="min-h-screen bg-(--bg-canvas) text-(--fg-primary)">
@@ -154,22 +156,33 @@ export default async function AuisHub() {
                   <p className="text-sm text-fg-on-inverse opacity-70 leading-relaxed max-w-xl">
                     {brand.configured && brand.tagline
                       ? brand.tagline
-                      : "Open the product to explore its pages, flows and design system."}
+                      : firstPage
+                        ? "Open the product to explore its pages, flows and design system."
+                        : "Your product has no page yet. Create the first one and open it from here."}
                   </p>
                 </div>
               </div>
               <AuPill variant="live">Active</AuPill>
             </div>
-            <div className="mt-2">
-              <Link href="/auis/projects" className="no-underline">
-                <AuButton
-                  variant="primary"
-                  iconRight="arrow_forward"
-                  className="bg-raised! text-fg-primary!"
-                >
-                  Open workbench
-                </AuButton>
-              </Link>
+            <div className="mt-2 flex items-center gap-3">
+              {firstPage ? (
+                <>
+                  <Link href={firstPage.href} className="no-underline">
+                    <AuButton variant="inverse" iconRight="arrow_forward">
+                      Open product
+                    </AuButton>
+                  </Link>
+                  <code className="text-xs text-fg-on-inverse opacity-60">
+                    {firstPage.href}
+                  </code>
+                </>
+              ) : (
+                <Link href="/auis/product" className="no-underline">
+                  <AuButton variant="inverse" iconRight="arrow_forward">
+                    Create the first page
+                  </AuButton>
+                </Link>
+              )}
             </div>
           </AuCard>
         </section>

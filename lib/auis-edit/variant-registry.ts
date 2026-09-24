@@ -66,6 +66,7 @@ export const COMPONENT_REGISTRY: ComponentSpec[] = [
           opt(AU_BTN, "ghost", "Ghost"),
           opt(AU_BTN, "subtle", "Subtle"),
           opt(AU_BTN, "danger", "Danger"),
+          opt(AU_BTN, "inverse", "Inverse"),
           opt(AU_BTN, "ai", "AI"),
           opt(AU_BTN, "ai-spectrum", "AI spectrum"),
           opt(AU_BTN, "ai-outline", "AI outline"),
