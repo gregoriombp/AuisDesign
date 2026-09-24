@@ -1,14 +1,14 @@
-# auis
+# @auis/cli
 
 Scaffold [**Auis**](https://github.com/gregoriombp/AuisDesign) — a code-native
 design builder. One command, no clone, no config:
 
 ```bash
-npx auis@latest my-product
+npx @auis/cli@latest my-product
 ```
 
 ```
-  auis  0.1.0
+  auis  0.2.0
   code-native design builder
 
   ✓ Template  main · tarball
@@ -26,8 +26,6 @@ npx auis@latest my-product
     /auis-setup   brand → tokens → voice
 ```
 
-`npm create auis@latest my-product` does the same thing.
-
 ## What you get
 
 A Next.js (App Router) + Tailwind v4 + shadcn/ui project where the design
@@ -44,8 +42,10 @@ codebase, and AI agents build against them under enforced rules:
 ## Options
 
 ```
-npx auis@latest [directory] [options]
+npx @auis/cli@latest [directory] [options]     scaffold a new project
+npx @auis/cli@latest doctor [directory]        read an existing repo, write nothing
 
+      --json           doctor only: the full report as JSON
   -r, --ref <ref>      branch, tag or commit of the template (default: main)
       --pm <manager>   npm | pnpm | yarn | bun (default: detected)
       --no-install     skip dependency installation
@@ -59,10 +59,11 @@ npx auis@latest [directory] [options]
 Examples:
 
 ```bash
-npx auis@latest my-product          # new directory
-npx auis@latest .                   # current directory
-npx auis@latest my-product --pm pnpm --no-git
-npx auis@latest my-product --ref v1.0.0
+npx @auis/cli@latest my-product          # new directory
+npx @auis/cli@latest .                   # current directory
+npx @auis/cli@latest my-product --pm pnpm --no-git
+npx @auis/cli@latest my-product --ref v1.0.0
+npx @auis/cli@latest doctor              # what Auis can do in the current repo, writes nothing
 ```
 
 Requires **Node.js ≥ 20**. The template is fetched as a GitHub tarball (`tar`),

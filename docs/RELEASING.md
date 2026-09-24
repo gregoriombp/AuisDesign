@@ -1,12 +1,17 @@
 # Releasing the installer
 
-`npx auis@latest my-product` is served by two npm packages that live in this
+`npx @auis/cli@latest my-product` is served by two npm packages that live in this
 repository:
 
-| Package | Directory | Why it exists |
-|---|---|---|
-| [`auis`](https://www.npmjs.com/package/auis) | `packages/auis` | The CLI. `npx auis@latest` resolves this name. |
-| [`create-auis`](https://www.npmjs.com/package/create-auis) | `packages/create-auis` | Alias so `npm create auis@latest` works. Depends on `auis` with a caret range, so it rarely needs a re-release. |
+| Package | Directory | Status | Why it exists |
+|---|---|---|---|
+| [`@auis/cli`](https://www.npmjs.com/package/@auis/cli) | `packages/auis` | published | The CLI. `npx @auis/cli@latest` resolves this name; the binary it installs is still called `auis`. |
+| `create-auis` | `packages/create-auis` | not published | Alias so `npm create auis@latest` works. Depends on `@auis/cli`. |
+
+The unscoped name `auis` is **not** ours and never was: npm rejects names it
+considers too similar to an existing package, and only says so at publish
+time, so the CLI shipped under the `@auis` scope instead (scoped names skip
+that check). `npx auis@latest` 404s — never document it.
 
 The Next.js app at the repository root is **never** published (`"private": true`).
 The CLI does not bundle the template — it downloads this repository as a tarball
@@ -19,46 +24,46 @@ The CLI version is its own thing; it does not track the template. Bump
 `packages/auis/package.json`:
 
 - **patch** — fixes inside the CLI;
-- **minor** — new flags or scaffold behaviour (e.g. a change to `PRUNE`);
+- **minor** — new flags, subcommands or scaffold behaviour (e.g. `doctor`, a change to `PRUNE`);
 - **major** — a flag or default that breaks existing invocations.
 
-Re-release `create-auis` only when its own `bin` changes or when it must require
-a new major of `auis`.
+`create-auis` pins `@auis/cli` with a caret range. On `0.x` a caret only floats
+within the minor (`^0.2.0` means `0.2.x`), so until `1.0.0` re-release
+`create-auis` whenever `@auis/cli` bumps its minor, and whenever its own `bin`
+changes.
 
-## First publish
+## Publishing
 
-1. Create an npm **automation** token on an account that owns (or can claim) the
-   `auis` and `create-auis` names.
-2. Add it as the repository secret `NPM_TOKEN`
-   (*Settings → Secrets and variables → Actions*).
-3. Publish `auis` **first** — `create-auis` depends on it:
-   Actions → **Publish CLI** → `package: auis`, `dry-run: true`, run it, read the
-   packed file list, then run it again with `dry-run: false`.
-4. Repeat with `package: create-auis`.
+The repository secret `NPM_TOKEN` is an npm **automation** token for an account
+that owns the `@auis` scope (*Settings → Secrets and variables → Actions*).
 
-Both names were unclaimed when the CLI was written. npm also rejects names it
-considers too similar to an existing package, and it only says so at publish
-time — if `auis` is refused, publish as `@auis/cli` (scoped names skip that
-check), point `create-auis`'s dependency at it, and update the `npx` line in the
-README, `packages/auis/README.md` and `docs/GETTING-STARTED.md`.
+1. Bump the version, commit, push.
+2. Actions → **Publish CLI** → `package: auis` (the directory; it publishes
+   `@auis/cli`), `dry-run: true`, run it, read the packed file list, then run it
+   again with `dry-run: false`.
+3. For the alias, repeat with `package: create-auis` — always **after** the
+   `@auis/cli` version it depends on is live. The unscoped `create-auis` name is
+   still unclaimed; if npm refuses it, publish it as `@auis/create` instead,
+   which makes the command `npm create @auis my-product`, and update the docs
+   accordingly.
 
 Then verify from a clean directory:
 
 ```bash
-npx auis@latest probe --no-install --no-git && rm -rf probe
-npm create auis@latest probe -- --no-install --no-git && rm -rf probe
+npx @auis/cli@latest probe --no-install --no-git && rm -rf probe
+npx @auis/cli@latest doctor . --json > /dev/null        # reads, writes nothing
+npm create auis@latest probe -- --no-install --no-git && rm -rf probe   # once create-auis is published
 ```
 
-## Subsequent releases
+Before a release, locally:
 
 ```bash
 npm run test:cli                                          # unit tests
 node packages/auis/bin/auis.mjs /tmp/probe --no-install    # end-to-end, ~1s
-# bump packages/auis/package.json, commit, push
+node packages/auis/bin/auis.mjs doctor /tmp/probe          # doctor on the result
 ```
 
-Then run the **Publish CLI** workflow (dry run first). Publishing locally works
-too, from `packages/auis`: `npm publish --access public`.
+Publishing locally works too, from `packages/auis`: `npm publish --access public`.
 
 ## What ships
 
@@ -71,3 +76,10 @@ cd packages/auis && npm pack --dry-run
 
 The CLI has **zero runtime dependencies**, so `npx` starts in about a second.
 Keep it that way.
+
+## History
+
+- `@auis/cli@0.1.0` (2026-09-15) — scaffold only. It predates `doctor`: on that
+  version `npx @auis/cli doctor` scaffolds into a directory named `doctor`.
+- `0.2.0` — first version with `doctor`. Publish it before pointing anyone at
+  the `doctor` docs.

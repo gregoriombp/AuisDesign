@@ -32,10 +32,10 @@ All five must pass. If you touched skills, also run `npm run skills:catalog` and
 
 ## The installer (`packages/`)
 
-`npx auis@latest my-product` is served by two published packages that live in this repository and are **not** part of the Next.js app:
+`npx @auis/cli@latest my-product` is served by two packages that live in this repository and are **not** part of the Next.js app:
 
 - [`packages/auis`](packages/auis) — the CLI (zero dependencies, plain `.mjs`). It downloads this repository as a tarball, drops the contributor-only files, and personalizes the result.
-- [`packages/create-auis`](packages/create-auis) — a thin alias so `npm create auis@latest` works.
+- [`packages/create-auis`](packages/create-auis) — a thin alias so `npm create auis@latest` works. Not published yet — see `docs/RELEASING.md`.
 
 ```bash
 npm run test:cli                                  # CLI unit tests
