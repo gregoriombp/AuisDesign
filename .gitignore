@@ -26,7 +26,7 @@ skills-lock.json
 
 # next.js
 /.next/
-# per-user build caches (NEXT_DIST_DIR), e.g. .next-germano
+# per-user build caches (NEXT_DIST_DIR), e.g. .next-<name>
 /.next-*/
 /out/
 
@@ -84,7 +84,6 @@ auis-states-matrix.pdf
 # Local session captures (screenshots + cap JSON refs — not product source)
 /g-*.png
 /cap-*.json
-/germano-perfil.png
 /usado-card.png
 
 # auis install manifest — which generated skill dirs belong to Auis (see

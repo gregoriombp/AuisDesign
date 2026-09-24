@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-09-10",
-  "count": 37,
+  "generated": "2026-09-24",
+  "count": 31,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -27,45 +27,6 @@
       "legacy": false,
       "divergent": false,
       "description": "Materializes UX flow edit suggestions filed from the flow editor (\"Suggest edit\" on /auis/ux-flow/<slug>) into the canonical page code. Pulls them from the same-origin /api/flow-suggestions route with a filter chosen by "
-    },
-    {
-      "name": "auis-review-bridge-dispatch",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": true,
-      "description": "Runs one pass of the Auis Review Bridge dispatcher — the motor that turns agent mentions in Review Mode comments into action. Reads /api/review-bridge/dispatch-queue (already gated by the per-agent Live Response / Auto C"
-    },
-    {
-      "name": "auis-review-bridge-germano-audit",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Runs Germano Faccio as a critical UI/UX second opinion on Auis Review Bridge items already in_review — what an executor (Claude or Codex) sent for approval. Compares the request with the delivery and posts one reply per "
-    },
-    {
-      "name": "auis-review-bridge-germano-explore",
-      "capability": "bridges",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Runs Germano Faccio on a proactive UI/UX patrol of the routes the user names: he navigates, clicks buttons, opens modals and sub-routes, triggers empty, loading, error and disabled states, and pins one concrete suggestio"
     },
     {
       "name": "auis-review-bridge-solve",
@@ -260,7 +221,7 @@
       "recommended": false,
       "legacy": false,
       "divergent": false,
-      "description": "Build or rework a product page in this Next.js app using the Auis design system, existing components, existing tokens, and desktop-only constraints."
+      "description": "Build or rework a product page in this Next.js app using the Auis design system, existing components and existing tokens."
     },
     {
       "name": "auis-page",
@@ -287,19 +248,6 @@
       "legacy": false,
       "divergent": false,
       "description": "Maps product screens into Auis State Mode: registers new screens, axes, states and `?ge=` interactions in `lib/auis-states/registry.ts` and keeps the `/auis/states` matrix honest after a page changes. Use after adding or"
-    },
-    {
-      "name": "commit",
-      "capability": "support",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Maps the pending changes and creates local atomic commits — one commit per file/area when it makes sense, without rewriting content inside a file just to slice it further. Does NOT push and does NOT open a PR unless the "
     },
     {
       "name": "design-system-new-component",
@@ -443,32 +391,6 @@
       "legacy": false,
       "divergent": true,
       "description": "Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as a screenshot (.webp in /public), generates the typed manifest in `app/"
-    },
-    {
-      "name": "auis-pg-create-flow",
-      "capability": "ux-flows",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": true,
-      "description": "Creates a NEW UX flow in the Auis UX Flow hub (`/auis/ux-flow/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the file (local path or pasted content), parses it via `parseAuFlowFile`, map"
-    },
-    {
-      "name": "auis-pg-merge-flow",
-      "capability": "ux-flows",
-      "origin": "repo",
-      "platforms": [
-        "claude",
-        "codex"
-      ],
-      "recommended": false,
-      "legacy": false,
-      "divergent": false,
-      "description": "Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`, `app/auis/ux-flow/[slug]/page.tsx`). Reads the file, compares it against the page's exp"
     },
     {
       "name": "auis-update-ux-flow",

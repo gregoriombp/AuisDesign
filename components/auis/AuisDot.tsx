@@ -7,6 +7,11 @@ import {
   type AuDropdownItem,
 } from "@/components/ui/AuDropdownMenu";
 import { AuLogo } from "@/components/ui/AuLogo";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { useBrand } from "@/app/auis/_data/BrandProvider";
 import { useReviewStore } from "@/lib/auis-review/store";
 import { useEditStore } from "@/lib/auis-edit/store";
@@ -17,11 +22,12 @@ import {
 } from "@/lib/auis-review/agentSettingsStore";
 import { REVIEW_AGENTS } from "@/lib/auis-review/agents";
 import { useBuilderChromeHidden } from "@/lib/auis/useBuilderChromeHidden";
+import { AgentsPanel } from "./AgentsPanel";
 
 /**
  * The persistent Auis dot (bottom-right corner): navigation shortcuts, the
- * three modes (Review / Edit / States) and the per-agent toggles that are the
- * dispatcher's permission.
+ * three modes (Review / Edit / States) and the Agents panel — on, ceiling and
+ * model per agent, which is what the mention trigger obeys.
  */
 export function AuisDot() {
   // useSearchParams (through useBuilderChromeHidden) requires Suspense on prerender.
@@ -43,6 +49,7 @@ function AuisDotInner() {
   const router = useRouter();
   const brand = useBrand();
   const [visible, setVisible] = React.useState(true);
+  const [agentsOpen, setAgentsOpen] = React.useState(false);
   const reviewActive = useReviewStore((s) => s.active);
   const toggleReview = useReviewStore((s) => s.toggleActive);
   const sessionRole = useReviewStore((s) => s.sessionRole);
@@ -53,8 +60,7 @@ function AuisDotInner() {
   const toggleStates = useStatesStore((s) => s.toggleActive);
   const agentSettings = useAgentSettingsStore((s) => s.settings);
   const hydrateAgents = useAgentSettingsStore((s) => s.hydrate);
-  const toggleAgent = useAgentSettingsStore((s) => s.toggle);
-  // Agents obey only the admin — the toggles do not even show for a reviewer
+  // Agents obey only the admin — the panel does not even show for a reviewer
   // (and the server refuses the PUT anyway).
   const isAdmin = sessionRole === "admin";
 
@@ -67,25 +73,24 @@ function AuisDotInner() {
 
   const go = (href: string) => router.push(href);
 
-  // Agent control panel — Live Response / Auto Construct per agent.
-  // Toggles keep the menu open (closeOnSelect: false) so you can flip several
-  // of them in one go.
+  // The agents live in a panel of their own (switch + disclosure). The menu
+  // item only opens it.
+  const enabledCount = REVIEW_AGENTS.filter(
+    (a) => agentSettingsOf(agentSettings, a.id).enabled,
+  ).length;
   const agentItems: AuDropdownItem[] = !isAdmin
     ? []
     : [
         { id: "sep-agents", separator: true },
-        { id: "label-agents", isLabel: true, label: "Agents" },
-        ...REVIEW_AGENTS.flatMap((agent): AuDropdownItem[] => {
-          const s = agentSettingsOf(agentSettings, agent.id);
-          return agent.capabilities.map((cap): AuDropdownItem => ({
-            id: `${agent.id}-${cap.key}`,
-            label: `${agent.handle} · ${cap.label}`,
-            icon: cap.icon,
-            checked: s[cap.key],
-            closeOnSelect: false,
-            onSelect: () => void toggleAgent(agent.id, cap.key),
-          }));
-        }),
+        {
+          id: "agents",
+          label: `Agents · ${enabledCount} on`,
+          icon: "agent",
+          // The menu returns focus to its trigger as it closes; opening the
+          // panel in the same tick would count that focus as "outside" and
+          // close the panel at once.
+          onSelect: () => window.setTimeout(() => setAgentsOpen(true), 0),
+        },
       ];
 
   const items: AuDropdownItem[] = [
@@ -172,23 +177,39 @@ function AuisDotInner() {
   ];
 
   return (
-    <div className="fixed bottom-4 right-4 z-60 pointer-events-none">
-      <AuDropdownMenu
-        align="end"
-        side="top"
-        sideOffset={8}
-        aria-label="Auis shortcuts"
-        trigger={
-          <button
-            type="button"
+    <Popover open={agentsOpen} onOpenChange={setAgentsOpen}>
+      <PopoverAnchor asChild>
+        <div className="fixed bottom-4 right-4 z-60 pointer-events-none">
+          <AuDropdownMenu
+            align="end"
+            side="top"
+            sideOffset={8}
             aria-label="Auis shortcuts"
-            className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-(--bg-inverse) text-(--fg-on-inverse) shadow-(--shadow-md) outline-hidden transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-(--ring-focus) focus-visible:ring-offset-2 focus-visible:ring-offset-(--bg-canvas)"
-          >
-            <AuLogo variant="mark" height={14} aria-label={brand.name} brand={brand} />
-          </button>
-        }
-        items={items}
-      />
-    </div>
+            trigger={
+              <button
+                type="button"
+                aria-label="Auis shortcuts"
+                className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-(--bg-inverse) text-(--fg-on-inverse) shadow-(--shadow-md) outline-hidden transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-(--ring-focus) focus-visible:ring-offset-2 focus-visible:ring-offset-(--bg-canvas)"
+              >
+                <AuLogo variant="mark" height={14} aria-label={brand.name} brand={brand} />
+              </button>
+            }
+            items={items}
+          />
+        </div>
+      </PopoverAnchor>
+      <PopoverContent
+        side="top"
+        align="end"
+        sideOffset={8}
+        className="w-auto overflow-hidden rounded-lg border border-(--border-subtle) bg-(--bg-raised) p-0 shadow-lg"
+        // The menu, as it finishes closing (~150ms), forces focus back to the
+        // dot — and that arrived after the panel opened and closed it at once.
+        // The panel closes on outside click and Esc; focus leaving does not count.
+        onFocusOutside={(event) => event.preventDefault()}
+      >
+        <AgentsPanel />
+      </PopoverContent>
+    </Popover>
   );
 }

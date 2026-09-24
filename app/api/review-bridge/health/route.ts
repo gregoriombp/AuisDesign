@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Compat with the solve/germano skills (they check ok + schemaVersion==3 before
-// running). The bridge is serverless and embedded — no token, same-origin.
+// Compat with the solve skill and the mention runner (they check ok +
+// schemaVersion==3 before running). The bridge is serverless and embedded — no
+// token, same-origin.
 export async function GET() {
   return NextResponse.json({
     ok: true,

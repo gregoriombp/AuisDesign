@@ -134,7 +134,6 @@ Apply whichever exist in this repo. Default for UI/UX preview projects:
 - **Never create new tokens.** If a color/spacing/radius does not exist, use the closest one that does or ask. Forbidden: `bg-[#hex]`, `p-[Npx]`, `text-[#hex]`, `gap-[Npx]`. Use `var(--<token>)` or the tokens' Tailwind classes.
 - **Component lookup order:** project component (e.g. `Au*`) → shadcn primitive (via MCP if available) → custom only as a last resort. If you are going to create a custom one, ask first.
 - **The reference informs structure, not style.** Stealing OpenAI's layout ≠ stealing OpenAI's colors.
-- **Desktop-only** unless the repo proves otherwise. Don't add `md:` / `lg:` reflows just to fill space. Don't document mobile-first if the product has no mobile.
 - **`font-mono` is forbidden in product UI.** Use `tabular-nums` for aligned numbers. Mono only for real code displayed in a block.
 - **UX writing tone:** direct, operational, present tense. "Invoices attempt charges in this order" > "Charges will be attempted in order". Read 2-3 strings that already exist in the repo before writing new ones — copy the tone.
 

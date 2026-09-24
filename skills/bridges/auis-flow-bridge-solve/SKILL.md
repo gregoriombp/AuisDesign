@@ -261,7 +261,6 @@ or Reopen (sends it back to open); the amber "N suggestions" badge on
 | Vague description ("improvements") + large diff | skip, ask the user to clarify |
 | Base snapshot no longer matches the page (stale) | skip, ask for a fresh proposal on the current flow |
 | Legacy record (no `baseRevision` / `baseHash`) | skip, ask the user to recreate it in the editor |
-| Suggestion introduces mobile / tablet screens or breakpoints | skip and explain (Auis is desktop-only) |
 | Suggestion adds a node with an `href` pointing at a route that does not exist | apply but write `"#"` and flag it in the summary |
 | Suggestion only moves nodes around (position-only diff) | skip unless the description asks for a new layout; nothing structural to materialize |
 

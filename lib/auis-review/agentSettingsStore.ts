@@ -1,71 +1,85 @@
 "use client"
 
-// Client store for the per-agent Live Response / Auto Construct toggles shown in
-// the floating Auis dot. Hydrates once from the serverless bridge and
-// writes each toggle through optimistically (reverting on failure). The bridge
-// file is the source of truth — the /loop dispatcher reads it directly.
+// State of the Agents panel (on · ceiling · model per agent). Hydrates once
+// from the bridge and writes every change optimistically, reverting only the
+// keys that failed. The bridge is the source of truth: the write routes and the
+// mention runner read it from there, not from here.
 
 import { create } from "zustand"
-import type {
-  ReviewAgentSettings,
-  ReviewAgentSettingsMap,
-} from "@/components/auis-review/types"
+import {
+  normalizeAgentSettings,
+  type ReviewAgentSettings,
+  type ReviewAgentSettingsMap,
+} from "./agentRuntime"
 
 const ENDPOINT = "/api/review-bridge/agent-settings"
-const OFF: ReviewAgentSettings = { liveResponse: false, autoConstruct: false }
+const OFF: ReviewAgentSettings = { enabled: false, permission: "reply", model: null }
 
 interface AgentSettingsState {
   settings: ReviewAgentSettingsMap
+  /** Does the mention trigger run on this machine? null until hydrated. */
+  triggerEnabled: boolean | null
   hydrated: boolean
   hydrate: () => Promise<void>
-  toggle: (agentId: string, key: keyof ReviewAgentSettings) => Promise<void>
+  update: (agentId: string, patch: Partial<ReviewAgentSettings>) => Promise<void>
 }
 
 export const useAgentSettingsStore = create<AgentSettingsState>()((set, get) => ({
   settings: {},
+  triggerEnabled: null,
   hydrated: false,
   hydrate: async () => {
     if (get().hydrated) return
     try {
       const res = await fetch(ENDPOINT)
       if (res.ok) {
-        const data = (await res.json()) as { settings?: ReviewAgentSettingsMap }
-        set({ settings: data.settings ?? {}, hydrated: true })
+        const data = (await res.json()) as {
+          settings?: ReviewAgentSettingsMap
+          triggerEnabled?: boolean
+        }
+        set({
+          settings: data.settings ?? {},
+          triggerEnabled: data.triggerEnabled ?? false,
+          hydrated: true,
+        })
         return
       }
     } catch {
-      // offline / no bridge — fall back to all-off, still usable.
+      // offline / no bridge — keep the runtime defaults, still usable.
     }
     set({ hydrated: true })
   },
-  toggle: async (agentId, key) => {
-    const prev = get().settings[agentId] ?? OFF
-    const next: ReviewAgentSettings = { ...prev, [key]: !prev[key] }
-    set((s) => ({ settings: { ...s.settings, [agentId]: next } }))
+  update: async (agentId, patch) => {
+    const prev = agentSettingsOf(get().settings, agentId)
+    set((s) => ({ settings: { ...s.settings, [agentId]: { ...prev, ...patch } } }))
     try {
       const res = await fetch(ENDPOINT, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agentId, settings: next }),
+        body: JSON.stringify({ agentId, settings: patch }),
       })
       if (!res.ok) throw new Error("put_failed")
     } catch {
-      // Revert ONLY this key off the CURRENT state — a concurrent toggle of the
-      // agent's other key (rapid clicks; the menu stays open) must survive.
+      // Revert ONLY this patch's keys off the CURRENT state — another click on
+      // the same agent (the panel stays open) must survive.
       set((s) => {
-        const current = s.settings[agentId] ?? OFF
-        return {
-          settings: { ...s.settings, [agentId]: { ...current, [key]: prev[key] } },
-        }
+        const current = agentSettingsOf(s.settings, agentId)
+        const reverted = {
+          ...current,
+          ...Object.fromEntries(
+            Object.keys(patch).map((k) => [k, prev[k as keyof ReviewAgentSettings]]),
+          ),
+        } as ReviewAgentSettings
+        return { settings: { ...s.settings, [agentId]: reverted } }
       })
     }
   },
 }))
 
-/** Settings for an agent, defaulting to all-off when never toggled. */
+/** Settings for an agent; with nothing stored, the runtime defaults. */
 export function agentSettingsOf(
   map: ReviewAgentSettingsMap,
   agentId: string,
 ): ReviewAgentSettings {
-  return map[agentId] ?? OFF
+  return map[agentId] ?? normalizeAgentSettings(agentId, undefined) ?? OFF
 }

@@ -82,7 +82,13 @@ The worked example is `/auis/states/example`: unions + parsers in
      `lib/auis-states/useScreenStateOverride.ts`, derives the scenario during
      render and wraps the screen in `Suspense`. Never copy the override into
      `useState`. `/auis/states/example` is the reference.
-   In both, the parser maps absent/unknown → default, exactly like the
+   - **Pattern A with a mirror:** the real flow writes its step into the URL
+     (wizards). The `key` comes from `useMirroredScenario`
+     (`lib/auis-states/useMirroredScenario.ts`), not from the server — see
+     `docs/screen-url-mapping.md` for the pattern and the traps it already
+     sprung (orphan pins, the router snapshot, the server key, a page
+     rendered behind the screen).
+   In all of them, the parser maps absent/unknown → default, exactly like the
    switcher assumes.
 3. **Edit the registry.** Deeper entries first (the matcher returns the first
    one that matches). Shared axes are reused by reference. Add `previewPath`
@@ -101,9 +107,12 @@ The worked example is `/auis/states/example`: unions + parsers in
    (iframes rendered with `?chrome=0`); open 2–3 deep links from the matrix
    and see the scenario mount — e.g. `/auis/states/example?state=empty`,
    `/auis/states/example?state=error&plan=pro`,
-   `/auis/states/example?ge=t%3ANew%20item`. Optional: `npm run states:pdf`
-   (needs the dev server and `playwright-core` with an installed Chrome) to
-   print the whole matrix.
+   `/auis/states/example?ge=t%3ANew%20item`. On a mirrored screen, also
+   walk the flow with the toolbar open: it must report the live step, remount
+   on every axis, and exiting the mode must return the screen to its default
+   (the exit also drops `?ge=`). Optional: `npm run states:pdf` (needs the
+   dev server and `playwright-core` with an installed Chrome) to print the
+   whole matrix.
 
 ## Invariants
 

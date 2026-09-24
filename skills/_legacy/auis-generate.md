@@ -14,7 +14,7 @@ Use current Auis skills instead:
 
 - Components: `auis-new-component`
 - Product pages and redesigns: `auis-new-page`
-- UX flows: `auis-create-ux-flow` or `auis-pg-*`
+- UX flows: `auis-create-ux-flow`
 - Review comments: `auis-review-bridge-solve`
 
 Do not generate:

@@ -24,10 +24,14 @@ export type AuMentionMenuEntry = {
   label: string;
   /** Material Symbol. */
   icon?: string;
+  /** Image mark rendered in place of the glyph (e.g. an agent's official logo). */
+  iconSrc?: string;
   /** Chevron on the right — signals a drill-in (an item with a nested list). */
   chevron?: boolean;
   /** Color accent on the label (e.g. the "Custom" item). */
   accent?: "purple";
+  /** Quiet status on the right of the row (e.g. "off" for a switched-off agent). */
+  meta?: string;
 };
 
 export type AuMentionMenuSection = {
@@ -85,20 +89,40 @@ function EntryRow({
             : "text-(--fg-primary)",
       )}
     >
-      <Icon
-        name={entry.icon ?? "bolt"}
-        size={16}
-        className={cn(
-          "shrink-0",
-          active
-            ? "text-(--fg-on-inverse)"
-            : entry.accent === "purple"
-              ? "text-(--au-purple-600)"
-              : "text-(--fg-tertiary)",
-        )}
-      />
+      {entry.iconSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={entry.iconSrc}
+          alt=""
+          aria-hidden="true"
+          className="h-4 w-4 shrink-0 rounded-full object-cover"
+        />
+      ) : (
+        <Icon
+          name={entry.icon ?? "bolt"}
+          size={16}
+          className={cn(
+            "shrink-0",
+            active
+              ? "text-(--fg-on-inverse)"
+              : entry.accent === "purple"
+                ? "text-(--au-purple-600)"
+                : "text-(--fg-tertiary)",
+          )}
+        />
+      )}
 
       <span className="min-w-0 flex-1 truncate font-medium">{entry.label}</span>
+      {entry.meta && (
+        <span
+          className={cn(
+            "shrink-0 text-2xs",
+            active ? "text-(--fg-on-inverse)" : "text-(--fg-tertiary)",
+          )}
+        >
+          {entry.meta}
+        </span>
+      )}
       {entry.chevron && (
         <Icon
           name="chevron_right"

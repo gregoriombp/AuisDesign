@@ -1,6 +1,6 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **37 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **31 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
@@ -16,11 +16,11 @@
 | `auis-foundation` | 🟣🟠🌐 | cowork | ⭐ | Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Be |
 | `auis-foundation-update` | 🟣🟠 | repo | — | INCREMENTALLY updates the foundation tokens of the Auis design system in app/globals.css (color, typography, spacing, radius, shadow, motion) — additi |
 | `auis-new-component` | 🟣🟠 | repo | — | Add or update an Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation. |
-| `auis-new-page` | 🟣🟠 | repo | — | Build or rework a product page in this Next.js app using the Auis design system, existing components, existing tokens, and desktop-only constraints. |
+| `auis-new-page` | 🟣🟠 | repo | — | Build or rework a product page in this Next.js app using the Auis design system, existing components and existing tokens. |
 | `auis-page` | 🟣🟠🌐 | cowork | ⭐ | Builds a full page in a Auis design system project (Next.js + shadcn/ui) from a screenshot, Figma URL, wireframe, or written description. Maps every v |
 | `auis-update-states` | 🟣🟠 | repo | — | Maps product screens into Auis State Mode: registers new screens, axes, states and `?ge=` interactions in `lib/auis-states/registry.ts` and keeps the  |
 
-## UX Flows (7)
+## UX Flows (5)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
@@ -28,19 +28,14 @@
 | `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Creates a compiled, multi-scenario "golden eye" UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug> |
 | `auis-flow` | 🟣🟠🌐 | cowork | ⭐ | Designs a feature's user flow as a FigJam board using the Auis convention: every screen becomes a card with name + route + file path + status; every t |
 | `auis-import-figma-flow` | 🟣🟠 | repo | ◐ | Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as  |
-| `auis-pg-create-flow` | 🟣🟠 | repo | ◐ | Creates a NEW UX flow in the Auis UX Flow hub (`/auis/ux-flow/[slug]`) from an `.awflow.json` file exported from the PG (designer) repo. Reads the fil |
-| `auis-pg-merge-flow` | 🟣🟠 | repo | — | Merges a `.awflow.json` (exported from the PG repo) with a flow that already exists in the Auis UX Flow hub (`/auis/ux-flow/[slug]`, `app/auis/ux-flow |
 | `auis-update-ux-flow` | 🟣🟠 | repo | ◐ | Registers a structural update to an existing UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>).  |
 
-## Bridges (review / flow / edit / project) (6)
+## Bridges (review / flow / edit / project) (3)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-edit-bridge-solve` | 🟣 | repo | — | Materializes Auis Live Edit Mode overlays into real TSX. Reads filtered page-editor ops (text, style tokens, typography classes, variant, icon, hide,  |
 | `auis-flow-bridge-solve` | 🟣🟠 | repo | — | Materializes UX flow edit suggestions filed from the flow editor ("Suggest edit" on /auis/ux-flow/<slug>) into the canonical page code. Pulls them fro |
-| `auis-review-bridge-dispatch` | 🟣🟠 | repo | ◐ | Runs one pass of the Auis Review Bridge dispatcher — the motor that turns agent mentions in Review Mode comments into action. Reads /api/review-bridge |
-| `auis-review-bridge-germano-audit` | 🟣🟠 | repo | — | Runs Germano Faccio as a critical UI/UX second opinion on Auis Review Bridge items already in_review — what an executor (Claude or Codex) sent for app |
-| `auis-review-bridge-germano-explore` | 🟣🟠 | repo | — | Runs Germano Faccio on a proactive UI/UX patrol of the routes the user names: he navigates, clicks buttons, opens modals and sub-routes, triggers empt |
 | `auis-review-bridge-solve` | 🟣🟠 | repo | ⭐ | Resolves Auis Review Mode comments in bulk. Reads from the review-bridge using a filter chosen by the user (all of them, only today's, only open ones, |
 
 ## Build & Handoff (3)
@@ -58,11 +53,10 @@
 | `auis-ux-writing` | 🟣🟠 | repo | ⭐ ◐ | Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits |
 | `auis-voice` | 🟣🟠 | repo | ⭐ | Bootstraps a product's voice by filling in PRODUCT_CONTEXT.md — the file every Auis writing skill reads. Derives the copy language and locale, the sit |
 
-## Support (8)
+## Support (7)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
-| `commit` | 🟣🟠 | repo | — | Maps the pending changes and creates local atomic commits — one commit per file/area when it makes sense, without rewriting content inside a file just |
 | `design-system-new-component` | 🟣🟠 | repo | ◐ legacy | [INACTIVE in this repo — do not trigger.] Generic, Au-blind version of "new component", kept only as a record of the Auis initial setup. To add or edi |
 | `design-system-new-page` | 🟣🟠 | repo | ◐ legacy | '[INACTIVE in this repo — do not trigger.] Generic, Au-blind version |
 | `figma-code-library-import` | 🟣🟠 | repo | — | Use when implementing or updating product UI from Figma in code through Claude or Cursor, especially when the project has its own component library an |
@@ -91,4 +85,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 37: 36 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 10 have their own Codex variant (◐).
+Of the 31: 30 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 8 have their own Codex variant (◐).

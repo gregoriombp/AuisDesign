@@ -79,7 +79,7 @@ page (component lookup: Au* → shadcn → custom; tokens are sacred).
 - Compose with Au* (e.g. a project's welcome screen uses
   `AuLogo` + `AuButton`). Include a context bar at the top
   ("Rebuilt from <step · name>", a link back to the project, an
-  "Original in Figma" link). Desktop-only screen.
+  "Original in Figma" link).
 
 **`restyle`** — a re-skin preview in the current DS (it doesn't necessarily
 become a product route). Treat it as a lighter/partial `build`, or a

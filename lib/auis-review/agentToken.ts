@@ -1,5 +1,5 @@
 /**
- * Lets AGENTS (the /loop dispatcher, the solve/germano skills) talk to the
+ * Lets AGENTS (the mention runner, the solve skill) talk to the
  * bridge APIs without a browser session when the app runs behind an auth
  * layer: the `x-bridge-agent-token` header is compared with the
  * BRIDGE_AGENT_TOKEN secret of the environment. Unset locally — the local dev

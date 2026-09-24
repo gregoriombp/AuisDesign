@@ -52,16 +52,46 @@ test("Codex writes with its canonical agent actor", () => {
   )
 })
 
-test("Codex mirrors Claude execution and approval without Germano powers", () => {
+test("Codex and Grok mirror Claude execution and approval", () => {
   const solve = getReviewSkill("auis-review-bridge-solve")
   assert.ok(solve)
   assert.equal(isReviewSkillAvailableToAgent(solve, "claude"), true)
   assert.equal(isReviewSkillAvailableToAgent(solve, "codex"), true)
-  assert.equal(isReviewSkillAvailableToAgent(solve, "germano"), false)
+  assert.equal(isReviewSkillAvailableToAgent(solve, "grok"), true)
 
   assert.equal(canReviewAgentSubmitForApproval("claude"), true)
   assert.equal(canReviewAgentSubmitForApproval("codex"), true)
-  assert.equal(canReviewAgentSubmitForApproval("germano"), false)
+  assert.equal(canReviewAgentSubmitForApproval("grok"), true)
+})
+
+test("Grok is a canonical executor with its own mention target", () => {
+  assert.equal(REVIEW_AGENTS.filter((agent) => agent.id === "grok").length, 1)
+  assert.equal(getReviewAgentByHandle("GROK")?.id, "grok")
+  assert.deepEqual(parseReviewCommand("@Grok fix this").mentions, ["grok"])
+  assert.deepEqual(canonicalReviewAgentActor("grok"), {
+    kind: "agent",
+    id: "grok",
+    name: "Grok",
+  })
+  assert.equal(getReviewAgent("grok")?.tone, "inverse")
+})
+
+test("every agent shows its official mark from public/assets/agents", () => {
+  const marks = REVIEW_AGENTS.map((a) => a.mark)
+  assert.deepEqual(marks, [
+    "/assets/agents/claude.svg",
+    "/assets/agents/openai.svg",
+    "/assets/agents/grok.svg",
+  ])
+  assert.equal(new Set(marks).size, marks.length)
+})
+
+test("an unknown @handle stays plain text and never becomes an actor", () => {
+  assert.equal(getReviewAgent("someone"), undefined)
+  assert.deepEqual(parseReviewCommand("@Someone look at this").mentions, [])
+  assert.equal(canonicalReviewAgentActor("someone"), undefined)
+  assert.equal(canReviewAgentSubmitForApproval("someone"), false)
+  assert.equal(isReservedReviewAgentIdentity({ id: "someone", name: "Someone" }), false)
 })
 
 test("there is no Cursor executor and no #now directive", () => {

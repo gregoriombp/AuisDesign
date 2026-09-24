@@ -16,9 +16,9 @@ import type {
  *              browser is an admin); or, behind an auth layer you add, the
  *              sessions you decide to promote.
  *   agent    — a request carrying a valid x-bridge-agent-token (skills and the
- *              dispatcher running outside the browser). Sees everything and
+ *              mention runner, outside the browser). Sees everything and
  *              transitions status, but only executes admin commands (the gate
- *              lives in the dispatch queue).
+ *              lives in the mention trigger and the dispatch queue).
  *   reviewer — any other authenticated session once auth exists: comments and
  *              replies, but does not command agents, does not change status and
  *              does not see "admins-only" comments.

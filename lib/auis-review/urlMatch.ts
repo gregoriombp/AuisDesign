@@ -76,3 +76,56 @@ export function canonicalizeReviewUrl(url: string): string {
 export function isSameReviewUrl(a: string, b: string): boolean {
   return canonicalizeReviewUrl(a) === canonicalizeReviewUrl(b)
 }
+
+/**
+ * Axes a screen GAINED after it already had comments on it.
+ *
+ * The case that creates an entry: a flow that used to keep its step in React
+ * state, so EVERY pin — from the first step to the last — recorded the bare
+ * path. Once the flow mirrors `?state=` (or any other param) into the URL,
+ * comparing by equality would exile those pins to the only address that is
+ * still bare: the first step.
+ *
+ * A stored pin that says nothing about the axis matches any value of it — that
+ * is all we know about where it was dropped. A new pin is born with the param
+ * and stays strict. Add an entry here whenever a screen with live comments
+ * starts writing a param, and cover it in `__tests__/urlMatch.test.ts`.
+ */
+export interface LegacyAxes {
+  path: string
+  params: string[]
+}
+
+const LEGACY_AXES: LegacyAxes[] = []
+
+/**
+ * Does the stored comment belong to the screen that is open now?
+ *
+ * Asymmetric on purpose: the looseness applies to what is STORED (the old pin,
+ * which could not record the axis), never to the current screen. That is why
+ * it is not `isSameReviewUrl` — there the two sides are interchangeable.
+ */
+export function matchesCurrentReviewUrl(
+  storedUrl: string,
+  currentUrl: string,
+  legacyAxes: readonly LegacyAxes[] = LEGACY_AXES,
+): boolean {
+  const stored = canonicalizeReviewUrl(storedUrl)
+  if (stored === currentUrl) return true
+
+  const [storedPath = "", storedQuery = ""] = stored.split("?", 2)
+  const [currentPath = "", currentQuery = ""] = currentUrl.split("?", 2)
+  if (storedPath !== currentPath) return false
+
+  const legacy = legacyAxes.find((entry) => entry.path === storedPath)
+  if (!legacy) return false
+
+  // It is only a pin from before the axis if it says NOTHING about any of them.
+  const storedParams = new URLSearchParams(storedQuery)
+  if (legacy.params.some((param) => storedParams.has(param))) return false
+
+  // Apart from the new axes, the rest of the address still has to match.
+  const currentParams = new URLSearchParams(currentQuery)
+  for (const param of legacy.params) currentParams.delete(param)
+  return currentParams.toString() === storedParams.toString()
+}

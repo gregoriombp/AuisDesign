@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useLiveLocation } from "@/lib/auis-review/liveLocation"
 import { Icon } from "@/components/ui/Icon"
 import { AuSegmented } from "@/components/ui/AuSegmented"
 import {
@@ -29,16 +30,24 @@ const DROP_ON_APPLY = ["ge", "reviewCommentId"]
 
 export function StatesToolbar() {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
+  // The axes are read from the LIVE address, not the router snapshot: screens
+  // that mirror their step with `replaceState` (a wizard) change address
+  // without navigating, and the toolbar would announce the step of the last
+  // navigation. Writing still goes through the router: picking a scenario is
+  // exactly what should remount the screen.
+  const liveLocation = useLiveLocation()
+  const searchParams = React.useMemo(
+    () => new URLSearchParams(liveLocation.split("?")[1] ?? ""),
+    [liveLocation],
+  )
   const router = useRouter()
   const requestExit = useStatesStore((s) => s.requestExit)
 
   const entry = React.useMemo(() => matchScreenStates(pathname), [pathname])
 
-  // Optimistic value per axis while router.replace has not reached
-  // useSearchParams yet (becomes the AuSegmented `pendingValue` / the menu's
-  // spinner). Cleared when the URL changes, with a safety timeout so it never
-  // gets stuck.
+  // Optimistic value per axis while router.replace has not reached the
+  // address yet (becomes the AuSegmented `pendingValue` / the menu's spinner).
+  // Cleared when the URL changes, with a safety timeout so it never gets stuck.
   const [pending, setPending] = React.useState<Record<string, string>>({})
   React.useEffect(() => {
     setPending({})
@@ -108,53 +117,61 @@ export function StatesToolbar() {
   return (
     <div
       {...{ [STATES_OVERLAY_DATA_ATTR]: "toolbar" }}
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 pointer-events-none"
+      // The side margin keeps the Auis dot (right corner) in view.
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 max-w-[calc(100vw-8rem)] pointer-events-none"
       style={{ zIndex: STATES_Z.toolbar }}
     >
-      <div className="pointer-events-auto rounded-full bg-(--bg-raised) border border-(--border-subtle) shadow-lg px-1.5 py-1.5 flex items-center gap-1">
+      <div className="pointer-events-auto max-w-full rounded-full bg-(--bg-raised) border border-(--border-subtle) shadow-lg px-1.5 py-1.5 flex items-center gap-1">
         {/* Mode switch (Review ↔ Edit ↔ States) — same category as the siblings. */}
-        <ModeFamilySwitch current="states" />
+        <div className="shrink-0">
+          <ModeFamilySwitch current="states" />
+        </div>
 
-        <span className="h-5 w-px bg-(--border-subtle)" />
+        <span className="h-5 w-px shrink-0 bg-(--border-subtle)" />
 
-        {entry ? (
-          <>
-            <span className="px-2 body-xs font-semibold text-(--fg-primary) whitespace-nowrap">
-              {entry.screenLabel}
+        {/* A screen with many axes (plus interactions) outgrows the window:
+            the middle scrolls, and the mode switch and the exit button stay
+            within reach. */}
+        <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
+          {entry ? (
+            <>
+              <span className="px-2 body-xs font-semibold text-(--fg-primary) whitespace-nowrap">
+                {entry.screenLabel}
+              </span>
+              {entry.axes.map((axis) => (
+                <AxisControl
+                  key={axis.param}
+                  axis={axis}
+                  current={currentOf(axis)}
+                  pending={pending[axis.param] ?? null}
+                  // With 3+ axes the pill overflows — every axis becomes a menu.
+                  forceMenu={entry.axes.length >= 3}
+                  onApply={(value) => applyAxis(axis, value)}
+                />
+              ))}
+              {entry.interactions && entry.interactions.length > 0 && (
+                <InteractionsControl
+                  interactions={entry.interactions}
+                  currentGe={searchParams.get("ge")}
+                  onApply={applyInteraction}
+                />
+              )}
+            </>
+          ) : (
+            <span className="px-2 body-xs text-(--fg-tertiary) whitespace-nowrap">
+              This screen has no registered states yet
             </span>
-            {entry.axes.map((axis) => (
-              <AxisControl
-                key={axis.param}
-                axis={axis}
-                current={currentOf(axis)}
-                pending={pending[axis.param] ?? null}
-                // With 3+ axes the pill overflows — every axis becomes a menu.
-                forceMenu={entry.axes.length >= 3}
-                onApply={(value) => applyAxis(axis, value)}
-              />
-            ))}
-            {entry.interactions && entry.interactions.length > 0 && (
-              <InteractionsControl
-                interactions={entry.interactions}
-                currentGe={searchParams.get("ge")}
-                onApply={applyInteraction}
-              />
-            )}
-          </>
-        ) : (
-          <span className="px-2 body-xs text-(--fg-tertiary) whitespace-nowrap">
-            This screen has no registered states yet
-          </span>
-        )}
+          )}
+        </div>
 
-        <span className="h-5 w-px bg-(--border-subtle)" />
+        <span className="h-5 w-px shrink-0 bg-(--border-subtle)" />
 
         <button
           type="button"
           onClick={() => requestExit()}
           aria-label="Exit State Mode"
           title="Exit (⌘⇧S)"
-          className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
+          className="h-8 w-8 shrink-0 inline-flex items-center justify-center rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
         >
           <Icon name="close" size={16} />
         </button>
@@ -185,7 +202,7 @@ function AxisControl({
 
   if (!asMenu) {
     return (
-      <span className="inline-flex items-center gap-1.5 pl-1">
+      <span className="inline-flex shrink-0 items-center gap-1.5 pl-1">
         <span className="body-xs text-(--fg-tertiary) whitespace-nowrap">
           {axis.label}
         </span>
@@ -230,7 +247,7 @@ function AxisControl({
       trigger={
         <button
           type="button"
-          className="h-8 inline-flex items-center gap-1.5 pl-2.5 pr-2 rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary) transition-colors"
+          className="h-8 shrink-0 inline-flex items-center gap-1.5 pl-2.5 pr-2 rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary) transition-colors"
         >
           <span className="body-xs text-(--fg-tertiary) whitespace-nowrap">
             {axis.label}
@@ -286,13 +303,14 @@ function InteractionsControl({
       trigger={
         <button
           type="button"
-          className="h-8 inline-flex items-center gap-1.5 pl-2.5 pr-2 rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary) transition-colors"
+          className="h-8 shrink-0 inline-flex items-center gap-1.5 pl-2.5 pr-2 rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary) transition-colors"
         >
           <Icon name="play_arrow" size={14} />
           <span className="body-xs text-(--fg-tertiary) whitespace-nowrap">
             Interaction
           </span>
-          <span className="body-xs font-medium whitespace-nowrap">
+          {/* The interaction label is a menu description — in the pill, truncated. */}
+          <span className="max-w-60 truncate body-xs font-medium" title={active?.label}>
             {active ? active.label : "—"}
           </span>
           <Icon name="keyboard_arrow_up" size={14} />

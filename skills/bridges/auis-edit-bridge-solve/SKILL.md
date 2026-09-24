@@ -61,13 +61,12 @@ Never post as a user, and never invent a third agent id.
 ## Auto mode
 
 Normally you present the plan and **wait for approval** (§3). The only time
-you proceed without asking is when this skill is run by the dispatcher
-(`auis-review-bridge-dispatch`) because the mentioning agent's **Auto
-Construct** toggle (labelled "Auto Design" on the executor rows) in the
-floating dot (AuisDot) is on — the toggle IS the permission; there is no extra
-directive to type. In that case proceed with
-"everything", keep the same skip rules, and flag in the summary that the run
-was automatic.
+you proceed without asking is when this skill runs inside a session the Review
+Bridge mention trigger opened (`scripts/mention-prompt.md`): the agent was
+mentioned by the admin and is under the **Edit** ceiling set in the floating
+dot's Agents panel — the mention IS the permission; there is no extra directive
+to type. In that case proceed with "everything", keep the same skip rules, and
+flag in the summary that the run was automatic.
 
 ---
 

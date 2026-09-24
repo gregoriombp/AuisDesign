@@ -35,19 +35,20 @@ Dependency is **one-way** (upper layers consume lower ones — see [`component-l
 
 - **Builder chrome** — `components/auis-review/` (canvas, pins, popovers, command menu), `components/auis-edit/` (toolbar, inspector, controls), `components/auis-states/` (State Mode provider + toolbar), `components/auis/` (AuisDot, ModeFamilySwitch, FlowStateDriver). The root layout mounts Review, Edit, State Mode, the state driver, and the dot globally; the three modes are mutually exclusive.
 - **Primitives** — `components/ui/` (30 `.tsx`: **26** `Au*` + `Icon.tsx` + three shadcn primitives, `badge.tsx`, `popover.tsx` and `radio-group.tsx`): the subset the chrome imports (`AuButton`, `AuModal`, `AuSheet`, `AuDropdownMenu`, `AuInput`, `Icon`, …), plus the Review Bridge's own surfaces (`AuMentionMenu`/`AuMentionChip`) and Auis's mark (`AuLogo`). The origin product's full catalog was **not** brought over.
-- **State/logic** — `lib/auis-review/`, `lib/auis-edit/`, `lib/auis-states/` (registry, store, `useScreenStateOverride`), `lib/bridge-store/` (fs document store shared by the bridges), `lib/hooks/` (Zustand stores, element anchoring, command parsing, voice, AI assist).
+- **State/logic** — `lib/auis-review/` (stores, element anchoring, command parsing, the agent registry and runtime, the live location, voice, AI assist), `lib/auis-edit/`, `lib/auis-states/` (registry, store, `useScreenStateOverride`, `useMirroredScenario`), `lib/bridge-store/` (fs document store shared by the bridges), `lib/hooks/`.
 
 ## Bridges (runtime)
 
 ```
 Review Mode (UI)  ──creates comment──▶  /api/review-bridge/*  ──▶  review-bridge/data/*.json
                                                   │
-   agent (auis-review-bridge-solve, or the /loop dispatcher) reads the queue  ◀───┘
+   an agent reads it: auis-review-bridge-solve, or the CLI run the mention  ◀───┘
+   trigger opened (_mention.ts → scripts/mention-run.mjs, local dev only)
                                                   │
                      resolves → marks in_review → you approve/reject in the inbox
 ```
 
-- **Review Bridge** — **serverless**: same-origin routes `app/api/review-bridge/*` persist to `review-bridge/data/` through `lib/bridge-store` (atomic writes + lock). Roles admin / reviewer / agent are resolved in `_session.ts` (always admin locally; `x-bridge-agent-token` for agents when a deployment enables auth). Agents are `claude`, `codex` and `germano`; the per-agent toggles in the floating dot (Live Response / Auto Construct) gate `/dispatch-queue`.
+- **Review Bridge** — **serverless**: same-origin routes `app/api/review-bridge/*` persist to `review-bridge/data/` through `lib/bridge-store` (atomic writes + lock). Roles admin / reviewer / agent are resolved in `_session.ts` (always admin locally; `x-bridge-agent-token` for agents when a deployment enables auth). Agents are `claude`, `grok` and `codex` (no engine yet); the dot's Agents panel stores on/off, ceiling (Reply / Edit) and model per agent in `agentSettings`, which gates the mention trigger (`_mention.ts`, `AUIS_MENTION_TRIGGER=1`) and `/dispatch-queue`.
 - **Flow Bridge** — suggestions via `/api/flow-suggestions` → `flow-bridge/data/`, with an integrity layer (base revision/hash, materialization receipts, `409` on a stale base).
 - **State Mode API** — `/api/screen-states` exposes `lib/auis-states/registry.ts` to the matrix page and the PDF script.
 - **Edit Bridge** — non-destructive "ops" via `/api/page-edits` → `page-editor/data/`; `auis-edit-bridge-solve` materializes them into code.
@@ -61,16 +62,16 @@ The `*/data/` directories are **runtime state** (gitignored), not source code.
 
 ```
 skills/<cap>/<name>/SKILL.md            (Claude — canonical)
-skills/<cap>/<name>/SKILL.codex.md      (Codex — only when it diverges; 10 cases)
+skills/<cap>/<name>/SKILL.codex.md      (Codex — only when it diverges; 8 cases)
         │  npm run skills:catalog                 │  npm run skills:sync
         ▼                                         ▼
 skills/registry.json + CATALOG.md        .claude/skills/<name>/   (Claude Code)
                                          .agents/skills/<name>/   (Codex/Cursor; applies SKILL.codex.md)
 ```
 
-- **Capabilities:** Design System (11), UX Flows (7), Bridges (6), Build & Handoff (3), Content (2), Support (8). **37 total.**
-- **Platforms:** 36 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). Germano runs as a real subagent on both: `.claude/agents/germano.md` and `.codex/agents/germano.toml`.
-- **Origin:** 6 generic (Cowork, "zeroed" core) + 23 repo-local (rich variants: onboarding, bridges, ux-flow, states, audit) + 8 support.
+- **Capabilities:** Design System (11), UX Flows (5), Bridges (3), Build & Handoff (3), Content (2), Support (7). **31 total.**
+- **Platforms:** 30 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`).
+- **Origin:** 6 generic (Cowork, "zeroed" core) + 18 repo-local (rich variants: onboarding, bridges, ux-flow, states, audit) + 7 support.
 - `scripts/skills-sync.mjs` does a manual recursive copy (avoids permission-mode problems on restricted mounts) and applies the Codex variant where one exists.
 
 ## Stack
@@ -79,4 +80,4 @@ Next.js (App Router) · React 19 · **Tailwind v4** (`@theme` + `:root` in `glob
 
 ## Branding & theming
 
-Auis ships **no brand assets for your product** — it is a builder, and your product doesn't exist yet. The one mark that *ships* in `public/` is `auis-wordmark.svg`: Auis's own, rendered by `AuLogo` in the builder chrome (`/auis/*`) as the default. No logo registry, no illustration set, no integration icons. `AuLogo` is the only component allowed to render a mark — and once a user seeds their brand through `/auis/welcome` (→ `/api/setup`, materialized by `auis-brand`), it renders **their** mark instead of Auis's, read server-side from `app/auis/_data/brand.ts` (the runtime overlay is gitignored). A component in `components/ui/` must never hardcode a mark, because it lands in *your* product. The tokens sit on a neutral baseline; theming for your own product is the `auis-foundation` skill.
+Auis ships **no brand assets for your product** — it is a builder, and your product doesn't exist yet. The marks that *ship* in `public/` are Auis's own (`assets/brand/auis-wordmark.svg`, rendered by `AuLogo` in the builder chrome as the default) and the official marks of the Review Bridge agents (`assets/agents/`: Claude, OpenAI, Grok — shown by `ReviewAvatar` and the `@` menu). No logo registry, no illustration set, no integration icons. `AuLogo` is the only component allowed to render a mark — and once a user seeds their brand through `/auis/welcome` (→ `/api/setup`, materialized by `auis-brand`), it renders **their** mark instead of Auis's, read server-side from `app/auis/_data/brand.ts` (the runtime overlay is gitignored). A component in `components/ui/` must never hardcode a mark, because it lands in *your* product. The tokens sit on a neutral baseline; theming for your own product is the `auis-foundation` skill.

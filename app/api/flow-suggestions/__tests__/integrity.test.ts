@@ -78,7 +78,7 @@ test("materialization receipt is normalized and rejects incomplete evidence", ()
       files: [" app/auis/ux-flow/example/page.tsx "],
       validations: [" npm run typecheck "],
       summary: " Materialized. ",
-      actor: { kind: "agent", id: "germano", name: "spoof" },
+      actor: { kind: "agent", id: "someone", name: "spoof" },
     }),
     {
       baseRevision: "flow:example@abc",

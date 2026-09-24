@@ -10,8 +10,8 @@ description: >
   when the user asks to "import a Figma flow", "create a project from
   Figma", "import Onboarding / Checkout", "bring the Figma screens
   into the repo", or pastes a figma.com URL with the intent of importing it
-  as a project. Do NOT use for `.awflow.json` → ReactFlow diagram (that is
-  `auis-pg-create-flow`): here the source is a Figma URL and the output is
+  as a project. Do NOT use to draw a ReactFlow diagram (that is
+  `auis-create-ux-flow`): here the source is a Figma URL and the output is
   SCREENSHOTS-as-a-project, not a node diagram.
 ---
 
