@@ -74,6 +74,32 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    group: "Design system",
+    title: "Patterns",
+    items: [
+      {
+        name: "App shell",
+        href: "/auis/styleguide/components/au-app-shell",
+        aliases: ["layout", "dashboard", "sidebar layout"],
+      },
+      {
+        name: "Side navigation",
+        href: "/auis/styleguide/components/au-side-nav",
+        aliases: ["sidebar", "nav", "menu"],
+      },
+      {
+        name: "Prompt composer",
+        href: "/auis/styleguide/components/au-prompt-composer",
+        aliases: ["assistant", "ask", "chat input"],
+      },
+      {
+        name: "File dropzone",
+        href: "/auis/styleguide/components/au-dropzone",
+        aliases: ["upload", "drop", "attach", "file picker"],
+      },
+    ],
+  },
+  {
     group: "Auis",
     title: "UX flows",
     items: [

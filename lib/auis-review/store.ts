@@ -1,6 +1,7 @@
 "use client"
 
 import { create } from "zustand"
+import { RemoteBridgeReview } from "@/components/auis-review/storage/remoteBridge"
 import { ServerlessReview } from "@/components/auis-review/storage/serverless"
 import type { ReviewStorage } from "@/components/auis-review/storage/types"
 import { makeId } from "@/components/auis-review/storage/utils"
@@ -29,7 +30,23 @@ import {
  *  permission is re-checked on the server on every write. */
 export type BridgeSessionRole = "admin" | "reviewer" | "agent"
 
-const storage = new ServerlessReview()
+/** Storage backend seam. The default is the embedded serverless bridge — the
+ *  same-origin /api/review-bridge/* routes over the same JSON files. Setting
+ *  both env vars points Review Mode at a standalone bridge server instead.
+ *
+ *  `LocalStorageReview` also implements ReviewStorage but is not selectable
+ *  here yet: a no-backend mode needs a config switch, not an env var, and that
+ *  lands with the package split. Keep all three implementations compiling. */
+function pickStorage(): ReviewStorage {
+  const bridgeUrl = process.env.NEXT_PUBLIC_AUIS_REVIEW_BRIDGE_URL
+  const bridgeToken = process.env.NEXT_PUBLIC_AUIS_REVIEW_TOKEN
+  if (bridgeUrl && bridgeToken) {
+    return new RemoteBridgeReview({ baseUrl: bridgeUrl, token: bridgeToken })
+  }
+  return new ServerlessReview()
+}
+
+const storage: ReviewStorage = pickStorage()
 
 function identityToActor(identity: ReviewIdentity | null): ReviewActor | null {
   if (!identity) return null

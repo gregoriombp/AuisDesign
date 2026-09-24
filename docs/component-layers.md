@@ -46,10 +46,11 @@ the same way.
 |---|---|---|---|
 | **Primitives** | Is it a single-purpose brick, made only of tokens + HTML/Radix? | No | `AuButton`, `AuInput`/`AuField`, `AuCheckbox`, `AuToggle`, `AuSlider`, `AuPill`, `AuToast`, `AuAlert`, `AuEmpty`, `AuProgress`, `AuTabs`, `AuDropdownMenu`, `AuBreadcrumb`, `Icon` |
 | **Components** | Does it combine primitives into a generic block, reusable in any product? | No | `AuCard`, `AuStatCard`, `AuTable`, `AuModal`, `AuSheet`, `AuBreadcrumbsBar` |
-| **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | *(none ship — this layer is yours to fill: an app shell, an onboarding flow, a multi-step wizard, a settings region)* |
+| **Patterns** | Does it orchestrate a whole flow or screen region, but stay generic? | A little | `AuAppShell`, `AuSideNav`, `AuPromptComposer`, `AuDropzone` — the rest is yours to fill: an onboarding flow, a multi-step wizard, a settings region |
 | **Domain** | Is it tied to an Auis concept (Review Bridge, brand)? | Yes | `AuMentionMenu`, `AuMentionChip`, `AuLogo` |
 
-> The **Patterns** row is empty on purpose, and the **Domain** row is Auis's own domain (the
+> The four **Patterns** that ship are starting points the builder itself does not use, and
+> the **Domain** row is Auis's own domain (the
 > builder), not your product's. When you build a pricing table, an integration tile, or a
 > billing card, those are *your* Domain — they belong in Layer B of the
 > [component map](./component-map.md).

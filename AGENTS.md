@@ -4,7 +4,7 @@ Conventions for any AI Agent (Claude Code, Codex, Cursor, etc.) working in this 
 
 > For product context (what Auis is, voice, vocabulary) see `PRODUCT_CONTEXT.md`. For styleguide page structure see `docs/`. The conventions, tokens, stack rules and skills below are authoritative.
 >
-> **Before building anything, open [`docs/component-map.md`](docs/component-map.md)** — the index of "I need X → use Y → import path → when not to". It has **two layers**, and the distinction matters: **Layer A** is the 26 `Au*` in `components/ui/` — the UI the **Auis builder itself** is made of (the Review Bridge, Auis's own mark, and the primitives those stand on). They are importable and reusable, but they are not a catalog for your product. Auis ships **no application shell and no AI copilot** — no dashboard layout, sidebar, header, nav rail, or notifications panel. **Layer B** — your product's own components — **ships empty on purpose**; you populate it with the `auis-component` skill. So the map is the fastest way to find the right `Au*` **and** to see, honestly, when a thing doesn't exist yet and you have to build it.
+> **Before building anything, open [`docs/component-map.md`](docs/component-map.md)** — the index of "I need X → use Y → import path → when not to". It has **two layers**, and the distinction matters: **Layer A** is the 26 `Au*` in `components/ui/` — the UI the **Auis builder itself** is made of (the Review Bridge, Auis's own mark, and the primitives those stand on). They are importable and reusable, but they are not a catalog for your product. Four more ship one tier up as **Patterns** — `AuAppShell`, `AuSideNav`, `AuPromptComposer`, `AuDropzone` — composed starting points the builder itself does not use; adopt them or ignore them. Beyond those Auis ships no product chrome: no header, no nav rail, no notifications panel, no AI copilot. **Layer B** — your product's own components — **ships empty on purpose**; you populate it with the `auis-component` skill. So the map is the fastest way to find the right `Au*` **and** to see, honestly, when a thing doesn't exist yet and you have to build it.
 >
 > Continuing the design-system cleanup? Read [`docs/ds-cleanup-plan.md`](docs/ds-cleanup-plan.md) (what's done, what's left, how to resume) and run `npm run ds:check` for the live debt count.
 
@@ -71,8 +71,9 @@ components/ui/MyButton.tsx               ← no prefix
 components/ui/au-button.tsx              ← file must be PascalCase
 ```
 
-**`Au[Name]` wraps a shadcn primitive — going forward.** (Reality today: of the **22**
-`Au*` that ship, exactly one wraps a lowercase primitive (`AuMentionChip` → `badge.tsx`);
+**`Au[Name]` wraps a shadcn primitive — going forward.** (Reality today: of the **30**
+`Au*` that ship, two wrap a lowercase primitive (`AuMentionChip` → `badge.tsx`,
+`AuRadioGroup` → `radio-group.tsx`);
 9 use `@radix-ui/*` directly (`AuButton`, `AuCheckbox`, `AuDropdownMenu`, `AuModal`,
 `AuProgress`, `AuSheet`, `AuTabs`, `AuToggle`, `AuToast`); the rest are hand-rolled in
 Tailwind + tokens. Treat "wraps a primitive" as the target for NEW components and as on-touch
@@ -114,9 +115,10 @@ New components from now on follow the correct flow from day one (primitive + wra
   This is the single biggest lever against agents rebuilding what already exists — and
   against agents importing what was never here.
 - Then check, in order:
-  1. `/components/ui/Au*` (official — 22 components)
-  2. `/components/ui/*.tsx` lowercase (shadcn primitives — only `badge.tsx` and
-     `popover.tsx` ship today; check if an `Au` wrapper exists before importing one)
+  1. `/components/ui/Au*` (official — 30 components: 26 Layer A + 4 Patterns)
+  2. `/components/ui/*.tsx` lowercase (shadcn primitives — only `badge.tsx`,
+     `popover.tsx` and `radio-group.tsx` ship today; check if an `Au` wrapper exists
+     before importing one)
 - **Reuse > extend > create.** Extend or wrap an existing component when it's close;
   build from scratch *only* when nothing fits and the semantics are genuinely new.
   Never duplicate an existing component under a new name.
