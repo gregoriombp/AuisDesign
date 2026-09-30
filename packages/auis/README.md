@@ -8,7 +8,7 @@ npx @auis/cli@latest my-product
 ```
 
 ```
-  auis  0.2.1
+  auis  0.2.2
   code-native design builder
 
   ✓ Template  main · tarball
@@ -37,7 +37,21 @@ codebase, and AI agents build against them under enforced rules:
 - **Edit Mode** — non-destructive visual edits that agents materialize into code.
 - **UX Flows as code** (`/auis/ux-flow`) — navigable flow diagrams that are React pages.
 - **State Mode** (`/auis/states`) — every registered screen in every state, side by side.
-- **37 agent skills** — execution contracts for Claude Code, Codex and Cursor.
+- **31 agent skills** — execution contracts for Claude Code, Codex and Cursor.
+
+## Existing repository?
+
+```bash
+npx @auis/cli@latest doctor
+```
+
+`doctor` reads the repository and reports what Auis could do in it — each
+capability with a reason, and an alternative when the answer is no. It writes
+nothing. Installing into an existing repository (`auis init`) is not shipped yet.
+
+The builder UI (Review, Edit, State Mode, the flow driver) needs **React 18+** in
+the host today. A mount that runs beside Vue, Svelte, Angular and others is
+planned; it does not exist yet.
 
 ## Options
 

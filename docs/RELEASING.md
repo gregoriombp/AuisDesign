@@ -85,3 +85,6 @@ Keep it that way.
   the `doctor` docs.
 - `0.2.1` — `doctor` no longer tells a server-less host to run `npx @auis/server`,
   a package that was never published.
+- `0.2.2` — `doctor` marks every capability that lives in the builder chrome
+  (Review, Edit, flow driver, State Mode) unsupported when the host has no
+  React 18+, and names the host's UI library (Vue, Svelte…) as the reason.

@@ -12,7 +12,7 @@ npm run dev        # http://127.0.0.1:3000
 
 `npx @auis/cli` unpacks the template, renames the project, initializes git, and installs dependencies (postinstall generates `.claude/skills` + `.agents/skills`). `--pm pnpm`, `--ref <branch|tag>`, `--no-install`, `--no-git` and `--force` are there when you need them — see [`packages/auis`](../packages/auis).
 
-Already have a repository? `npx @auis/cli@latest doctor` reads it and reports what Auis can and cannot do inside it, with a reason and an alternative for each capability. It writes nothing.
+Already have a repository? `npx @auis/cli@latest doctor` reads it and reports what Auis can and cannot do inside it, with a reason and an alternative for each capability. It writes nothing. Installing into an existing repository is not shipped yet, and the builder UI needs React 18+ in the host until the framework-agnostic mount lands — see [Two ways in, today](../README.md#two-ways-in-today).
 
 Cloning still works if you'd rather have the repository as-is, contributor files included:
 

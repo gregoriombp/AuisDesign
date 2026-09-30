@@ -9,9 +9,18 @@ Instead of designing in one tool and rebuilding in another, Auis gives you:
 - **Edit Mode** — non-destructive visual edits (text, tokens, variants, icons) that agents materialize into real code.
 - **UX Flows as code** — a dedicated hub (`/auis/ux-flow`) of navigable flow diagrams that are React pages, not static pictures, with comments, structural suggestions and compiled multi-scenario views.
 - **State Mode** — every registered screen rendered in every state, side by side (`/auis/states`), driven by URL params; switch states in place on any screen with ⌘⇧S.
-- **37 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
+- **31 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
 
-Built with **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-first.
+The template is **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-first. That is the shape of a new Auis project, not a requirement for yours: the direction is a toolkit that installs into an existing product without changing what is already there.
+
+## Two ways in, today
+
+| You have | What works today |
+|---|---|
+| **Nothing yet** — a new product | `npx @auis/cli@latest my-product` creates the project with every surface working. |
+| **An existing product** | `npx @auis/cli@latest doctor` reads the repository and reports, capability by capability, what Auis could do in it. Installing into an existing repository (`auis init`) is not shipped yet. |
+
+In an existing repository the builder UI (Review, Edit, State Mode, the flow driver) needs **React 18+** today, because it mounts as a React tree. A mount that carries its own runtime — so it runs beside Vue, Svelte, Angular and others — is planned; it does not exist yet. The skills and the rulebook are plain files and work in any repository.
 
 > **Origin.** Auis started as *Bombardier*, an internal builder inside a private product. This repository is that engine extracted, de-branded, and open-sourced with neutral foundations and a documented builder core, ready to become **your** design system.
 
@@ -48,7 +57,7 @@ npm run dev            # Next.js on http://127.0.0.1:3000
 | `--force` | scaffold into a directory that is not empty |
 | `-y, --yes` | take the defaults, never prompt |
 
-Already have a product? Run `doctor` first, inside its repository:
+Already have a product? Run `doctor` inside its repository:
 
 ```bash
 npx @auis/cli@latest doctor            # reads your repo, writes nothing

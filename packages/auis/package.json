@@ -1,6 +1,6 @@
 {
   "name": "@auis/cli",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Scaffold Auis — the code-native design builder for Next.js + Tailwind + shadcn/ui, with agent skills built in.",
   "type": "module",
   "bin": {
