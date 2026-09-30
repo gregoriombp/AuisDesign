@@ -66,7 +66,7 @@ export function capabilities(d) {
     const why = d.framework.name === "unknown"
       ? "No JavaScript framework detected, so there is no dev server for Auis to mount routes on."
       : `${d.framework.name}${d.router.name === "pages-router" ? " on the Pages Router" : ""} gives Auis no file-writing route to persist through.`;
-    out.push(degraded("review.persistence", why, "Comments live in each reviewer's browser; Export/Import moves them. Run `npx @auis/server` for a shared queue."));
+    out.push(degraded("review.persistence", why, "Comments live in each reviewer's browser; Export/Import moves them. A standalone server for a shared queue is planned; it does not exist yet."));
     out.push(degraded("review.mentions", why, "Mentions are recorded locally but no agent can read the queue until a server backs it."));
     out.push(unsupported("skills.bridges", why, "The bridge skills read a queue over HTTP; without one they have nothing to read."));
   }

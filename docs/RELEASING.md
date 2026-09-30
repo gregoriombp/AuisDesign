@@ -83,3 +83,5 @@ Keep it that way.
   version `npx @auis/cli doctor` scaffolds into a directory named `doctor`.
 - `0.2.0` — first version with `doctor`. Publish it before pointing anyone at
   the `doctor` docs.
+- `0.2.1` — `doctor` no longer tells a server-less host to run `npx @auis/server`,
+  a package that was never published.
