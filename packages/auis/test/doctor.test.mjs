@@ -106,7 +106,7 @@ describe("detect", () => {
 });
 
 describe("capabilities", () => {
-  it("supports what needs nothing from the host stack", () => {
+  it("supports what needs nothing from a React host but the DOM", () => {
     const caps = capabilities(detect(makeHost()));
     for (const id of ["review.pins", "review.anchoring", "edit.text", "edit.reorder", "flow.driver", "skills.rulebook"]) {
       assert.equal(verdictOf(caps, id), "supported", id);
@@ -134,6 +134,28 @@ describe("capabilities", () => {
     assert.equal(verdictOf(caps, "review.persistence"), "degraded");
     assert.equal(verdictOf(caps, "skills.bridges"), "unsupported");
     assert.equal(verdictOf(caps, "review.pins"), "supported", "pins never needed the server");
+  });
+
+  it("promises nothing that lives in the chrome when the host has no React to mount it in", () => {
+    const root = mkdtempSync(join(tmpdir(), "auis-doctor-vue-"));
+    temps.push(root);
+    write(root, "package.json", JSON.stringify({ name: "vue-app", scripts: { dev: "vite" }, dependencies: { vue: "^3.5.0" }, devDependencies: { vite: "^6.0.0" } }));
+    write(root, "src/style.css", `:root{${Array.from({ length: 22 }, (_, i) => `--tok-${i}: #fff;`).join("")}}\n`);
+    const caps = capabilities(detect(root));
+    for (const cap of caps.filter((c) => /^(review|edit|flow|states)\./.test(c.id))) {
+      assert.equal(cap.verdict, "unsupported", cap.id);
+      assert.match(cap.because, /vite app without React/, cap.id);
+    }
+    assert.equal(verdictOf(caps, "skills.rulebook"), "supported", "the rulebook has no runtime to mount");
+  });
+
+  it("names an old React as the reason, not a missing one", () => {
+    const root = mkdtempSync(join(tmpdir(), "auis-doctor-react17-"));
+    temps.push(root);
+    write(root, "package.json", JSON.stringify({ name: "old", dependencies: { react: "17.0.2", "react-scripts": "5.0.0" } }));
+    const caps = capabilities(detect(root));
+    assert.equal(verdictOf(caps, "edit.text"), "unsupported");
+    assert.match(caps.find((c) => c.id === "edit.text").because, /React 17 is below the 18/);
   });
 
   it("ties materialization to the App Router, because that is what the inference assumes", () => {

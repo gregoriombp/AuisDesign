@@ -33,20 +33,11 @@ const unsupported = (id, because, remedy) => ({ id, verdict: "unsupported", beca
  */
 export function capabilities(d) {
   const out = [];
-  const reactOk = d.react.major !== null && d.react.major >= 18;
   const serverBacked = d.devServer.fileWriting;
 
   // --- Review -------------------------------------------------------------
-  if (reactOk) {
-    out.push(supported("review.pins", "Pins anchor through plain DOM — no markup, no wrapper, no provider in your components."));
-    out.push(supported("review.draw", "Freehand marks use the same DOM anchoring as pins."));
-  } else {
-    const why = d.react.major === null
-      ? "No React dependency found; the builder chrome is a React tree today."
-      : `React ${d.react.major} is below the 18 the chrome needs.`;
-    out.push(unsupported("review.pins", why, "A framework-agnostic mount that carries its own React is planned; it does not exist yet."));
-    out.push(unsupported("review.draw", why, "Same mount work as review.pins."));
-  }
+  out.push(supported("review.pins", "Pins anchor through plain DOM — no markup, no wrapper, no provider in your components."));
+  out.push(supported("review.draw", "Freehand marks use the same DOM anchoring as pins."));
 
   if (d.webComponents.present) {
     out.push(degraded(
@@ -72,7 +63,7 @@ export function capabilities(d) {
   }
 
   // --- Edit ---------------------------------------------------------------
-  out.push(supported("edit.text", "Text edits are contenteditable on the live DOM — they work regardless of stack."));
+  out.push(supported("edit.text", "Text edits are contenteditable on the live DOM — nothing to add to your components."));
   out.push(supported("edit.reorder", "Reordering moves DOM siblings; no knowledge of your components is needed."));
 
   const props = d.tokens.customProperties;
@@ -118,7 +109,7 @@ export function capabilities(d) {
   }
 
   // --- Flows, states, rulebook -------------------------------------------
-  out.push(supported("flow.driver", "Deep links replay clicks by visible text or selector, which needs nothing from your stack."));
+  out.push(supported("flow.driver", "Deep links replay clicks by visible text or selector — no hooks or markup in your pages."));
   out.push(degraded(
     "states.mode",
     "State Mode needs a hand-written registry of your screens and a hook call inside each page.",
@@ -126,7 +117,27 @@ export function capabilities(d) {
   ));
   out.push(supported("skills.rulebook", "The skills and conventions are plain files with no runtime — they work in any repository."));
 
-  return out;
+  return gateOnChrome(out, d);
+}
+
+/**
+ * Review, Edit, the flow driver and State Mode all run inside the builder
+ * chrome, and the chrome is a React tree mounted in the host's own React. A
+ * host without React 18+ gets none of them, however well its DOM or its tokens
+ * would suit them — so every chrome-bound verdict gives way to that one reason
+ * instead of promising a feature nobody could open.
+ */
+const CHROME_BOUND = /^(review|edit|flow|states)\./;
+
+function gateOnChrome(caps, d) {
+  if (d.react.major !== null && d.react.major >= 18) return caps;
+  const why = d.react.major !== null
+    ? `React ${d.react.major} is below the 18 the builder chrome needs.`
+    : d.framework.name === "unknown"
+      ? "No React dependency found; the builder chrome is a React tree today."
+      : `This is a ${d.framework.name} app without React; the builder chrome is a React tree today.`;
+  const remedy = "A mount that carries its own runtime, so the chrome runs beside Vue, Svelte, Angular or no framework at all, is planned; it does not exist yet.";
+  return caps.map((c) => (CHROME_BOUND.test(c.id) ? unsupported(c.id, why, remedy) : c));
 }
 
 /** Paths Auis may want, that the host may already own. */
@@ -230,7 +241,17 @@ export function report(doc) {
   write();
   write(`  ${color.bold("Capabilities")}  ${color.dim(`${doc.summary.supported} supported · ${doc.summary.degraded} degraded · ${doc.summary.unsupported} unsupported`)}`);
   write();
+  // A reason shared by many rows (no React blocks the whole chrome) is printed
+  // once; the rows after it point back instead of repeating two long lines.
+  const firstWith = new Map();
   for (const c of doc.capabilities) {
+    const key = `${c.verdict}\n${c.because}\n${c.remedy ?? ""}`;
+    const first = firstWith.get(key);
+    if (first) {
+      write(`    ${MARK[c.verdict]()} ${color.bold(c.id.padEnd(20))}${color.dim(`same as ${first}`)}`);
+      continue;
+    }
+    firstWith.set(key, c.id);
     write(`    ${MARK[c.verdict]()} ${color.bold(c.id.padEnd(20))}${c.because}`);
     if (c.remedy) write(`      ${color.dim(" ".repeat(20) + c.remedy)}`);
   }
