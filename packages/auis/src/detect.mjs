@@ -338,6 +338,26 @@ function detectDevServer(root, pkg, framework, router) {
   };
 }
 
+// The component library the app renders with, which is what a person calls their
+// stack ("a Vue app") — the build tool in FRAMEWORKS is not.
+const UI_LIBS = [
+  ["React", ["react"]],
+  ["Vue", ["vue"]],
+  ["Svelte", ["svelte"]],
+  ["Angular", ["@angular/core"]],
+  ["Solid", ["solid-js"]],
+  ["Preact", ["preact"]],
+  ["Lit", ["lit"]],
+];
+
+function detectUi(pkg) {
+  for (const [name, deps] of UI_LIBS) {
+    const hit = dependency(pkg, deps);
+    if (hit) return { name, evidence: [`package.json#${hit.name}`] };
+  }
+  return { name: null, evidence: [] };
+}
+
 /** Everything `auis doctor` knows about a repository. Reads only. */
 export function detect(root) {
   const pkg = readJson(root, "package.json");
@@ -352,6 +372,7 @@ export function detect(root) {
     name: pkg?.name ?? path.basename(root),
     packageManager: detectPackageManager(root),
     framework,
+    ui: detectUi(pkg),
     react: { version: react?.range ?? null, major: react ? major(react.range) : null, evidence: react ? ["package.json#react"] : [] },
     router,
     rootLayout: detectRootLayout(root, router),

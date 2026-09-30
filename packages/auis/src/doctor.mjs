@@ -133,9 +133,9 @@ function gateOnChrome(caps, d) {
   if (d.react.major !== null && d.react.major >= 18) return caps;
   const why = d.react.major !== null
     ? `React ${d.react.major} is below the 18 the builder chrome needs.`
-    : d.framework.name === "unknown"
-      ? "No React dependency found; the builder chrome is a React tree today."
-      : `This is a ${d.framework.name} app without React; the builder chrome is a React tree today.`;
+    : d.ui.name
+      ? `This is a ${d.ui.name} app; the builder chrome is a React tree today and needs React 18+ to mount in.`
+      : "No React dependency found; the builder chrome is a React tree today.";
   const remedy = "A mount that carries its own runtime, so the chrome runs beside Vue, Svelte, Angular or no framework at all, is planned; it does not exist yet.";
   return caps.map((c) => (CHROME_BOUND.test(c.id) ? unsupported(c.id, why, remedy) : c));
 }

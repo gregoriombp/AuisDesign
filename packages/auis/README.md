@@ -8,7 +8,7 @@ npx @auis/cli@latest my-product
 ```
 
 ```
-  auis  0.2.1
+  auis  0.2.2
   code-native design builder
 
   ✓ Template  main · tarball

@@ -144,7 +144,7 @@ describe("capabilities", () => {
     const caps = capabilities(detect(root));
     for (const cap of caps.filter((c) => /^(review|edit|flow|states)\./.test(c.id))) {
       assert.equal(cap.verdict, "unsupported", cap.id);
-      assert.match(cap.because, /vite app without React/, cap.id);
+      assert.match(cap.because, /This is a Vue app/, cap.id);
     }
     assert.equal(verdictOf(caps, "skills.rulebook"), "supported", "the rulebook has no runtime to mount");
   });
