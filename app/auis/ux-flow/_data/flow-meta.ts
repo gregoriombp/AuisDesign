@@ -36,9 +36,16 @@ export const FLOW_META: FlowMeta[] = [
       "Two journeys compiled into a single graph with a focus lens per scenario, shared-screen dots, click-to-open previews and state deep links.",
     group: "Examples",
   },
+  {
+    slug: "koru-login-golden-eye",
+    title: "Koru sign-in — compiled view",
+    description:
+      "Six ways into Koru fused into one graph: email and password, Google or Apple, the installed app, password reset, no account yet, and the session gate.",
+    group: "Compiled views",
+  },
 ]
 
-export const FLOW_GROUPS: FlowGroup[] = ["Examples"]
+export const FLOW_GROUPS: FlowGroup[] = ["Compiled views", "Examples"]
 
 export function getFlowMeta(slug: string): FlowMeta | undefined {
   return FLOW_META.find((f) => f.slug === slug)
