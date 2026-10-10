@@ -23,6 +23,7 @@ import {
 } from "@/lib/auis-review/agents";
 import { triggerMentionRun } from "../../_mention";
 import { mergeCommentEdit } from "../../_merge";
+import { isValidRevealPath } from "../../_reveal";
 import { withBridgeErrors } from "../../_errors";
 
 export const runtime = "nodejs";
@@ -207,6 +208,9 @@ async function handlePUT(
     return NextResponse.json({ error: "invalid_comment_target" }, { status: 400 });
   }
   if (body.id !== id) return NextResponse.json({ error: "id_mismatch" }, { status: 400 });
+  if (body.revealPath !== undefined && !isValidRevealPath(body.revealPath)) {
+    return NextResponse.json({ error: "invalid_reveal_path" }, { status: 400 });
+  }
   const incoming: ReviewComment = { ...(body as unknown as ReviewComment), schemaVersion: SCHEMA };
 
   const found = await getCommentAny(id);
