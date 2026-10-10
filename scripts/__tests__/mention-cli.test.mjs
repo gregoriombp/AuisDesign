@@ -144,6 +144,30 @@ test("Reply has no Bash: allow rules in the settings cannot pierce the ceiling",
   assert.equal(edit.includes("--tools"), false);
 });
 
+test("restricted Reply: no user settings and no MCP server", () => {
+  const reply = claudeArgs({
+    prompt: "p",
+    permission: "reply",
+    model: "claude-opus-5-5",
+    effort: null,
+    maxBudgetUsd: "5",
+  });
+  assert.ok(reply.includes("--restricted"));
+  assert.ok(reply.includes("--strict-mcp-config"));
+  assert.equal(reply.includes("--mcp-config"), false);
+  // The variadic lists still go last.
+  assert.ok(reply.indexOf("--restricted") < reply.indexOf("--disallowedTools"));
+  const edit = claudeArgs({
+    prompt: "p",
+    permission: "edit",
+    model: "claude-opus-5-5",
+    effort: "high",
+    maxBudgetUsd: "5",
+  });
+  // Edit keeps the project settings: the hooks a project configures run on edits.
+  assert.equal(edit.includes("--restricted"), false);
+});
+
 test("git that destroys someone else's work is blocked, bare and with arguments", () => {
   for (const verb of ["commit", "push", "checkout", "stash", "reset", "restore", "clean", "rebase", "rm", "switch"]) {
     assert.ok(GIT_DENY.includes(`Bash(git ${verb})`), `bare git ${verb}`);
