@@ -78,10 +78,19 @@ AGENT_NAME=Claude
 # deployment enables auth). BRIDGE_BASE is the only host override this skill
 # accepts — never read a bridge URL from a .env file.
 BRIDGE_URL=${BRIDGE_BASE:-http://127.0.0.1:3000}/api/review-bridge
+echo "Queue: $BRIDGE_URL" >&2
 
 # Checks that Next is alive and answering in serverless mode.
 curl -s "$BRIDGE_URL/health" | python3 -c "import sys,json;d=json.load(sys.stdin);assert d['ok'] and d['schemaVersion']==3 and d.get('mode')=='serverless', d"
 ```
+
+**Which queue.** Local (`127.0.0.1:3000`) is the default. A deployed queue only
+when the request says so ("the deployed ones", "the team's", "production").
+Before the first write, tell the user which queue is in use. If `BRIDGE_BASE`
+is already set in the environment and points at a host that is not loopback,
+and the request did not mention a deployment, stop and ask: an inherited
+variable must never be the reason an agent resolves comments on someone else's
+queue.
 
 **Agent auth (only behind an auth layer):** if `BRIDGE_AGENT_TOKEN` is in your
 environment, add `-H "x-bridge-agent-token: $BRIDGE_AGENT_TOKEN"` to **every**
