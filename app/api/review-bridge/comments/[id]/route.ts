@@ -22,6 +22,7 @@ import {
   getReviewAgent,
 } from "@/lib/auis-review/agents";
 import { triggerMentionRun } from "../../_mention";
+import { mergeCommentEdit } from "../../_merge";
 import { withBridgeErrors } from "../../_errors";
 
 export const runtime = "nodejs";
@@ -208,7 +209,8 @@ async function handlePUT(
   if (body.id !== id) return NextResponse.json({ error: "id_mismatch" }, { status: 400 });
   const incoming: ReviewComment = { ...(body as unknown as ReviewComment), schemaVersion: SCHEMA };
 
-  const existing = (await getCommentAny(id))?.comment ?? null;
+  const found = await getCommentAny(id);
+  const existing = found?.comment ?? null;
   const bodyAgent = getReviewAgent(incoming.authorId);
   const requestedAgent = headerAgent ?? bodyAgent;
   // An explicit attempt at agent authorship never falls back to the human
@@ -271,40 +273,17 @@ async function handlePUT(
     if (session.role === "agent" && existing.authorId !== incoming.authorId) {
       return NextResponse.json({ error: "forbidden_agent_edit" }, { status: 403 });
     }
-    incoming.authorId = existing.authorId;
-    incoming.authorName = existing.authorName;
-    incoming.authorColorToken = existing.authorColorToken;
-    if (existing.authorKind) incoming.authorKind = existing.authorKind;
-    else delete incoming.authorKind;
-    incoming.createdAt = existing.createdAt;
-    if (existing.authorEmail) incoming.authorEmail = existing.authorEmail;
-    else delete incoming.authorEmail;
-    if (existing.authorRole) incoming.authorRole = existing.authorRole;
-    else delete incoming.authorRole;
-    // Visibility: admin/agent decides; a reviewer inherits the existing one.
-    if (session.role === "reviewer") {
-      if (existing.visibility === "admins") incoming.visibility = "admins";
-      else delete incoming.visibility;
-      // Status through upsert: a reviewer only toggles open ↔ future idea on
-      // what is theirs — resolve/approve is still a transition, and that is 403.
-      const softStates = new Set(["open", "backlog"]);
-      if (!softStates.has(existing.status) || !softStates.has(incoming.status)) {
-        incoming.status = existing.status;
-      }
-      if (existing.resolution) incoming.resolution = existing.resolution;
-      else delete incoming.resolution;
-    } else if (session.role === "agent") {
-      incoming.status = existing.status;
-      if (existing.resolution) incoming.resolution = existing.resolution;
-      else delete incoming.resolution;
-      if (existing.visibility === "admins") incoming.visibility = "admins";
-      else delete incoming.visibility;
-    } else if (incoming.visibility !== "admins") {
-      delete incoming.visibility;
-    }
   }
 
-  await upsertComment(incoming);
+  // Authorship, replies, resolution and status come from the stored record
+  // (see _merge.ts); the client's possibly stale copy only carries the edit.
+  const toWrite = existing
+    ? mergeCommentEdit(existing, incoming, {
+        canSetVisibility: session.role === "admin",
+        isAgent: session.role === "agent",
+      })
+    : incoming;
+  await upsertComment(toWrite, found?.location ?? null);
   // Mention trigger (gate 4): only CREATION fires. This PUT also edits, and
   // re-saving an old comment that already says "@Claude" must not wake the
   // agent again. Fire and forget — the browser's response does not wait for it.

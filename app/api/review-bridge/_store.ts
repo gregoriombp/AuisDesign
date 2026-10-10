@@ -175,16 +175,55 @@ export async function getCommentAny(
 }
 
 // ── writes (atomic RMW through the driver; mutates are re-runnable) ──────────
-export async function upsertComment(comment: ReviewComment): Promise<void> {
+/**
+ * Writes the comment into the document that holds its id. `location` is where
+ * the route found it (`null` = creation). Creating and editing in main cost a
+ * single write to main. An archived comment, or one that moved between the
+ * route's read and the write, is resolved on the pair: replaced wherever the
+ * id is, never copied a second time into main.
+ */
+export async function upsertComment(
+  comment: ReviewComment,
+  location: "main" | "archive" | null = null,
+): Promise<void> {
   // Externalize OUTSIDE the mutate: image writes do not belong in a retry loop.
   const externalized = await externalizeComment(comment);
-  await docs.update(MAIN_KEY, initMain, (raw) => {
-    const db = asMain(raw);
-    const idx = db.comments.findIndex((c) => c.id === externalized.id);
-    if (idx === -1) db.comments.push(externalized);
-    else db.comments[idx] = externalized;
-    return { data: db, result: undefined };
-  });
+  if (location !== "archive") {
+    const placed = await docs.update(MAIN_KEY, initMain, (raw) => {
+      const db = asMain(raw);
+      const idx = db.comments.findIndex((c) => c.id === externalized.id);
+      if (idx !== -1) {
+        db.comments[idx] = externalized;
+        return { data: db, result: true };
+      }
+      if (location === null) {
+        db.comments.push(externalized);
+        return { data: db, result: true };
+      }
+      return { result: false };
+    });
+    if (placed) return;
+  }
+  await docs.updatePair(
+    { key: MAIN_KEY, init: initMain },
+    { key: ARCHIVE_KEY, init: initArchive },
+    (rawMain, rawArchive) => {
+      const main = asMain(rawMain);
+      const inMain = main.comments.findIndex((c) => c.id === externalized.id);
+      if (inMain !== -1) {
+        main.comments[inMain] = externalized;
+        return { a: main, result: undefined };
+      }
+      const archive = asArchive(rawArchive);
+      const inArchive = archive.comments.findIndex((c) => c.id === externalized.id);
+      if (inArchive !== -1) {
+        archive.comments[inArchive] = externalized;
+        return { b: archive, result: undefined };
+      }
+      main.comments.push(externalized);
+      return { a: main, result: undefined };
+    },
+  );
 }
 
 export async function deleteComment(id: string): Promise<boolean> {
