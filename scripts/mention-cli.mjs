@@ -86,8 +86,13 @@ export function claudeArgs({ prompt, permission, model, effort, maxBudgetUsd }) 
     args.push("--permission-mode", "bypassPermissions", "--disallowedTools", ...GIT_DENY);
   } else {
     // Executor Reply: pure reading, no Bash (see CLAUDE_REPLY_TOOLS). The
-    // runner posts the reply.
+    // runner posts the reply. Restricted mode drops the user, project and
+    // local settings, so global allow rules do not apply to this run. With
+    // --strict-mcp-config and no --mcp-config, the run loads no MCP server
+    // (not even a browser server that can run arbitrary code).
     args.push(
+      "--restricted",
+      "--strict-mcp-config",
       "--tools",
       CLAUDE_REPLY_TOOLS,
       "--permission-mode",

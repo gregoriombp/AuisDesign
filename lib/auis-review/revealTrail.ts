@@ -69,6 +69,11 @@ function isDestructive(el: Element, label: string): boolean {
   return aria ? DESTRUCTIVE.test(aria) : false
 }
 
+/** Same rule for whoever clicks on their own from a URL (FlowStateDriver). */
+export function isDestructiveTarget(el: Element): boolean {
+  return isDestructive(el, labelOf(el))
+}
+
 let trail: TrailEntry[] = []
 
 function labelOf(el: Element): string {

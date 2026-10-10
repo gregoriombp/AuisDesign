@@ -62,14 +62,20 @@ next-env.d.ts
 
 # review bridge runtime state (grows unbounded — not source code)
 review-bridge/data/*.json
+review-bridge/data/*.json.corrupt-*
+review-bridge/data/*.tmp
 review-bridge/data/images/
 review-bridge/data/.backups/
 
 # flow-bridge runtime state (grows unbounded — not source code)
 flow-bridge/data/*.json
+flow-bridge/data/*.json.corrupt-*
+flow-bridge/data/*.tmp
 
 # page-editor runtime state — Live Edit Mode persisted edits (not source code)
 page-editor/data/*.json
+page-editor/data/*.json.corrupt-*
+page-editor/data/*.tmp
 
 # brand setup runtime overlay — the user's own brand (not source code; AuisDesign
 # ships the default). Written by /api/setup, read by getBrand().

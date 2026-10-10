@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils"
 /**
  * AuMentionChip — the inline chip that renders an @agent mention, a /skill or a
  * #directive inside a Review Bridge comment. Purely presentational: the caller
- * picks the tone and the Material Symbol.
+ * picks the tone and either a Material Symbol or an image mark (an agent's
+ * official logo, passed in — the chip never ships one).
  */
 
 export type AuMentionChipTone =
@@ -39,6 +40,8 @@ type AuMentionChipProps = React.HTMLAttributes<HTMLElement> & {
   tone?: AuMentionChipTone
   /** Material Symbol name. */
   icon?: string
+  /** Image mark rendered in place of the glyph (e.g. an agent's official logo). */
+  iconSrc?: string
   interactive?: boolean
 }
 
@@ -46,6 +49,7 @@ export function AuMentionChip({
   as = "span",
   tone = "neutral",
   icon,
+  iconSrc,
   interactive,
   className,
   children,
@@ -64,7 +68,18 @@ export function AuMentionChip({
   return (
     <Badge asChild variant="outline" className={chipClassName}>
       <Component {...buttonProps} {...rest}>
-        {icon ? <Icon name={icon} size={14} className="shrink-0" /> : null}
+        {iconSrc ? (
+          // An <img> keeps the chip inline: it renders inside comment text (<p>).
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={iconSrc}
+            alt=""
+            aria-hidden="true"
+            className="h-4 w-4 shrink-0 rounded-full object-cover"
+          />
+        ) : icon ? (
+          <Icon name={icon} size={14} className="shrink-0" />
+        ) : null}
         {children}
       </Component>
     </Badge>

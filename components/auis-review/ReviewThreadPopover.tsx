@@ -43,14 +43,6 @@ function anchorPoint(comment: ReviewComment): ReviewPoint {
     : comment.anchor.centroid
 }
 
-function targetSummary(comment: ReviewComment): string | null {
-  const target = comment.context?.target
-  if (!target) return null
-  const detail = target.label ?? target.text ?? target.attributes?.href
-  if (!detail) return target.role ? `${target.tag} · ${target.role}` : target.tag
-  return `${target.tag} · ${detail}`
-}
-
 export function ReviewThreadPopover() {
   const threadCommentId = useReviewStore((s) => s.threadCommentId)
   const comments = useReviewStore((s) => s.comments)
@@ -155,7 +147,6 @@ export function ReviewThreadPopover() {
   const replies = Array.isArray(comment.replies) ? comment.replies : []
   const isResolved = comment.status === "resolved"
   const isInReview = comment.status === "in_review"
-  const target = targetSummary(comment)
 
   // Hierarchy: an admin moderates (status/visibility); a reviewer only touches
   // what is theirs. The server re-validates everything — here it only keeps the
@@ -414,13 +405,6 @@ export function ReviewThreadPopover() {
                 </div>
               )}
             </>
-          )}
-
-          {target && (
-            <div className="mt-2 flex items-center gap-1 body-xs text-(--fg-tertiary)">
-              <Icon name="my_location" size={11} />
-              <span className="truncate">{target}</span>
-            </div>
           )}
 
           {comment.resolution?.summary && (

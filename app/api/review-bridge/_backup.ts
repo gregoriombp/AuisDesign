@@ -30,6 +30,7 @@ const SNAP_DIR = path.join(BACKUP_ROOT, "snapshots");
 const POOL_DIR = path.join(BACKUP_ROOT, "images");
 
 const KEEP_RECENT = 40; // the newest N snapshots, always
+const KEEP_DAILY_DAYS = 60; // first snapshot of each day in this window; before it, first of each month
 const MIN_INTERVAL_MS = 60_000; // at most one snapshot per minute in a burst
 
 let lastSnapshot = 0;
@@ -76,6 +77,28 @@ async function syncImagePool(): Promise<void> {
   }
 }
 
+/**
+ * Which snapshots stay: the KEEP_RECENT newest, the first of each day over the
+ * last KEEP_DAILY_DAYS days and the first of each month before that. The long
+ * history survives, sparse, and the folder stops growing by one snapshot a day
+ * forever.
+ */
+export function snapshotsToKeep(dirs: string[], now: number): Set<string> {
+  const sorted = [...dirs].sort();
+  const keep = new Set(sorted.slice(-KEEP_RECENT));
+  const cutoff = new Date(now - KEEP_DAILY_DAYS * 86_400_000).toISOString().slice(0, 10);
+  const seen = new Set<string>();
+  for (const d of sorted) {
+    const day = d.slice(0, 10);
+    const bucket = day >= cutoff ? day : d.slice(0, 7);
+    if (!seen.has(bucket)) {
+      seen.add(bucket);
+      keep.add(d);
+    }
+  }
+  return keep;
+}
+
 async function rotate(): Promise<void> {
   let dirs: string[];
   try {
@@ -83,16 +106,7 @@ async function rotate(): Promise<void> {
   } catch {
     return;
   }
-  // Keep the KEEP_RECENT newest + the first snapshot of every day (long history).
-  const keep = new Set(dirs.slice(-KEEP_RECENT));
-  const seenDay = new Set<string>();
-  for (const d of dirs) {
-    const day = d.slice(0, 10);
-    if (!seenDay.has(day)) {
-      seenDay.add(day);
-      keep.add(d);
-    }
-  }
+  const keep = snapshotsToKeep(dirs, Date.now());
   for (const d of dirs) {
     if (keep.has(d)) continue;
     await fs.rm(path.join(SNAP_DIR, d), { recursive: true, force: true });

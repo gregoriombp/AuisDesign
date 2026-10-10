@@ -24,14 +24,21 @@ import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 
 /**
  * Filter controls for the comment lists — a filter ICON opens the mega menu
- * (multi-select authors and screens + a period with presets and a custom
- * range), and the ordering lives outside, as a discreet link. Shared by the
- * drawer and the Review Bridge page; a badge on the icon counts the active
- * groups.
+ * (the screen scope when the drawer asks for it, multi-select authors and
+ * screens + a period with presets and a custom range), and the ordering lives
+ * outside, as a discreet link. Shared by the drawer and the Review Bridge page;
+ * a badge on the icon counts the active groups.
  */
 
 // Above the Review Mode sheet (1065) and thread popover (1060).
 const MENU_Z = REVIEW_Z.modal + 20
+
+export type ReviewScope = "all" | "page"
+
+const SCOPE_LABEL: Record<ReviewScope, string> = {
+  all: "All screens",
+  page: "This screen",
+}
 
 function toggleIn(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
@@ -42,6 +49,35 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <span className="au-eyebrow text-(--fg-tertiary) px-3 pt-3 pb-1.5 block">
       {children}
     </span>
+  )
+}
+
+function OptionRow({
+  label,
+  active,
+  onSelect,
+  children,
+}: {
+  label: React.ReactNode
+  active: boolean
+  onSelect: () => void
+  children?: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        "flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left body-xs transition-colors duration-au-fast",
+        active
+          ? "bg-(--bg-muted) font-medium text-(--fg-primary)"
+          : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
+      )}
+    >
+      {label}
+      {children ??
+        (active && <Icon name="check" size={14} className="text-(--fg-primary)" />)}
+    </button>
   )
 }
 
@@ -97,13 +133,18 @@ export function ReviewFilterControls({
   onChange,
   authors,
   pages,
+  scope,
+  onScopeChange,
   align = "end",
 }: {
   filters: ReviewListFilters
   onChange: (next: ReviewListFilters) => void
   authors: ReviewAuthorOption[]
-  /** Omit (undefined) to hide the Screen section (e.g. the "This screen" scope). */
+  /** Omit (undefined) to hide the list of screens (e.g. the "This screen" scope). */
   pages?: string[]
+  /** Scope of the list. Only the drawer passes it; without it the section is hidden. */
+  scope?: ReviewScope
+  onScopeChange?: (next: ReviewScope) => void
   align?: "start" | "end"
 }) {
   const [open, setOpen] = React.useState(false)
@@ -123,8 +164,19 @@ export function ReviewFilterControls({
   const set = (patch: Partial<ReviewListFilters>) =>
     onChange({ ...filters, ...patch })
 
-  const count = activeFilterCount(filters)
+  // "This screen" narrows the list like any filter — it counts in the badge
+  // and in "Clear filters", or it would hide comments without a trace.
+  const scoped = scope === "page"
+  const count = activeFilterCount(filters) + (scoped ? 1 : 0)
   const desc = filters.order === "desc"
+
+  const pickScope = (next: ReviewScope) => {
+    if (!onScopeChange || next === scope) return
+    onScopeChange(next)
+    // The list of screens only exists under "All screens" — an old selection
+    // would hide everything.
+    if (next === "page" && filters.pages.length > 0) set({ pages: [] })
+  }
 
   const pickPreset = (p: Exclude<ReviewPeriod, "custom">) => {
     setCustomOpen(false)
@@ -193,6 +245,22 @@ export function ReviewFilterControls({
           className="w-80 p-0 rounded-lg border border-(--border-subtle) bg-(--bg-raised) shadow-lg overflow-hidden"
         >
           <div className="max-h-[70vh] overflow-y-auto pb-1">
+            {/* Scope — only in the drawer, which knows what "this screen" is */}
+            {scope && onScopeChange && (
+              <>
+                <SectionLabel>Where</SectionLabel>
+                {(["all", "page"] as ReviewScope[]).map((s) => (
+                  <OptionRow
+                    key={s}
+                    label={SCOPE_LABEL[s]}
+                    active={scope === s}
+                    onSelect={() => pickScope(s)}
+                  />
+                ))}
+                <div className="mt-2 mx-3 h-px bg-(--border-subtle)" />
+              </>
+            )}
+
             {/* Authors — multi */}
             <SectionLabel>Author</SectionLabel>
             {authors.length === 0 ? (
@@ -237,27 +305,14 @@ export function ReviewFilterControls({
             <div className="mt-2 mx-3 h-px bg-(--border-subtle)" />
             <SectionLabel>Period</SectionLabel>
             {(Object.keys(PERIOD_LABEL) as Exclude<ReviewPeriod, "custom">[]).map(
-              (p) => {
-                const active = filters.period === p
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => pickPreset(p)}
-                    className={cn(
-                      "flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left body-xs transition-colors duration-au-fast",
-                      active
-                        ? "bg-(--bg-muted) font-medium text-(--fg-primary)"
-                        : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
-                    )}
-                  >
-                    {PERIOD_LABEL[p]}
-                    {active && (
-                      <Icon name="check" size={14} className="text-(--fg-primary)" />
-                    )}
-                  </button>
-                )
-              },
+              (p) => (
+                <OptionRow
+                  key={p}
+                  label={PERIOD_LABEL[p]}
+                  active={filters.period === p}
+                  onSelect={() => pickPreset(p)}
+                />
+              ),
             )}
             <button
               type="button"
@@ -329,7 +384,7 @@ export function ReviewFilterControls({
           </div>
 
           {/* Footer — clear everything */}
-          {hasActiveFilters(filters) && (
+          {(hasActiveFilters(filters) || scoped) && (
             <div className="border-t border-(--border-subtle) px-3 py-2 flex justify-end">
               <button
                 type="button"
@@ -337,6 +392,7 @@ export function ReviewFilterControls({
                   setCustomOpen(false)
                   setRange({})
                   onChange({ ...DEFAULT_REVIEW_FILTERS, order: filters.order })
+                  if (scoped) onScopeChange?.("all")
                 }}
                 className="inline-flex items-center gap-1 body-xs text-(--fg-secondary) hover:text-(--fg-primary) transition-colors"
               >

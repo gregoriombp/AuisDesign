@@ -43,7 +43,11 @@ port, no token, no `.env`.
 `schemaVersion = 3`. Backups: before every write the store snapshots the
 previous state to `~/.auis/review-bridge-backups/` (override with
 `REVIEW_BRIDGE_BACKUP_DIR`) and restores from the latest snapshot when
-`comments.json` vanished (clean checkout, reinstall).
+`comments.json` vanished (clean checkout, reinstall). It keeps the 40 newest
+snapshots, the first of each day over the last 60 days and the first of each
+month before that. A corrupt `comments.json` is never treated as empty: the
+store keeps a `.corrupt-*` copy next to it and answers 503 until you fix the
+JSON or restore a snapshot by hand.
 
 ## Hierarchy
 
@@ -124,7 +128,10 @@ The Auis dot → **Agents** opens one row per agent: an on/off switch, a
 The comment's wording can ask for less than the ceiling, never more. The
 ceiling is enforced by the CLI flags the runner builds (`scripts/mention-cli.mjs`:
 tool allowlists, `--disallowedTools` for git, Grok's `--sandbox`), not by the
-prompt alone. The settings live in `comments.json` under `agentSettings` and
+prompt alone. Claude's Reply run is also `--restricted --strict-mcp-config`: it
+ignores the user, project and local settings files and loads no MCP server, so
+a global allow rule or a browser server cannot widen it. Edit keeps the project
+settings, because the hooks a project configures run on edits. The settings live in `comments.json` under `agentSettings` and
 are always read normalized: an old or partial record becomes the runtime
 defaults (Claude on in Edit, the rest off).
 

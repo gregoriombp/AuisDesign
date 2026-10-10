@@ -1,12 +1,13 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 
-import type {
-  BridgeDocStore,
-  DocRef,
-  DocStoreConfig,
-  MutateOutcome,
-  PairOutcome,
+import {
+  BridgeUnavailableError,
+  type BridgeDocStore,
+  type DocRef,
+  type DocStoreConfig,
+  type MutateOutcome,
+  type PairOutcome,
 } from "./types";
 
 /**
@@ -23,8 +24,11 @@ import type {
  */
 
 // One lock per namespace, shared by every driver instance (several
-// createDocStore calls for the same namespace chain on the same queue).
-const locks = new Map<string, Promise<unknown>>();
+// createDocStore calls for the same namespace chain on the same queue). The
+// registry lives on globalThis: in dev, HMR re-evaluates this module, and a
+// module-scoped Map would start empty and let two writes to the same file race.
+const lockHost = globalThis as unknown as { __auisBridgeFsLocks?: Map<string, Promise<unknown>> };
+const locks = (lockHost.__auisBridgeFsLocks ??= new Map<string, Promise<unknown>>());
 function withLock<T>(ns: string, fn: () => Promise<T>): Promise<T> {
   const prev = locks.get(ns) ?? Promise.resolve();
   const run = prev.then(fn, fn); // runs after the previous one settles (ok or error)
@@ -32,19 +36,40 @@ function withLock<T>(ns: string, fn: () => Promise<T>): Promise<T> {
   return run;
 }
 
+const quarantined = new Set<string>();
+
 async function readDoc<T>(file: string, init: () => T): Promise<T> {
+  let raw: string;
   try {
-    const raw = await fs.readFile(file, "utf8");
+    raw = await fs.readFile(file, "utf8");
+  } catch (err) {
+    // Missing → initial state (the dir is created on the first write).
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return init();
+    throw err;
+  }
+  try {
     return JSON.parse(raw) as T;
   } catch {
-    // Missing/corrupt → initial state (the dir is created on the first write).
-    return init();
+    // A corrupt file never becomes an empty document: the next write would land
+    // on top of it and erase the data. Keep a copy of the bytes next to it and
+    // fail loudly (503 on the routes) until someone fixes or restores it.
+    if (!quarantined.has(file)) {
+      quarantined.add(file);
+      const copy = `${file}.corrupt-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+      await fs.writeFile(copy, raw, "utf8").catch(() => {});
+    }
+    throw new BridgeUnavailableError(
+      `${path.basename(file)} is corrupt. A copy was kept next to it (.corrupt-*). ` +
+        "Fix the JSON or restore it from a backup (the Review Bridge keeps snapshots in ~/.auis/review-bridge-backups).",
+    );
   }
 }
 
 async function writeDocAtomic(file: string, data: unknown): Promise<void> {
   await fs.mkdir(path.dirname(file), { recursive: true });
-  const tmp = `${file}.tmp`;
+  // Unique name: two processes (the dev server and a maintenance script)
+  // writing the same file do not fight over the same temp file.
+  const tmp = `${file}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}.tmp`;
   await fs.writeFile(tmp, JSON.stringify(data, null, 2), "utf8");
   await fs.rename(tmp, file);
 }

@@ -9,8 +9,8 @@ import { useReviewers } from "@/lib/auis-review/reviewers"
 import { PersonHover } from "./PersonHover"
 
 /**
- * Renders a Review Bridge comment/reply body, painting @agent and /skill as
- * AuMentionChips and @person as an inline link-toned mention (hover shows the
+ * Renders a Review Bridge comment/reply body, painting @agent (with the
+ * agent's mark) and /skill as AuMentionChips and @person as an inline link-toned mention (hover shows the
  * full name + e-mail), while leaving every other character verbatim (newlines
  * included, via the caller's whitespace-pre-wrap class). The segmentation is
  * lossless, so the text reads exactly as authored — only the commands light up.
@@ -51,6 +51,7 @@ export function CommentText({
             <AuMentionChip
               key={i}
               tone={agent?.tone ?? "neutral"}
+              iconSrc={agent?.mark}
               icon={agent?.icon ?? "agent"}
             >
               {agent?.handle ?? seg.value}

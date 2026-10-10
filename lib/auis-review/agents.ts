@@ -54,9 +54,11 @@ const AGENT_CONFIG: Record<
   ReviewAgentId,
   Omit<ReviewAgent, "id" | "name" | "handle" | "canSubmitForApproval">
 > = {
+  // The chip tone follows each brand: Claude in terracotta, OpenAI and xAI in
+  // black and white (light and dark, so they are not confused).
   claude: {
     blurb: "Answers, and applies changes to the interface.",
-    tone: "purple",
+    tone: "amber",
     accentVar: "var(--au-purple-600)",
     icon: "agent",
     mark: "/assets/agents/claude.svg",
@@ -64,7 +66,7 @@ const AGENT_CONFIG: Record<
   },
   codex: {
     blurb: "Answers, and applies changes to the interface.",
-    tone: "teal",
+    tone: "neutral",
     accentVar: "var(--au-teal-600)",
     icon: "agent",
     mark: "/assets/agents/openai.svg",

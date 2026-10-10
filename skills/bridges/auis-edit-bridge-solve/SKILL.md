@@ -77,9 +77,14 @@ flag in the summary that the run was automatic.
 ```bash
 # page-edits runs alongside Next. Default dev port: 3000.
 BASE=${EDIT_BASE:-http://127.0.0.1:3000}
+echo "Queue: $BASE" >&2
 # validates that the route responds (it needs ?route=…)
 curl -s "$BASE/api/page-edits?route=%2F" >/dev/null || echo "Start 'npm run dev' at the root and come back."
 ```
+
+**Which queue.** Local (`127.0.0.1:3000`) is the default. If `EDIT_BASE` is
+already set and points at a host that is not loopback, and the request did not
+mention one, stop and ask before the first write.
 
 You can also read the files straight from disk (you do not need the dev server to
 READ): `page-editor/data/<encoded-route>.json` (+ `.archive.json`), where the key is

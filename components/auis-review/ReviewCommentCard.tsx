@@ -50,14 +50,6 @@ function StatusPill({ status }: { status: ReviewComment["status"] }) {
   return null
 }
 
-function targetSummary(comment: ReviewComment): string | null {
-  const target = comment.context?.target
-  if (!target) return null
-  const detail = target.label ?? target.text ?? target.attributes?.href
-  if (!detail) return target.role ? `${target.tag} · ${target.role}` : target.tag
-  return `${target.tag} · ${detail}`
-}
-
 /**
  * Where the pin was dropped, in words: the landmark trail and, when the target
  * was inside an overlay, how one got there. Only shows when the anchor does not
@@ -479,7 +471,6 @@ export function ReviewCommentCard({
     comment.status === "in_review" &&
     (context === "sheet" || context === "inbox") &&
     isAdmin
-  const target = targetSummary(comment)
 
   return (
     <article
@@ -655,13 +646,6 @@ export function ReviewCommentCard({
             </div>
           )}
         </>
-      )}
-
-      {target && (
-        <div className="mt-2 flex items-center gap-1 body-xs text-(--fg-tertiary)">
-          <Icon name="my_location" size={11} />
-          <span className="truncate">{target}</span>
-        </div>
       )}
 
       {anchorLost && (
