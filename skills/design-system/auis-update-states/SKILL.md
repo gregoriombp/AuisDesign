@@ -107,7 +107,9 @@ The worked example is `/auis/states/example`: unions + parsers in
    (iframes rendered with `?chrome=0`); open 2–3 deep links from the matrix
    and see the scenario mount — e.g. `/auis/states/example?state=empty`,
    `/auis/states/example?state=error&plan=pro`,
-   `/auis/states/example?ge=t%3ANew%20item`. On a mirrored screen, also
+   `/auis/states/example?ge=t%3ANew%20item` (opened as a top-level page, a
+   `?ge=` link waits for a click on **Replay** — click it; inside the matrix
+   iframes it replays on its own). On a mirrored screen, also
    walk the flow with the toolbar open: it must report the live step, remount
    on every axis, and exiting the mode must return the screen to its default
    (the exit also drops `?ge=`). Optional: `npm run states:pdf` (needs the

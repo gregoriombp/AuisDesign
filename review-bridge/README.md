@@ -43,7 +43,11 @@ port, no token, no `.env`.
 `schemaVersion = 3`. Backups: before every write the store snapshots the
 previous state to `~/.auis/review-bridge-backups/` (override with
 `REVIEW_BRIDGE_BACKUP_DIR`) and restores from the latest snapshot when
-`comments.json` vanished (clean checkout, reinstall).
+`comments.json` vanished (clean checkout, reinstall). It keeps the 40 newest
+snapshots, the first of each day over the last 60 days and the first of each
+month before that. A corrupt `comments.json` is never treated as empty: the
+store keeps a `.corrupt-*` copy next to it and answers 503 until you fix the
+JSON or restore a snapshot by hand.
 
 ## Hierarchy
 

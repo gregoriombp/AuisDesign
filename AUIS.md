@@ -170,6 +170,13 @@ matches, `c:<css>` clicks a selector, `w:<ms>` waits, steps joined by `>>`), and
 `previewPath` when the route has a dynamic segment. `matchScreenStates` returns
 the first matching entry, deepest first.
 
+A `?ge=` recipe replays on its own inside the states matrix, the UX-flow
+previews (same-origin iframes) and on in-app navigation (State Mode). A link
+opened from outside — pasted, shared, a new tab — shows "This link replays
+clicks on this screen" and waits for **Replay**, so a link sent to someone never
+clicks inside their session. No step ever clicks a destructive action (delete,
+remove, pay, sign out).
+
 Two implementation patterns for a screen:
 
 - **Pattern A (server-thin):** the page maps `searchParams` to initial props and

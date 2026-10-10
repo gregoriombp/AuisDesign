@@ -423,8 +423,10 @@ before writing a variant.
 **`?ge=<recipe>` — interaction replay.** For states that live in component
 state and have no URL (an open modal, a wizard on step 2, a side panel, a
 menu). `FlowStateDriver` (mounted in `app/layout.tsx`, active on every route)
-reads `?ge=` and replays the click path after hydration. Grammar — steps
-joined by `>>`:
+reads `?ge=` and replays the click path after hydration — on its own inside
+the flow's preview panel (a same-origin iframe); a `?ge=` link opened as a
+top-level page waits for a click on **Replay** first, and no step ever clicks a
+destructive action. Grammar — steps joined by `>>`:
 
 | Step | Effect |
 |---|---|
@@ -465,7 +467,8 @@ Rules:
 - Prefer `t:` over `c:` — button text survives markup changes, selectors
   don't. Add a `w:` step between clicks that open async overlays.
 - A recipe depends on the real button text: **open every `?ge=` variant in the
-  browser once** and confirm the badge goes away.
+  browser once** (from the flow's preview panel, or as a page and click
+  **Replay**) and confirm the badge goes away.
 - The first variant is what a plain card click opens; put the default state
   first.
 - Every variant `href` is a route that exists in this repo — same rule as a
