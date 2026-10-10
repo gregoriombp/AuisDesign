@@ -81,9 +81,12 @@ export function ReviewCommentSheet() {
 
   // The drawer stays mounted between openings: every opening goes back to "All
   // screens", and "This screen" is a choice for that time, from the filter menu.
-  React.useEffect(() => {
+  // Adjusted during render (not in an effect) so the first frame is already right.
+  const [wasOpen, setWasOpen] = React.useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
     if (open) setScope("all")
-  }, [open])
+  }
 
   React.useEffect(() => {
     if ((tab === "archive" || tab === "all") && !archiveLoaded) {
