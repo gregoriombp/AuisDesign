@@ -23,18 +23,34 @@ import {
 } from "@/lib/auis-review/commentFilters"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewCommentCard } from "./ReviewCommentCard"
-import { ReviewFilterControls } from "./ReviewFilterBar"
+import { ReviewFilterControls, type ReviewScope } from "./ReviewFilterBar"
 import type { ReviewComment } from "./types"
 
 // "Future ideas" (backlog) no longer lives in the drawer — its home is the
 // Review Bridge page (/auis/review-bridge), which has room to compose and triage.
-type Tab = "open" | "in_review" | "archive"
-type Scope = "page" | "all"
+type Tab = "all" | "open" | "in_review" | "archive"
 
 const TAB_LABEL: Record<Tab, string> = {
+  all: "All",
   open: "Open",
   in_review: "In review",
   archive: "Archived",
+}
+
+/**
+ * "All" joins open, in review and archived. Future ideas stay out, as in the
+ * other tabs. A comment can sit in both lists until the store's next read; the
+ * live copy wins, since it carries the current status.
+ */
+function mergeAll(
+  main: readonly ReviewComment[],
+  archive: readonly ReviewComment[]
+): ReviewComment[] {
+  const live = main.filter(
+    (c) => c.status === "open" || c.status === "in_review"
+  )
+  const liveIds = new Set(live.map((c) => c.id))
+  return [...live, ...archive.filter((c) => !liveIds.has(c.id))]
 }
 
 export function ReviewCommentSheet() {
@@ -54,8 +70,8 @@ export function ReviewCommentSheet() {
 
   const currentUrl = useCurrentUrl()
 
-  const [scope, setScope] = React.useState<Scope>("page")
-  const [tab, setTab] = React.useState<Tab>("open")
+  const [scope, setScope] = React.useState<ReviewScope>("all")
+  const [tab, setTab] = React.useState<Tab>("all")
   const [query, setQuery] = React.useState("")
   const [filters, setFilters] = React.useState<ReviewListFilters>(
     DEFAULT_REVIEW_FILTERS
@@ -63,8 +79,14 @@ export function ReviewCommentSheet() {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
   const [bulkBusy, setBulkBusy] = React.useState(false)
 
+  // The drawer stays mounted between openings: every opening goes back to "All
+  // screens", and "This screen" is a choice for that time, from the filter menu.
   React.useEffect(() => {
-    if (tab === "archive" && !archiveLoaded) {
+    if (open) setScope("all")
+  }, [open])
+
+  React.useEffect(() => {
+    if ((tab === "archive" || tab === "all") && !archiveLoaded) {
       void loadArchivePage(true)
     }
   }, [tab, archiveLoaded, loadArchivePage])
@@ -87,7 +109,16 @@ export function ReviewCommentSheet() {
       allComments.find((c) => c.id === selectedCommentId) ??
       archivedComments.find((c) => c.id === selectedCommentId)
     if (!target) return
-    setTab(target.status === "in_review" ? "in_review" : target.status === "open" ? "open" : "archive")
+    // On "All" the comment is already listed — keep the tab.
+    setTab((current) =>
+      current === "all"
+        ? current
+        : target.status === "in_review"
+        ? "in_review"
+        : target.status === "open"
+        ? "open"
+        : "archive"
+    )
     if (!matchesCurrentReviewUrl(target.url, currentUrl)) setScope("all")
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCommentId])
@@ -101,7 +132,9 @@ export function ReviewCommentSheet() {
 
   const visible: ReviewComment[] = React.useMemo(() => {
     const base =
-      tab === "open"
+      tab === "all"
+        ? mergeAll(sourceMain, sourceArchive)
+        : tab === "open"
         ? sourceMain.filter((c) => c.status === "open")
         : tab === "in_review"
         ? sourceMain.filter((c) => c.status === "in_review")
@@ -228,26 +261,8 @@ export function ReviewCommentSheet() {
           )}
         </div>
 
-        <div className="flex items-center gap-1 p-1 rounded-full bg-(--bg-muted) self-start body-xs font-medium">
-          {(["page", "all"] as Scope[]).map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setScope(s)}
-              className={[
-                "px-3 py-1 rounded-full transition-colors",
-                scope === s
-                  ? "bg-(--bg-raised) text-(--fg-primary) shadow-sm"
-                  : "text-(--fg-secondary) hover:text-(--fg-primary)",
-              ].join(" ")}
-            >
-              {s === "page" ? "This screen" : "Everything"}
-            </button>
-          ))}
-        </div>
-
         <div className="flex items-center gap-1 body-xs font-medium">
-          {(["open", "in_review", "archive"] as Tab[]).map((t) => (
+          {(["all", "open", "in_review", "archive"] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
@@ -282,6 +297,8 @@ export function ReviewCommentSheet() {
               authors={authorOptions}
               // In the "This screen" scope the screen filter is redundant — hide it.
               pages={scope === "all" ? pageOptions : undefined}
+              scope={scope}
+              onScopeChange={setScope}
             />
           </div>
         </div>
@@ -331,9 +348,11 @@ export function ReviewCommentSheet() {
                     ? "Nothing waiting for review"
                     : scope === "page"
                     ? "No comments on this screen"
+                    : tab === "all"
+                    ? "No comments yet"
                     : "No open comments"}
                 </AuEmptyTitle>
-                {tab === "open" && scope === "page" && (
+                {(tab === "open" || tab === "all") && scope === "page" && (
                   <AuEmptyDescription>
                     Use the freehand mark or the pin on the bottom bar to leave
                     the first comment.
@@ -348,13 +367,13 @@ export function ReviewCommentSheet() {
                   key={c.id}
                   comment={c}
                   context="sheet"
-                  archived={tab === "archive"}
+                  archived={tab === "archive" || c.status === "resolved"}
                   selectable={tab === "in_review" && isAdmin}
                   selected={selectedIds.has(c.id)}
                   onToggleSelected={() => toggleSelected(c.id)}
                 />
               ))}
-              {tab === "archive" && archiveCursor && (
+              {(tab === "archive" || tab === "all") && archiveCursor && (
                 <button
                   type="button"
                   onClick={() => void loadArchivePage(false)}
