@@ -1,11 +1,11 @@
-import { elementBelowOverlayAt } from "@/lib/auis-review/scrollOffset"
+import { elementBelowOverlayAt } from "./scrollOffset"
 import type {
   ReviewAnchor,
   ReviewAnchorFingerprint,
   ReviewDrawAnchor,
   ReviewElementAnchor,
   ReviewPoint,
-} from "@auis/core/types"
+} from "./types"
 
 // Pins store an absolute position (doc coords), but when a side panel opens or
 // closes the container changes width and the content reflows horizontally —

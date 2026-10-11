@@ -18,7 +18,7 @@ reason to hold the portability work. See [Follow-ups](#follow-ups).
 ## Method
 
 The [`scripts/anchor-survival.mjs`](../scripts/anchor-survival.mjs) script
-injects the anchoring code into each page. It lifts `lib/auis-review/elementAnchor.ts`
+injects the anchoring code into each page. It lifts `kit/core/src/elementAnchor.ts`
 verbatim, with types stripped and imports dropped. It drops five pins per page
 the way the canvas does, calling `captureElementAnchor()` at a click point in
 the middle of each target. A fresh browser context per scenario starts from the

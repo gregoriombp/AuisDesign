@@ -1,4 +1,4 @@
-import type { ReviewElementContext } from "@/lib/auis-review/elementContext"
+import type { ReviewElementContext } from "@auis/core/elementContext"
 
 // Calls to /api/review/suggest. Two modes: "complete" (inline autocomplete,
 // ghost text) and "rewrite" (magic wand). Both target an AI agent that will

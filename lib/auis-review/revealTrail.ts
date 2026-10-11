@@ -19,10 +19,10 @@ import {
   captureElementRef,
   resolveAnchoredElement,
   resolveElementBySelector,
-} from "./elementAnchor"
-import { stripIconLigature } from "@/lib/auis/iconLigature"
-import { fireClick } from "@/lib/auis/fireClick"
-import { findClickableByText } from "@/lib/auis/findClickable"
+} from "@auis/core/elementAnchor"
+import { stripIconLigature } from "@auis/core/iconLigature"
+import { fireClick } from "@auis/core/fireClick"
+import { findClickableByText } from "@auis/core/findClickable"
 import { OVERLAY_DATA_ATTR } from "@/components/auis-review/constants"
 import type {
   ReviewAnchor,

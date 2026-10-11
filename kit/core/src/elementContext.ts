@@ -1,11 +1,11 @@
-import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
-import { stripIconLigature } from "@/lib/auis/iconLigature"
+import { resolveAnchoredElement } from "./elementAnchor"
+import { stripIconLigature } from "./iconLigature"
 import type {
   ReviewAnchor,
   ReviewCommentContext,
   ReviewElementAttributes,
   ReviewElementContext,
-} from "@auis/core/types"
+} from "./types"
 
 // A lean context of the element under the comment — feeds the prompt suggestion
 // (/api/review/suggest) and the magic pointer's label. Text/attributes only,

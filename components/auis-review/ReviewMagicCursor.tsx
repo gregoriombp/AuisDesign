@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { useReviewStore } from "@/lib/auis-review/store"
-import { elementBelowOverlayAt } from "@/lib/auis-review/scrollOffset"
-import { shortLabelFor } from "@/lib/auis-review/elementContext"
+import { elementBelowOverlayAt } from "@auis/core/scrollOffset"
+import { shortLabelFor } from "@auis/core/elementContext"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 
 interface Rect {

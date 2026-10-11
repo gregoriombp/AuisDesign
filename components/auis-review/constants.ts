@@ -1,4 +1,4 @@
-export const OVERLAY_DATA_ATTR = "data-auis-review"
+export { OVERLAY_DATA_ATTR, SCHEMA_VERSION, STORAGE_KEYS } from "@auis/core/constants"
 
 /**
  * Review Mode sits ABOVE every product surface a reviewer might want to
@@ -20,14 +20,6 @@ export const REVIEW_Z = {
   mention: 1069,
   modal: 1070,
 } as const
-
-export const STORAGE_KEYS = {
-  identity: "auis-review:identity",
-  comments: "auis-review:comments",
-  schemaVersion: "auis-review:schema-version",
-} as const
-
-export const SCHEMA_VERSION = 3
 
 export const STALE_DOCUMENT_HEIGHT_THRESHOLD = 0.2
 

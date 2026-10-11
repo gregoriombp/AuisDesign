@@ -6,7 +6,7 @@ import type {
   ReviewExportPayload,
   ReviewIdentity,
   ReviewReply,
-} from "@auis/core/types"
+} from "../types"
 
 export interface ReviewStorageFilter {
   url?: string

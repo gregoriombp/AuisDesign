@@ -9,7 +9,7 @@ import { useImageAttach } from "@/lib/auis-review/useImageAttach"
 import { useReviewCommandAutocomplete } from "@/lib/auis-review/useReviewCommandAutocomplete"
 import { useVoiceTranscription } from "@/lib/auis-review/useVoiceTranscription"
 import { fetchRewrite } from "@/lib/auis-review/commentAssist"
-import type { ReviewElementContext } from "@/lib/auis-review/elementContext"
+import type { ReviewElementContext } from "@auis/core/elementContext"
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
 
 /**

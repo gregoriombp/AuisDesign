@@ -3,7 +3,7 @@
  * Wave 0 of docs/review-bridge-packages-plan.md: do review pins stay on their
  * element in apps Auis did not author? Results: docs/anchor-survival.md.
  *
- * The anchoring code is lifted VERBATIM from lib/auis-review/elementAnchor.ts
+ * The anchoring code is lifted VERBATIM from kit/core/src/elementAnchor.ts
  * (types stripped, imports dropped) and injected into each page. Pins are
  * dropped the way the canvas drops them — captureElementAnchor() at a click
  * point — then the page is perturbed (resize, navigate away and back, reload,
@@ -33,7 +33,7 @@ const ONLY = argOf("--only", "")
 const OUT = argOf("--out", "")
 
 const ROOT = resolve(import.meta.dirname, "..")
-const ANCHOR_SOURCE = resolve(ROOT, "lib/auis-review/elementAnchor.ts")
+const ANCHOR_SOURCE = resolve(ROOT, "kit/core/src/elementAnchor.ts")
 
 /** elementAnchor.ts as a script that exposes its functions on window. With no
  *  Auis overlay in the host, elementBelowOverlayAt is elementFromPoint. */

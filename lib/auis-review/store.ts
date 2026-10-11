@@ -1,11 +1,11 @@
 "use client"
 
 import { create } from "zustand"
-import { RemoteBridgeReview } from "@/components/auis-review/storage/remoteBridge"
-import { ServerlessReview } from "@/components/auis-review/storage/serverless"
-import type { ReviewStorage } from "@/components/auis-review/storage/types"
-import { makeId } from "@/components/auis-review/storage/utils"
-import { buildReviewCommentContext } from "@/lib/auis-review/elementContext"
+import { RemoteBridgeReview } from "@auis/core/storage/remoteBridge"
+import { ServerlessReview } from "@auis/core/storage/serverless"
+import type { ReviewStorage } from "@auis/core/storage/types"
+import { makeId } from "@auis/core/storage/utils"
+import { buildReviewCommentContext } from "@auis/core/elementContext"
 import { snapshotRevealTrail } from "@/lib/auis-review/revealTrail"
 import type {
   ReviewActor,

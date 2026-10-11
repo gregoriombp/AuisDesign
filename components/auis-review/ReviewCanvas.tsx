@@ -3,16 +3,13 @@
 import * as React from "react"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { useCommentsForUrl, useCurrentUrl } from "@/lib/auis-review/hooks"
-import {
-  useCumulativeScrollOffset,
-  useLayoutVersion,
-} from "@/lib/auis-review/scrollOffset"
+import { useCumulativeScrollOffset, useLayoutVersion } from "@auis/ui/scrollHooks"
 import {
   captureDrawAnchor,
   captureElementAnchor,
   resolveDrawPoints,
   resolveElementPoint,
-} from "@/lib/auis-review/elementAnchor"
+} from "@auis/core/elementAnchor"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewPinMarker } from "./ReviewPinMarker"
 import type { ReviewDrawPath, ReviewPoint } from "@auis/core/types"

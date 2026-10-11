@@ -8,14 +8,12 @@ import { AuPill } from "@/components/ui/AuPill"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { useCurrentUrl } from "@/lib/auis-review/hooks"
-import {
-  findPrimaryScrollContainer,
-  useLayoutVersion,
-} from "@/lib/auis-review/scrollOffset"
+import { findPrimaryScrollContainer } from "@auis/core/scrollOffset"
+import { useLayoutVersion } from "@auis/ui/scrollHooks"
 import {
   formatFullTimestamp,
   formatRelative,
-} from "@/lib/auis-review/format"
+} from "@auis/core/format"
 import { STALE_DOCUMENT_HEIGHT_THRESHOLD } from "./constants"
 import { ReviewAvatar } from "./ReviewAvatar"
 import { ReplyComposer } from "./ReplyComposer"
@@ -23,9 +21,9 @@ import { UxFlowChip } from "./UxFlowChip"
 import { CommentText } from "./CommentText"
 import { AuthorName } from "./PersonHover"
 import { useImageAttach } from "@/lib/auis-review/useImageAttach"
-import { elementFromCommentContext } from "@/lib/auis-review/elementContext"
+import { elementFromCommentContext } from "@auis/core/elementContext"
 import { permalinkPath } from "@/lib/auis-review/permalink"
-import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
+import { resolveAnchoredElement } from "@auis/core/elementAnchor"
 import { revealAnchor } from "@/lib/auis-review/revealTrail"
 import { matchesCurrentReviewUrl } from "@/lib/auis-review/urlMatch"
 import type { ReviewComment, ReviewReply } from "@auis/core/types"

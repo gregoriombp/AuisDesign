@@ -4,7 +4,7 @@ import * as React from "react"
 import { useReviewPathname } from "@auis/ui/router"
 import { useGlobalHotkey } from "@/lib/hooks/useGlobalHotkey"
 import { useReviewStore } from "@/lib/auis-review/store"
-import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
+import { resolveAnchoredElement } from "@auis/core/elementAnchor"
 import {
   revealAnchor,
   startRevealTrail,

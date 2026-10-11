@@ -26,11 +26,8 @@ import {
   reorderDom,
   type Drop,
 } from "@/lib/auis-edit/reorder"
-import {
-  elementBelowOverlayAt,
-  useCumulativeScrollOffset,
-  useLayoutVersion,
-} from "@/lib/auis-review/scrollOffset"
+import { elementBelowOverlayAt } from "@auis/core/scrollOffset"
+import { useCumulativeScrollOffset, useLayoutVersion } from "@auis/ui/scrollHooks"
 import type { PageEditAnchor, PageEditOp } from "@/lib/auis-edit/types"
 import { EDIT_OVERLAY_DATA_ATTR, EDIT_Z } from "./constants"
 import { EditToolbar } from "./EditToolbar"

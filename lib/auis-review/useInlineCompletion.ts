@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { ReviewElementContext } from "@/lib/auis-review/elementContext"
+import type { ReviewElementContext } from "@auis/core/elementContext"
 import { fetchCompletion } from "@/lib/auis-review/commentAssist"
 
 const MIN_CHARS = 6

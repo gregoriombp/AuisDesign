@@ -5,13 +5,13 @@ import { AuButton } from "@/components/ui/AuButton"
 import { AuSpinner } from "@/components/ui/AuSpinner"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
-import { useCumulativeScrollOffset } from "@/lib/auis-review/scrollOffset"
+import { useCumulativeScrollOffset } from "@auis/ui/scrollHooks"
 import { useStopDismiss } from "@/lib/auis-review/useStopDismiss"
 import { fileToHighResDataUrl } from "@/lib/auis-review/imageScale"
 import {
   describeAnchorElement,
   type ReviewElementContext,
-} from "@/lib/auis-review/elementContext"
+} from "@auis/core/elementContext"
 import { useVoiceTranscription } from "@/lib/auis-review/useVoiceTranscription"
 import { useInlineCompletion } from "@/lib/auis-review/useInlineCompletion"
 import { useReviewCommandAutocomplete } from "@/lib/auis-review/useReviewCommandAutocomplete"

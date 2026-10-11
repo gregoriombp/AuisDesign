@@ -9,16 +9,13 @@ import {
 import { AuPill } from "@/components/ui/AuPill"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
-import {
-  useCumulativeScrollOffset,
-  useLayoutVersion,
-} from "@/lib/auis-review/scrollOffset"
+import { useCumulativeScrollOffset, useLayoutVersion } from "@auis/ui/scrollHooks"
 import {
   resolveDrawPoints,
   resolveElementPoint,
-} from "@/lib/auis-review/elementAnchor"
-import { formatFullTimestamp } from "@/lib/auis-review/format"
-import { elementFromCommentContext } from "@/lib/auis-review/elementContext"
+} from "@auis/core/elementAnchor"
+import { formatFullTimestamp } from "@auis/core/format"
+import { elementFromCommentContext } from "@auis/core/elementContext"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReplyRow } from "./ReviewCommentCard"
 import { ReplyComposer } from "./ReplyComposer"
