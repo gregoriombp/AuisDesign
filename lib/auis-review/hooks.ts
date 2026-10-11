@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import type { ReviewComment } from "@/components/auis-review/types"
+import type { ReviewComment } from "@auis/core/types"
 import { useReviewStore } from "./store"
 import { useLiveLocation } from "./liveLocation"
 import { canonicalizeReviewUrl, matchesCurrentReviewUrl } from "./urlMatch"

@@ -18,7 +18,7 @@ import type {
   ReviewMode,
   ReviewPoint,
   ReviewReply,
-} from "@/components/auis-review/types"
+} from "@auis/core/types"
 import {
   DEFAULT_STROKE_WIDTH,
   REVIEW_PALETTE,

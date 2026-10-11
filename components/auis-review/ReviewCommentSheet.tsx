@@ -24,7 +24,7 @@ import {
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewCommentCard } from "./ReviewCommentCard"
 import { ReviewFilterControls, type ReviewScope } from "./ReviewFilterBar"
-import type { ReviewComment } from "./types"
+import type { ReviewComment } from "@auis/core/types"
 
 // "Future ideas" (backlog) no longer lives in the drawer — its home is the
 // Review Bridge page (/auis/review-bridge), which has room to compose and triage.

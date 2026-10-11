@@ -5,7 +5,7 @@
 // in the bridge store — see GET /api/review-bridge/reviewers, which derives the
 // handle and returns the list ready to use.
 //
-// The handle derivation (isomorphic, no "use client") lives in ./reviewerHandle
+// The handle derivation (isomorphic, no "use client") lives in @auis/core/reviewerHandle
 // and is re-exported here so the existing importers (autocomplete, CommentText)
 // do not need to know it moved. This module is ONLY the client side: a module
 // cache + a hook to read the list without duplicating fetches (the "@"
@@ -13,19 +13,14 @@
 
 import * as React from "react"
 
+import type { ReviewerRef } from "@auis/core/reviewerHandle"
+
 export {
   foldAscii,
   deriveReviewerHandleBase,
   deriveReviewerHandles,
-} from "./reviewerHandle"
-
-export interface ReviewerRef {
-  id: string
-  name: string
-  email?: string
-  /** Token typed after "@" (case-insensitive on parse, always lowercase here). */
-  handle: string
-}
+} from "@auis/core/reviewerHandle"
+export type { ReviewerRef }
 
 // ── client fetch cache (single-flight, ~60s) ─────────────────────────────────
 

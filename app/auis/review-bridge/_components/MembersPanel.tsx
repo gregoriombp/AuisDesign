@@ -15,7 +15,7 @@ import { Icon } from "@/components/ui/Icon"
 /**
  * Team tab of the Review Bridge — who is who and who can do what. Lists the
  * review identities (the "who are you?" members) and, when a deployment wires
- * an auth provider into `_session.ts`, its accounts with the resolved role. An
+ * an auth provider into `kit/server/src/review/session.ts`, its accounts with the resolved role. An
  * admin removes an obsolete identity from here; the real role comes from the
  * server (it is not editable by click — on purpose: the hierarchy must never
  * be self-assignable from the UI).
@@ -136,7 +136,7 @@ export function MembersPanel() {
               Hierarchy <strong className="text-(--fg-primary)">off</strong> — every
               session counts as admin. Auis ships without an auth provider; to
               split admins from reviewers, resolve the session in{" "}
-              <code className="text-(--fg-primary)">app/api/review-bridge/_session.ts</code>{" "}
+              <code className="text-(--fg-primary)">kit/server/src/review/session.ts</code>{" "}
               and every route inherits the roles.
             </>
           )}

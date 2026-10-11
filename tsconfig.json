@@ -24,6 +24,21 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@auis/core": [
+        "./kit/core/src/index.ts"
+      ],
+      "@auis/core/*": [
+        "./kit/core/src/*"
+      ],
+      "@auis/server": [
+        "./kit/server/src/index.ts"
+      ],
+      "@auis/server/*": [
+        "./kit/server/src/*"
+      ],
+      "@auis/next": [
+        "./kit/next/src/index.ts"
       ]
     },
     "target": "ES2017"

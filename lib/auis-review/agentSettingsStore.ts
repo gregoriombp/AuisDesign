@@ -10,7 +10,7 @@ import {
   normalizeAgentSettings,
   type ReviewAgentSettings,
   type ReviewAgentSettingsMap,
-} from "./agentRuntime"
+} from "@auis/core/agentRuntime"
 
 const ENDPOINT = "/api/review-bridge/agent-settings"
 const OFF: ReviewAgentSettings = { enabled: false, permission: "reply", model: null }

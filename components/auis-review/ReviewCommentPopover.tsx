@@ -18,7 +18,7 @@ import { useReviewCommandAutocomplete } from "@/lib/auis-review/useReviewCommand
 import { fetchRewrite } from "@/lib/auis-review/commentAssist"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
-import type { ReviewPoint } from "./types"
+import type { ReviewPoint } from "@auis/core/types"
 
 const POPOVER_WIDTH = 360
 const POPOVER_OFFSET = 16

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 
 import { SCHEMA_VERSION } from "@/components/auis-review/constants"
 import { makeId } from "@/components/auis-review/storage/utils"
-import type { ReviewComment } from "@/components/auis-review/types"
+import type { ReviewComment } from "@auis/core/types"
 import { useReviewStore } from "@/lib/auis-review/store"
 
 import type {

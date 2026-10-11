@@ -117,8 +117,9 @@ Product-neutral references: `app/auis/ux-flow/example/page.tsx` and
 ### Review Comments
 
 `npm run dev` serves the Review Bridge through same-origin routes
-(`app/api/review-bridge/*`) that persist to `review-bridge/data/`. There is no
-separate server, no port and no token in local development.
+(`/api/review-bridge/*`, one catch-all handing every request to `@auis/server`
+in `kit/server`) that persist to `review-bridge/data/`. There is no separate
+server, no port and no token in local development.
 
 - Every comment carries the route, a human-readable location trail, the target
   element anchor and the steps needed to reveal it.
@@ -127,7 +128,7 @@ separate server, no port and no token in local development.
 - **Mention trigger (local dev only).** With `AUIS_MENTION_TRIGGER=1` in
   `.env.local`, writing `@Claude …` or `@Grok …` in a comment or a reply opens
   that agent's own CLI right there, from the route that stored it
-  (`app/api/review-bridge/_mention.ts`). Nothing polls and nothing waits: the
+  (`kit/server/src/review/mention.ts`). Nothing polls and nothing waits: the
   write is the event. Five gates, all required — never in production, only the
   admin's own writes, never a write authored by an agent (or agents would drive
   each other), only on creation (re-saving an old comment does not fire), and
@@ -151,7 +152,7 @@ separate server, no port and no token in local development.
 
 Hierarchy: the local session is always an **admin**. When a deployment enables
 authentication, `admin` / `reviewer` / `agent` roles are resolved in
-`app/api/review-bridge/_session.ts`; agents authenticate with
+`kit/server/src/review/session.ts`; agents authenticate with
 `x-bridge-agent-token` against `BRIDGE_AGENT_TOKEN`.
 
 ### State Mode

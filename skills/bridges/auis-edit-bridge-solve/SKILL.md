@@ -46,7 +46,7 @@ applied/discarded → ignore (already in the archive)
 ## Actor identity
 
 On EVERY call that writes to the bridge, post as the executor you are. The two
-executors Auis ships are registered in `lib/auis-review/agentIdentity.ts`:
+executors Auis ships are registered in `kit/core/src/agentIdentity.ts`:
 
 ```json
 { "kind": "agent", "id": "claude", "name": "Claude" }

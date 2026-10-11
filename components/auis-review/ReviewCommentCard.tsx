@@ -28,7 +28,7 @@ import { permalinkPath } from "@/lib/auis-review/permalink"
 import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
 import { revealAnchor } from "@/lib/auis-review/revealTrail"
 import { matchesCurrentReviewUrl } from "@/lib/auis-review/urlMatch"
-import type { ReviewComment, ReviewReply } from "./types"
+import type { ReviewComment, ReviewReply } from "@auis/core/types"
 
 function isStale(comment: ReviewComment, currentDocHeight: number): boolean {
   if (!comment.documentHeight) return false

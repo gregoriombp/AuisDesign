@@ -1,6 +1,6 @@
 // Review Mode attachments are written to disk (content-addressed) by the
 // serverless bridge and referenced by URL in the JSON — see
-// app/api/review-bridge/_images.ts. Here we only prepare the upload: cap the
+// kit/server/src/review/images.ts. Here we only prepare the upload: cap the
 // longest side + re-encode as JPEG so a UI screenshot never travels as a giant
 // PNG/4K image. 1600px @ 0.82 keeps text legible at a fraction of the weight.
 const MAX_DIM = 1600

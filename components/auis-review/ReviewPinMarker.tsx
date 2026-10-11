@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { ReviewComment, ReviewPoint } from "./types"
+import type { ReviewComment, ReviewPoint } from "@auis/core/types"
 
 type Props = {
   position: ReviewPoint

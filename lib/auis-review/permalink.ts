@@ -3,7 +3,7 @@
 // way back. One implementation for every surface (drawer card, thread popover,
 // inbox, pending-work page) — the copies used to diverge.
 
-import type { ReviewComment } from "@/components/auis-review/types"
+import type { ReviewComment } from "@auis/core/types"
 
 /** Relative path carrying the comment's permalink. */
 export function permalinkPath(comment: ReviewComment): string {

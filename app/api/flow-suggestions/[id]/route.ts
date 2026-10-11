@@ -9,7 +9,7 @@ import {
   flowActorForSession,
   parseFlowMaterializationReceipt,
 } from "../_integrity";
-import { getBridgeSession } from "../../review-bridge/_session";
+import { getBridgeSession } from "@auis/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

@@ -13,10 +13,10 @@
 
 import * as React from "react"
 import type { AuMentionMenuSection } from "@/components/ui/AuMentionMenu"
-import { REVIEW_AGENTS } from "./agents"
+import { REVIEW_AGENTS } from "@auis/core/agents"
 import { agentSettingsOf, useAgentSettingsStore } from "./agentSettingsStore"
-import { parseReviewCommand } from "./commandParse"
-import { isReviewSkillAvailableToAgent, REVIEW_SKILLS } from "./skills"
+import { parseReviewCommand } from "@auis/core/commandParse"
+import { isReviewSkillAvailableToAgent, REVIEW_SKILLS } from "@auis/core/skills"
 import { foldAscii, useReviewers } from "./reviewers"
 import { getCaretCoordinates } from "./textareaCaret"
 

@@ -29,7 +29,7 @@ import {
   collectPageOptions,
   type ReviewListFilters,
 } from "@/lib/auis-review/commentFilters"
-import type { ReviewComment } from "@/components/auis-review/types"
+import type { ReviewComment } from "@auis/core/types"
 
 // "backlog" = Future ideas — their home is HERE now (they left the drawer).
 type Tab = "open" | "in_review" | "backlog" | "archive"

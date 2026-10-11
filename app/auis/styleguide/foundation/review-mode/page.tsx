@@ -186,7 +186,7 @@ export default function ReviewModeFoundationPage() {
         lead="Same-origin routes, JSON on disk, backups before every write. Agents on this machine read the same files."
       >
         <div className="flex flex-col gap-5">
-          <Card pill="Routes" variant="ai" meta="app/api/review-bridge/">
+          <Card pill="Routes" variant="ai" meta="kit/server/src/review/">
             <code className="font-mono text-xs">GET /comments?view=lean</code> for
             triage, <code className="font-mono text-xs">PUT /comments/:id</code> with
             a transition to move status, <code className="font-mono text-xs">POST …/replies</code>{" "}
@@ -201,7 +201,7 @@ export default function ReviewModeFoundationPage() {
             (content-addressed attachments). Snapshots go to{" "}
             <code className="font-mono text-xs">~/.auis/review-bridge-backups</code>.
           </Card>
-          <Card pill="Hierarchy" variant="draft" meta="app/api/review-bridge/_session.ts">
+          <Card pill="Hierarchy" variant="draft" meta="kit/server/src/review/session.ts">
             Locally every browser is an admin. Put Auis behind a login and resolve
             the session in one file: admins command agents and approve, reviewers
             comment, agents authenticate with{" "}

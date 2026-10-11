@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useReviewers } from "@/lib/auis-review/reviewers"
-import type { ReviewAuthorRole } from "./types"
+import type { ReviewAuthorRole } from "@auis/core/types"
 
 /**
  * Human identity with hover detail — the "name up front, e-mail on hover"

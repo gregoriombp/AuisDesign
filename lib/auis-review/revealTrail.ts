@@ -27,7 +27,7 @@ import { OVERLAY_DATA_ATTR } from "@/components/auis-review/constants"
 import type {
   ReviewAnchor,
   ReviewRevealStep,
-} from "@/components/auis-review/types"
+} from "@auis/core/types"
 
 interface TrailEntry extends ReviewRevealStep {
   path: string

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runner of the Review Bridge mention trigger. It is opened by the route that
-// just stored the comment (app/api/review-bridge/_mention.ts), detached — which
+// just stored the comment (kit/server/src/review/mention.ts), detached — which
 // is why it survives the dev server's HMR, which would kill a supervisor living
 // inside Next.
 //

@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/Icon"
-import type { ReviewFlowRef } from "./types"
+import type { ReviewFlowRef } from "@auis/core/types"
 
 /**
  * Marks a review comment that was authored on a styleguide UX-flow diagram,

@@ -5,7 +5,7 @@ import type {
   ReviewDrawAnchor,
   ReviewElementAnchor,
   ReviewPoint,
-} from "@/components/auis-review/types"
+} from "@auis/core/types"
 
 // Pins store an absolute position (doc coords), but when a side panel opens or
 // closes the container changes width and the content reflows horizontally —

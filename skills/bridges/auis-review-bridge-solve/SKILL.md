@@ -25,8 +25,9 @@ bridge, plans the fixes, implements them, and hands each item back marked as
 > **serverless, embedded in Next** (routes `/api/review-bridge/*`, same-origin,
 > no separate client configuration).
 >
-> Source of truth for the endpoints: `app/api/review-bridge/*/route.ts`; the
-> record shape is `components/auis-review/types.ts`; the overview is
+> Source of truth for the endpoints: `kit/server/src/review/routes/` (routed by
+> `kit/server/src/review/handler.ts`); the
+> record shape is `kit/core/src/types.ts`; the overview is
 > `review-bridge/README.md`.
 
 ## Golden rule
@@ -50,7 +51,7 @@ resolved     → ignore      (already archived; different queue)
 ## Actor identity
 
 Sign with the identity of the runtime that is running. The `id` **must** exist
-in `lib/auis-review/agentIdentity.ts` — an invented id is rejected as
+in `kit/core/src/agentIdentity.ts` — an invented id is rejected as
 `unknown_executor`.
 
 ```
@@ -97,7 +98,7 @@ environment, add `-H "x-bridge-agent-token: $BRIDGE_AGENT_TOKEN"` to **every**
 curl call of this flow (health included). Without the header a deployment with
 auth answers 401/403. Local dev has no token and the calls stay as they are.
 
-The Next routes persist through `lib/bridge-store` (atomic writes + a lock on
+The Next routes persist through the doc store in `kit/server/src/docstore` (atomic writes + a lock on
 the local JSON files). If health fails, stop with a message telling the user to
 run `npm run dev` at the root (or to check `BRIDGE_BASE`/the token when pointing
 at a deployment) and come back.

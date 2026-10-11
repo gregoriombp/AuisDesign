@@ -4,7 +4,7 @@
 // (presets + custom range) and chronological order. The UI lives in
 // ReviewFilterBar (the mega menu behind the filter icon).
 
-import type { ReviewComment } from "@/components/auis-review/types"
+import type { ReviewComment } from "@auis/core/types"
 
 export type ReviewPeriod = "all" | "today" | "7d" | "30d" | "custom"
 export type ReviewOrder = "desc" | "asc"

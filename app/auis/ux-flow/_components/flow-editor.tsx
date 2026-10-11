@@ -48,7 +48,7 @@ import {
   loadFlowData,
   SubflowGroupNode,
 } from "./flow-subflow"
-import type { ReviewComment } from "@/components/auis-review/types"
+import type { ReviewComment } from "@auis/core/types"
 
 /* ─────────────────────────────────────────────────────────────────────
  * Suggestions API — same-origin route (app/api/flow-suggestions) backed by
