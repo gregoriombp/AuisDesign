@@ -154,7 +154,7 @@ export interface ReviewActor {
   name: string
 }
 
-/** Agents panel: on · ceiling · model. Source: lib/auis-review/agentRuntime. */
+/** Agents panel: on · ceiling · model. Source: kit/core/src/agentRuntime.ts. */
 export type {
   ReviewAgentPermission,
   ReviewAgentSettings,

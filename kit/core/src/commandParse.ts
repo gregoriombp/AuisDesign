@@ -1,14 +1,14 @@
 // Pure parser that turns a Review Bridge comment's raw text into structured
 // command data + render segments. Shared by: the read views (render @mention and
 // /skill as chips), the composer's autocomplete, the mention trigger
-// (app/api/review-bridge/_mention.ts) and /dispatch-queue. Nothing persists the
+// (kit/server/src/review/mention.ts) and /dispatch-queue. Nothing persists the
 // parse — every reader re-derives it from the text.
 //
 // The composer is a plain <textarea>, so commands live in the text literally as
 // the human types them: "@Claude", "/auis-ux-writing". Only KNOWN agents/skills
 // become tokens; an unknown @foo or /bar stays plain text. There is no "#now"
 // directive: the mention itself is the request, and how far the agent may go is
-// its ceiling in the Auis dot's Agents panel (see lib/auis-review/agentRuntime).
+// its ceiling in the Auis dot's Agents panel (see kit/core/src/agentRuntime.ts).
 //
 // @mentions of a PERSON (a human reviewer, see ./reviewers) are recognized only
 // when the CALLER passes `opts.userHandles` — without it, a "@jane" that matches

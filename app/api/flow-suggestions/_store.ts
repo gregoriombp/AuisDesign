@@ -1,7 +1,7 @@
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 
-import { createDocStore } from "@/lib/bridge-store";
+import { createDocStore } from "@auis/server";
 
 import {
   canonicalFlowRevision,

@@ -5,7 +5,7 @@ import {
   type FlowSuggestionStatus,
 } from "./_store";
 import { flowActorForSession } from "./_integrity";
-import { getBridgeSession } from "../review-bridge/_session";
+import { getBridgeSession } from "@auis/server";
 
 // Touches the filesystem (flow-bridge/data/*.json) — must run on Node, never
 // cached.

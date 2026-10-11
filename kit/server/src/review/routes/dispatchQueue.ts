@@ -1,0 +1,126 @@
+import { getAgentSettings, listComments } from "../store";
+import { effectiveAuthorRole, getBridgeSession } from "../session";
+import { parseReviewCommand } from "@auis/core/commandParse";
+import { getReviewAgent } from "@auis/core/agents";
+import {
+  getReviewSkill,
+  isReviewSkillAvailableToAgent,
+} from "@auis/core/skills";
+
+// The actionable queue: open, user-authored comments that mention an agent the
+// user has switched ON in the Auis dot. Same settings as the mention trigger:
+// ceiling Reply → "respond"; Edit → "act". Encodes the gate ONCE, server-side,
+// reusing the same parser the composer/chips use.
+//
+// NO CONSUMER ships with Auis. What acts is the mention trigger
+// (kit/server/src/review/mention.ts), which reads the same Agents panel
+// settings. The route stays up as a read-only view of what is actionable, for
+// a product that wants to poll instead of trigger.
+//
+// HIERARCHY: agents obey ONLY the admin. Command sources are exclusively
+// messages whose effective author role is "admin" (the pin's text and replies)
+// — an "@Claude" typed by a reviewer stays as text and NEVER enters the queue.
+// A reviewer's pin can still dispatch, but only when the ADMIN replies on it
+// mentioning the agent (the command is the admin's, the context is the reviewer's).
+
+type DispatchMode = "respond" | "act";
+
+interface DispatchItem {
+  commentId: string;
+  url: string;
+  agentId: string;
+  agentName: string;
+  mode: DispatchMode;
+  text: string;
+  flowRef?: (Awaited<ReturnType<typeof listComments>>)[number]["flowRef"];
+  skills: { slug: string; label: string; acts: boolean }[];
+  createdAt: number;
+}
+
+async function handleGET(request: Request) {
+  // Readable by an agent (token) or by the admin — a reviewer has nothing to
+  // do here.
+  const session = await getBridgeSession(request);
+  if (session.role === "reviewer") {
+    return Response.json({ error: "forbidden_role" }, { status: 403 });
+  }
+
+  const url = new URL(request.url).searchParams.get("url") ?? undefined;
+  const settings = await getAgentSettings();
+  const open = await listComments({ status: "open", url });
+
+  const items: DispatchItem[] = [];
+  for (const c of open) {
+    // No self-loop: agent-authored pins (including retired agents' old ones,
+    // which often say "have @Claude do it") never auto-trigger another agent.
+    // Only the user's own directives dispatch.
+    if (c.authorKind === "agent" || getReviewAgent(c.authorId)) continue;
+
+    const replies = c.replies ?? [];
+
+    // The user may address the pin and then follow up with an "@Claude" REPLY —
+    // so the mention usually lives in a reply, not in c.text. Parse the ADMIN
+    // stream (the body + every admin-authored reply) and merge mentions/skills
+    // as the union. Agent replies are never command sources (that would let agents
+    // drive each other), and reviewer replies never command (hierarchy gate).
+    const userSources = [
+      ...(effectiveAuthorRole(c) === "admin" ? [{ text: c.text, at: c.createdAt }] : []),
+      ...replies
+        .filter((r) => r.authorKind === "user" && effectiveAuthorRole(r) === "admin")
+        .map((r) => ({ text: r.text, at: r.createdAt })),
+    ];
+    if (userSources.length === 0) continue;
+    const latestUserAt = userSources.reduce((mx, u) => Math.max(mx, u.at), 0);
+    const mentions: string[] = [];
+    const skills: string[] = [];
+    for (const u of userSources) {
+      const p = parseReviewCommand(u.text);
+      for (const id of p.mentions) if (!mentions.includes(id)) mentions.push(id);
+      for (const sk of p.skills) if (!skills.includes(sk)) skills.push(sk);
+    }
+    if (mentions.length === 0) continue;
+
+    for (const agentId of mentions) {
+      const agent = getReviewAgent(agentId);
+      if (!agent) continue;
+      const s = settings[agentId];
+      if (!s?.enabled) continue;
+      // Same ceiling as the trigger: Reply answers; Edit acts.
+      const mode: DispatchMode = s.permission === "reply" ? "respond" : "act";
+
+      // Idempotency, timeline-aware: the agent is "done" only if it has replied
+      // AFTER the user's most recent message. This keeps it from re-running a
+      // comment it already answered, while still re-opening the item when the
+      // user follows up with a fresh "@Claude" reply (a re-prompt).
+      const latestAgentReplyAt = replies
+        .filter((r) => r.authorKind === "agent" && r.authorId === agentId)
+        .reduce((mx, r) => Math.max(mx, r.createdAt), -Infinity);
+      if (latestAgentReplyAt > latestUserAt) continue;
+
+      const routedSkills = skills.flatMap((slug) => {
+        const skill = getReviewSkill(slug);
+        if (!skill || !isReviewSkillAvailableToAgent(skill, agentId)) return [];
+        return [skill.slug];
+      });
+      items.push({
+        commentId: c.id,
+        url: c.url,
+        agentId,
+        agentName: agent.name,
+        mode,
+        text: c.text,
+        flowRef: c.flowRef,
+        skills: routedSkills.map((slug) => {
+          const skill = getReviewSkill(slug)!;
+          return { slug, label: skill.label, acts: skill.acts };
+        }),
+        createdAt: c.createdAt,
+      });
+    }
+  }
+
+  items.sort((a, b) => a.createdAt - b.createdAt); // FIFO — oldest first
+  return Response.json({ items, settings });
+}
+
+export const GET = handleGET;
