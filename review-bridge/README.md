@@ -50,9 +50,15 @@ The plan for making it installable elsewhere is
 | `data/images/<sha256>.<ext>` | Content-addressed attachments (comment and reply images are stored as `/api/review-bridge/images/<name>` refs, never as inline data URLs) |
 
 `schemaVersion = 3`. Backups: before every write the store snapshots the
-previous state to `~/.auis/review-bridge-backups/` (override with
-`REVIEW_BRIDGE_BACKUP_DIR`) and restores from the latest snapshot when
-`comments.json` vanished (clean checkout, reinstall). It keeps the 40 newest
+previous state to `~/.auis/review-bridge-backups/<project>/`, where
+`<project>` is a hash of the project's folder (override with
+`REVIEW_BRIDGE_BACKUP_DIR`). When `comments.json` vanished (clean checkout,
+reinstall) it restores from the latest snapshot of that same project. Every
+Auis-based project on the machine shares `~/.auis/review-bridge-backups`, and
+the per-project folder is what keeps one from restoring another's comments.
+Snapshots from before per-project folders sit at the top of that folder and
+are never restored from. A project's first read backs it up if it has no
+snapshot yet. It keeps the 40 newest
 snapshots, the first of each day over the last 60 days and the first of each
 month before that. A corrupt `comments.json` is never treated as empty: the
 store keeps a `.corrupt-*` copy next to it and answers 503 until you fix the
