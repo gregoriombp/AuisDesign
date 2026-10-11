@@ -3,6 +3,7 @@
 import * as React from "react"
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 
+import { ChromeScope } from "@auis/ui/ChromeScope"
 import { ReviewAvatar } from "@auis/ui/review/ReviewAvatar"
 import { AuSegmented } from "@/components/ui/AuSegmented"
 import { AuToggle } from "@/components/ui/AuToggle"
@@ -73,13 +74,15 @@ export function AgentsPanel() {
                     type="button"
                     className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left outline-hidden focus-visible:ring-2 focus-visible:ring-(--ring-focus) focus-visible:ring-offset-2"
                   >
-                    <ReviewAvatar
-                      authorKind="agent"
-                      authorId={agent.id}
-                      authorName={agent.name}
-                      colorToken={agent.accentVar}
-                      size={24}
-                    />
+                    <ChromeScope>
+                      <ReviewAvatar
+                        authorKind="agent"
+                        authorId={agent.id}
+                        authorName={agent.name}
+                        colorToken={agent.accentVar}
+                        size={24}
+                      />
+                    </ChromeScope>
                     <span className="min-w-0 flex-1">
                       <span className="block body-sm font-medium text-(--fg-primary)">
                         {agent.name}

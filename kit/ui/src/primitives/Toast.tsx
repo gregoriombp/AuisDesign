@@ -81,7 +81,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       <ToastPrimitives.Provider swipeDirection="right" duration={Infinity}>
         {children}
         <ToastPrimitives.Viewport
-          className="au-toast-stack"
+          className="auis-toast-stack"
           aria-label="Notifications"
         >
           {visible.map((t) => (
@@ -114,20 +114,20 @@ function ToastItem({
       }}
       duration={Infinity}
       className={cn(
-        "au-toast",
-        `au-toast--${variant}`,
-        toast.leaving && "au-toast--leaving"
+        "auis-toast",
+        `auis-toast--${variant}`,
+        toast.leaving && "auis-toast--leaving"
       )}
     >
-      <span className="au-toast__icon">
+      <span className="auis-toast__icon">
         <Icon name={glyph} size={18} />
       </span>
-      <div className="au-toast__body">
-        <ToastPrimitives.Title className="au-toast__title">
+      <div className="auis-toast__body">
+        <ToastPrimitives.Title className="auis-toast__title">
           {toast.title}
         </ToastPrimitives.Title>
         {(toast.description || toast.action) && (
-          <ToastPrimitives.Description className="au-toast__desc">
+          <ToastPrimitives.Description className="auis-toast__desc">
             {toast.description}
             {toast.description && toast.action && " · "}
             {toast.action && (
@@ -139,7 +139,7 @@ function ToastItem({
                   onDismiss()
                 }}
               >
-                <button type="button" className="au-toast__action">
+                <button type="button" className="auis-toast__action">
                   {toast.action.label}
                 </button>
               </ToastPrimitives.Action>
@@ -148,7 +148,7 @@ function ToastItem({
         )}
       </div>
       <ToastPrimitives.Close
-        className="au-toast__close"
+        className="auis-toast__close"
         aria-label="Close notification"
       >
         ×

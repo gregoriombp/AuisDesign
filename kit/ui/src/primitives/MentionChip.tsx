@@ -27,11 +27,11 @@ export const MENTION_CHIP_BASE_CLASS =
   "inline-flex min-h-6 items-center gap-1.5 rounded-lg border-transparent px-2.5 py-1 text-xs font-medium leading-none align-baseline select-none"
 
 export const MENTION_CHIP_INTERACTIVE_CLASS =
-  "cursor-pointer transition-[background-color,color,border-color,filter] duration-au-fast hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--accent-brand)"
+  "cursor-pointer transition-[background-color,color,border-color,filter] duration-au-fast hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--auis-accent-brand)"
 
 export const MENTION_CHIP_TONE_CLASS: Record<MentionChipTone, string> = {
-  neutral: "bg-(--bg-hover) text-(--fg-secondary)",
-  inverse: "bg-(--bg-inverse) text-(--fg-on-inverse)",
+  neutral: "bg-(--auis-bg-hover) text-(--auis-fg-secondary)",
+  inverse: "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)",
   teal: "bg-(--au-teal-100) text-(--au-teal-800)",
   purple: "bg-(--au-purple-100) text-(--au-purple-800)",
   amber: "bg-(--au-amber-100) text-(--au-amber-900)",

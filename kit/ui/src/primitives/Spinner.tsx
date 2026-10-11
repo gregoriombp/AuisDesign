@@ -6,8 +6,8 @@ import { cn } from "./cn"
 /**
  * Spinner — indeterminate loading ring. Border-only (`border-current` with a
  * transparent top + `animate-spin`), no SVG: it inherits the text color of its
- * context via currentColor — paint it with `text-(--fg-secondary)`,
- * `text-(--accent-brand)` etc. on the element or an ancestor.
+ * context via currentColor — paint it with `text-(--auis-fg-secondary)`,
+ * `text-(--auis-accent-brand)` etc. on the element or an ancestor.
  *
  * Use `Progress` when the progress is known. The spinner is for short,
  * indeterminate actions (saving, connecting, loading a list).
@@ -51,7 +51,7 @@ export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
           )}
         />
         {hasLabel && (
-          <span className="text-sm text-(--fg-secondary)">{label}</span>
+          <span className="text-sm text-(--auis-fg-secondary)">{label}</span>
         )}
       </span>
     )

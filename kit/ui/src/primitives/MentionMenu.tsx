@@ -83,10 +83,10 @@ function EntryRow({
       className={cn(
         "flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-sm transition-colors duration-au-fast",
         active
-          ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
+          ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
           : entry.accent === "purple"
             ? "text-(--au-purple-700)"
-            : "text-(--fg-primary)",
+            : "text-(--auis-fg-primary)",
       )}
     >
       {entry.iconSrc ? (
@@ -104,10 +104,10 @@ function EntryRow({
           className={cn(
             "shrink-0",
             active
-              ? "text-(--fg-on-inverse)"
+              ? "text-(--auis-fg-on-inverse)"
               : entry.accent === "purple"
                 ? "text-(--au-purple-600)"
-                : "text-(--fg-tertiary)",
+                : "text-(--auis-fg-tertiary)",
           )}
         />
       )}
@@ -117,7 +117,7 @@ function EntryRow({
         <span
           className={cn(
             "shrink-0 text-2xs",
-            active ? "text-(--fg-on-inverse)" : "text-(--fg-tertiary)",
+            active ? "text-(--auis-fg-on-inverse)" : "text-(--auis-fg-tertiary)",
           )}
         >
           {entry.meta}
@@ -129,7 +129,7 @@ function EntryRow({
           size={15}
           className={cn(
             "shrink-0",
-            active ? "text-(--fg-on-inverse)" : "text-(--fg-tertiary)",
+            active ? "text-(--auis-fg-on-inverse)" : "text-(--auis-fg-tertiary)",
           )}
         />
       )}
@@ -153,7 +153,7 @@ export function MentionMenu({
       role="listbox"
       aria-label={ariaLabel}
       className={cn(
-        "w-64 rounded-2xl border border-(--border-subtle) bg-(--bg-raised) p-1.5 shadow-lg",
+        "w-64 rounded-2xl border border-(--auis-border-subtle) bg-(--auis-bg-raised) p-1.5 shadow-lg",
         className,
       )}
       style={style}
@@ -165,7 +165,7 @@ export function MentionMenu({
             e.preventDefault();
             header.onBack?.();
           }}
-          className="mb-0.5 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-(--fg-tertiary) transition-colors duration-au-fast hover:bg-(--bg-hover) hover:text-(--fg-secondary)"
+          className="mb-0.5 flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-xs font-medium text-(--auis-fg-tertiary) transition-colors duration-au-fast hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-secondary)"
         >
           <Icon name="arrow_back" size={14} />
           {header.label}
@@ -178,7 +178,7 @@ export function MentionMenu({
             section.entries.length > 0 && (
               <React.Fragment key={section.label ?? `sec-${si}`}>
                 {section.label && (
-                  <p className="px-2.5 pb-1 pt-2 text-2xs font-medium text-(--fg-tertiary)">
+                  <p className="px-2.5 pb-1 pt-2 text-2xs font-medium text-(--auis-fg-tertiary)">
                     {section.label}
                   </p>
                 )}
@@ -197,7 +197,7 @@ export function MentionMenu({
       </div>
 
       {footer && (
-        <div className="mt-1 border-t border-(--border-subtle) pt-1">
+        <div className="mt-1 border-t border-(--auis-border-subtle) pt-1">
           <EntryRow
             entry={{ key: footer.key, label: footer.label, icon: "add" }}
             active={footer.key === activeKey}

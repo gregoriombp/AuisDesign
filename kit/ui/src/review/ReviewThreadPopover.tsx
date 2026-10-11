@@ -32,7 +32,7 @@ const GAP = 16
 
 /** Elements that should NOT dismiss the thread when clicked: the review
  * overlay itself and any Radix popper (the ⋯ menu portals outside the tree). */
-const KEEP_OPEN_SELECTOR = `[${OVERLAY_DATA_ATTR}], [data-radix-popper-content-wrapper], .au-dropdown, [role="menu"]`
+const KEEP_OPEN_SELECTOR = `[${OVERLAY_DATA_ATTR}], [data-radix-popper-content-wrapper], .auis-dropdown, [role="menu"]`
 
 function anchorPoint(comment: ReviewComment): ReviewPoint {
   return comment.anchor.kind === "pin"
@@ -227,11 +227,11 @@ export function ReviewThreadPopover() {
       style={{ zIndex: REVIEW_Z.popover, left, width: THREAD_WIDTH, ...vertical }}
     >
       <div
-        className="pointer-events-auto flex flex-col rounded-lg bg-(--bg-raised) border border-(--border-subtle) shadow-lg overflow-hidden"
+        className="pointer-events-auto flex flex-col rounded-lg bg-(--auis-bg-raised) border border-(--auis-border-subtle) shadow-lg overflow-hidden"
         style={{ maxHeight }}
       >
         {/* Header */}
-        <header className="flex items-center gap-2 px-3 py-2.5 border-b border-(--border-subtle)">
+        <header className="flex items-center gap-2 px-3 py-2.5 border-b border-(--auis-border-subtle)">
           <ReviewAvatar
             authorKind={comment.authorKind}
             authorId={comment.authorId}
@@ -245,15 +245,15 @@ export function ReviewThreadPopover() {
                 name={comment.authorName}
                 email={comment.authorEmail}
                 role={comment.authorRole}
-                className="body-xs font-medium text-(--fg-primary) truncate"
+                className="body-xs font-medium text-(--auis-fg-primary) truncate"
               />
               {comment.authorKind === "agent" && (
-                <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
+                <span className="text-2xs px-1 py-0 rounded-xs bg-(--auis-bg-muted) text-(--auis-fg-tertiary)">
                   agent
                 </span>
               )}
             </div>
-            <span className="text-2xs text-(--fg-tertiary) tabular-nums">
+            <span className="text-2xs text-(--auis-fg-tertiary) tabular-nums">
               {formatFullTimestamp(comment.createdAt)}
             </span>
           </div>
@@ -262,7 +262,7 @@ export function ReviewThreadPopover() {
           <div className="ml-auto flex items-center gap-0.5">
             {comment.visibility === "admins" && (
               <span
-                className="inline-flex items-center gap-1 body-xs text-(--fg-tertiary)"
+                className="inline-flex items-center gap-1 body-xs text-(--auis-fg-tertiary)"
                 title="Visible to admins only"
               >
                 <Icon name="lock" size={11} />
@@ -274,7 +274,7 @@ export function ReviewThreadPopover() {
               type="button"
               onClick={() => setSheetOpen(true)}
               aria-label="See more"
-              className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
               title="See more (open in the side panel)"
             >
               <Icon name="open_in_full" size={13} />
@@ -285,7 +285,7 @@ export function ReviewThreadPopover() {
                 onClick={() => void archiveDirect(comment.id)}
                 aria-label="Mark as resolved"
                 title="Mark as resolved"
-                className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--accent-success) hover:bg-(--bg-hover) transition-colors"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-accent-success) hover:bg-(--auis-bg-hover) transition-colors"
               >
                 <Icon name="check_circle" size={15} />
               </button>
@@ -296,7 +296,7 @@ export function ReviewThreadPopover() {
                 <button
                   type="button"
                   aria-label="Actions"
-                  className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
+                  className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
                 >
                   <Icon name="more_horiz" size={15} />
                 </button>
@@ -307,7 +307,7 @@ export function ReviewThreadPopover() {
               type="button"
               onClick={closeThread}
               aria-label="Close"
-              className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
+              className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
             >
               <Icon name="close" size={15} />
             </button>
@@ -325,7 +325,7 @@ export function ReviewThreadPopover() {
                 rows={3}
                 autoFocus
                 placeholder="Edit the comment…"
-                className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
+                className="w-full rounded-sm border border-(--auis-border-subtle) bg-(--auis-bg-surface) p-2 body-sm text-(--auis-fg-primary) focus:outline-hidden focus:border-(--auis-accent-brand) resize-none"
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void saveEdit()
                   if (e.key === "Escape") setEditing(false)
@@ -339,13 +339,13 @@ export function ReviewThreadPopover() {
                       <img
                         src={src}
                         alt=""
-                        className="h-16 w-16 rounded-sm object-cover border border-(--border-subtle)"
+                        className="h-16 w-16 rounded-sm object-cover border border-(--auis-border-subtle)"
                       />
                       <button
                         type="button"
                         onClick={() => editImg.remove(idx)}
                         aria-label="Remove image"
-                        className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/ethumb:opacity-100 transition-opacity"
+                        className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/ethumb:opacity-100 transition-opacity"
                       >
                         <Icon name="close" size={9} />
                       </button>
@@ -375,7 +375,7 @@ export function ReviewThreadPopover() {
             <>
               {comment.text.length > 0 && (
                 <CommentText
-                  className="m-0 body-sm text-(--fg-primary) whitespace-pre-wrap leading-relaxed"
+                  className="m-0 body-sm text-(--auis-fg-primary) whitespace-pre-wrap leading-relaxed"
                   text={comment.text}
                 />
               )}
@@ -392,7 +392,7 @@ export function ReviewThreadPopover() {
                       key={idx}
                       type="button"
                       onClick={() => window.open(src, "_blank", "noopener")}
-                      className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
+                      className="rounded-sm overflow-hidden border border-(--auis-border-subtle) hover:border-(--auis-border-strong) transition-colors focus:outline-hidden"
                       aria-label={`View image ${idx + 1}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -405,13 +405,13 @@ export function ReviewThreadPopover() {
           )}
 
           {comment.resolution?.summary && (
-            <p className="m-0 mt-2 body-xs text-(--fg-tertiary) italic">
+            <p className="m-0 mt-2 body-xs text-(--auis-fg-tertiary) italic">
               {comment.resolution.summary}
             </p>
           )}
 
           {replies.length > 0 && (
-            <div className="mt-2 pt-1 border-t border-(--border-subtle) flex flex-col divide-y divide-(--border-subtle)">
+            <div className="mt-2 pt-1 border-t border-(--auis-border-subtle) flex flex-col divide-y divide-(--auis-border-subtle)">
               {replies.map((r) => (
                 <ReplyRow key={r.id} reply={r} commentId={comment.id} />
               ))}
@@ -420,7 +420,7 @@ export function ReviewThreadPopover() {
         </div>
 
         {/* Footer: approve/reject when in review, then the reply composer */}
-        <div className="border-t border-(--border-subtle) p-2 flex flex-col gap-2">
+        <div className="border-t border-(--auis-border-subtle) p-2 flex flex-col gap-2">
           {isInReview && isAdmin && (
             <div className="flex items-center gap-1.5">
               <Button

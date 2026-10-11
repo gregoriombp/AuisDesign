@@ -22,12 +22,12 @@ export function Pill({
   className,
   ...rest
 }: PillProps) {
-  const classes = ["au-pill", `au-pill--${variant}`, className]
+  const classes = ["auis-pill", `auis-pill--${variant}`, className]
     .filter(Boolean)
     .join(" ")
   return (
     <span className={classes} {...rest}>
-      {dot && <span className="au-pill__dot" aria-hidden="true" />}
+      {dot && <span className="auis-pill__dot" aria-hidden="true" />}
       {children}
     </span>
   )

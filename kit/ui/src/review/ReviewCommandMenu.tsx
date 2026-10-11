@@ -3,6 +3,7 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { MentionMenu } from "../primitives/MentionMenu"
+import { useChromePortal } from "../ChromeScope"
 import type { ReviewCommandAutocomplete } from "./useReviewCommandAutocomplete"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 
@@ -15,7 +16,8 @@ const GAP = 6
  * useReviewCommandAutocomplete hook — prefers below the caret, flips above when
  * it would overflow the viewport, and clamps to the horizontal edges.
  *
- * Portaled to <body>: the composer popovers use `transform`, which would make a
+ * Portaled to the chrome's portal root at the end of <body> (or to <body> outside
+ * a ChromeScope): the composer popovers use `transform`, which would make a
  * nested `position: fixed` resolve against the transformed ancestor instead of
  * the viewport. The portal keeps the menu in viewport space. It still carries
  * the review overlay marker so the composer's outside-click guards treat it as
@@ -23,6 +25,7 @@ const GAP = 6
  */
 export function ReviewCommandMenu({ ac }: { ac: ReviewCommandAutocomplete }) {
   const ref = React.useRef<HTMLDivElement>(null)
+  const container = useChromePortal()
   const [placement, setPlacement] = React.useState<{
     top: number
     left: number
@@ -73,6 +76,6 @@ export function ReviewCommandMenu({ ac }: { ac: ReviewCommandAutocomplete }) {
         onPick={ac.pickByKey}
       />
     </div>,
-    document.body,
+    container ?? document.body,
   )
 }

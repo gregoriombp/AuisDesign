@@ -4,6 +4,7 @@ import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { cn } from "./cn"
 import { Icon } from "./Icon"
+import { useChromePortal } from "../ChromeScope"
 
 export type ModalSize = "sm" | "md" | "lg" | "cockpit"
 
@@ -21,7 +22,7 @@ export type ModalProps = {
    * is placed one below. Used by Review Mode to sit above app-level modals. */
   zIndex?: number
   /** For sequential (wizard) modals: change `stepKey` on every step. The body is
-   * remounted and re-animates (`au-wizard-step-in`), giving you the forward
+   * remounted and re-animates (`auis-wizard-step-in`), giving you the forward
    * transition without the caller asking for it. Without `stepKey`, behavior is
    * unchanged. */
   stepKey?: string | number
@@ -42,6 +43,7 @@ export function Modal({
   stepKey,
   className,
 }: ModalProps) {
+  const container = useChromePortal()
   return (
     <DialogPrimitive.Root
       open={open}
@@ -49,13 +51,13 @@ export function Modal({
         if (!next) onClose()
       }}
     >
-      <DialogPrimitive.Portal>
+      <DialogPrimitive.Portal container={container}>
         <DialogPrimitive.Overlay
-          className="au-modal-scrim"
+          className="auis-modal-scrim"
           style={zIndex !== undefined ? { zIndex: zIndex - 1 } : undefined}
         />
         {/* Radix Portal renders Overlay and Content as siblings; the original
-         * .au-modal-scrim relied on flex centering of its child .au-modal.
+         * .auis-modal-scrim relied on flex centering of its child .auis-modal.
          * This wrapper recreates that centering layer without touching globals.css. */}
         <div
           className="fixed inset-0 z-1001 flex items-center justify-center p-6 pointer-events-none"
@@ -63,8 +65,8 @@ export function Modal({
         >
           <DialogPrimitive.Content
             className={cn(
-              "au-modal pointer-events-auto",
-              `au-modal--${size}`,
+              "auis-modal pointer-events-auto",
+              `auis-modal--${size}`,
               className
             )}
             onPointerDownOutside={(e) => {
@@ -75,15 +77,15 @@ export function Modal({
             }}
           >
             {title ? (
-              <header className="au-modal__head">
+              <header className="auis-modal__head">
                 <div className="flex min-w-0 items-center gap-2">
-                  <DialogPrimitive.Title className="au-modal__title">
+                  <DialogPrimitive.Title className="auis-modal__title">
                     {title}
                   </DialogPrimitive.Title>
                   {titleAdornment}
                 </div>
                 <DialogPrimitive.Close
-                  className="au-modal__close"
+                  className="auis-modal__close"
                   aria-label="Close"
                 >
                   <Icon name="close" size={18} />
@@ -97,13 +99,13 @@ export function Modal({
             <div
               key={stepKey}
               className={cn(
-                "au-modal__body",
-                stepKey !== undefined && "au-wizard-step"
+                "auis-modal__body",
+                stepKey !== undefined && "auis-wizard-step"
               )}
             >
               {children}
             </div>
-            {footer && <footer className="au-modal__foot">{footer}</footer>}
+            {footer && <footer className="auis-modal__foot">{footer}</footer>}
           </DialogPrimitive.Content>
         </div>
       </DialogPrimitive.Portal>

@@ -66,7 +66,7 @@ export function ReviewPinMarker({
       <circle
         r={PIN_RADIUS}
         fill="none"
-        stroke="var(--bg-canvas)"
+        stroke="var(--auis-bg-canvas)"
         strokeWidth={PIN_STROKE}
       />
       <text
@@ -75,7 +75,7 @@ export function ReviewPinMarker({
         fontSize={TEXT_SIZE}
         fontFamily="Geist, sans-serif"
         fontWeight="600"
-        fill="var(--fg-on-inverse)"
+        fill="var(--auis-fg-on-inverse)"
         style={{ pointerEvents: "none", userSelect: "none" }}
       >
         {glyph}

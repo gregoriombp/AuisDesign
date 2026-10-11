@@ -58,7 +58,7 @@ export function BacklogComposer() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full rounded-md border border-dashed border-(--border-default) px-3 py-2.5 body-sm text-(--fg-secondary) hover:text-(--fg-primary) hover:border-(--border-strong) inline-flex items-center justify-center gap-1.5 transition-colors"
+        className="w-full rounded-md border border-dashed border-(--auis-border-default) px-3 py-2.5 body-sm text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) hover:border-(--auis-border-strong) inline-flex items-center justify-center gap-1.5 transition-colors"
       >
         <Icon name="lightbulb" size={15} weight={500} />
         Add future idea
@@ -67,7 +67,7 @@ export function BacklogComposer() {
   }
 
   return (
-    <div className="rounded-md border border-(--border-subtle) bg-(--bg-raised) p-2 flex flex-col gap-2">
+    <div className="rounded-md border border-(--auis-border-subtle) bg-(--auis-bg-raised) p-2 flex flex-col gap-2">
       <textarea
         ref={taRef}
         value={text}
@@ -75,7 +75,7 @@ export function BacklogComposer() {
         onPaste={img.onPaste}
         rows={3}
         placeholder="Describe the future idea… paste an image"
-        className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
+        className="w-full rounded-sm border border-(--auis-border-subtle) bg-(--auis-bg-surface) p-2 body-sm text-(--auis-fg-primary) focus:outline-hidden focus:border-(--auis-accent-brand) resize-none"
         onKeyDown={(e) => {
           if (commands.onKeyDown(e)) return
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void save()
@@ -94,13 +94,13 @@ export function BacklogComposer() {
               <img
                 src={src}
                 alt=""
-                className="h-14 w-14 rounded-sm object-cover border border-(--border-subtle)"
+                className="h-14 w-14 rounded-sm object-cover border border-(--auis-border-subtle)"
               />
               <button
                 type="button"
                 onClick={() => img.remove(idx)}
                 aria-label="Remove image"
-                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/bthumb:opacity-100 transition-opacity"
+                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/bthumb:opacity-100 transition-opacity"
               >
                 <Icon name="close" size={9} />
               </button>
@@ -115,7 +115,7 @@ export function BacklogComposer() {
           disabled={!img.canAddMore}
           aria-label="Attach image"
           title="Attach image (or paste with ⌘V)"
-          className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors disabled:opacity-40"
+          className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors disabled:opacity-40"
         >
           <Icon name="image" size={14} weight={600} />
         </button>

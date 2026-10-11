@@ -4,6 +4,7 @@ import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { cn } from "./cn"
 import { Icon } from "./Icon"
+import { useChromePortal } from "../ChromeScope"
 
 export type SheetSize = "default" | "wide" | "xwide"
 
@@ -43,6 +44,7 @@ export function Sheet({
   zIndex,
   bodyClassName,
 }: SheetProps) {
+  const container = useChromePortal()
   React.useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -65,13 +67,13 @@ export function Sheet({
         if (!next) onClose()
       }}
     >
-      <DialogPrimitive.Portal>
+      <DialogPrimitive.Portal container={container}>
         <DialogPrimitive.Overlay
-          className="au-sheet-scrim"
+          className="auis-sheet-scrim"
           style={zIndex !== undefined ? { zIndex: zIndex - 1 } : undefined}
         />
         {/* Radix Portal renders Overlay and Content as siblings; the original
-         * .au-sheet-scrim used flex justify-end to dock its child .au-sheet
+         * .auis-sheet-scrim used flex justify-end to dock its child .auis-sheet
          * to the right edge. This wrapper recreates that dock without
          * touching globals.css. */}
         <div
@@ -81,8 +83,8 @@ export function Sheet({
           <DialogPrimitive.Content
             aria-label={typeof title === "string" ? title : "Side panel"}
             className={cn(
-              "au-sheet pointer-events-auto",
-              `au-sheet--${size}`
+              "auis-sheet pointer-events-auto",
+              `auis-sheet--${size}`
             )}
             onPointerDownOutside={(e) => {
               if (!dismissible) e.preventDefault()
@@ -92,22 +94,22 @@ export function Sheet({
             }}
           >
             {(title || meta) && (
-              <header className="au-sheet__top">
+              <header className="auis-sheet__top">
                 <div>
                   {title &&
                     (typeof title === "string" ? (
-                      <DialogPrimitive.Title className="au-sheet__title">
+                      <DialogPrimitive.Title className="auis-sheet__title">
                         {title}
                       </DialogPrimitive.Title>
                     ) : (
                       <DialogPrimitive.Title asChild>
-                        <h2 className="au-sheet__title">{title}</h2>
+                        <h2 className="auis-sheet__title">{title}</h2>
                       </DialogPrimitive.Title>
                     ))}
-                  {meta && <div className="au-sheet__meta">{meta}</div>}
+                  {meta && <div className="auis-sheet__meta">{meta}</div>}
                 </div>
                 <DialogPrimitive.Close
-                  className="au-sheet__close"
+                  className="auis-sheet__close"
                   aria-label="Close"
                 >
                   <Icon name="close" size={18} />
@@ -119,9 +121,9 @@ export function Sheet({
                 Side panel
               </DialogPrimitive.Title>
             )}
-            {tabs && <div className="au-sheet__tabs">{tabs}</div>}
-            <div className={cn("au-sheet__body", bodyClassName)}>{children}</div>
-            {footer && <footer className="au-sheet__foot">{footer}</footer>}
+            {tabs && <div className="auis-sheet__tabs">{tabs}</div>}
+            <div className={cn("auis-sheet__body", bodyClassName)}>{children}</div>
+            {footer && <footer className="auis-sheet__foot">{footer}</footer>}
           </DialogPrimitive.Content>
         </div>
       </DialogPrimitive.Portal>
@@ -143,8 +145,8 @@ export function SheetTab({
       type="button"
       onClick={onClick}
       className={cn(
-        "au-sheet__tab",
-        active && "au-sheet__tab--active"
+        "auis-sheet__tab",
+        active && "auis-sheet__tab--active"
       )}
     >
       {children}
@@ -162,9 +164,9 @@ export function SheetRow({
   mono?: boolean
 }) {
   return (
-    <div className="au-sheet__row">
-      <span className="au-sheet__row-k">{label}</span>
-      <span className={cn("au-sheet__row-v", mono && "mono")}>
+    <div className="auis-sheet__row">
+      <span className="auis-sheet__row-k">{label}</span>
+      <span className={cn("auis-sheet__row-v", mono && "mono")}>
         {children}
       </span>
     </div>

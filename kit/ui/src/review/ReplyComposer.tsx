@@ -159,7 +159,7 @@ export function ReplyComposer({
         onPaste={img.onPaste}
         placeholder="Write a reply… paste an image, or dictate"
         rows={2}
-        className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
+        className="w-full rounded-sm border border-(--auis-border-subtle) bg-(--auis-bg-surface) p-2 body-sm text-(--auis-fg-primary) focus:outline-hidden focus:border-(--auis-accent-brand) resize-none"
         onKeyDown={(e) => {
           if (commands.onKeyDown(e)) return
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void submit()
@@ -171,10 +171,10 @@ export function ReplyComposer({
       <ReviewCommandMenu ac={commands} />
 
       {assistError && (
-        <p className="m-0 body-xs text-(--accent-danger)">{assistError}</p>
+        <p className="m-0 body-xs text-(--auis-accent-danger)">{assistError}</p>
       )}
       {voice.error && (
-        <p className="m-0 body-xs text-(--accent-danger)">{voice.error}</p>
+        <p className="m-0 body-xs text-(--auis-accent-danger)">{voice.error}</p>
       )}
 
       {img.images.length > 0 && (
@@ -185,13 +185,13 @@ export function ReplyComposer({
               <img
                 src={src}
                 alt=""
-                className="h-14 w-14 rounded-sm object-cover border border-(--border-subtle)"
+                className="h-14 w-14 rounded-sm object-cover border border-(--auis-border-subtle)"
               />
               <button
                 type="button"
                 onClick={() => img.remove(idx)}
                 aria-label="Remove image"
-                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
               >
                 <Icon name="close" size={9} />
               </button>
@@ -208,7 +208,7 @@ export function ReplyComposer({
             disabled={!img.canAddMore}
             aria-label="Attach image"
             title="Attach image (or paste with ⌘V)"
-            className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors disabled:opacity-40"
+            className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors disabled:opacity-40"
           >
             <Icon name="image" size={14} weight={600} />
           </button>
@@ -222,8 +222,8 @@ export function ReplyComposer({
             className={[
               "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors disabled:opacity-60",
               recording
-                ? "bg-(--accent-danger) text-(--fg-on-inverse)"
-                : "text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)",
+                ? "bg-(--auis-accent-danger) text-(--auis-fg-on-inverse)"
+                : "text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover)",
             ].join(" ")}
           >
             {transcribing ? (
@@ -243,7 +243,7 @@ export function ReplyComposer({
             disabled={rewriting || text.trim().length === 0}
             aria-label="Improve the reply"
             title="Improve the reply (magic wand)"
-            className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors disabled:opacity-50"
+            className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors disabled:opacity-50"
           >
             {rewriting ? (
               <Spinner size="sm" aria-hidden="true" />
@@ -253,23 +253,23 @@ export function ReplyComposer({
           </button>
 
           {recording ? (
-            <span className="body-xs text-(--accent-danger) flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-(--accent-danger) animate-pulse" />
+            <span className="body-xs text-(--auis-accent-danger) flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-(--auis-accent-danger) animate-pulse" />
               Recording
             </span>
           ) : transcribing ? (
-            <span className="body-xs text-(--fg-tertiary) truncate min-w-0">
+            <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
               Transcribing…
             </span>
           ) : rewriting ? (
-            <span className="body-xs text-(--fg-tertiary) truncate min-w-0">
+            <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
               Improving…
             </span>
           ) : undoText !== null ? (
             <button
               type="button"
               onClick={undoRewrite}
-              className="body-xs text-(--fg-secondary) hover:text-(--fg-primary) underline underline-offset-2"
+              className="body-xs text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) underline underline-offset-2"
             >
               Undo
             </button>

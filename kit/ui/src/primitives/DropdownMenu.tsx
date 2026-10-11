@@ -4,6 +4,7 @@ import * as React from "react"
 import * as DropdownPrimitive from "@radix-ui/react-dropdown-menu"
 import { cn } from "./cn"
 import { Icon } from "./Icon"
+import { useChromePortal } from "../ChromeScope"
 
 /**
  * DropdownMenu — declarative dropdown / action menu.
@@ -15,7 +16,7 @@ import { Icon } from "./Icon"
  *
  * Items can be commands, separators, or labels. Commands optionally
  * carry an icon, a `checked` state (rendered as a trailing check),
- * a `danger` flag (paints the row in `--accent-danger`), and a
+ * a `danger` flag (paints the row in `--auis-accent-danger`), and a
  * `disabled` flag.
  */
 
@@ -88,23 +89,24 @@ export function DropdownMenu({
   open,
   onOpenChange,
 }: DropdownMenuProps) {
+  const container = useChromePortal()
   return (
     <DropdownPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DropdownPrimitive.Trigger asChild>{trigger}</DropdownPrimitive.Trigger>
-      <DropdownPrimitive.Portal>
+      <DropdownPrimitive.Portal container={container}>
         <DropdownPrimitive.Content
           align={align}
           side={side}
           sideOffset={sideOffset}
           aria-label={ariaLabel}
-          className={cn("au-dropdown", className)}
+          className={cn("auis-dropdown", className)}
         >
           {items.map((it) => {
             if (isSeparator(it)) {
               return (
                 <DropdownPrimitive.Separator
                   key={it.id}
-                  className="au-dropdown__separator"
+                  className="auis-dropdown__separator"
                 />
               )
             }
@@ -112,7 +114,7 @@ export function DropdownMenu({
               return (
                 <DropdownPrimitive.Label
                   key={it.id}
-                  className="au-dropdown__label"
+                  className="auis-dropdown__label"
                 >
                   {it.label}
                 </DropdownPrimitive.Label>
@@ -130,24 +132,24 @@ export function DropdownMenu({
                   it.onSelect?.()
                 }}
                 className={cn(
-                  "au-dropdown__item",
-                  it.danger && "au-dropdown__item--danger",
-                  it.checked && "au-dropdown__item--checked",
+                  "auis-dropdown__item",
+                  it.danger && "auis-dropdown__item--danger",
+                  it.checked && "auis-dropdown__item--checked",
                 )}
               >
                 {it.icon && (
                   <Icon
                     name={it.icon}
                     size={16}
-                    className="au-dropdown__item-icon"
+                    className="auis-dropdown__item-icon"
                   />
                 )}
-                <span className="au-dropdown__item-label">{it.label}</span>
+                <span className="auis-dropdown__item-label">{it.label}</span>
                 {it.checked && (
                   <Icon
                     name="check"
                     size={14}
-                    className="au-dropdown__item-check"
+                    className="auis-dropdown__item-check"
                   />
                 )}
               </DropdownPrimitive.Item>

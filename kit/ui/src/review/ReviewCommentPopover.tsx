@@ -308,16 +308,16 @@ export function ReviewCommentPopover() {
     >
       <form
         onSubmit={submit}
-        className="pointer-events-auto rounded-lg bg-(--bg-raised) border border-(--border-subtle) shadow-lg flex flex-col overflow-hidden"
+        className="pointer-events-auto rounded-lg bg-(--auis-bg-raised) border border-(--auis-border-subtle) shadow-lg flex flex-col overflow-hidden"
       >
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-(--border-subtle)">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-(--auis-border-subtle)">
           <span
-            className="h-5 w-5 rounded-full flex items-center justify-center body-xs font-semibold text-(--fg-on-inverse)"
+            className="h-5 w-5 rounded-full flex items-center justify-center body-xs font-semibold text-(--auis-fg-on-inverse)"
             style={{ background: identity.colorToken }}
           >
             {identity.name.charAt(0).toUpperCase()}
           </span>
-          <span className="body-xs font-medium text-(--fg-primary)">
+          <span className="body-xs font-medium text-(--auis-fg-primary)">
             {identity.name}
           </span>
           {sessionShared && (
@@ -325,14 +325,14 @@ export function ReviewCommentPopover() {
               type="button"
               onClick={() => openIdentityModal("new")}
               title="Shared account — comment as someone else"
-              className="body-xs text-(--fg-tertiary) hover:text-(--fg-primary) underline underline-offset-2 decoration-dotted"
+              className="body-xs text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) underline underline-offset-2 decoration-dotted"
             >
               switch
             </button>
           )}
-          <span className="body-xs text-(--fg-tertiary) ml-auto inline-flex items-center gap-1.5">
+          <span className="body-xs text-(--auis-fg-tertiary) ml-auto inline-flex items-center gap-1.5">
             {adminsOnly && (
-              <span className="inline-flex items-center gap-0.5 text-(--fg-secondary)">
+              <span className="inline-flex items-center gap-0.5 text-(--auis-fg-secondary)">
                 <Icon name="lock" size={10} />
                 Private
               </span>
@@ -353,7 +353,7 @@ export function ReviewCommentPopover() {
             style={{ color: "transparent" }}
           >
             {text}
-            {ghost && <span className="text-(--fg-tertiary)">{ghost}</span>}
+            {ghost && <span className="text-(--auis-fg-tertiary)">{ghost}</span>}
           </div>
           <textarea
             ref={textareaRef}
@@ -395,21 +395,21 @@ export function ReviewCommentPopover() {
             }}
             placeholder="Write the feedback… paste an image, or dictate"
             rows={3}
-            className="relative w-full resize-none px-3 py-2 bg-transparent body-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) focus:outline-hidden"
+            className="relative w-full resize-none px-3 py-2 bg-transparent body-sm text-(--auis-fg-primary) placeholder:text-(--auis-fg-tertiary) focus:outline-hidden"
             style={{ zIndex: 1 }}
           />
         </div>
 
         {saveError && (
-          <p className="mx-3 mb-2 body-xs text-(--accent-danger)">{saveError}</p>
+          <p className="mx-3 mb-2 body-xs text-(--auis-accent-danger)">{saveError}</p>
         )}
         {assistError && (
-          <p className="mx-3 mb-2 body-xs text-(--accent-danger)">
+          <p className="mx-3 mb-2 body-xs text-(--auis-accent-danger)">
             {assistError}
           </p>
         )}
         {voice.error && (
-          <p className="mx-3 mb-2 body-xs text-(--accent-danger)">
+          <p className="mx-3 mb-2 body-xs text-(--auis-accent-danger)">
             {voice.error}
           </p>
         )}
@@ -422,12 +422,12 @@ export function ReviewCommentPopover() {
                 <img
                   src={src}
                   alt=""
-                  className="h-16 w-16 rounded-sm object-cover border border-(--border-subtle)"
+                  className="h-16 w-16 rounded-sm object-cover border border-(--auis-border-subtle)"
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(idx)}
-                  className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
+                  className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
                   aria-label="Remove image"
                 >
                   <Icon name="close" size={9} />
@@ -438,7 +438,7 @@ export function ReviewCommentPopover() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="h-16 w-16 rounded-sm border border-dashed border-(--border-default) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) hover:border-(--border-strong) transition-colors"
+                className="h-16 w-16 rounded-sm border border-dashed border-(--auis-border-default) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:border-(--auis-border-strong) transition-colors"
                 aria-label="Add image"
               >
                 <Icon name="add" size={16} />
@@ -447,12 +447,12 @@ export function ReviewCommentPopover() {
           </div>
         )}
 
-        <div className="px-2 py-2 flex items-center justify-between gap-2 border-t border-(--border-subtle)">
+        <div className="px-2 py-2 flex items-center justify-between gap-2 border-t border-(--auis-border-subtle)">
           <div className="flex items-center gap-1 min-w-0">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
+              className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
               aria-label="Attach image"
               title="Attach image (or paste with ⌘V)"
               disabled={images.length >= MAX_IMAGES}
@@ -469,8 +469,8 @@ export function ReviewCommentPopover() {
               className={[
                 "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors disabled:opacity-60",
                 recording
-                  ? "bg-(--accent-danger) text-(--fg-on-inverse)"
-                  : "text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)",
+                  ? "bg-(--auis-accent-danger) text-(--auis-fg-on-inverse)"
+                  : "text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover)",
               ].join(" ")}
             >
               {transcribing ? (
@@ -490,7 +490,7 @@ export function ReviewCommentPopover() {
               disabled={rewriting || text.trim().length === 0}
               aria-label="Improve the comment"
               title="Improve the comment (magic wand)"
-              className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors disabled:opacity-50"
+              className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors disabled:opacity-50"
             >
               {rewriting ? (
                 <Spinner size="sm" aria-hidden="true" />
@@ -514,8 +514,8 @@ export function ReviewCommentPopover() {
                 className={[
                   "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors",
                   adminsOnly
-                    ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
-                    : "text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)",
+                    ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
+                    : "text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover)",
                 ].join(" ")}
               >
                 <Icon name={adminsOnly ? "lock" : "lock_open"} size={14} weight={600} />
@@ -523,30 +523,30 @@ export function ReviewCommentPopover() {
             )}
 
             {recording ? (
-              <span className="body-xs text-(--accent-danger) flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-(--accent-danger) animate-pulse" />
+              <span className="body-xs text-(--auis-accent-danger) flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-(--auis-accent-danger) animate-pulse" />
                 Recording
               </span>
             ) : transcribing ? (
-              <span className="body-xs text-(--fg-tertiary) truncate min-w-0">
+              <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
                 Transcribing…
               </span>
             ) : rewriting ? (
-              <span className="body-xs text-(--fg-tertiary) truncate min-w-0">Improving…</span>
+              <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">Improving…</span>
             ) : undoText !== null ? (
               <button
                 type="button"
                 onClick={undoRewrite}
-                className="body-xs text-(--fg-secondary) hover:text-(--fg-primary) underline underline-offset-2"
+                className="body-xs text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) underline underline-offset-2"
               >
                 Undo
               </button>
             ) : ghost ? (
-              <span className="body-xs text-(--fg-tertiary) truncate min-w-0">
+              <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
                 Tab to complete
               </span>
             ) : (
-              <span className="body-xs text-(--fg-tertiary) flex items-center gap-1">
+              <span className="body-xs text-(--auis-fg-tertiary) flex items-center gap-1">
                 <Icon name="keyboard_command_key" size={11} />
                 ⌘↵
               </span>

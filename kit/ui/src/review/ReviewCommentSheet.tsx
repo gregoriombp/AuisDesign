@@ -210,7 +210,7 @@ export function ReviewCommentSheet() {
       zIndex={REVIEW_Z.sheet}
       title="Comments"
       meta={
-        <span className="body-xs text-(--fg-tertiary)">
+        <span className="body-xs text-(--auis-fg-tertiary)">
           {scope === "page" ? "On this screen" : "Across all screens"} ·{" "}
           {visible.length}
         </span>
@@ -220,7 +220,7 @@ export function ReviewCommentSheet() {
           {...{ [OVERLAY_DATA_ATTR]: "" }}
           className="flex items-center justify-between gap-2"
         >
-          <span className="body-xs text-(--fg-tertiary)">
+          <span className="body-xs text-(--auis-fg-tertiary)">
             Total: {allComments.length}
           </span>
           <Button
@@ -242,7 +242,7 @@ export function ReviewCommentSheet() {
         className="flex flex-col gap-3 h-full"
       >
         <div className="relative">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-(--fg-tertiary) pointer-events-none">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-(--auis-fg-tertiary) pointer-events-none">
             <Icon name="search" size={16} weight={500} />
           </span>
           <input
@@ -250,14 +250,14 @@ export function ReviewCommentSheet() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search comments…"
-            className="w-full h-9 pl-8 pr-8 rounded-full bg-(--bg-muted) border border-transparent focus:border-(--border-default) focus:bg-(--bg-raised) outline-none body-sm text-(--fg-primary) placeholder:text-(--fg-tertiary) transition-colors"
+            className="w-full h-9 pl-8 pr-8 rounded-full bg-(--auis-bg-muted) border border-transparent focus:border-(--auis-border-default) focus:bg-(--auis-bg-raised) outline-none body-sm text-(--auis-fg-primary) placeholder:text-(--auis-fg-tertiary) transition-colors"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
               aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 inline-flex items-center justify-center rounded-full text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 inline-flex items-center justify-center rounded-full text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
             >
               <Icon name="close" size={14} />
             </button>
@@ -273,8 +273,8 @@ export function ReviewCommentSheet() {
               className={[
                 "px-2.5 py-1 rounded-full transition-colors inline-flex items-center gap-1.5",
                 tab === t
-                  ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
-                  : "text-(--fg-secondary) hover:bg-(--bg-hover)",
+                  ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
+                  : "text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover)",
               ].join(" ")}
             >
               {TAB_LABEL[t]}
@@ -283,7 +283,7 @@ export function ReviewCommentSheet() {
                   className={[
                     "min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full body-xs font-semibold tabular-nums",
                     tab === t
-                      ? "bg-(--bg-raised) text-(--fg-primary)"
+                      ? "bg-(--auis-bg-raised) text-(--auis-fg-primary)"
                       : "bg-(--au-amber-100) text-(--au-amber-700)",
                   ].join(" ")}
                 >
@@ -307,8 +307,8 @@ export function ReviewCommentSheet() {
         </div>
 
         {showBulkBar && (
-          <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-sm bg-(--bg-muted) body-xs">
-            <span className="text-(--fg-secondary)">
+          <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-sm bg-(--auis-bg-muted) body-xs">
+            <span className="text-(--auis-fg-secondary)">
               {selectedIds.size} selected
             </span>
             <div className="flex items-center gap-1">
@@ -380,7 +380,7 @@ export function ReviewCommentSheet() {
                 <button
                   type="button"
                   onClick={() => void loadArchivePage(false)}
-                  className="mt-2 body-xs text-(--accent-brand) hover:underline self-center"
+                  className="mt-2 body-xs text-(--auis-accent-brand) hover:underline self-center"
                 >
                   Load more archived
                 </button>

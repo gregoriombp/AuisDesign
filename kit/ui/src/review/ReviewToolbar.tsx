@@ -11,7 +11,7 @@ import { ReviewAvatar } from "./ReviewAvatar"
 import { useChromeHidden } from "../router"
 import type { ReviewMode } from "@auis/core/types"
 
-// Mirrors the motion tokens in globals.css (--dur-slow + --ease-out) so the bar
+// Mirrors the motion tokens in globals.css (--auis-dur-slow + --auis-ease-out) so the bar
 // widens/shrinks in the same idiom as the rest of the DS.
 const EXPAND_EASE = "cubic-bezier(0.22, 0.61, 0.36, 1)"
 const EXPAND_MS = 300
@@ -44,8 +44,8 @@ function ModeLinks({ modes }: { modes: ReviewModeLink[] }) {
           className={[
             "h-8 w-8 inline-flex items-center justify-center rounded-full transition-colors",
             m.active
-              ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
-              : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
+              ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
+              : "text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)",
           ].join(" ")}
         >
           <Icon name={m.icon} size={16} fill={m.active ? 1 : 0} />
@@ -76,8 +76,8 @@ function ModeButton({ mode, icon, label, shortcut }: ModeButtonProps) {
       className={[
         "h-8 w-8 inline-flex items-center justify-center rounded-full transition-colors",
         active
-          ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
-          : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
+          ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
+          : "text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)",
       ].join(" ")}
     >
       <Icon name={icon} size={16} />
@@ -101,8 +101,8 @@ function MagicModeButton() {
       className={[
         "h-8 w-8 inline-flex items-center justify-center rounded-full transition-colors",
         active
-          ? "text-(--fg-on-inverse)"
-          : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
+          ? "text-(--auis-fg-on-inverse)"
+          : "text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)",
       ].join(" ")}
       style={
         active
@@ -170,7 +170,7 @@ function AccountAvatarMenu() {
           onClick={() => setOpen((v) => !v)}
           aria-label={`Account: ${identity.name} · switch`}
           title="Review account"
-          className="mr-0.5 inline-flex rounded-full transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-(--border-strong)"
+          className="mr-0.5 inline-flex rounded-full transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-(--auis-border-strong)"
         >
           <ReviewAvatar
             authorId={identity.id}
@@ -235,8 +235,8 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
     >
       <div
         className={[
-          "pointer-events-auto relative h-11 rounded-full overflow-hidden bg-(--bg-raised) shadow-lg",
-          active ? "ring-1 ring-(--border-subtle)" : "",
+          "pointer-events-auto relative h-11 rounded-full overflow-hidden bg-(--auis-bg-raised) shadow-lg",
+          active ? "ring-1 ring-(--auis-border-subtle)" : "",
         ].join(" ")}
         style={{
           width: target != null ? target : "auto",
@@ -258,13 +258,13 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
           {modes && modes.length > 0 && (
             <>
               <ModeLinks modes={modes} />
-              <span className="h-5 w-px bg-(--border-subtle)" />
+              <span className="h-5 w-px bg-(--auis-border-subtle)" />
             </>
           )}
 
           <AccountAvatarMenu />
 
-          <span className="h-5 w-px bg-(--border-subtle)" />
+          <span className="h-5 w-px bg-(--auis-border-subtle)" />
 
           <ModeButton mode="cursor" icon="arrow_selector_tool" label="Cursor" />
           <ModeButton
@@ -276,7 +276,7 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
           <ModeButton mode="pin" icon="location_on" label="Pin" />
           <MagicModeButton />
 
-          <span className="h-5 w-px bg-(--border-subtle)" />
+          <span className="h-5 w-px bg-(--auis-border-subtle)" />
 
           <button
             type="button"
@@ -295,8 +295,8 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
             className={[
               "relative h-8 inline-flex items-center gap-1 px-2 rounded-full transition-colors",
               sheetOpen
-                ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
-                : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
+                ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
+                : "text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)",
             ].join(" ")}
           >
             <Icon name="forum" size={16} />
@@ -307,7 +307,7 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
             )}
             {inReviewCount > 0 && (
               <span
-                className="absolute -top-1 -right-1 min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full body-xs font-semibold tabular-nums bg-(--au-amber-500) text-(--fg-on-inverse) ring-2 ring-(--bg-raised)"
+                className="absolute -top-1 -right-1 min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full body-xs font-semibold tabular-nums bg-(--au-amber-500) text-(--auis-fg-on-inverse) ring-2 ring-(--auis-bg-raised)"
                 aria-hidden="true"
               >
                 {inReviewCount}
@@ -320,19 +320,19 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
             onClick={() => setExportOpen(true)}
             aria-label="Export comments"
             title="Export JSON"
-            className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)"
           >
             <Icon name="ios_share" size={16} />
           </button>
 
-          <span className="h-5 w-px bg-(--border-subtle)" />
+          <span className="h-5 w-px bg-(--auis-border-subtle)" />
 
           <button
             type="button"
             onClick={toggleActive}
             aria-label="Close Review Mode"
             title="Close (⌘⇧Y)"
-            className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)"
           >
             <Icon name="close" size={16} />
           </button>
@@ -353,7 +353,7 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
             onClick={toggleActive}
             aria-label="Open Review Mode (⌘⇧Y)"
             title="Review Mode · ⌘⇧Y"
-            className="h-full inline-flex items-center gap-2 px-4 whitespace-nowrap bg-(--bg-inverse) text-(--fg-on-inverse) hover:opacity-90 body-xs font-medium"
+            className="h-full inline-flex items-center gap-2 px-4 whitespace-nowrap bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse) hover:opacity-90 body-xs font-medium"
           >
             <Icon name="rate_review" size={14} />
             Review

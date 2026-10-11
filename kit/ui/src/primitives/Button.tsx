@@ -60,12 +60,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           ? 24
           : 22
     const className_ = cn(
-      "au-btn",
-      `au-btn--${variant}`,
-      `au-btn--${size}`,
-      iconOnly && "au-btn--icon",
-      block && "au-btn--block",
-      loading && "au-btn--loading",
+      "auis-btn",
+      `auis-btn--${variant}`,
+      `auis-btn--${size}`,
+      iconOnly && "auis-btn--icon",
+      block && "auis-btn--block",
+      loading && "auis-btn--loading",
       className,
     )
 
@@ -85,9 +85,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           <>
             {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}
-            <span className="au-btn__label">{childLabel}</span>
+            <span className="auis-btn__label">{childLabel}</span>
             {iconRight && <Icon name={iconRight} size={iconSize} weight={300} />}
-            {loading && <span aria-hidden="true" className="au-btn__spinner" />}
+            {loading && <span aria-hidden="true" className="auis-btn__spinner" />}
           </>
         ),
       )
@@ -116,11 +116,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           <>
             {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}
-            <span className="au-btn__label">{children}</span>
+            <span className="auis-btn__label">{children}</span>
             {iconRight && <Icon name={iconRight} size={iconSize} weight={300} />}
           </>
         )}
-        {loading && <span aria-hidden="true" className="au-btn__spinner" />}
+        {loading && <span aria-hidden="true" className="auis-btn__spinner" />}
       </button>
     )
   }

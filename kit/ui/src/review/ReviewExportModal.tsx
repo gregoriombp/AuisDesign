@@ -80,7 +80,7 @@ export function ReviewExportModal() {
           {...{ [OVERLAY_DATA_ATTR]: "" }}
           className="flex items-center justify-between gap-2 w-full"
         >
-          <span className="body-xs text-(--fg-tertiary)">
+          <span className="body-xs text-(--auis-fg-tertiary)">
             {count} {count === 1 ? "comment" : "comments"}
           </span>
           <div className="flex items-center gap-2">
@@ -111,11 +111,11 @@ export function ReviewExportModal() {
         {...{ [OVERLAY_DATA_ATTR]: "" }}
         className="flex flex-col gap-3"
       >
-        <p className="body-sm text-(--fg-secondary) leading-relaxed flex items-start gap-2">
+        <p className="body-sm text-(--auis-fg-secondary) leading-relaxed flex items-start gap-2">
           <Icon
             name="info"
             size={16}
-            className="text-(--fg-tertiary) mt-0.5"
+            className="text-(--auis-fg-tertiary) mt-0.5"
           />
           <span>
             A full snapshot of the bridge (open, in review and archived
@@ -123,7 +123,7 @@ export function ReviewExportModal() {
             page to merge without duplicates.
           </span>
         </p>
-        <pre className="rounded-sm bg-(--bg-muted) border border-(--border-subtle) p-3 max-h-[40vh] overflow-auto body-xs mono text-(--fg-primary) whitespace-pre">
+        <pre className="rounded-sm bg-(--auis-bg-muted) border border-(--auis-border-subtle) p-3 max-h-[40vh] overflow-auto body-xs mono text-(--auis-fg-primary) whitespace-pre">
           {json || "Loading…"}
         </pre>
       </div>

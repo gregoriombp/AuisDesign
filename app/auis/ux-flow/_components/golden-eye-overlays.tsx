@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { ChromeScope } from "@auis/ui/ChromeScope"
 import { ReviewCommandMenu } from "@auis/ui/review/ReviewCommandMenu"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuModal } from "@/components/ui/AuModal"
@@ -193,7 +194,9 @@ export function GoldenEyeCommentComposer({
           onSelect={() => commands.sync()}
           onBlur={() => commands.close()}
         />
-        <ReviewCommandMenu ac={commands} />
+        <ChromeScope>
+          <ReviewCommandMenu ac={commands} />
+        </ChromeScope>
       </div>
     </AuModal>
   )

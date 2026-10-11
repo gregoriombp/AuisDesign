@@ -72,11 +72,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
 
     const wrapperClasses = [
-      "au-input",
-      invalid && "au-input--invalid",
-      dense && "au-input--dense",
-      disabled && "au-input--disabled",
-      isSearch && "au-input--search",
+      "auis-input",
+      invalid && "auis-input--invalid",
+      dense && "auis-input--dense",
+      disabled && "auis-input--disabled",
+      isSearch && "auis-input--search",
       className,
     ]
       .filter(Boolean)
@@ -96,7 +96,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {showClear && (
           <button
             type="button"
-            className="au-input__clear"
+            className="auis-input__clear"
             aria-label="Clear search"
             tabIndex={-1}
             onClick={clearValue}
@@ -107,7 +107,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {canReveal && (
           <button
             type="button"
-            className="au-input__reveal"
+            className="auis-input__reveal"
             aria-label={revealed ? "Hide password" : "Show password"}
             aria-pressed={revealed}
             tabIndex={-1}
@@ -155,42 +155,42 @@ export function Field({
     const invalid = Boolean(error)
     return (
       <div
-        className={["au-field-framed-wrap", className].filter(Boolean).join(" ")}
+        className={["auis-field-framed-wrap", className].filter(Boolean).join(" ")}
       >
         <fieldset
           className={[
-            "au-field--framed",
-            invalid && "au-field--framed-invalid",
+            "auis-field--framed",
+            invalid && "auis-field--framed-invalid",
           ]
             .filter(Boolean)
             .join(" ")}
         >
-          <legend className="au-field__legend">{label}</legend>
+          <legend className="auis-field__legend">{label}</legend>
           {children}
         </fieldset>
         {error ? (
-          <div className="au-field__error">
+          <div className="auis-field__error">
             <Icon name="error" size={12} /> {error}
           </div>
         ) : helper ? (
-          <div className="au-field__helper">{helper}</div>
+          <div className="auis-field__helper">{helper}</div>
         ) : null}
       </div>
     )
   }
 
   return (
-    <div className={["au-field", className].filter(Boolean).join(" ")}>
-      <label className="au-field__label" htmlFor={htmlFor}>
+    <div className={["auis-field", className].filter(Boolean).join(" ")}>
+      <label className="auis-field__label" htmlFor={htmlFor}>
         {label}
       </label>
       {children}
       {error ? (
-        <div className="au-field__error">
+        <div className="auis-field__error">
           <Icon name="error" size={12} /> {error}
         </div>
       ) : helper ? (
-        <div className="au-field__helper">{helper}</div>
+        <div className="auis-field__helper">{helper}</div>
       ) : null}
     </div>
   )

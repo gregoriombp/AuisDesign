@@ -118,14 +118,14 @@ export function ReplyRow({
             name={reply.authorName}
             email={reply.authorEmail}
             role={reply.authorRole}
-            className="body-xs font-medium text-(--fg-primary) truncate"
+            className="body-xs font-medium text-(--auis-fg-primary) truncate"
           />
           {isAgent && (
-            <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
+            <span className="text-2xs px-1 py-0 rounded-xs bg-(--auis-bg-muted) text-(--auis-fg-tertiary)">
               agent
             </span>
           )}
-          <span className="text-2xs text-(--fg-tertiary) tabular-nums">
+          <span className="text-2xs text-(--auis-fg-tertiary) tabular-nums">
             {formatRelative(reply.createdAt)}
             {reply.editedAt ? " · edited" : ""}
           </span>
@@ -138,7 +138,7 @@ export function ReplyRow({
               }}
               aria-label="Edit reply"
               title="Edit reply"
-              className="ml-auto shrink-0 h-5 w-5 inline-flex items-center justify-center rounded-xs text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover) opacity-0 group-hover/reply:opacity-100 focus-visible:opacity-100 transition-opacity"
+              className="ml-auto shrink-0 h-5 w-5 inline-flex items-center justify-center rounded-xs text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) opacity-0 group-hover/reply:opacity-100 focus-visible:opacity-100 transition-opacity"
             >
               <Icon name="edit" size={11} />
             </button>
@@ -156,7 +156,7 @@ export function ReplyRow({
               onPaste={editImg.onPaste}
               rows={2}
               autoFocus
-              className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
+              className="w-full rounded-sm border border-(--auis-border-subtle) bg-(--auis-bg-surface) p-2 body-sm text-(--auis-fg-primary) focus:outline-hidden focus:border-(--auis-accent-brand) resize-none"
               onKeyDown={(e) => {
                 if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void saveEdit()
                 if (e.key === "Escape") setEditing(false)
@@ -170,13 +170,13 @@ export function ReplyRow({
                     <img
                       src={src}
                       alt=""
-                      className="h-14 w-14 rounded-sm object-cover border border-(--border-subtle)"
+                      className="h-14 w-14 rounded-sm object-cover border border-(--auis-border-subtle)"
                     />
                     <button
                       type="button"
                       onClick={() => editImg.remove(idx)}
                       aria-label="Remove image"
-                      className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/rethumb:opacity-100 transition-opacity"
+                      className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/rethumb:opacity-100 transition-opacity"
                     >
                       <Icon name="close" size={9} />
                     </button>
@@ -203,7 +203,7 @@ export function ReplyRow({
           <>
             {reply.text.length > 0 && (
               <CommentText
-                className="m-0 body-sm text-(--fg-primary) whitespace-pre-wrap leading-relaxed"
+                className="m-0 body-sm text-(--auis-fg-primary) whitespace-pre-wrap leading-relaxed"
                 text={reply.text}
               />
             )}
@@ -222,7 +222,7 @@ export function ReplyRow({
                       e.stopPropagation()
                       window.open(src, "_blank", "noopener")
                     }}
-                    className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
+                    className="rounded-sm overflow-hidden border border-(--auis-border-subtle) hover:border-(--auis-border-strong) transition-colors focus:outline-hidden"
                     aria-label={`View image ${idx + 1}`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -476,8 +476,8 @@ export function ReviewCommentCard({
       className={[
         "group rounded-md border p-3 cursor-pointer transition-colors",
         selected
-          ? "border-(--accent-brand) bg-(--bg-hover)"
-          : "border-(--border-subtle) bg-(--bg-raised) hover:border-(--border-default)",
+          ? "border-(--auis-accent-brand) bg-(--auis-bg-hover)"
+          : "border-(--auis-border-subtle) bg-(--auis-bg-raised) hover:border-(--auis-border-default)",
       ].join(" ")}
     >
       <header className="flex items-center gap-2 mb-2">
@@ -491,7 +491,7 @@ export function ReviewCommentCard({
             }}
             onClick={(e) => e.stopPropagation()}
             aria-label="Select"
-            className="accent-(--accent-brand) mr-0.5"
+            className="accent-(--auis-accent-brand) mr-0.5"
           />
         )}
         <ReviewAvatar
@@ -507,16 +507,16 @@ export function ReviewCommentCard({
               name={comment.authorName}
               email={comment.authorEmail}
               role={comment.authorRole}
-              className="body-xs font-medium text-(--fg-primary) truncate"
+              className="body-xs font-medium text-(--auis-fg-primary) truncate"
             />
             {comment.authorKind === "agent" && (
-              <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
+              <span className="text-2xs px-1 py-0 rounded-xs bg-(--auis-bg-muted) text-(--auis-fg-tertiary)">
                 agent
               </span>
             )}
           </div>
           <span
-            className="text-2xs text-(--fg-tertiary) tabular-nums"
+            className="text-2xs text-(--auis-fg-tertiary) tabular-nums"
             title={new Date(comment.createdAt).toISOString()}
           >
             {formatFullTimestamp(comment.createdAt)}
@@ -526,7 +526,7 @@ export function ReviewCommentCard({
         <div className="ml-auto flex items-center gap-1">
           {comment.visibility === "admins" && (
             <span
-              className="inline-flex items-center gap-1 body-xs text-(--fg-tertiary)"
+              className="inline-flex items-center gap-1 body-xs text-(--auis-fg-tertiary)"
               title="Visible to admins only"
             >
               <Icon name="lock" size={11} />
@@ -545,7 +545,7 @@ export function ReviewCommentCard({
                 type="button"
                 onClick={(e) => e.stopPropagation()}
                 aria-label="Actions"
-                className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--fg-tertiary) hover:text-(--fg-primary) hover:bg-(--bg-hover)"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover)"
               >
                 <Icon name="more_horiz" size={14} />
               </button>
@@ -564,7 +564,7 @@ export function ReviewCommentCard({
             rows={3}
             autoFocus
             placeholder="Edit the comment…"
-            className="w-full rounded-sm border border-(--border-subtle) bg-(--bg-surface) p-2 body-sm text-(--fg-primary) focus:outline-hidden focus:border-(--accent-brand) resize-none"
+            className="w-full rounded-sm border border-(--auis-border-subtle) bg-(--auis-bg-surface) p-2 body-sm text-(--auis-fg-primary) focus:outline-hidden focus:border-(--auis-accent-brand) resize-none"
             onKeyDown={(e) => {
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void saveEdit()
               if (e.key === "Escape") setEditing(false)
@@ -578,13 +578,13 @@ export function ReviewCommentCard({
                   <img
                     src={src}
                     alt=""
-                    className="h-16 w-16 rounded-sm object-cover border border-(--border-subtle)"
+                    className="h-16 w-16 rounded-sm object-cover border border-(--auis-border-subtle)"
                   />
                   <button
                     type="button"
                     onClick={() => editImg.remove(idx)}
                     aria-label="Remove image"
-                    className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--bg-raised) border border-(--border-subtle) flex items-center justify-center text-(--fg-tertiary) hover:text-(--fg-primary) opacity-0 group-hover/ethumb:opacity-100 transition-opacity"
+                    className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/ethumb:opacity-100 transition-opacity"
                   >
                     <Icon name="close" size={9} />
                   </button>
@@ -614,7 +614,7 @@ export function ReviewCommentCard({
         <>
           {comment.text.length > 0 && (
             <CommentText
-              className="body-sm text-(--fg-primary) whitespace-pre-wrap leading-relaxed"
+              className="body-sm text-(--auis-fg-primary) whitespace-pre-wrap leading-relaxed"
               text={comment.text}
             />
           )}
@@ -634,7 +634,7 @@ export function ReviewCommentCard({
                     e.stopPropagation()
                     window.open(src, "_blank", "noopener")
                   }}
-                  className="rounded-sm overflow-hidden border border-(--border-subtle) hover:border-(--border-strong) transition-colors focus:outline-hidden"
+                  className="rounded-sm overflow-hidden border border-(--auis-border-subtle) hover:border-(--auis-border-strong) transition-colors focus:outline-hidden"
                   aria-label={`View image ${idx + 1}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -647,7 +647,7 @@ export function ReviewCommentCard({
       )}
 
       {anchorLost && (
-        <div className="mt-2 flex items-start gap-1 body-xs text-(--fg-tertiary)">
+        <div className="mt-2 flex items-start gap-1 body-xs text-(--auis-fg-tertiary)">
           <Icon name="location_off" size={11} className="mt-0.5 shrink-0" />
           <span>
             The pin is not drawn on this screen.
@@ -663,7 +663,7 @@ export function ReviewCommentCard({
           navigateToAnchor()
         }}
         title={`Go to ${comment.url}`}
-        className="mt-2 w-full body-xs text-(--fg-tertiary) flex items-center gap-1 rounded-xs hover:text-(--accent-brand) transition-colors text-left"
+        className="mt-2 w-full body-xs text-(--auis-fg-tertiary) flex items-center gap-1 rounded-xs hover:text-(--auis-accent-brand) transition-colors text-left"
       >
         <Icon name="link" size={11} />
         <span className="truncate underline-offset-2 group-hover:underline">
@@ -676,7 +676,7 @@ export function ReviewCommentCard({
 
       {comment.resolution?.summary && (
         <p
-          className="m-0 mt-2 body-xs text-(--fg-tertiary) italic"
+          className="m-0 mt-2 body-xs text-(--auis-fg-tertiary) italic"
           title={
             comment.resolution.approvedAt
               ? `Approved on ${new Date(
@@ -690,7 +690,7 @@ export function ReviewCommentCard({
       )}
 
       {replies.length > 0 && (
-        <div className="mt-3 pt-2 border-t border-(--border-subtle) flex flex-col divide-y divide-(--border-subtle)">
+        <div className="mt-3 pt-2 border-t border-(--auis-border-subtle) flex flex-col divide-y divide-(--auis-border-subtle)">
           {replies.map((r) => (
             <ReplyRow key={r.id} reply={r} commentId={comment.id} />
           ))}
@@ -729,7 +729,7 @@ export function ReviewCommentCard({
           <button
             type="button"
             onClick={() => setReplyOpen((v) => !v)}
-            className="inline-flex items-center gap-1 text-(--fg-secondary) hover:text-(--fg-primary)"
+            className="inline-flex items-center gap-1 text-(--auis-fg-secondary) hover:text-(--auis-fg-primary)"
           >
             <Icon name="reply" size={11} />
             {replyOpen ? "Cancel reply" : "Reply"}
@@ -737,7 +737,7 @@ export function ReviewCommentCard({
           <button
             type="button"
             onClick={() => setHistoryOpen((v) => !v)}
-            className="inline-flex items-center gap-1 text-(--fg-tertiary) hover:text-(--fg-secondary)"
+            className="inline-flex items-center gap-1 text-(--auis-fg-tertiary) hover:text-(--auis-fg-secondary)"
             aria-expanded={historyOpen}
           >
             <Icon name={historyOpen ? "expand_less" : "expand_more"} size={11} />
@@ -760,18 +760,18 @@ export function ReviewCommentCard({
       {historyOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="mt-2 rounded-sm bg-(--bg-surface) border border-(--border-subtle) p-2 flex flex-col gap-1 body-xs text-(--fg-secondary)"
+          className="mt-2 rounded-sm bg-(--auis-bg-surface) border border-(--auis-border-subtle) p-2 flex flex-col gap-1 body-xs text-(--auis-fg-secondary)"
         >
           <div>
-            <span className="text-(--fg-primary)">Created</span> ·{" "}
-            <span className="text-(--fg-tertiary)">
+            <span className="text-(--auis-fg-primary)">Created</span> ·{" "}
+            <span className="text-(--auis-fg-tertiary)">
               {formatFullTimestamp(comment.createdAt)} by {comment.authorName}
             </span>
           </div>
           {replies.map((r) => (
             <div key={r.id}>
-              <span className="text-(--fg-primary)">Reply</span> ·{" "}
-              <span className="text-(--fg-tertiary)">
+              <span className="text-(--auis-fg-primary)">Reply</span> ·{" "}
+              <span className="text-(--auis-fg-tertiary)">
                 {formatFullTimestamp(r.createdAt)} by {r.authorName}
                 {r.authorKind === "agent" ? " (agent)" : ""}
               </span>
@@ -779,8 +779,8 @@ export function ReviewCommentCard({
           ))}
           {comment.resolution?.at && (
             <div>
-              <span className="text-(--fg-primary)">In review</span> ·{" "}
-              <span className="text-(--fg-tertiary)">
+              <span className="text-(--auis-fg-primary)">In review</span> ·{" "}
+              <span className="text-(--auis-fg-tertiary)">
                 {formatFullTimestamp(comment.resolution.at)} by{" "}
                 {comment.resolution.actor.name}
                 {comment.resolution.actor.kind === "agent" ? " (agent)" : ""}
@@ -789,8 +789,8 @@ export function ReviewCommentCard({
           )}
           {comment.resolution?.approvedAt && comment.resolution.approvedBy && (
             <div>
-              <span className="text-(--fg-primary)">Approved</span> ·{" "}
-              <span className="text-(--fg-tertiary)">
+              <span className="text-(--auis-fg-primary)">Approved</span> ·{" "}
+              <span className="text-(--auis-fg-tertiary)">
                 {formatFullTimestamp(comment.resolution.approvedAt)} by{" "}
                 {comment.resolution.approvedBy.name}
               </span>

@@ -65,7 +65,7 @@ export function CommentText({
           const person = byHandle.get(seg.handle)
           return (
             <PersonHover key={i} email={person?.email}>
-              <span className="text-(--accent-brand) font-medium cursor-default hover:underline underline-offset-2">
+              <span className="text-(--auis-accent-brand) font-medium cursor-default hover:underline underline-offset-2">
                 @{person?.name ?? seg.handle}
               </span>
             </PersonHover>

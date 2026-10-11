@@ -169,7 +169,7 @@ const MAGIC_CSS = `
   max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   padding: 2px 8px; border-radius: 6px;
   font-size: 11px; font-weight: 600; line-height: 1.5;
-  color: var(--fg-on-inverse);
+  color: var(--auis-fg-on-inverse);
   background: linear-gradient(110deg, var(--au-blue-600), var(--au-purple-600), var(--au-pink-600));
   box-shadow: 0 2px 8px color-mix(in srgb, var(--au-purple-600) 35%, transparent);
 }

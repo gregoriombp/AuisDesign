@@ -24,8 +24,8 @@ function cx(...parts: Array<string | false | null | undefined>) {
 export function Empty({ className, ...rest }: DivProps) {
   return (
     <div
-      data-slot="au-empty"
-      className={cx("au-empty", className)}
+      data-slot="auis-empty"
+      className={cx("auis-empty", className)}
       {...rest}
     />
   )
@@ -34,8 +34,8 @@ export function Empty({ className, ...rest }: DivProps) {
 export function EmptyHeader({ className, ...rest }: DivProps) {
   return (
     <div
-      data-slot="au-empty-header"
-      className={cx("au-empty__header", className)}
+      data-slot="auis-empty-header"
+      className={cx("auis-empty__header", className)}
       {...rest}
     />
   )
@@ -50,11 +50,11 @@ export function EmptyMedia({
 }: DivProps & { variant?: EmptyMediaVariant }) {
   return (
     <div
-      data-slot="au-empty-media"
+      data-slot="auis-empty-media"
       data-variant={variant}
       className={cx(
-        "au-empty__media",
-        variant === "icon" && "au-empty__media--icon",
+        "auis-empty__media",
+        variant === "icon" && "auis-empty__media--icon",
         className
       )}
       {...rest}
@@ -68,8 +68,8 @@ export function EmptyTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      data-slot="au-empty-title"
-      className={cx("au-empty__title", className)}
+      data-slot="auis-empty-title"
+      className={cx("auis-empty__title", className)}
       {...rest}
     />
   )
@@ -81,8 +81,8 @@ export function EmptyDescription({
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
-      data-slot="au-empty-description"
-      className={cx("au-empty__description", className)}
+      data-slot="auis-empty-description"
+      className={cx("auis-empty__description", className)}
       {...rest}
     />
   )
@@ -91,8 +91,8 @@ export function EmptyDescription({
 export function EmptyContent({ className, ...rest }: DivProps) {
   return (
     <div
-      data-slot="au-empty-content"
-      className={cx("au-empty__content", className)}
+      data-slot="auis-empty-content"
+      className={cx("auis-empty__content", className)}
       {...rest}
     />
   )

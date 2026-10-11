@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { ChromeScope } from "@auis/ui/ChromeScope"
 import { ReviewAvatar } from "@auis/ui/review/ReviewAvatar"
 import { AuthorName } from "@auis/ui/review/PersonHover"
 import { BacklogComposer } from "@auis/ui/review/BacklogComposer"
@@ -186,22 +187,26 @@ function CommentCard({
           className="mt-1 accent-(--accent-brand)"
         />
       )}
-      <ReviewAvatar
-        authorKind={comment.authorKind}
-        authorId={comment.authorId}
-        authorName={comment.authorName}
-        colorToken={comment.authorColorToken}
-        size={28}
-        className="mt-0.5"
-      />
+      <ChromeScope>
+        <ReviewAvatar
+          authorKind={comment.authorKind}
+          authorId={comment.authorId}
+          authorName={comment.authorName}
+          colorToken={comment.authorColorToken}
+          size={28}
+          className="mt-0.5"
+        />
+      </ChromeScope>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <AuthorName
-            name={comment.authorName}
-            email={comment.authorEmail}
-            role={comment.authorRole}
-            className="text-sm font-medium text-(--fg-primary) truncate"
-          />
+          <ChromeScope>
+            <AuthorName
+              name={comment.authorName}
+              email={comment.authorEmail}
+              role={comment.authorRole}
+              className="text-sm font-medium text-(--fg-primary) truncate"
+            />
+          </ChromeScope>
           {comment.authorKind === "agent" && (
             <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
               agent
@@ -436,12 +441,14 @@ export function CommentsPanel() {
           ))}
         </div>
 
-        <ReviewFilterControls
-          filters={filters}
-          onChange={setFilters}
-          authors={authorOptions}
-          pages={pageOptions}
-        />
+        <ChromeScope>
+          <ReviewFilterControls
+            filters={filters}
+            onChange={setFilters}
+            authors={authorOptions}
+            pages={pageOptions}
+          />
+        </ChromeScope>
 
         <label className="flex items-center gap-2 body-xs text-(--fg-secondary) cursor-pointer">
           <input
@@ -474,7 +481,9 @@ export function CommentsPanel() {
       {/* Compose a future idea — the backlog's home is this page. */}
       {tab === "backlog" && (
         <div className="max-w-xl">
-          <BacklogComposer />
+          <ChromeScope>
+            <BacklogComposer />
+          </ChromeScope>
         </div>
       )}
 

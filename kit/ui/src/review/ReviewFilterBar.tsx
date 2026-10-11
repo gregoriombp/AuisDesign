@@ -46,7 +46,7 @@ function toggleIn(list: string[], value: string): string[] {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="au-eyebrow text-(--fg-tertiary) px-3 pt-3 pb-1.5 block">
+    <span className="au-eyebrow text-(--auis-fg-tertiary) px-3 pt-3 pb-1.5 block">
       {children}
     </span>
   )
@@ -70,13 +70,13 @@ function OptionRow({
       className={cn(
         "flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left body-xs transition-colors duration-au-fast",
         active
-          ? "bg-(--bg-muted) font-medium text-(--fg-primary)"
-          : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
+          ? "bg-(--auis-bg-muted) font-medium text-(--auis-fg-primary)"
+          : "text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)",
       )}
     >
       {label}
       {children ??
-        (active && <Icon name="check" size={14} className="text-(--fg-primary)" />)}
+        (active && <Icon name="check" size={14} className="text-(--auis-fg-primary)" />)}
     </button>
   )
 }
@@ -95,14 +95,14 @@ function CheckRow({
   return (
     <label
       className={cn(
-        "flex items-center gap-2.5 px-3 py-1.5 cursor-pointer transition-colors duration-au-fast hover:bg-(--bg-hover)",
+        "flex items-center gap-2.5 px-3 py-1.5 cursor-pointer transition-colors duration-au-fast hover:bg-(--auis-bg-hover)",
       )}
     >
       <Checkbox checked={checked} onChange={onToggle} label={label} />
       <span
         className={cn(
           "body-xs min-w-0 truncate",
-          checked ? "text-(--fg-primary) font-medium" : "text-(--fg-secondary)",
+          checked ? "text-(--auis-fg-primary) font-medium" : "text-(--auis-fg-secondary)",
           mono && "tabular-nums",
         )}
       >
@@ -210,7 +210,7 @@ export function ReviewFilterControls({
             ? "Newest first — click for chronological order"
             : "Chronological order (oldest first) — click to flip"
         }
-        className="inline-flex items-center gap-0.5 body-xs text-(--fg-tertiary) hover:text-(--fg-primary) transition-colors"
+        className="inline-flex items-center gap-0.5 body-xs text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) transition-colors"
       >
         <Icon name={desc ? "south" : "north"} size={11} />
         {desc ? "Newest" : "Oldest"}
@@ -225,13 +225,13 @@ export function ReviewFilterControls({
             className={cn(
               "relative h-7 w-7 inline-flex items-center justify-center rounded-full transition-colors",
               count > 0 || open
-                ? "bg-(--bg-inverse) text-(--fg-on-inverse)"
-                : "bg-(--bg-muted) text-(--fg-secondary) hover:text-(--fg-primary)",
+                ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
+                : "bg-(--auis-bg-muted) text-(--auis-fg-secondary) hover:text-(--auis-fg-primary)",
             )}
           >
             <Icon name="filter_list" size={15} weight={600} />
             {count > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full bg-(--accent-brand) text-(--fg-on-inverse) text-2xs font-semibold tabular-nums">
+              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 inline-flex items-center justify-center rounded-full bg-(--auis-accent-brand) text-(--auis-fg-on-inverse) text-2xs font-semibold tabular-nums">
                 {count}
               </span>
             )}
@@ -242,7 +242,7 @@ export function ReviewFilterControls({
           align={align}
           sideOffset={6}
           style={{ zIndex: MENU_Z }}
-          className="w-80 p-0 rounded-lg border border-(--border-subtle) bg-(--bg-raised) shadow-lg overflow-hidden"
+          className="w-80 p-0 rounded-lg border border-(--auis-border-subtle) bg-(--auis-bg-raised) shadow-lg overflow-hidden"
         >
           <div className="max-h-[70vh] overflow-y-auto pb-1">
             {/* Scope — only in the drawer, which knows what "this screen" is */}
@@ -257,14 +257,14 @@ export function ReviewFilterControls({
                     onSelect={() => pickScope(s)}
                   />
                 ))}
-                <div className="mt-2 mx-3 h-px bg-(--border-subtle)" />
+                <div className="mt-2 mx-3 h-px bg-(--auis-border-subtle)" />
               </>
             )}
 
             {/* Authors — multi */}
             <SectionLabel>Author</SectionLabel>
             {authors.length === 0 ? (
-              <p className="m-0 px-3 pb-2 body-xs text-(--fg-tertiary)">
+              <p className="m-0 px-3 pb-2 body-xs text-(--auis-fg-tertiary)">
                 No authors yet.
               </p>
             ) : (
@@ -285,7 +285,7 @@ export function ReviewFilterControls({
             {/* Screens — multi (hidden in the "This screen" scope) */}
             {pages && (
               <>
-                <div className="mt-2 mx-3 h-px bg-(--border-subtle)" />
+                <div className="mt-2 mx-3 h-px bg-(--auis-border-subtle)" />
                 <SectionLabel>Screen</SectionLabel>
                 <div className="max-h-44 overflow-y-auto">
                   {pages.map((p) => (
@@ -302,7 +302,7 @@ export function ReviewFilterControls({
             )}
 
             {/* Period — presets + custom */}
-            <div className="mt-2 mx-3 h-px bg-(--border-subtle)" />
+            <div className="mt-2 mx-3 h-px bg-(--auis-border-subtle)" />
             <SectionLabel>Period</SectionLabel>
             {(Object.keys(PERIOD_LABEL) as Exclude<ReviewPeriod, "custom">[]).map(
               (p) => (
@@ -320,21 +320,21 @@ export function ReviewFilterControls({
               className={cn(
                 "flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left body-xs transition-colors duration-au-fast",
                 filters.period === "custom"
-                  ? "bg-(--bg-muted) font-medium text-(--fg-primary)"
-                  : "text-(--fg-secondary) hover:bg-(--bg-hover) hover:text-(--fg-primary)",
+                  ? "bg-(--auis-bg-muted) font-medium text-(--auis-fg-primary)"
+                  : "text-(--auis-fg-secondary) hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)",
               )}
             >
               <span className="inline-flex items-center gap-1.5">
-                <Icon name="calendar_month" size={13} className="text-(--fg-tertiary)" />
+                <Icon name="calendar_month" size={13} className="text-(--auis-fg-tertiary)" />
                 {customLabel ? `Custom · ${customLabel}` : "Custom…"}
               </span>
               {filters.period === "custom" && !customOpen ? (
-                <Icon name="check" size={14} className="text-(--fg-primary)" />
+                <Icon name="check" size={14} className="text-(--auis-fg-primary)" />
               ) : (
                 <Icon
                   name={customOpen ? "expand_less" : "expand_more"}
                   size={14}
-                  className="text-(--fg-tertiary)"
+                  className="text-(--auis-fg-tertiary)"
                 />
               )}
             </button>
@@ -342,30 +342,30 @@ export function ReviewFilterControls({
               <div ref={customRef} className="px-3 pb-2 flex flex-col gap-2">
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex flex-col gap-1">
-                    <span className="body-xs text-(--fg-tertiary)">From</span>
+                    <span className="body-xs text-(--auis-fg-tertiary)">From</span>
                     <input
                       type="date"
                       value={toDateInput(range.from)}
                       onChange={(e) =>
                         setRange((r) => ({ ...r, from: fromDateInput(e.target.value, false) }))
                       }
-                      className="au-input h-8 px-2 body-xs"
+                      className="auis-input h-8 px-2 body-xs"
                     />
                   </label>
                   <label className="flex flex-col gap-1">
-                    <span className="body-xs text-(--fg-tertiary)">To</span>
+                    <span className="body-xs text-(--auis-fg-tertiary)">To</span>
                     <input
                       type="date"
                       value={toDateInput(range.to)}
                       onChange={(e) =>
                         setRange((r) => ({ ...r, to: fromDateInput(e.target.value, true) }))
                       }
-                      className="au-input h-8 px-2 body-xs"
+                      className="auis-input h-8 px-2 body-xs"
                     />
                   </label>
                 </div>
-                <div className="flex items-center justify-between gap-2 border-t border-(--border-subtle) pt-2">
-                  <p className="m-0 body-xs text-(--fg-tertiary)">
+                <div className="flex items-center justify-between gap-2 border-t border-(--auis-border-subtle) pt-2">
+                  <p className="m-0 body-xs text-(--auis-fg-tertiary)">
                     {range.from !== undefined && range.to !== undefined
                       ? `${formatDayShort(range.from)} – ${formatDayShort(range.to)}`
                       : "Pick a start and an end"}
@@ -385,7 +385,7 @@ export function ReviewFilterControls({
 
           {/* Footer — clear everything */}
           {(hasActiveFilters(filters) || scoped) && (
-            <div className="border-t border-(--border-subtle) px-3 py-2 flex justify-end">
+            <div className="border-t border-(--auis-border-subtle) px-3 py-2 flex justify-end">
               <button
                 type="button"
                 onClick={() => {
@@ -394,7 +394,7 @@ export function ReviewFilterControls({
                   onChange({ ...DEFAULT_REVIEW_FILTERS, order: filters.order })
                   if (scoped) onScopeChange?.("all")
                 }}
-                className="inline-flex items-center gap-1 body-xs text-(--fg-secondary) hover:text-(--fg-primary) transition-colors"
+                className="inline-flex items-center gap-1 body-xs text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) transition-colors"
               >
                 <Icon name="filter_alt_off" size={12} />
                 Clear filters

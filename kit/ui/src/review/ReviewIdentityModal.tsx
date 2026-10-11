@@ -76,14 +76,14 @@ export function ReviewIdentityModal() {
         onSubmit={submit}
         className="flex flex-col gap-5"
       >
-        <p className="body-sm text-(--fg-secondary) leading-relaxed">
+        <p className="body-sm text-(--auis-fg-secondary) leading-relaxed">
           {sessionShared
             ? "This login is shared between people — identify yourself so every comment goes out under YOUR name. Saved only in this browser."
             : "Your name shows on every comment and on the agent replies. Saved only in your browser."}
         </p>
 
         <label className="flex flex-col gap-2">
-          <span className="body-xs font-medium text-(--fg-secondary)">
+          <span className="body-xs font-medium text-(--auis-fg-secondary)">
             Name
           </span>
           <Input
@@ -96,8 +96,8 @@ export function ReviewIdentityModal() {
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="body-xs font-medium text-(--fg-secondary)">
-            Personal e-mail <span className="text-(--fg-tertiary)">(optional)</span>
+          <span className="body-xs font-medium text-(--auis-fg-secondary)">
+            Personal e-mail <span className="text-(--auis-fg-tertiary)">(optional)</span>
           </span>
           <Input
             type="email"
@@ -106,13 +106,13 @@ export function ReviewIdentityModal() {
             placeholder="you@company.com"
             maxLength={80}
           />
-          <span className="body-xs text-(--fg-tertiary)">
+          <span className="body-xs text-(--auis-fg-tertiary)">
             Shows on hover of your name and of your @mention.
           </span>
         </label>
 
         <fieldset className="flex flex-col gap-2">
-          <legend className="body-xs font-medium text-(--fg-secondary) mb-1">
+          <legend className="body-xs font-medium text-(--auis-fg-secondary) mb-1">
             Your marker color
           </legend>
           <div className="flex flex-wrap gap-2">
@@ -129,7 +129,7 @@ export function ReviewIdentityModal() {
                   style={{
                     background: c.token,
                     borderColor: selected
-                      ? "var(--fg-primary)"
+                      ? "var(--auis-fg-primary)"
                       : "transparent",
                   }}
                   title={c.label}

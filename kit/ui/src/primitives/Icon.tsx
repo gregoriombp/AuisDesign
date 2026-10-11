@@ -55,7 +55,7 @@ export function Icon({
     <span
       aria-hidden="true"
       className={
-        "material-symbols-rounded au-icon" + (className ? " " + className : "")
+        "material-symbols-rounded auis-icon" + (className ? " " + className : "")
       }
       style={{
         fontSize: size,
@@ -112,7 +112,7 @@ function clampIconOpticalSize(size: number) {
 
 /** The "gesture" mark — how an **Agent** is drawn as an icon, the brand
  *  alternative to a robot/`smart_toy`. One continuous stroke that draws itself
- *  in an endless loop (the motion lives in `.au-agent-glyph` in globals.css).
+ *  in an endless loop (the motion lives in `.auis-agent-glyph` in globals.css).
  *
  *  It still behaves like any glyph: inherits `currentColor`, scales with
  *  `size`, and its stroke thickness tracks the `weight` axis so it sits beside
@@ -144,7 +144,7 @@ function AgentGlyph({
     <span
       aria-hidden="true"
       className={
-        "au-icon au-agent-glyph" +
+        "auis-icon auis-agent-glyph" +
         (animated ? " is-animated" : "") +
         (gradient ? " is-gradient" : "") +
         (className ? " " + className : "")

@@ -51,7 +51,7 @@ export function ReviewAvatar({
         alt={label}
         title={label}
         // The ring keeps a light mark (OpenAI's white tile) legible on a light surface.
-        className={`${base} ring-1 ring-(--border-subtle)`}
+        className={`${base} ring-1 ring-(--auis-border-subtle)`}
         style={{ ...dim, objectFit: "cover" }}
       />
     )
@@ -59,7 +59,7 @@ export function ReviewAvatar({
 
   return (
     <span
-      className={`${base} font-semibold text-(--fg-on-inverse)`}
+      className={`${base} font-semibold text-(--auis-fg-on-inverse)`}
       style={{ ...dim, background: colorToken, fontSize: Math.round(size * 0.42) }}
       title={label}
       aria-label={label}
