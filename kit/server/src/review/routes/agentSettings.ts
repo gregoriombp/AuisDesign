@@ -15,7 +15,7 @@ async function handleGET(request: Request) {
     return Response.json({ error: "forbidden_role" }, { status: 403 });
   }
   const settings = await getAgentSettings();
-  // The runner (scripts/mention-run.mjs) does not import TypeScript: it gets
+  // The runner (kit/server/bin/mention-run.mjs) does not import TypeScript: it gets
   // each agent's runtime from here, with the name and handle for the prompt.
   const runtimes = Object.fromEntries(
     REVIEW_AGENTS.map((a) => [

@@ -6,7 +6,9 @@ import { createReviewRoute } from "@auis/next"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-const route = createReviewRoute()
+// The mention runner is the one @auis/server ships; Auis consumes the kit from
+// source, so it points at the file instead of an installed package.
+const route = createReviewRoute({ mentionRunner: "kit/server/bin/mention-run.mjs" })
 export const GET = route.GET
 export const POST = route.POST
 export const PUT = route.PUT

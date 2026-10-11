@@ -44,7 +44,7 @@ Dependency is **one-way** (upper layers consume lower ones — see [`component-l
 Review Mode (UI)  ──creates comment──▶  /api/review-bridge/*  ──▶  review-bridge/data/*.json
                                                   │
    an agent reads it: auis-review-bridge-solve, or the CLI run the mention  ◀───┘
-   trigger opened (mention.ts → scripts/mention-run.mjs, local dev only)
+   trigger opened (mention.ts → kit/server/bin/mention-run.mjs, local dev only)
                                                   │
                      resolves → marks in_review → you approve/reject in the inbox
 ```

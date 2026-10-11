@@ -88,7 +88,7 @@ async function handlePOST(
   if (!result) return Response.json({ error: "not_found" }, { status: 404 });
   // The mention almost always lands HERE, in a reply to the pin — not in the
   // pin itself. Same reason the dispatch queue reads the whole admin stream.
-  triggerMentionRun(id, result.reply.text, result.reply);
+  triggerMentionRun(id, result.reply.text, result.reply, new URL(request.url).origin);
   return Response.json({ reply: result.reply, location: result.location });
 }
 

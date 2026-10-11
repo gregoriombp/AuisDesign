@@ -286,7 +286,7 @@ async function handlePUT(
   // Mention trigger (gate 4): only CREATION fires. This PUT also edits, and
   // re-saving an old comment that already says "@Claude" must not wake the
   // agent again. Fire and forget — the browser's response does not wait for it.
-  if (!existing) triggerMentionRun(id, incoming.text, incoming);
+  if (!existing) triggerMentionRun(id, incoming.text, incoming, new URL(request.url).origin);
   return Response.json({ ok: true });
 }
 

@@ -141,7 +141,7 @@ The Auis dot → **Agents** opens one row per agent: an on/off switch, a
 | **Edit** | everything Reply can + edit code and mark `in_review` | commit, push, archive, approve |
 
 The comment's wording can ask for less than the ceiling, never more. The
-ceiling is enforced by the CLI flags the runner builds (`scripts/mention-cli.mjs`:
+ceiling is enforced by the CLI flags the runner builds (`kit/server/bin/mention-cli.mjs`:
 tool allowlists, `--disallowedTools` for git, Grok's `--sandbox`), not by the
 prompt alone. Claude's Reply run is also `--restricted --strict-mcp-config`: it
 ignores the user, project and local settings files and loads no MCP server, so
@@ -164,7 +164,7 @@ nothing polls, nothing waits. Five gates, all required:
    does not fire again;
 5. only for an agent switched on in the Agents panel, with a CLI.
 
-The route spawns `scripts/mention-run.mjs` detached (so it survives the dev
+The route spawns `kit/server/bin/mention-run.mjs` detached (so it survives the dev
 server's HMR) with the comment id and the mentioned agents. The runner:
 
 - reads the Agents panel through `GET /agent-settings` (now, and again after

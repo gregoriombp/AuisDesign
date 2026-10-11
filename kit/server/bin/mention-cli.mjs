@@ -1,8 +1,8 @@
 // Translation of "agent + ceiling + model" into a command line, plus the
 // readers of what the CLI returns. Pure on purpose: the test
-// (scripts/__tests__/mention-cli.test.mjs) covers every ceiling without opening a
+// (./__tests__/mention-cli.test.mjs) covers every ceiling without opening a
 // process. Reading the Agents panel and running is the runner's job
-// (scripts/mention-run.mjs).
+// (./mention-run.mjs).
 
 /**
  * Under no ceiling. Commit and push belong to the user; the others erase work
@@ -186,6 +186,27 @@ export function answeredSince(comment, agentId, startedAt) {
 const ENV_KEEP =
   /^(PATH|HOME|USER|LOGNAME|SHELL|TMPDIR|TERM|COLORTERM|LANG|LC_[A-Z_]+|TZ|XDG_[A-Z_]+|CLAUDE_CODE_[A-Z_]+|CLAUDE_CONFIG_DIR|NODE_EXTRA_CA_CERTS|SSL_CERT_FILE|HTTPS?_PROXY|NO_PROXY|__CF_USER_TEXT_ENCODING)$/;
 const GROK_ENV_KEEP = /^(XAI_API_KEY|GROK_[A-Z_]+)$/;
+
+const LOOPBACK = new Set(["127.0.0.1", "localhost", "[::1]"]);
+export const DEFAULT_BRIDGE_BASE = "http://127.0.0.1:3000";
+
+/**
+ * Where the runner reaches the bridge: AUIS_BRIDGE_URL (the origin of the route
+ * that spawned it) when it is plain http on this machine, else the Auis default.
+ * Anything else — https, another host, a path — falls back: the agent must
+ * never be pointed at a deployment.
+ */
+export function bridgeBase(env) {
+  const raw = env?.AUIS_BRIDGE_URL;
+  if (!raw) return DEFAULT_BRIDGE_BASE;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "http:" || !LOOPBACK.has(url.hostname)) return DEFAULT_BRIDGE_BASE;
+    return url.origin;
+  } catch {
+    return DEFAULT_BRIDGE_BASE;
+  }
+}
 
 export function agentEnv(parent, cli, base) {
   const env = {};
