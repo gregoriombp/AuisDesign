@@ -240,7 +240,59 @@ Verified:
   open (apart from Radix's scroll lock on `body` while the drawer is open). Inside the
   host, a pin dropped on the `h1` was saved through the host's own bridge, and the `@`
   menu showed the agents' marks.
+- Behaviour, end to end (`scripts/chrome-check/behave.mjs`), 16 checks:
+  - the toolbar's Edit and State switch
+  - a comment from another screen opening through Next's router, with no page load
+  - the chrome's own toast
+  - the `@` menus in the drawer, the inbox and the flow canvas
+  - the chrome pieces the inbox renders on its own
+  - the Agents panel
+  - a console with no errors or DOM-nesting warnings
+
+  The same checks pass against `next start`, and the chrome surfaces match the dev
+  server's pixel for pixel.
+- `npm run mention:dry` still reaches the bridge, and the data is unchanged.
 - 99 tests, typecheck, `next build`, `ds:check`; lint at the same 28 warnings as `main`.
+
+**Verify (to resume or to check a later change).** With `npm run dev` running, and
+Playwright available (`playwright-core`, or `PLAYWRIGHT_MODULE`):
+
+```bash
+node scripts/chrome-check/shoot.mjs before
+```
+
+Run that on the commit before the change, then this on the change:
+
+```bash
+node scripts/chrome-check/shoot.mjs after
+```
+
+Compare the two runs; it should report 28/28 identical:
+
+```bash
+node scripts/chrome-check/compare.mjs before after
+```
+
+Shoot with the app's CSS swapped for `chrome.css` alone:
+
+```bash
+BARE=1 node scripts/chrome-check/shoot.mjs bare
+```
+
+Compare only the chrome surfaces; it should report 18/18 identical:
+
+```bash
+CLIPS=1 node scripts/chrome-check/compare.mjs after bare
+```
+
+Run the behaviour checks; all should pass:
+
+```bash
+node scripts/chrome-check/behave.mjs
+```
+
+The bridge is mocked in these scripts, so they never write to the real data. Then run
+`npm test`, `npm run typecheck`, `npm run lint`, `npm run ds:check` and `npm run build`.
 
 Known gaps carried forward:
 - **The backup pool is shared across projects.** Backups live in
@@ -253,6 +305,10 @@ Known gaps carried forward:
   `loadFonts={false}` turns the links off.
 - Only a Next host was tried. The default router (window + page load) has no host behind
   it yet. Vite, Express and Hono are wave 4.
+- The font check only looks for a Google Fonts `<link>`. A host that serves its own
+  `@font-face` named "Geist" still gets Google's faces linked on top, and those can
+  change the weights the host sees. Check `document.fonts` instead, or default
+  `loadFonts` to off when `init` writes the layout lines.
 - In app pages, a class the app passes into a chrome piece inside `ChromeScope` loses to
   the chrome's base styles when the chrome's own CSS does not have that class. Pass layout
   classes to a wrapper outside the scope.
