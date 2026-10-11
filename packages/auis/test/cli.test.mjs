@@ -20,7 +20,20 @@ describe("parseArgs", () => {
   it("reads the directory with or without an explicit command", () => {
     assert.equal(parseArgs(["my-product"]).directory, "my-product");
     assert.equal(parseArgs(["create", "my-product"]).directory, "my-product");
-    assert.equal(parseArgs(["init", "."]).directory, ".");
+    assert.equal(parseArgs(["new", "my-product"]).directory, "my-product");
+  });
+
+  it("reads init and uninstall as their own commands, not as create", () => {
+    const i = parseArgs(["init", "--dry-run", "--only", "review"]);
+    assert.equal(i.command, "init");
+    assert.equal(i.dryRun, true);
+    assert.equal(i.only, "review");
+    assert.equal(parseArgs(["init", "../host"]).directory, "../host");
+    const u = parseArgs(["uninstall", "--purge", "--force"]);
+    assert.equal(u.command, "uninstall");
+    assert.equal(u.purge, true);
+    assert.equal(u.force, true);
+    assert.equal(parseArgs(["init", "--only=review"]).only, "review");
   });
 
   it("supports both spellings of every valued flag", () => {
