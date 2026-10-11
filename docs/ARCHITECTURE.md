@@ -35,7 +35,8 @@ Dependency is **one-way** (upper layers consume lower ones — see [`component-l
 
 - **Builder chrome** — `components/auis-review/` (canvas, pins, popovers, command menu), `components/auis-edit/` (toolbar, inspector, controls), `components/auis-states/` (State Mode provider + toolbar), `components/auis/` (AuisDot, ModeFamilySwitch, FlowStateDriver). The root layout mounts Review, Edit, State Mode, the state driver, and the dot globally; the three modes are mutually exclusive.
 - **Primitives** — `components/ui/` (30 `.tsx`: **26** `Au*` + `Icon.tsx` + three shadcn primitives, `badge.tsx`, `popover.tsx` and `radio-group.tsx`): the subset the chrome imports (`AuButton`, `AuModal`, `AuSheet`, `AuDropdownMenu`, `AuInput`, `Icon`, …), plus the Review Bridge's own surfaces (`AuMentionMenu`/`AuMentionChip`) and Auis's mark (`AuLogo`). The origin product's full catalog was **not** brought over.
-- **State/logic** — `lib/auis-review/` (stores, element anchoring, command parsing, the agent registry and runtime, the live location, voice, AI assist), `lib/auis-edit/`, `lib/auis-states/` (registry, store, `useScreenStateOverride`, `useMirroredScenario`), `lib/bridge-store/` (fs document store shared by the bridges), `lib/hooks/`.
+- **State/logic** — `lib/auis-review/` (the browser side: stores, element anchoring, the live location, voice, AI assist), `lib/auis-edit/`, `lib/auis-states/` (registry, store, `useScreenStateOverride`, `useMirroredScenario`), `lib/hooks/`.
+- **Review Bridge packages (`kit/`)** — being extracted so a host can install only the Review Bridge ([`review-bridge-packages-plan.md`](review-bridge-packages-plan.md)). `@auis/core` (`kit/core`) holds the shared domain: comment types, the agent registry and runtime, the command parser, skills, reviewer handles. `@auis/server` (`kit/server`) is the bridge server with no framework in it: one `handle(Request)` for every endpoint, plus the fs document store shared by the bridges. `@auis/next` (`kit/next`) plugs it into Next. The app imports them through `tsconfig` paths; `kit/__tests__/boundaries.test.ts` keeps core and server free of the app, Next and React.
 
 ## Bridges (runtime)
 
@@ -43,12 +44,12 @@ Dependency is **one-way** (upper layers consume lower ones — see [`component-l
 Review Mode (UI)  ──creates comment──▶  /api/review-bridge/*  ──▶  review-bridge/data/*.json
                                                   │
    an agent reads it: auis-review-bridge-solve, or the CLI run the mention  ◀───┘
-   trigger opened (_mention.ts → scripts/mention-run.mjs, local dev only)
+   trigger opened (mention.ts → scripts/mention-run.mjs, local dev only)
                                                   │
                      resolves → marks in_review → you approve/reject in the inbox
 ```
 
-- **Review Bridge** — **serverless**: same-origin routes `app/api/review-bridge/*` persist to `review-bridge/data/` through `lib/bridge-store` (atomic writes + lock). Roles admin / reviewer / agent are resolved in `_session.ts` (always admin locally; `x-bridge-agent-token` for agents when a deployment enables auth). Agents are `claude`, `grok` and `codex` (no engine yet); the dot's Agents panel stores on/off, ceiling (Reply / Edit) and model per agent in `agentSettings`, which gates the mention trigger (`_mention.ts`, `AUIS_MENTION_TRIGGER=1`) and `/dispatch-queue`.
+- **Review Bridge** — **serverless**: one catch-all route, `app/api/review-bridge/[...path]/route.ts`, hands every `/api/review-bridge/*` request to `@auis/server` (`kit/server/src/review/handler.ts` routes it), which persists to `review-bridge/data/` through the doc store in `kit/server/src/docstore` (atomic writes + lock). Roles admin / reviewer / agent are resolved in `kit/server/src/review/session.ts` (always admin locally; `x-bridge-agent-token` for agents when a deployment enables auth). Agents are `claude`, `grok` and `codex` (no engine yet); the dot's Agents panel stores on/off, ceiling (Reply / Edit) and model per agent in `agentSettings`, which gates the mention trigger (`kit/server/src/review/mention.ts`, `AUIS_MENTION_TRIGGER=1`) and `/dispatch-queue`.
 - **Flow Bridge** — suggestions via `/api/flow-suggestions` → `flow-bridge/data/`, with an integrity layer (base revision/hash, materialization receipts, `409` on a stale base).
 - **State Mode API** — `/api/screen-states` exposes `lib/auis-states/registry.ts` to the matrix page and the PDF script.
 - **Edit Bridge** — non-destructive "ops" via `/api/page-edits` → `page-editor/data/`; `auis-edit-bridge-solve` materializes them into code.

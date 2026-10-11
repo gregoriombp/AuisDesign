@@ -14,7 +14,7 @@ The bridge is serverless: the Next.js app serves it through
 | `flow-bridge/data/suggestions.json` | Open, in-review and recently applied suggestions. |
 | `flow-bridge/data/suggestions.archive.json` | Applied and discarded suggestions moved out of the main file. |
 
-Both files are created on first write by `lib/bridge-store` (namespace `flows`).
+Both files are created on first write by the doc store in `kit/server/src/docstore` (namespace `flows`).
 Delete them to reset the bridge locally.
 
 ## Lifecycle

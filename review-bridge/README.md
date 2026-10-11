@@ -6,6 +6,15 @@ Serverless backend of **Review Mode**: the same-origin routes under
 machine. `npm run dev` already brings everything up — no second process, no
 port, no token, no `.env`.
 
+The server lives in `kit/server` as `@auis/server`: one
+`createReviewHandler(options)` returns a `handle(Request): Promise<Response>`
+that answers every path below, with no framework inside it. The app mounts it
+through `@auis/next` in a single catch-all,
+`app/api/review-bridge/[...path]/route.ts`. Options (`basePath`, `dataDir`,
+`backupDir`, `mentionRunner`) default to exactly what this README describes.
+The plan for making it installable elsewhere is
+`docs/review-bridge-packages-plan.md`.
+
 ## Lifecycle of a comment
 
 ```
@@ -51,13 +60,13 @@ JSON or restore a snapshot by hand.
 
 ## Hierarchy
 
-Every request resolves a session on the server (`app/api/review-bridge/_session.ts`):
+Every request resolves a session on the server (`kit/server/src/review/session.ts`):
 
 | Role | Who | Can |
 |---|---|---|
 | `admin` | The local dev server — Auis ships no auth provider, so every browser is an admin | Everything: comment, command agents, approve/reject/archive, private comments, agent toggles |
 | `agent` | A request carrying a valid `x-bridge-agent-token` (the skills, the mention runner) when `BRIDGE_AGENT_TOKEN` is set | Reply and comment as an agent, move items to `in_review`; never approve/reject/delete |
-| `reviewer` | Any other session once you plug an auth layer into `_session.ts` | Comment and reply; cannot command agents, change status or see `admins`-only comments |
+| `reviewer` | Any other session once you plug an auth layer into `kit/server/src/review/session.ts` | Comment and reply; cannot command agents, change status or see `admins`-only comments |
 
 The client mirrors the role through `GET /session` only to adapt the UI; the
 permission is re-checked on every write.
@@ -112,8 +121,8 @@ Agents available: `@Claude`, `@Grok` and `@Codex` — executors that share the
 same contracts (`auis-review-bridge-solve`, `auis-ux-writing`,
 `auis-edit-bridge-solve`). Claude and Grok have a CLI the mention trigger can
 open; Codex is registered but has no engine yet and stays off. The registry is
-`lib/auis-review/agents.ts`; what each one can run (CLI, ceilings, models,
-effort) is `lib/auis-review/agentRuntime.ts`.
+`kit/core/src/agents.ts`; what each one can run (CLI, ceilings, models,
+effort) is `kit/core/src/agentRuntime.ts`.
 
 ### The Agents panel
 
@@ -139,7 +148,7 @@ defaults (Claude on in Edit, the rest off).
 
 With `AUIS_MENTION_TRIGGER=1` in `.env.local`, writing `@Claude …` or `@Grok …`
 in a pin or a reply opens that agent's CLI right there, from the route that
-stored the write (`app/api/review-bridge/_mention.ts`). The write is the event:
+stored the write (`kit/server/src/review/mention.ts`). The write is the event:
 nothing polls, nothing waits. Five gates, all required:
 
 1. never in production, and never in dev without the opt-in;
