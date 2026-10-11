@@ -35,8 +35,11 @@ Auis is not separate documentation for the product. It is a product layer
 that runs with the Next.js app. That is the shape of the template a new Auis
 project starts from; the direction is a toolkit that installs into an existing
 product — React first, then other frameworks through a self-contained mount —
-without changing what is already there. Neither `auis init` nor that mount
-ships yet; `npx @auis/cli doctor` reports what would work in a given repository.
+without changing what is already there. The first piece of that ships:
+`npx @auis/cli init` installs Review into an existing Next.js App Router app
+(`uninstall` reverses it), and `npx @auis/cli doctor` reports what would work in
+a given repository. The self-contained mount for other frameworks does not ship
+yet.
 
 - **Design system as source of truth:** official components live in
   `components/ui/Au*`, use tokens from `app/globals.css`, and are documented in
