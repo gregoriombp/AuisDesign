@@ -1,14 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { ReviewCommandMenu } from "@/components/auis-review/ReviewCommandMenu"
+import { ChromeScope } from "@auis/ui/ChromeScope"
+import { ReviewCommandMenu } from "@auis/ui/review/ReviewCommandMenu"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuModal } from "@/components/ui/AuModal"
 import { AuSegmented } from "@/components/ui/AuSegmented"
 import { AuSheet } from "@/components/ui/AuSheet"
 import { AuTextarea } from "@/components/ui/AuTextarea"
-import { useReviewStore } from "@/lib/auis-review/store"
-import { useReviewCommandAutocomplete } from "@/lib/auis-review/useReviewCommandAutocomplete"
+import { useReviewStore } from "@auis/ui/review/store"
+import { useReviewCommandAutocomplete } from "@auis/ui/review/useReviewCommandAutocomplete"
 
 export type GoldenEyeScreenVariant = {
   label: string
@@ -193,7 +194,9 @@ export function GoldenEyeCommentComposer({
           onSelect={() => commands.sync()}
           onBlur={() => commands.close()}
         />
-        <ReviewCommandMenu ac={commands} />
+        <ChromeScope>
+          <ReviewCommandMenu ac={commands} />
+        </ChromeScope>
       </div>
     </AuModal>
   )

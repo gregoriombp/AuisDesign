@@ -24,8 +24,8 @@ manifest and a data folder) and nothing else.
 |---|---|---|
 | 1 | `@auis/core` + `@auis/server` + `@auis/next` (server side): the 16 Review Bridge routes run behind one `handle(Request)` | **done** (2026-10-10) |
 | 0 | Anchor-survival experiment on real apps (gate before wave 2) | **done** (2026-10-10): passed, see `docs/anchor-survival.md` |
-| 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **next** |
-| 3 | `auis init --only review` / `uninstall` + publishing the packages | not started |
+| 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **done** (2026-10-11) |
+| 3 | `auis init --only review` / `uninstall` + publishing the packages | **next** (fix the shared backup pool first, see wave 3) |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
 
 Update this table in the same PR that moves a wave forward.
@@ -58,15 +58,16 @@ the two disagree, this file wins:
 |---|---|---|---|
 | `@auis/core` | `kit/core` | Shared domain: comment types, agent identities and registry, agent runtime (ceilings, models), the `@`/`/` command parser, skills registry, reviewer handles | nothing outside itself (no `@/`, no `next`, no `react`, no `node:*`) |
 | `@auis/server` | `kit/server` | Everything the Review Bridge does on the server: the doc store (disk driver), backups, images, sessions/roles, the mention trigger, the merge and reveal rules, the 16 handlers and the router behind `createReviewHandler(options) → handle(Request): Promise<Response>` | `@auis/core`, `node:*` |
-| `@auis/next` | `kit/next` | Wave 1: `createReviewRoute(options)` → `{ GET, POST, PUT, PATCH, DELETE }` for a Next catch-all. Wave 2: the browser half (router hooks replacing the 3 `next/navigation` imports in the review UI) | `@auis/server`, `next` |
-| `@auis/ui` | `kit/ui` (wave 2) | The review chrome: pins, drawer, popovers, toolbar, chips, with its own scoped CSS | `@auis/core`, `react` |
+| `@auis/next` | `kit/next` | `createReviewRoute(options)` → `{ GET, POST, PUT, PATCH, DELETE }` for a Next catch-all; `@auis/next/client`: `NextReviewRouter`, the router the chrome reads | `@auis/server`, `@auis/core`, `@auis/ui`, `next`, `react` |
+| `@auis/ui` | `kit/ui` | The review chrome: pins, drawer, popovers, toolbar, chips, its own primitives, and its own scoped CSS | `@auis/core`, `react`, `react-dom`, `zustand`, `@radix-ui/*`, `clsx`, `tailwind-merge` |
 
 `handle(Request): Response` is what makes the rest possible: `NextRequest` is a
 `Request`, `NextResponse` is a `Response`, and Node 18+ has both as globals. Adapters for
 Vite, Express or Hono are a few dozen lines each.
 
 A test (`kit/__tests__/boundaries.test.ts`) fails if `kit/core` or `kit/server` import
-`@/`, `next` or `react`, or if `kit/core` imports `node:*`.
+`@/`, `next` or `react`, if `kit/core` imports `node:*`, or if `kit/ui` imports the app,
+Next, Node or anything outside the list above.
 
 ---
 
@@ -210,6 +211,108 @@ Auis dot (`components/auis/AuisDot.tsx`) is the mode switch the UI hangs from.
 renders a legible chrome. The validation host renders the chrome with its own styles
 untouched.
 
+**Shipped (2026-10-11).** The shortcut route, with one change: the chrome could not keep
+importing the app's `Au*` (the boundary forbids `@/`), so it carries its own copies of
+the fourteen primitives. Where things ended up:
+
+| What | Where |
+|---|---|
+| The chrome | `kit/ui/src/review/` — the old `components/auis-review` and `lib/auis-review` |
+| Its primitives | `kit/ui/src/primitives/` — `Button`, `Modal`, `Sheet`, `DropdownMenu`… copied from the `Au*`, no `Au` prefix (not the product's design system; `ds:check` does not scan `kit/`) |
+| Entry for a host | `ReviewChrome` (`kit/ui/src/ReviewChrome.tsx`): the chrome, its toast stack and its fonts in one element. Auis mounts it through `components/auis/AuisReview.tsx`, which passes the Edit/State switch as data (`modes`) |
+| Scope | `ChromeScope` (`kit/ui/src/ChromeScope.tsx`): the `[data-auis-ui]` root, and one scoped portal root at the end of `<body>` for every overlay. App pages that render a chrome piece on their own (the inbox, the flow canvas, the agents panel) wrap that piece in it |
+| Styles | `kit/ui/src/styles/chrome.source.css` → `npm run ui:css` → `chrome.css`: Tailwind compiled from `kit/ui/src` only, every rule under `[data-auis-ui]`, no cascade layers (a host's unlayered CSS would beat them), `--tw-*` → `--auis-tw-*`, keyframes prefixed `auis-`, rem → px. `kit/ui/src/__tests__/chrome-css.test.ts` fails when it is stale or any of that breaks |
+| Tokens | `--auis-*`, a copy of the neutral baseline, declared in `chrome.source.css` — the chrome's, not the product's, so they live outside `globals.css` and its token authority. `--au-*` and `--fg-primary`/`--fg-tertiary` keep their names inside the scope because stored comments reference them |
+| Router | `kit/ui/src/router.tsx` (default: the window and a page load) and `@auis/next/client` (`NextReviewRouter`, mounted once in the root layout) |
+| Moved to core | `elementAnchor`, `scrollOffset` (its pure half), `elementContext`, `format`, `fireClick`, `findClickable`, `iconLigature`, the three client storage implementations, the overlay attribute and storage keys (`constants`), and the agents' marks inline (`agentMarks`) |
+
+Verified:
+- **The Auis app looks the same.** Twenty-eight screenshots (light and dark) of every
+  chrome surface were taken before the first change, against a mocked bridge and a fixed
+  clock. After every step, all 28 were pixel-identical to them.
+- **The chrome looks the same without `globals.css`.** With every app stylesheet replaced
+  by `chrome.css` alone, the eighteen chrome surfaces were pixel-identical to the same
+  surfaces with the app's CSS, in both themes. The page around them was unstyled.
+- **The validation host is untouched.** A scratch copy of Destiny Matrix was given the
+  kit, the route and the two layout lines. Its three pages were pixel-identical to the
+  untouched app, and the computed styles of `body`, `header`, `h1`, `.label`, `button`,
+  `a`, `input` and `svg` matched. They also matched with Review on, and with the drawer
+  open (apart from Radix's scroll lock on `body` while the drawer is open). Inside the
+  host, a pin dropped on the `h1` was saved through the host's own bridge, and the `@`
+  menu showed the agents' marks.
+- Behaviour, end to end (`scripts/chrome-check/behave.mjs`), 16 checks:
+  - the toolbar's Edit and State switch
+  - a comment from another screen opening through Next's router, with no page load
+  - the chrome's own toast
+  - the `@` menus in the drawer, the inbox and the flow canvas
+  - the chrome pieces the inbox renders on its own
+  - the Agents panel
+  - a console with no errors or DOM-nesting warnings
+
+  The same checks pass against `next start`, and the chrome surfaces match the dev
+  server's pixel for pixel.
+- `npm run mention:dry` still reaches the bridge, and the data is unchanged.
+- 99 tests, typecheck, `next build`, `ds:check`; lint at the same 28 warnings as `main`.
+
+**Verify (to resume or to check a later change).** With `npm run dev` running, and
+Playwright available (`playwright-core`, or `PLAYWRIGHT_MODULE`):
+
+```bash
+node scripts/chrome-check/shoot.mjs before
+```
+
+Run that on the commit before the change, then this on the change:
+
+```bash
+node scripts/chrome-check/shoot.mjs after
+```
+
+Compare the two runs; it should report 28/28 identical:
+
+```bash
+node scripts/chrome-check/compare.mjs before after
+```
+
+Shoot with the app's CSS swapped for `chrome.css` alone:
+
+```bash
+BARE=1 node scripts/chrome-check/shoot.mjs bare
+```
+
+Compare only the chrome surfaces; it should report 18/18 identical:
+
+```bash
+CLIPS=1 node scripts/chrome-check/compare.mjs after bare
+```
+
+Run the behaviour checks; all should pass:
+
+```bash
+node scripts/chrome-check/behave.mjs
+```
+
+The bridge is mocked in these scripts, so they never write to the real data. Then run
+`npm test`, `npm run typecheck`, `npm run lint`, `npm run ds:check` and `npm run build`.
+
+Known gaps carried forward:
+- **The backup pool is shared across projects.** Backups live in
+  `~/.auis/review-bridge-backups` for every project on the machine. When a project has no
+  `comments.json`, it restores the newest snapshot in that pool, whatever project wrote
+  it. The host copy came up with another app's comments. This comes from wave 1, and it
+  must be fixed before `init` puts a bridge in a new repo (see wave 3).
+- Icons still come from the Material Symbols font, which the chrome links from Google
+  Fonts when the page lacks it, along with Geist. Wave 4's Shadow DOM needs them inline.
+  `loadFonts={false}` turns the links off.
+- Only a Next host was tried. The default router (window + page load) has no host behind
+  it yet. Vite, Express and Hono are wave 4.
+- The font check only looks for a Google Fonts `<link>`. A host that serves its own
+  `@font-face` named "Geist" still gets Google's faces linked on top, and those can
+  change the weights the host sees. Check `document.fonts` instead, or default
+  `loadFonts` to off when `init` writes the layout lines.
+- In app pages, a class the app passes into a chrome piece inside `ChromeScope` loses to
+  the chrome's base styles when the chrome's own CSS does not have that class. Pass layout
+  classes to a wrapper outside the scope.
+
 ---
 
 ## Wave 3 — install into someone else's repo
@@ -217,6 +320,10 @@ untouched.
 **Goal.** `npx @auis/cli init --only review` in a Next App Router host.
 
 **Scope.**
+- First, the backup pool (found in wave 2). It has to be namespaced per project, for
+  example under a hash of the data dir. `ensureRestored()` may only restore from that
+  project's own snapshots. Today a new host restores another project's comments. Wave 3
+  writes `.auis/data/`, so the backup path must come from the same place.
 - CLI: `init` stops being an alias of create (today `create`, `init` and `new` all
   scaffold — `CREATE_ALIASES` in `packages/auis/src/cli.mjs`). `create`/`new` keep
   scaffolding; `init` installs into the current repo. `init --dry-run` is `doctor` plus

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
 import test from "node:test"
 
 import {
@@ -76,14 +77,15 @@ test("Grok is a canonical executor with its own mention target", () => {
   assert.equal(getReviewAgent("grok")?.tone, "inverse")
 })
 
-test("every agent shows its official mark from public/assets/agents", () => {
-  const marks = REVIEW_AGENTS.map((a) => a.mark)
-  assert.deepEqual(marks, [
-    "/assets/agents/claude.svg",
-    "/assets/agents/openai.svg",
-    "/assets/agents/grok.svg",
-  ])
-  assert.equal(new Set(marks).size, marks.length)
+test("every agent carries its official mark inline, identical to public/assets/agents", () => {
+  const files = { claude: "claude.svg", codex: "openai.svg", grok: "grok.svg" } as const
+  for (const agent of REVIEW_AGENTS) {
+    const prefix = "data:image/svg+xml,"
+    assert.ok(agent.mark.startsWith(prefix), `${agent.id} mark is not inline`)
+    const file = new URL(`../../../../public/assets/agents/${files[agent.id]}`, import.meta.url)
+    assert.equal(decodeURIComponent(agent.mark.slice(prefix.length)), readFileSync(file, "utf8").trim())
+  }
+  assert.equal(new Set(REVIEW_AGENTS.map((a) => a.mark)).size, REVIEW_AGENTS.length)
 })
 
 test("an unknown @handle stays plain text and never becomes an actor", () => {

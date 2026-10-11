@@ -3,10 +3,11 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ReviewAvatar } from "@/components/auis-review/ReviewAvatar"
-import { AuthorName } from "@/components/auis-review/PersonHover"
-import { BacklogComposer } from "@/components/auis-review/BacklogComposer"
-import { ReviewFilterControls } from "@/components/auis-review/ReviewFilterBar"
+import { ChromeScope } from "@auis/ui/ChromeScope"
+import { ReviewAvatar } from "@auis/ui/review/ReviewAvatar"
+import { AuthorName } from "@auis/ui/review/PersonHover"
+import { BacklogComposer } from "@auis/ui/review/BacklogComposer"
+import { ReviewFilterControls } from "@auis/ui/review/ReviewFilterBar"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuDropdownMenu, type AuDropdownItem } from "@/components/ui/AuDropdownMenu"
 import {
@@ -20,15 +21,15 @@ import { AuInput } from "@/components/ui/AuInput"
 import { AuPill } from "@/components/ui/AuPill"
 import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
-import { useReviewStore } from "@/lib/auis-review/store"
-import { permalinkPath } from "@/lib/auis-review/permalink"
+import { useReviewStore } from "@auis/ui/review/store"
+import { permalinkPath } from "@auis/ui/review/permalink"
 import {
   DEFAULT_REVIEW_FILTERS,
   applyReviewFilters,
   collectAuthorOptions,
   collectPageOptions,
   type ReviewListFilters,
-} from "@/lib/auis-review/commentFilters"
+} from "@auis/ui/review/commentFilters"
 import type { ReviewComment } from "@auis/core/types"
 
 // "backlog" = Future ideas — their home is HERE now (they left the drawer).
@@ -186,22 +187,26 @@ function CommentCard({
           className="mt-1 accent-(--accent-brand)"
         />
       )}
-      <ReviewAvatar
-        authorKind={comment.authorKind}
-        authorId={comment.authorId}
-        authorName={comment.authorName}
-        colorToken={comment.authorColorToken}
-        size={28}
-        className="mt-0.5"
-      />
+      <ChromeScope>
+        <ReviewAvatar
+          authorKind={comment.authorKind}
+          authorId={comment.authorId}
+          authorName={comment.authorName}
+          colorToken={comment.authorColorToken}
+          size={28}
+          className="mt-0.5"
+        />
+      </ChromeScope>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <AuthorName
-            name={comment.authorName}
-            email={comment.authorEmail}
-            role={comment.authorRole}
-            className="text-sm font-medium text-(--fg-primary) truncate"
-          />
+          <ChromeScope>
+            <AuthorName
+              name={comment.authorName}
+              email={comment.authorEmail}
+              role={comment.authorRole}
+              className="text-sm font-medium text-(--fg-primary) truncate"
+            />
+          </ChromeScope>
           {comment.authorKind === "agent" && (
             <span className="text-2xs px-1 py-0 rounded-xs bg-(--bg-muted) text-(--fg-tertiary)">
               agent
@@ -436,12 +441,14 @@ export function CommentsPanel() {
           ))}
         </div>
 
-        <ReviewFilterControls
-          filters={filters}
-          onChange={setFilters}
-          authors={authorOptions}
-          pages={pageOptions}
-        />
+        <ChromeScope>
+          <ReviewFilterControls
+            filters={filters}
+            onChange={setFilters}
+            authors={authorOptions}
+            pages={pageOptions}
+          />
+        </ChromeScope>
 
         <label className="flex items-center gap-2 body-xs text-(--fg-secondary) cursor-pointer">
           <input
@@ -474,7 +481,9 @@ export function CommentsPanel() {
       {/* Compose a future idea — the backlog's home is this page. */}
       {tab === "backlog" && (
         <div className="max-w-xl">
-          <BacklogComposer />
+          <ChromeScope>
+            <BacklogComposer />
+          </ChromeScope>
         </div>
       )}
 

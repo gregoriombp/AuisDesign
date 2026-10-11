@@ -17,6 +17,7 @@
     "predev": "node scripts/skills-sync.mjs",
     "postinstall": "node scripts/skills-sync.mjs",
     "ds:check": "node scripts/ds-check.mjs",
+    "ui:css": "node kit/ui/scripts/build-css.mjs",
     "states:pdf": "node scripts/states-matrix-pdf.mjs"
   },
   "keywords": [

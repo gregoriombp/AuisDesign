@@ -1,0 +1,128 @@
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cn } from "./cn"
+import { Icon } from "./Icon"
+
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "subtle"
+  | "danger"
+  | "ai"
+  | "ai-spectrum"
+  | "ai-outline"
+  | "inverse"
+
+export type ButtonSize = "sm" | "md" | "lg"
+
+export type ButtonProps = Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "size"
+> & {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  iconLeft?: string
+  iconRight?: string
+  iconOnly?: string
+  loading?: boolean
+  block?: boolean
+  asChild?: boolean
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button(
+    {
+      variant = "secondary",
+      size = "md",
+      iconLeft,
+      iconRight,
+      iconOnly,
+      loading,
+      block,
+      disabled,
+      asChild,
+      children,
+      className,
+      ...rest
+    },
+    ref
+  ) {
+    const iconSize = iconOnly
+      ? size === "sm"
+        ? 22
+        : size === "lg"
+          ? 26
+          : 24
+      : size === "sm"
+        ? 18
+        : size === "lg"
+          ? 24
+          : 22
+    const className_ = cn(
+      "auis-btn",
+      `auis-btn--${variant}`,
+      `auis-btn--${size}`,
+      iconOnly && "auis-btn--icon",
+      block && "auis-btn--block",
+      loading && "auis-btn--loading",
+      className,
+    )
+
+    if (asChild) {
+      // Slot needs a single child. We clone the element that was passed
+      // (usually a <Link>) and inject its label INSIDE it, wrapped by the
+      // icons — that way the final markup has exactly one root.
+      const child = React.Children.only(
+        children as React.ReactElement<{ children?: React.ReactNode }>,
+      )
+      const childLabel = child.props.children
+      const newChild = React.cloneElement(
+        child,
+        {},
+        iconOnly ? (
+          <Icon name={iconOnly} size={iconSize} weight={300} />
+        ) : (
+          <>
+            {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}
+            <span className="auis-btn__label">{childLabel}</span>
+            {iconRight && <Icon name={iconRight} size={iconSize} weight={300} />}
+            {loading && <span aria-hidden="true" className="auis-btn__spinner" />}
+          </>
+        ),
+      )
+      return (
+        <Slot
+          ref={ref}
+          aria-busy={loading || undefined}
+          className={className_}
+          {...rest}
+        >
+          {newChild}
+        </Slot>
+      )
+    }
+
+    return (
+      <button
+        ref={ref}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
+        className={className_}
+        {...rest}
+      >
+        {iconOnly ? (
+          <Icon name={iconOnly} size={iconSize} weight={300} />
+        ) : (
+          <>
+            {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}
+            <span className="auis-btn__label">{children}</span>
+            {iconRight && <Icon name={iconRight} size={iconSize} weight={300} />}
+          </>
+        )}
+        {loading && <span aria-hidden="true" className="auis-btn__spinner" />}
+      </button>
+    )
+  }
+)
+

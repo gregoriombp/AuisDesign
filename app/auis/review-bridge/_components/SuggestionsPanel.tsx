@@ -13,7 +13,7 @@ import {
 import { AuPill } from "@/components/ui/AuPill"
 import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
-import { useReviewStore } from "@/lib/auis-review/store"
+import { useReviewStore } from "@auis/ui/review/store"
 import { getFlowMeta } from "../../ux-flow/_data/flow-meta"
 
 type SuggestionStatus = "open" | "in_review" | "applied" | "discarded"

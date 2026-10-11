@@ -2,7 +2,9 @@
 // what each one may import is a rule, checked here on every `npm test`:
 //   @auis/core   — nothing outside itself (no app alias, framework or Node built-in)
 //   @auis/server — @auis/core and Node built-ins, never the app or a UI framework
-//   @auis/next   — @auis/server and @auis/core, never the app
+//   @auis/next   — the other kit packages and Next, never the app
+//   @auis/ui     — @auis/core, React and the chrome's own dependencies; never
+//                  the app, Next or a Node built-in
 // See docs/review-bridge-packages-plan.md.
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -37,6 +39,7 @@ function violations(pkg: string, allowed: (spec: string) => boolean): string[] {
 }
 
 const relative = (spec: string) => spec.startsWith("./") || spec.startsWith("../");
+const kit = (spec: string, ...names: string[]) => names.some((n) => spec === `@auis/${n}` || spec.startsWith(`@auis/${n}/`));
 
 test("@auis/core imports nothing outside itself", () => {
   assert.deepEqual(violations("core", relative), []);
@@ -49,9 +52,27 @@ test("@auis/server imports only @auis/core and Node built-ins", () => {
   );
 });
 
-test("@auis/next imports only the other kit packages", () => {
+test("@auis/next imports only the other kit packages, Next and React", () => {
   assert.deepEqual(
-    violations("next", (s) => relative(s) || s.startsWith("@auis/server") || s.startsWith("@auis/core")),
+    violations(
+      "next",
+      (s) => relative(s) || kit(s, "server", "core", "ui") || s === "react" || s.startsWith("next/"),
+    ),
+    [],
+  );
+});
+
+// What a host installs alongside the chrome (plus @radix-ui/*). Adding to this
+// list adds a dependency to every host — keep it short. clsx + tailwind-merge
+// keep `cn()` merging classes exactly as the primitives were written for.
+const UI_DEPENDENCIES = ["react", "react-dom", "zustand", "clsx", "tailwind-merge"];
+
+test("@auis/ui imports only @auis/core, React and its own dependencies", () => {
+  assert.deepEqual(
+    violations(
+      "ui",
+      (s) => relative(s) || kit(s, "core", "ui") || UI_DEPENDENCIES.includes(s) || s.startsWith("@radix-ui/"),
+    ),
     [],
   );
 });

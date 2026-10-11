@@ -1,0 +1,1599 @@
+/*
+ * @auis/ui — the review chrome's own stylesheet (SOURCE).
+ *
+ * The chrome installs into apps that have none of Auis's tokens, Tailwind
+ * setup or components, so it brings its own: this file is compiled by
+ * `npm run ui:css` (kit/ui/scripts/build-css.mjs) into chrome.css, where every
+ * rule is scoped under [data-auis-ui], nothing sits in a cascade layer (a
+ * host's unlayered CSS would otherwise beat it), Tailwind's --tw-* variables
+ * become --auis-tw-*, keyframes get an auis- prefix and rem becomes px (a host
+ * that changes the root font size does not resize the chrome).
+ *
+ * The values are a COPY of the neutral Auis baseline on purpose: the chrome
+ * keeps this look whatever the product's own tokens become. These --auis-*
+ * tokens are the chrome's, not the product's — they live here, outside
+ * app/globals.css and its token authority. --au-* keep their names because
+ * stored comments reference them (authorColorToken: "var(--au-blue-600)").
+ *
+ * Do not edit chrome.css by hand; edit this file and rebuild.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@import "tw-animate-css";
+
+/* Only the chrome's own sources generate utilities. */
+@source "../";
+
+@custom-variant dark (&:is(.dark *));
+
+/* The non-color part of the Auis theme, so `rounded-lg`, `shadow-md`,
+ * `text-2xs`, `duration-au-fast`… resolve to the values the chrome was drawn
+ * with. */
+@theme {
+  --font-sans:
+    Geist, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-heading: Geist, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: Geist, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: Geist Mono, ui-monospace, SF Mono, Menlo, monospace;
+
+  /* TYPE — the fine steps missing from the small end of the ramp. The product
+   * leans on 10/11px for dense labels, but the scale stopped at Tailwind's
+   * text-xs (12px), so the code fell back to text-[10px]/[11px]. These tokens
+   * fill the gap; the remaining sizes (12..30) already exist as text-xs..3xl.
+   * Maintained by the auis-foundation-update skill. */
+  --text-2xs: 11px;
+  --text-3xs: 10px;
+
+  /* TRACKING — named letter-spacing. Tokenizes the product's recurring
+   * arbitrary tracking-[...] values (uppercase eyebrows, tight titles) at the
+   * SAME values, so swapping arbitrary for token is zero visual change.
+   * Distinct names on purpose: they coexist with Tailwind's default scale
+   * (tracking-tight/normal/wide/wider/widest, used in a few places) without
+   * overriding it. Utility channel only — letter-spacing neither varies by theme
+   * nor has a var() consumer. Maintained by the auis-foundation-update skill. */
+  --tracking-heading-tighter: -0.02em;
+  --tracking-heading-tight: -0.015em;
+  --tracking-heading: -0.01em;
+  --tracking-body: -0.005em;
+  --tracking-label: 0.06em;
+  --tracking-label-lg: 0.08em;
+
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.04);
+  --shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.18);
+
+  /* Motion — UTILITY channel (Tailwind v4 generates classes from @theme).
+   *  These exist so motion can be applied straight in className:
+   *  `ease-au-out` (57× `duration-au-fast`, + `ease-fluid`, `duration-au-base`…).
+   *  Same curves/durations are also published as plain `var()` tokens in :root
+   *  (`--ease-out`, `--dur-*`) for inline styles & raw CSS — keep both in sync.
+   *  Two NAMES, one source of truth; neither block is redundant. */
+  --ease-au-out: cubic-bezier(0.22, 0.61, 0.36, 1); /* mirror of --ease-out */
+  --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --transition-duration-au-fast: 120ms; /* mirror of --dur-fast */
+  --transition-duration-au-base: 180ms; /* mirror of --dur-base */
+  --transition-duration-au-slow: 280ms; /* mirror of --dur-slow */
+
+  --animate-spin-slow: spin 8s linear infinite;
+  --animate-fadeInUp: fadeInUp 0.35s cubic-bezier(0.22, 0.8, 0.3, 1);
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+@layer theme {
+  [data-auis-ui] {
+    /* Stored data names these two (the default author color of a server or
+     * agent reply, an agent's accent), so they keep resolving inside the
+     * chrome — to the chrome's values. */
+    --fg-primary: var(--auis-fg-primary);
+    --fg-tertiary: var(--auis-fg-tertiary);
+
+    --au-black: #000000;
+    --au-white: #ffffff;
+    --au-gray-25: #fefefe;
+    --au-gray-50: #fdfdfd;
+    --au-gray-100: #fbfbfb;
+    --au-gray-150: #f9f9f9;
+    --au-gray-200: #f2f2f2;
+    --au-gray-300: #e5e5e5;
+    --au-gray-400: #d1d1d1;
+    --au-gray-500: #b8b8b8;
+    --au-gray-600: #999999;
+    --au-gray-700: #7a7a7a;
+    --au-gray-800: #5e5e5e;
+    --au-gray-900: #454545;
+    --au-gray-1000: #2f2f2f;
+    --au-gray-1100: #1a1a1a;
+    --au-gray-1200: #0d0d0d;
+    --au-blue-100: #f2f7ff;
+    --au-blue-150: #e8f0ff;
+    --au-blue-200: #ddebff;
+    --au-blue-300: #b8d4ff;
+    --au-blue-400: #8fb8ff;
+    --au-blue-500: #478aff;
+    --au-blue-600: #2f76e6;
+    --au-blue-700: #1a5ec8;
+    --au-blue-800: #1346a2;
+    --au-blue-900: #0d317a;
+    --au-blue-1000: #09225a;
+    --au-blue-1100: #06163d;
+    --au-blue-1200: #030d25;
+    --au-emerald-100: #f2fbf5;
+    --au-emerald-150: #e8f9ed;
+    --au-emerald-200: #ddf7e5;
+    --au-emerald-300: #bff2d0;
+    --au-emerald-400: #99ebb8;
+    --au-emerald-500: #5bdf9e;
+    --au-emerald-600: #40c987;
+    --au-emerald-700: #22a871;
+    --au-emerald-800: #17825a;
+    --au-emerald-900: #105e45;
+    --au-emerald-1000: #0a4230;
+    --au-emerald-1100: #062b1f;
+    --au-emerald-1200: #041912;
+    --au-red-100: #fff2f2;
+    --au-red-150: #fde6e6;
+    --au-red-200: #fddddd;
+    --au-red-300: #fbbfbf;
+    --au-red-400: #f29999;
+    --au-red-500: #df5b5b;
+    --au-red-600: #c94040;
+    --au-red-700: #a82222;
+    --au-red-800: #821718;
+    --au-red-900: #5e1010;
+    --au-red-1000: #420a0a;
+    --au-red-1100: #2b0606;
+    --au-red-1200: #190404;
+    --au-purple-100: #f7f2fc;
+    --au-purple-150: #f0e7fa;
+    --au-purple-200: #eaddf8;
+    --au-purple-300: #dbbff2;
+    --au-purple-400: #c499eb;
+    --au-purple-500: #9e5bdf;
+    --au-purple-600: #8740c9;
+    --au-purple-700: #7122a8;
+    --au-purple-800: #5a1782;
+    --au-purple-900: #45105e;
+    --au-purple-1000: #300a42;
+    --au-teal-100: #dff7f6;
+    --au-teal-200: #a1e6e6;
+    --au-teal-400: #64d4d7;
+    --au-teal-500: #45cccf;
+    --au-teal-600: #26c3c7;
+    --au-teal-700: #20b2b4;
+    --au-teal-900: #16908f;
+    --au-amber-100: #fff7ed;
+    --au-amber-150: #fdefd9;
+    --au-amber-200: #fde6cc;
+    --au-amber-300: #fcd4a3;
+    --au-amber-400: #f2a95b;
+    --au-amber-500: #e6762f;
+    --au-amber-600: #cc5f1e;
+    --au-amber-700: #b05315;
+    --au-amber-800: #8c4112;
+    --au-amber-900: #7a3a10;
+    --au-amber-1000: #54270a;
+    --au-amber-1100: #331806;
+    --au-amber-1200: #1f0e03;
+    --au-pink-100: #fdf2f8;
+    --au-pink-200: #fce3ee;
+    --au-pink-300: #f9c4db;
+    --au-pink-400: #f490b5;
+    --au-pink-500: #e85c91;
+    --au-pink-600: #d13f76;
+    --au-pink-700: #a82a5c;
+    --au-pink-800: #801f46;
+    --au-pink-900: #5a1530;
+    --au-pink-1000: #3b0d20;
+    --au-pink-1200: #1a0610;
+    --au-lime-100: #f4fbe5;
+    --au-lime-200: #e4f5be;
+    --au-lime-400: #bde862;
+    --au-lime-500: #a1d136;
+    --au-lime-600: #7fab25;
+    --au-lime-700: #5f8018;
+    --au-lime-900: #354811;
+    --au-lime-1200: #111706;
+    --au-slate-100: #f4f6f8;
+    --au-slate-200: #e4e8ee;
+    --au-slate-300: #c9d0da;
+    --au-slate-400: #9fa9ba;
+    --au-slate-500: #7886a0;
+    --au-slate-600: #5d6a82;
+    --au-slate-700: #465267;
+    --au-slate-800: #333d4d;
+    --au-slate-900: #222a36;
+    --au-slate-1000: #141922;
+    --au-slate-1200: #080a0e;
+    /* COLOR — VAR channel. The --au-* below mirror the --color-au-* in @theme
+     * (top of the file) and exist for consumption via var(): bg-(--au-gray-100),
+     * var(--au-blue-700), etc. (~810 uses). @theme covers consumption by
+     * utility class (bg-au-*, ~337 uses). Two channels, one value —
+     * keep in sync with @theme; this block also anchors the semantic tokens
+     * (--bg-*, --fg-*, --accent-*) that reference these primitives. */
+
+    /* Neutral anchors */
+
+    /* Gray scale — the "structure" / hardware of the system */
+
+    /* Blue — origin point of the AI gradient spectrum */
+
+    /* Emerald — success semantic scale */
+
+    /* Red — destructive / error */
+
+    /* Purple — decorative / "thinking" accent */
+
+    /* Teal — informational / data-viz */
+
+    /* Amber — alert / pending review */
+
+    /* Pink — highlight / marketing accent (used sparingly) */
+
+    /* Lime — growth / positive delta accent */
+
+    /* Slate — cool neutral alt (data-viz, subdued chrome) */
+
+    /* Semantic tokens — light mode */
+    --auis-bg-canvas: var(--au-white);
+    --auis-bg-surface: var(--au-gray-150);
+    --auis-bg-raised: var(--au-white);
+    --auis-bg-muted: var(--au-gray-200);
+    --auis-bg-inverse: var(--au-gray-1200);
+    /* Hover/focus fill for interactive surfaces (rows, dropdown items,
+   * pickers). Aliased to --auis-bg-surface so it stays in sync with the
+   * neutral chrome of the system; split from --auis-bg-surface so callers
+   * can style "this is a hover state" semantically. Used to be tinted
+   * brand-blue and was migrated to neutral gray for calm. */
+    --auis-bg-hover: var(--au-gray-150);
+    /* Persistent fill for the currently-selected interactive item in a
+   * list/grid. One step darker than --auis-bg-hover so a hovered-but-not-
+   * selected row remains distinguishable from the active selection.
+   * Pair with `border-color: transparent` — the fill carries the
+   * selection signal, no extra stroke needed. */
+    --auis-bg-selected: var(--au-gray-200);
+    /* Active/pressed fill for ghost/subtle buttons, menu items, list rows.
+   * One step darker than --auis-bg-selected — reads as "being clicked right now". */
+    --auis-bg-pressed: var(--au-gray-300);
+
+    --auis-fg-primary: var(--au-gray-1200);
+    --auis-fg-secondary: var(--au-gray-800);
+    --auis-fg-tertiary: var(--au-gray-600);
+    --auis-fg-muted: var(--au-gray-500);
+    --auis-fg-on-inverse: var(--au-white);
+
+    --auis-border-subtle: var(--au-gray-200);
+    --auis-border-default: var(--au-gray-300);
+    --auis-border-strong: var(--au-gray-500);
+    --auis-border-inverse: var(--au-gray-1000);
+    --auis-ring-focus: var(--au-slate-600);
+
+    --auis-accent-brand: var(--au-slate-900);
+    --auis-accent-brand-hover: var(--au-slate-1000);
+    /* Active/pressed of brand — maximum-contrast extreme (pure black on light,
+   * pure white on dark). Use for primary button :active, link :active, etc.
+   * Sits beyond --auis-accent-brand-hover on the intensity ramp. */
+    --auis-accent-brand-pressed: var(--au-black);
+    --auis-accent-success: var(--au-emerald-700);
+    --auis-accent-danger: var(--au-red-700);
+    --auis-accent-danger-hover: var(--au-red-600);
+    --auis-accent-danger-pressed: var(--au-red-800);
+    --auis-accent-warning: var(--au-amber-500);
+
+    /* Dark chrome surfaces (product sidebar + shell) */
+    --auis-dark-bg: var(--au-gray-1200);
+    --auis-dark-bg-raised: var(--au-gray-1100);
+    --auis-dark-bg-hover: var(--au-gray-1000);
+    --auis-dark-fg-primary: var(--au-white);
+    --auis-dark-fg-secondary: var(--au-gray-500);
+    --auis-dark-fg-tertiary: var(--au-gray-700);
+    --auis-dark-border: var(--au-gray-1000);
+
+    /* Radii */
+    --auis-radius-xs: 6px;
+    --auis-radius-sm: 8px;
+    --auis-radius-md: 10px;
+    --auis-radius-lg: 12px;
+    --auis-radius-xl: 16px;
+    --auis-radius-2xl: 24px;
+    --auis-radius-full: 9999px;
+
+    /* Spacing — 4px base */
+    --auis-space-0: 0px;
+    --auis-space-1: 4px;
+    --auis-space-2: 8px;
+    --auis-space-3: 12px;
+    --auis-space-4: 16px;
+    --auis-space-5: 20px;
+    --auis-space-6: 24px;
+    --auis-space-8: 32px;
+    --auis-space-10: 40px;
+    --auis-space-12: 48px;
+    --auis-space-16: 64px;
+    --auis-space-18: 72px;
+
+    /* Layout — content container intents.
+   * A page picks ONE intent based on what it holds, not on viewport size.
+   * Above the max, the canvas centers — it does not stretch. */
+    --auis-content-narrow: 720px; /* single-column reading: forms, profile, onboarding */
+    --auis-content-default: 1200px; /* mixed content: docs, catalog, billing overview */
+    --auis-content-wide: 1440px; /* data dense: dashboards, editors, big tables */
+    --auis-content-px: 40px; /* horizontal padding inside the container */
+    --auis-content-gutter: 24px; /* default gap between cards / blocks (gap-6) */
+
+    /* Shadows — restrained */
+    --auis-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --auis-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --auis-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    --auis-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.04);
+    --auis-shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.18);
+
+    /* Motion — VAR channel (consumed as var(--…) in inline styles & raw CSS).
+     *  Mirrors the utility-class tokens in @theme above (--ease-au-out,
+     *  --transition-duration-au-*). Same values, different consumption path —
+     *  use these for `style={{ transition }}`, the @theme ones for className. */
+    --auis-ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --auis-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --auis-dur-fast: 120ms;
+    --auis-dur-base: 180ms;
+    --auis-dur-slow: 280ms;
+
+    /* Type families — single voice.
+   *  · Geist → body, UI text, headings and display.
+   *  · Geist Mono → code only. Never used for timestamps, IDs, metadata
+   *    or any product data that's not literal source code. */
+    --auis-font-sans:
+      'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --auis-font-body: var(--auis-font-sans);
+    --auis-font-heading: var(--auis-font-sans);
+    --auis-font-display: var(--auis-font-sans);
+    --auis-font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    /* Type scale */
+    --auis-display-xxl-size: 128px;
+    --auis-display-xl-size: 96px;
+    --auis-display-lg-size: 80px;
+    --auis-display-md-size: 64px;
+    --auis-display-sm-size: 48px;
+    --auis-h1-size: 40px;
+    --auis-h2-size: 32px;
+    --auis-h3-size: 28px;
+    --auis-h4-size: 24px;
+    --auis-h5-size: 20px;
+    --auis-h6-size: 18px;
+    --auis-body-xl-size: 20px;
+    --auis-body-lg-size: 18px;
+    --auis-body-md-size: 16px;
+    --auis-body-sm-size: 14px;
+    --auis-body-xs-size: 12px;
+    --auis-mono-md-size: 14px;
+    --auis-mono-sm-size: 12px;
+  }
+
+  .dark [data-auis-ui] {
+    --auis-bg-canvas: var(--au-gray-1200);
+    --auis-bg-surface: var(--au-gray-1100);
+    --auis-bg-raised: var(--au-gray-1100);
+    --auis-bg-muted: var(--au-gray-1000);
+    --auis-bg-inverse: var(--au-white);
+    --auis-bg-hover: var(--au-gray-1000);
+    --auis-bg-selected: var(--au-gray-900);
+    --auis-bg-pressed: var(--au-gray-800);
+
+    --auis-fg-primary: var(--au-white);
+    --auis-fg-secondary: var(--au-gray-500);
+    --auis-fg-tertiary: var(--au-gray-700);
+    --auis-fg-muted: var(--au-gray-800);
+    --auis-fg-on-inverse: var(--au-gray-1200);
+
+    --auis-border-subtle: var(--au-gray-1100);
+    --auis-border-default: var(--au-gray-1000);
+    --auis-border-strong: var(--au-gray-900);
+    --auis-border-inverse: var(--au-gray-300);
+    --auis-ring-focus: var(--au-slate-200);
+
+    --auis-accent-brand: var(--au-slate-200);
+    --auis-accent-brand-hover: var(--au-slate-100);
+    --auis-accent-brand-pressed: var(--au-white);
+    --auis-accent-success: var(--au-emerald-500);
+    --auis-accent-danger: var(--au-red-500);
+    --auis-accent-danger-hover: var(--au-red-400);
+    --auis-accent-danger-pressed: var(--au-red-300);
+    --auis-accent-warning: var(--au-amber-400);
+  }
+}
+
+@layer base {
+  /* Tailwind v3 compatibility default the app also carries: a bare `border`
+   * is light gray, not currentColor. */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* What the chrome inherits from <body> in the Auis app, set on its own root
+   * so a host's body (font size, line height, letter spacing, color…) does not
+   * reach it. The root is display: contents — it draws nothing itself. */
+  [data-auis-ui] {
+    display: contents;
+    font-family: var(--auis-font-body);
+    font-size: 16px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.5;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-align: start;
+    text-indent: 0;
+    white-space: normal;
+    color: var(--auis-fg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--auis-font-heading);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--auis-fg-primary);
+  }
+  h1 { font-size: var(--auis-h1-size); letter-spacing: -0.02em; }
+  h2 { font-size: var(--auis-h2-size); letter-spacing: -0.015em; }
+  h3 { font-size: var(--auis-h3-size); }
+  h4 { font-size: var(--auis-h4-size); line-height: 1.25; }
+  h5 { font-size: var(--auis-h5-size); line-height: 1.3; }
+  h6 { font-size: var(--auis-h6-size); line-height: 1.35; }
+
+  code, pre, kbd, samp, .mono {
+    font-family: var(--auis-font-mono);
+    font-feature-settings: "liga" 0, "calt" 0;
+  }
+
+  ::selection {
+    background: var(--au-blue-200);
+    color: var(--au-gray-1200);
+  }
+}
+
+@layer base {
+  a,
+  button,
+  summary,
+  label,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  [role="switch"],
+  [role="checkbox"],
+  [role="radio"] {
+    transition:
+      color var(--auis-dur-fast) var(--auis-ease-out),
+      background-color var(--auis-dur-fast) var(--auis-ease-out),
+      border-color var(--auis-dur-fast) var(--auis-ease-out),
+      box-shadow var(--auis-dur-fast) var(--auis-ease-out),
+      outline-color var(--auis-dur-fast) var(--auis-ease-out),
+      text-decoration-color var(--auis-dur-fast) var(--auis-ease-out),
+      fill var(--auis-dur-fast) var(--auis-ease-out),
+      stroke var(--auis-dur-fast) var(--auis-ease-out);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button,
+    summary,
+    label,
+    input,
+    select,
+    textarea,
+    [role="button"],
+    [role="tab"],
+    [role="menuitem"],
+    [role="option"],
+    [role="switch"],
+    [role="checkbox"],
+    [role="radio"] {
+      transition-duration: 0.01ms;
+    }
+  }
+}
+
+@utility body-sm {
+  font-family: var(--auis-font-body);
+  font-size: var(--auis-body-sm-size);
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+@utility body-xs {
+  font-family: var(--auis-font-body);
+  font-size: var(--auis-body-xs-size);
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  font-weight: 400;
+}
+@utility au-eyebrow {
+  /* Eyebrow — the small uppercase tracked label used above titles, inside
+   * card metadata, on spec rows, etc. Named `.au-eyebrow` on purpose:
+   * Tailwind ships a `.overline` utility (text-decoration: overline) that
+   * would otherwise add a stroke above the text. */
+  font-family: var(--auis-font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--auis-fg-tertiary);
+  text-decoration: none;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+ * The chrome's primitives (kit/ui/src/primitives). Unlayered and after the
+ * utilities, the same precedence they had in the app's stylesheet.
+ * ────────────────────────────────────────────────────────────────────────── */
+/* Wizard: smooth entry for each step (fade + slide up). Apply on a wrapper
+ * keyed by the current step so it replays on every screen change. */
+@keyframes auis-wizard-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.auis-wizard-step {
+  animation: auis-wizard-step-in var(--auis-dur-base) var(--auis-ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .auis-wizard-step {
+    animation: none;
+  }
+}
+
+/* Material Symbols Rounded — Auis icon system.
+ * Locks defaults so glyphs never render as ligature text while loading. */
+.material-symbols-rounded.auis-icon {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  vertical-align: -0.15em;
+}
+
+/* Agent glyph — the animated "gesture" mark that represents an Agent in icon
+ * form (the brand alternative to a robot). Rendered by <Icon name="agent" />.
+ * One continuous stroke that draws itself in an endless loop. Inherits
+ * currentColor + size like any glyph; stroke-width tracks the weight axis
+ * (set inline by the component). Sanctioned raw-SVG agent visual — see AGENTS.md. */
+.auis-agent-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex: none;
+}
+.auis-agent-glyph svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.auis-agent-glyph path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 1;
+}
+/* Gradient variant — <Icon name="agent" gradient />. Brand iridescent stroke
+ * (blue → lavender → peach) instead of currentColor. The <linearGradient>
+ * ships inside the glyph SVG; this overrides the currentColor rule above. */
+.auis-agent-glyph.is-gradient path {
+  stroke: url(#au-agent-gradient);
+}
+.auis-agent-glyph.is-animated path {
+  animation: auis-agent-draw 2.6s var(--auis-ease-in-out) infinite;
+}
+@keyframes auis-agent-draw {
+  0% { stroke-dashoffset: 1; }      /* hidden — pen lifted */
+  55%, 70% { stroke-dashoffset: 0; } /* drawn, brief hold */
+  100% { stroke-dashoffset: -1; }   /* sweeps off, ready to redraw */
+}
+@media (prefers-reduced-motion: reduce) {
+  .auis-agent-glyph.is-animated path {
+    animation: none;
+    stroke-dashoffset: 0; /* stays fully drawn */
+  }
+}
+/* ============================================================
+ * AuButton — mirrors Auis Design System (zip) spec exactly.
+ * 5 variants · 3 sizes · iconLeft/iconRight · loading.
+ * ============================================================ */
+.auis-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--auis-radius-full);
+  font-family: var(--auis-font-sans);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--auis-dur-base) var(--auis-ease-out),
+    color var(--auis-dur-base) var(--auis-ease-out),
+    border-color var(--auis-dur-base) var(--auis-ease-out),
+    filter var(--auis-dur-base) var(--auis-ease-out),
+    box-shadow var(--auis-dur-base) var(--auis-ease-out),
+    transform var(--auis-dur-fast) var(--auis-ease-out);
+  user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+/* Tactile press — a hair of downward travel on click. Subtle enough to
+   feel physical without reading as a bounce. */
+.auis-btn:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+.auis-btn:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(13, 16, 19, 0.14);
+}
+.dark .auis-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+.auis-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Sizes — heights 30 / 38 / 46. Slightly more generous horizontal padding
+   for a calmer, roomier feel (OpenAI-ish breathing room). */
+.auis-btn--sm { height: 30px; padding: 0 14px; font-size: 13px; }
+.auis-btn--md { height: 38px; padding: 0 18px; font-size: 14px; }
+.auis-btn--lg { height: 46px; padding: 0 24px; font-size: 15px; }
+
+/* Full-width variant */
+.auis-btn--block { width: 100%; justify-content: center; }
+
+/* Icon-only — square, symmetrical padding */
+.auis-btn--icon.auis-btn--sm { width: 30px; padding: 0; justify-content: center; }
+.auis-btn--icon.auis-btn--md { width: 38px; padding: 0; justify-content: center; }
+.auis-btn--icon.auis-btn--lg { width: 46px; padding: 0; justify-content: center; }
+
+/* Primary — high-contrast (near-black on light, inverts on dark) */
+.auis-btn--primary {
+  background: var(--auis-fg-primary);
+  color: var(--auis-bg-canvas);
+  border-color: var(--auis-fg-primary);
+}
+.auis-btn--primary:hover:not(:disabled) {
+  background: var(--au-gray-1000);
+  border-color: var(--au-gray-1000);
+}
+.auis-btn--primary:active:not(:disabled) {
+  background: var(--au-black);
+  border-color: var(--au-black);
+}
+
+/* Inverse — the primary button for an inverse surface (a bg-inverse card, a
+   dark hero): primary's pair swapped, so it reads in both modes */
+.auis-btn--inverse {
+  background: var(--auis-bg-canvas);
+  color: var(--auis-fg-primary);
+  border-color: var(--auis-bg-canvas);
+}
+.auis-btn--inverse:hover:not(:disabled) {
+  background: var(--auis-bg-muted);
+  border-color: var(--auis-bg-muted);
+}
+.auis-btn--inverse:active:not(:disabled) {
+  background: var(--auis-bg-pressed);
+  border-color: var(--auis-bg-pressed);
+}
+.auis-btn--inverse:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+.dark .auis-btn--inverse:focus-visible {
+  box-shadow: 0 0 0 3px rgba(13, 16, 19, 0.14);
+}
+
+/* Secondary — outline, neutral */
+.auis-btn--secondary {
+  background: transparent;
+  color: var(--auis-fg-primary);
+  border-color: var(--auis-border-default);
+}
+.auis-btn--secondary:hover:not(:disabled) {
+  border-color: var(--auis-fg-primary);
+  background: var(--auis-bg-surface);
+}
+
+/* Ghost — soft fill at rest, darker on hover. (The "transparent at rest"
+   role is now covered by au-btn--subtle's lighter cousin or by leaving the
+   variant off entirely.) */
+.auis-btn--ghost {
+  background: var(--auis-bg-surface);
+  color: var(--auis-fg-primary);
+  border-color: transparent;
+}
+.auis-btn--ghost:hover:not(:disabled) {
+  background: var(--auis-bg-muted);
+}
+
+/* Subtle — tonal fill, sits between ghost (invisible at rest) and
+   secondary (bordered). Designed for icon-only row actions in tables
+   and other dense surfaces where the trigger needs a real touch target
+   without competing with the row's primary CTA. */
+.auis-btn--subtle {
+  background: var(--auis-bg-muted);
+  color: var(--auis-fg-primary);
+  border-color: transparent;
+}
+.auis-btn--subtle:hover:not(:disabled) {
+  background: var(--au-gray-300);
+}
+.dark .auis-btn--subtle:hover:not(:disabled) {
+  background: var(--au-gray-900);
+}
+
+/* Row actions — subtle + iconOnly: square rounded tile, transparent at
+ * rest, soft gray fill on hover. Pill shape competes with the table's
+ * grid, so the row trigger goes square; the gray only appears on
+ * intent so the column doesn't drown in muted pills. */
+.auis-btn--subtle.auis-btn--icon {
+  background: transparent;
+  border-radius: var(--auis-radius-md);
+}
+.auis-btn--subtle.auis-btn--icon:hover:not(:disabled) {
+  background: var(--auis-bg-hover);
+}
+.dark .auis-btn--subtle.auis-btn--icon:hover:not(:disabled) {
+  background: var(--auis-bg-hover);
+}
+
+/* Danger — destructive actions */
+.auis-btn--danger {
+  background: var(--au-red-700);
+  color: #fff;
+  border-color: var(--au-red-700);
+}
+.auis-btn--danger:hover:not(:disabled) {
+  background: var(--au-red-800);
+  border-color: var(--au-red-800);
+}
+
+/* Loading */
+.auis-btn--loading .auis-btn__label { opacity: 0.6; }
+.auis-btn__spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: auis-spin 600ms linear infinite;
+}
+@keyframes auis-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+ * AuInput + AuField — inputs with focus ring + error state.
+ * ============================================================ */
+.auis-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.auis-field__label {
+  font: 500 12px/1 var(--auis-font-sans);
+  color: var(--auis-fg-secondary);
+}
+.auis-field__error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--au-red-700);
+}
+.auis-field__helper {
+  font-size: 12px;
+  color: var(--auis-fg-tertiary);
+}
+.auis-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 12px;
+  background: var(--auis-bg-canvas);
+  border: 1px solid var(--auis-border-default);
+  border-radius: var(--auis-radius-md);
+  transition:
+    border-color var(--auis-dur-base) var(--auis-ease-out),
+    box-shadow var(--auis-dur-base) var(--auis-ease-out),
+    background var(--auis-dur-base) var(--auis-ease-out);
+}
+/* Subtle hover before focus — border firms up a touch on intent. */
+.auis-input:hover:not(:focus-within):not(.auis-input--disabled) {
+  border-color: var(--auis-fg-tertiary);
+}
+.auis-input--dense { height: 34px; padding: 0 10px; }
+.auis-input input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 14px/1.4 var(--auis-font-sans);
+  color: var(--auis-fg-primary);
+  min-width: 0;
+}
+.auis-input input::placeholder { color: var(--auis-fg-tertiary); }
+.auis-input:focus-within {
+  border-color: var(--auis-fg-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--auis-fg-primary) 12%, transparent);
+}
+.auis-input--invalid { border-color: var(--au-red-700); }
+.auis-input--invalid:focus-within {
+  box-shadow: 0 0 0 3px rgba(168, 34, 34, 0.18);
+}
+.auis-input--disabled,
+.auis-input:has(input:disabled) {
+  background: var(--auis-bg-surface);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.auis-input--disabled input,
+.auis-input input:disabled {
+  cursor: not-allowed;
+}
+
+/* Framed variant (AuField variant="framed") — notched outline where the label
+ * rides on the border and the value reads large. Opt-in, low-density screens
+ * only (login, account identity). The <fieldset> owns the border + focus ring;
+ * the inner .auis-input frame is stripped so the two don't double up. */
+.auis-field-framed-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.auis-field--framed {
+  min-width: 0;
+  margin: 0;
+  padding: 7px 18px 12px;
+  background: var(--auis-bg-canvas);
+  border: 1px solid var(--auis-border-default);
+  border-radius: var(--auis-radius-2xl);
+  transition:
+    border-color var(--auis-dur-base) var(--auis-ease-out),
+    box-shadow var(--auis-dur-base) var(--auis-ease-out);
+}
+.auis-field__legend {
+  margin-left: -4px;
+  padding: 0 6px;
+  font: 500 13px/1 var(--auis-font-sans);
+  color: var(--auis-fg-tertiary);
+  transition: color var(--auis-dur-base) var(--auis-ease-out);
+}
+.auis-field--framed:hover:not(:focus-within) {
+  border-color: var(--auis-fg-tertiary);
+}
+.auis-field--framed:focus-within {
+  border-color: var(--auis-fg-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--auis-fg-primary) 12%, transparent);
+}
+.auis-field--framed:focus-within .auis-field__legend {
+  color: var(--auis-fg-secondary);
+}
+/* Inner AuInput goes bare — the fieldset is the frame now. */
+.auis-field--framed .auis-input,
+.auis-field--framed .auis-input:hover,
+.auis-field--framed .auis-input:focus-within {
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.auis-field--framed .auis-input input {
+  font: 400 18px/1.5 var(--auis-font-sans);
+}
+.auis-field--framed-invalid,
+.auis-field--framed-invalid:hover:not(:focus-within) {
+  border-color: var(--au-red-700);
+}
+.auis-field--framed-invalid:focus-within {
+  box-shadow: 0 0 0 3px rgba(168, 34, 34, 0.18);
+}
+.auis-field--framed-invalid .auis-field__legend {
+  color: var(--au-red-700);
+}
+
+/* Search variant — pill-shaped input with a subtle hairline border on
+ * the canvas surface. Replaces the previous liquid-glass treatment with
+ * a flatter, calmer look that reads cleanly on any background and
+ * follows the semantic tokens straight through to dark mode. */
+.auis-input--search {
+  border-radius: var(--auis-radius-full);
+  border-color: var(--auis-border-default);
+  background: color-mix(in srgb, var(--au-gray-100) 60%, transparent);
+}
+.auis-input--search:focus-within {
+  border-color: var(--auis-fg-primary);
+  background: var(--auis-bg-canvas);
+}
+
+/* Clear button — sits inside the input, stays inside the rounded boundary
+ * regardless of variant. Suppress the native WebKit clear glyph so it can't
+ * leak through (any consumer passing type="search" would otherwise get two). */
+.auis-input__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--auis-fg-tertiary);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color var(--auis-dur-base) var(--auis-ease-out);
+}
+.auis-input__clear:hover { color: var(--auis-fg-secondary); }
+.auis-input__clear:focus-visible {
+  outline: 2px solid var(--au-blue-500);
+  outline-offset: 2px;
+}
+/* Reveal (eye) — show/hide password toggle; same shape as the clear button,
+ * stays inside the input's rounded boundary. */
+.auis-input__reveal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--auis-fg-tertiary);
+  cursor: pointer;
+  border-radius: var(--auis-radius-sm);
+  transition: color var(--auis-dur-base) var(--auis-ease-out);
+}
+.auis-input__reveal:hover { color: var(--auis-fg-secondary); }
+.auis-input__reveal:focus-visible {
+  outline: 2px solid var(--au-blue-500);
+  outline-offset: 2px;
+}
+.auis-input input::-webkit-search-cancel-button,
+.auis-input input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+
+/* ============================================================
+ * AuDropdownMenu — Radix DropdownMenu surface and items.
+ * Painted with semantic tokens so dark mode flips automatically.
+ * ============================================================ */
+.auis-dropdown {
+  z-index: 1100;
+  min-width: 180px;
+  max-height: var(--radix-dropdown-menu-content-available-height);
+  overflow: hidden auto;
+  padding: 4px;
+  background: var(--auis-bg-raised);
+  border: 1px solid var(--auis-border-subtle);
+  border-radius: var(--auis-radius-lg);
+  box-shadow: var(--auis-shadow-lg);
+  outline: 0;
+  animation: auis-dropdown-in var(--auis-dur-base) var(--auis-ease-out);
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+@keyframes auis-dropdown-in {
+  from { opacity: 0; transform: scale(0.96) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.auis-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--auis-radius-sm);
+  font: 400 13px/1.3 var(--auis-font-sans);
+  color: var(--auis-fg-primary);
+  cursor: pointer;
+  user-select: none;
+  outline: 0;
+  transition: background var(--auis-dur-fast) var(--auis-ease-out);
+}
+.auis-dropdown__item:focus,
+.auis-dropdown__item[data-highlighted] {
+  background: var(--auis-bg-hover);
+}
+.auis-dropdown__item[data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.auis-dropdown__item--danger { color: var(--auis-accent-danger); }
+.auis-dropdown__item--danger:focus,
+.auis-dropdown__item--danger[data-highlighted] {
+  background: var(--au-red-150);
+}
+.auis-dropdown__item-icon { flex-shrink: 0; }
+.auis-dropdown__item-label { flex: 1; min-width: 0; }
+.auis-dropdown__item-check {
+  flex-shrink: 0;
+  color: var(--auis-fg-secondary);
+}
+.auis-dropdown__item--checked { color: var(--auis-fg-primary); }
+.auis-dropdown__separator {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--auis-border-subtle);
+}
+.auis-dropdown__label {
+  display: block;
+  padding: 6px 10px 4px;
+  font: 600 10px/1 var(--auis-font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--auis-fg-tertiary);
+}
+
+/* ============================================================
+ * AuPill — inline status marker with optional pulse dot.
+ * ============================================================ */
+.auis-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--auis-radius-full);
+  font: 500 11px/1 var(--auis-font-sans);
+  background: var(--auis-bg-surface);
+  color: var(--auis-fg-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.auis-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--auis-fg-tertiary);
+  flex-shrink: 0;
+}
+.auis-pill--live {
+  background: var(--au-emerald-100);
+  color: var(--au-emerald-700);
+}
+.auis-pill--live .auis-pill__dot { background: var(--au-emerald-500); }
+.auis-pill--draft {
+  background: var(--au-gray-150);
+  color: var(--au-gray-800);
+}
+.auis-pill--draft .auis-pill__dot { background: var(--au-gray-600); }
+.auis-pill--warning {
+  background: var(--au-amber-150);
+  color: var(--au-amber-700);
+}
+.auis-pill--warning .auis-pill__dot { background: var(--au-amber-500); }
+.auis-pill--beta {
+  background: var(--au-amber-100);
+  color: var(--au-amber-700);
+}
+.auis-pill--beta .auis-pill__dot { background: var(--au-amber-500); }
+.auis-pill--error {
+  background: var(--au-red-100);
+  color: var(--au-red-700);
+}
+.auis-pill--error .auis-pill__dot { background: var(--au-red-500); }
+.auis-pill--neutral {
+  background: var(--auis-bg-surface);
+  color: var(--auis-fg-primary);
+}
+.auis-pill--info {
+  background: var(--au-blue-100);
+  color: var(--au-blue-700);
+}
+.auis-pill--info .auis-pill__dot { background: var(--au-blue-500); }
+.auis-pill--ai {
+  background: var(--au-blue-100);
+  color: var(--au-blue-700);
+}
+.auis-pill--ai .auis-pill__dot {
+  background: var(--au-blue-500);
+  box-shadow: 0 0 8px var(--au-blue-500);
+  animation: auis-pill-pulse 2.2s ease-in-out infinite;
+}
+@keyframes auis-pill-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ============================================================
+ * AuModal — scrim + centered dialog, focus-trapped by React.
+ * ============================================================ */
+.auis-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: auis-scrim-in 180ms var(--auis-ease-out);
+}
+/* Soft exit: Radix keeps the scrim mounted until the [closed] animation ends. */
+.auis-modal-scrim[data-state="closed"] {
+  animation: auis-scrim-out 150ms var(--auis-ease-out) forwards;
+}
+@keyframes auis-scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes auis-scrim-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.auis-modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--auis-bg-raised);
+  border-radius: var(--auis-radius-xl);
+  box-shadow: var(--auis-shadow-overlay);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: auis-modal-in 180ms var(--auis-ease-out);
+}
+/* Close / Back / Cancel stop feeling abrupt — the content recedes and fades. */
+.auis-modal[data-state="closed"] {
+  animation: auis-modal-out 150ms var(--auis-ease-out) forwards;
+}
+@keyframes auis-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes auis-modal-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translateY(6px) scale(0.985); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auis-modal,
+  .auis-modal[data-state="closed"],
+  .auis-modal-scrim,
+  .auis-modal-scrim[data-state="closed"] {
+    animation-duration: 1ms;
+  }
+}
+.auis-modal__head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.auis-modal__title {
+  margin: 0;
+  font: 500 20px/1.25 var(--auis-font-sans);
+  letter-spacing: -0.01em;
+  color: var(--auis-fg-primary);
+}
+.auis-modal__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--auis-fg-tertiary);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--auis-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background var(--auis-dur-base) var(--auis-ease-out),
+    color var(--auis-dur-base) var(--auis-ease-out);
+}
+.auis-modal__close:hover {
+  background: var(--auis-bg-surface);
+  color: var(--auis-fg-primary);
+}
+.auis-modal__body {
+  font-size: 14px;
+  color: var(--auis-fg-secondary);
+  line-height: 1.5;
+}
+.auis-modal__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+/* ============================================================
+ * AuEmpty — zero-state composition (port of shadcn `Empty`).
+ * ============================================================ */
+.auis-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 24px;
+  text-align: center;
+}
+.auis-empty__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 480px;
+}
+.auis-empty__media {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--auis-fg-tertiary);
+  margin-bottom: 4px;
+}
+.auis-empty__media--icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--auis-radius-full);
+  background: var(--auis-bg-surface);
+  border: 1px solid var(--auis-border-subtle);
+  color: var(--auis-fg-secondary);
+}
+.auis-empty__title {
+  margin: 0;
+  font: 600 16px/1.3 var(--auis-font-sans);
+  letter-spacing: -0.01em;
+  color: var(--auis-fg-primary);
+}
+.auis-empty__description {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--auis-fg-secondary);
+}
+.auis-empty__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ============================================================
+ * AuModal size variants — cockpit extends width for configuration
+ * screens (settings inspector, multi-panel dialogs).
+ * ============================================================ */
+.auis-modal--sm     { max-width: 448px; }
+.auis-modal--md     { max-width: 520px; }
+.auis-modal--lg     { max-width: 672px; }
+.auis-modal--cockpit {
+  max-width: 760px;
+  border-radius: 18px;
+  padding: 0;
+  overflow: hidden;
+}
+.auis-modal--cockpit .auis-modal__head {
+  padding: 22px 28px 16px;
+  border-bottom: 1px solid var(--auis-border-subtle);
+}
+.auis-modal--cockpit .auis-modal__body {
+  padding: 20px 28px;
+}
+.auis-modal--cockpit .auis-modal__foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--auis-border-subtle);
+  background: var(--auis-bg-raised);
+}
+
+/* ============================================================
+ * AuToast — transient feedback, bottom-right stack.
+ * ============================================================ */
+.auis-toast-stack {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  pointer-events: none;
+}
+.auis-toast-stack > * { pointer-events: auto; }
+
+.auis-toast {
+  background: var(--auis-bg-raised);
+  border: 1px solid var(--auis-border-default);
+  border-radius: var(--auis-radius-md);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  box-shadow: var(--auis-shadow-lg);
+  animation: auis-toast-in 220ms var(--auis-ease-out);
+  color: var(--auis-fg-primary);
+}
+@keyframes auis-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.auis-toast--leaving { animation: auis-toast-out 160ms var(--auis-ease-in-out) forwards; }
+@keyframes auis-toast-out {
+  to { opacity: 0; transform: translateY(8px); }
+}
+.auis-toast__icon { line-height: 0; flex: 0 0 auto; color: var(--au-emerald-600); }
+.auis-toast__body { flex: 1; min-width: 0; }
+.auis-toast__title {
+  font-family: var(--auis-font-heading);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--auis-fg-primary);
+  margin: 0 0 2px 0;
+}
+.auis-toast__desc {
+  font-size: 12px;
+  color: var(--auis-fg-tertiary);
+  line-height: 1.45;
+  margin: 0;
+}
+.auis-toast__desc a,
+.auis-toast__action {
+  color: var(--au-blue-600);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+  background: none;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  padding: 0;
+  font: inherit;
+}
+.auis-toast__close {
+  color: var(--auis-fg-tertiary);
+  font-family: var(--auis-font-body);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 2px 4px;
+  line-height: 1;
+  border-radius: var(--auis-radius-xs);
+}
+.auis-toast__close:hover { color: var(--auis-fg-primary); background: var(--auis-bg-surface); }
+
+.auis-toast--ai    .auis-toast__icon { color: var(--au-blue-600); }
+.auis-toast--ai    .auis-toast__desc a { color: var(--au-blue-600); }
+.auis-toast--error .auis-toast__icon { color: var(--au-red-600); }
+.auis-toast--error .auis-toast__desc a { color: var(--au-red-600); }
+.auis-toast--warning .auis-toast__icon { color: var(--au-amber-500); }
+.auis-toast--warning .auis-toast__desc a { color: var(--au-amber-600); }
+/* AuToastVariant declares five; success and info had no rule and rendered
+   uncolored. Same token mapping AuAlert uses for those two states. */
+.auis-toast--success .auis-toast__icon { color: var(--au-emerald-600); }
+.auis-toast--success .auis-toast__desc a { color: var(--au-emerald-600); }
+.auis-toast--info  .auis-toast__icon { color: var(--au-blue-600); }
+.auis-toast--info  .auis-toast__desc a { color: var(--au-blue-600); }
+
+/* ============================================================
+ * AuSheet — right-side drawer. Scrim reuses .auis-modal-scrim.
+ * ============================================================ */
+.auis-sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.40);
+  display: flex;
+  justify-content: flex-end;
+  animation: auis-scrim-in 180ms var(--auis-ease-out);
+}
+.auis-sheet-scrim[data-state="closed"] {
+  animation: auis-scrim-out 150ms var(--auis-ease-out) forwards;
+}
+.auis-sheet {
+  width: 520px;
+  max-width: 100%;
+  height: 100%;
+  background: var(--auis-bg-raised);
+  border-left: 1px solid var(--auis-border-subtle);
+  box-shadow: var(--auis-shadow-overlay);
+  display: flex;
+  flex-direction: column;
+  animation: auis-sheet-in 220ms var(--auis-ease-out);
+  overflow: hidden;
+}
+.auis-sheet--wide { width: 1080px; }
+.auis-sheet--xwide { width: 1440px; }
+@keyframes auis-sheet-in {
+  from { transform: translateX(100%); }
+  to   { transform: none; }
+}
+.auis-sheet[data-state="closed"] {
+  animation: auis-sheet-out 200ms var(--auis-ease-out) forwards;
+}
+@keyframes auis-sheet-out {
+  from { transform: none; }
+  to   { transform: translateX(100%); }
+}
+
+@keyframes auis-collapsible-down {
+  from { height: 0; }
+  to   { height: var(--radix-collapsible-content-height); }
+}
+@keyframes auis-collapsible-up {
+  from { height: var(--radix-collapsible-content-height); }
+  to   { height: 0; }
+}
+.auis-sheet__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--auis-border-subtle);
+}
+.auis-sheet__title {
+  font-family: var(--auis-font-heading);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--auis-fg-primary);
+  margin: 0;
+}
+.auis-sheet__meta {
+  font-size: 12px;
+  color: var(--auis-fg-tertiary);
+  font-family: var(--auis-font-body);
+  margin-top: 2px;
+}
+.auis-sheet__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--auis-fg-tertiary);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--auis-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--auis-dur-base) var(--auis-ease-out), color var(--auis-dur-base) var(--auis-ease-out);
+}
+.auis-sheet__close:hover { background: var(--auis-bg-surface); color: var(--auis-fg-primary); }
+
+.auis-sheet__tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--auis-border-subtle);
+}
+.auis-sheet__tab {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 10px 14px;
+  color: var(--auis-fg-tertiary);
+  cursor: pointer;
+  font: 500 12px var(--auis-font-body);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--auis-dur-fast) var(--auis-ease-out);
+}
+.auis-sheet__tab:hover { color: var(--auis-fg-primary); }
+.auis-sheet__tab--active {
+  color: var(--auis-fg-primary);
+  border-bottom-color: var(--auis-fg-primary);
+}
+
+.auis-sheet__body {
+  padding: 22px 20px;
+  flex: 1;
+  overflow: auto;
+}
+.auis-sheet__row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--auis-border-subtle);
+  font-size: 12.5px;
+}
+.auis-sheet__row:last-child { border-bottom: 0; }
+.auis-sheet__row-k { color: var(--auis-fg-tertiary); }
+.auis-sheet__row-v { color: var(--auis-fg-primary); }
+.auis-sheet__row-v.mono { font-family: var(--auis-font-mono); font-size: 12px; }
+
+.auis-sheet__foot {
+  border-top: 1px solid var(--auis-border-subtle);
+  padding: 14px 20px;
+  background: var(--auis-bg-surface);
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auis-toast { animation: none; }
+  .auis-sheet,
+  .auis-sheet[data-state="closed"],
+  .auis-sheet-scrim,
+  .auis-sheet-scrim[data-state="closed"] {
+    animation-duration: 1ms;
+  }
+}
+

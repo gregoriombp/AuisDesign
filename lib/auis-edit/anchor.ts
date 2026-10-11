@@ -1,7 +1,7 @@
 import {
   cssPath,
   resolveElementBySelector,
-} from "@/lib/auis-review/elementAnchor"
+} from "@auis/core/elementAnchor"
 import type { PageEditAnchor } from "./types"
 
 // Edit Mode reuses the review-mode element addressing (selector + fingerprint),

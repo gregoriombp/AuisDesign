@@ -114,7 +114,9 @@ Kept because the reasoning transfers to the calls you'll have to make:
   feedback purpose; they stay in the base for reuse.
 
 Applied to what ships, that leaves **Domain** holding only the unmistakably-Auis pieces: the
-Review Bridge surfaces (`AuMentionMenu`, `AuMentionChip`) and Auis's own mark (`AuLogo`).
+Review Bridge surfaces (`AuMentionMenu`, `AuMentionChip`) and Auis's own mark (`AuLogo`). The
+review chrome itself (`@auis/ui`, `kit/ui`) no longer imports them: it carries its own copies
+so it can install into apps without Auis's components.
 
 ## Scope of this phase
 

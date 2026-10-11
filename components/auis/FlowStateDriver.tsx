@@ -38,9 +38,9 @@ import { Suspense, useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 
 import { AuButton } from "@/components/ui/AuButton"
-import { fireClick } from "@/lib/auis/fireClick"
-import { findClickableByText } from "@/lib/auis/findClickable"
-import { isDestructiveTarget } from "@/lib/auis-review/revealTrail"
+import { fireClick } from "@auis/core/fireClick"
+import { findClickableByText } from "@auis/core/findClickable"
+import { isDestructiveTarget } from "@auis/ui/review/revealTrail"
 
 type DriveStatus = "awaiting" | "driving" | "done" | "failed"
 type FailReason = "missing" | "destructive"

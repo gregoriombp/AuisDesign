@@ -1,7 +1,7 @@
 "use client"
 
 import { create } from "zustand"
-import { useReviewStore } from "@/lib/auis-review/store"
+import { useReviewStore } from "@auis/ui/review/store"
 import type { PageEditAnchor, PageEditOp, PageEditOpType } from "./types"
 
 // Edit Mode persists to the serverless /api/page-edits route (same-origin, no
