@@ -74,7 +74,7 @@ export function AgentsPanel() {
                     type="button"
                     className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left outline-hidden focus-visible:ring-2 focus-visible:ring-(--ring-focus) focus-visible:ring-offset-2"
                   >
-                    <ChromeScope>
+                    <ChromeScope as="span">
                       <ReviewAvatar
                         authorKind="agent"
                         authorId={agent.id}

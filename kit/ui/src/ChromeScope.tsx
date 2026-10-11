@@ -47,11 +47,22 @@ export function useChromePortal(): HTMLElement | undefined {
   return React.useContext(PortalContext) ?? undefined
 }
 
-export function ChromeScope({ children }: { children: React.ReactNode }) {
+/**
+ * The scope element is `display: contents` — it draws nothing and the layout
+ * sees through it. Pass `as="span"` where a `div` is not allowed (inside a
+ * button, a label or a paragraph).
+ */
+export function ChromeScope({
+  as: Tag = "div",
+  children,
+}: {
+  as?: "div" | "span"
+  children: React.ReactNode
+}) {
   const portal = React.useSyncExternalStore(subscribe, getPortalRoot, getServerPortalRoot)
   return (
-    <div {...{ [SCOPE_ATTR]: "" }}>
+    <Tag {...{ [SCOPE_ATTR]: "" }}>
       <PortalContext.Provider value={portal}>{children}</PortalContext.Provider>
-    </div>
+    </Tag>
   )
 }

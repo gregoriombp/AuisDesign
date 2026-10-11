@@ -861,6 +861,10 @@
     display: block;
   }
 
+  [data-auis-ui] .contents {
+    display: contents;
+  }
+
   [data-auis-ui] .flex {
     display: flex;
   }
