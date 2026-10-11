@@ -60,7 +60,7 @@ async function readDoc<T>(file: string, init: () => T): Promise<T> {
     }
     throw new BridgeUnavailableError(
       `${path.basename(file)} is corrupt. A copy was kept next to it (.corrupt-*). ` +
-        "Fix the JSON or restore it from a backup (the Review Bridge keeps snapshots in ~/.auis/review-bridge-backups).",
+        "Fix the JSON or restore it from a backup (the Review Bridge keeps snapshots in ~/.auis/review-bridge-backups/<project>).",
     );
   }
 }

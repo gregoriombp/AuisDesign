@@ -199,7 +199,8 @@ export default function ReviewModeFoundationPage() {
             <code className="font-mono text-xs">comments.archive.json</code>{" "}
             (resolved) and <code className="font-mono text-xs">images/</code>{" "}
             (content-addressed attachments). Snapshots go to{" "}
-            <code className="font-mono text-xs">~/.auis/review-bridge-backups</code>.
+            <code className="font-mono text-xs">~/.auis/review-bridge-backups</code>, in a
+            folder of this project&apos;s own.
           </Card>
           <Card pill="Hierarchy" variant="draft" meta="kit/server/src/review/session.ts">
             Locally every browser is an admin. Put Auis behind a login and resolve

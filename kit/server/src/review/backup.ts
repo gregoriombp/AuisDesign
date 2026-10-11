@@ -10,9 +10,15 @@ import { reviewPaths } from "./config";
  * repo. So the snapshots go OUTSIDE the repo (the user's home), where they
  * survive a clean, an npm install and even a re-clone.
  *
- * Backup layout (REVIEW_BRIDGE_BACKUP_DIR or ~/.auis/review-bridge-backups):
+ * Backup layout (REVIEW_BRIDGE_BACKUP_DIR, else ~/.auis/review-bridge-backups/<project>):
  *   <root>/snapshots/<ISO>/comments.json + comments.archive.json   (text, rotated)
  *   <root>/images/<hash>.<ext>                                     (append-only pool)
+ *
+ * <project> is `projectBackupKey()` (config.ts). Every Auis-based project on the
+ * machine shares ~/.auis/review-bridge-backups, so without it a project with no
+ * comments.json restored the newest snapshot of whichever project wrote last.
+ * Snapshots from before the key sit in the folder's flat layout and are never
+ * restored from — nothing says whose they are.
  *
  * The JSONs are small (images already live on disk), so copying is cheap. The
  * image pool is content-addressed and incremental: only what is not there yet
@@ -163,7 +169,15 @@ export function ensureRestored(): Promise<boolean> {
 async function doRestore(): Promise<boolean> {
   try {
     const live = await readMaybe(reviewPaths().mainFile);
-    if (live !== null) return false; // file present → leave it alone
+    if (live !== null) {
+      // File present → leave it alone. If this project has no snapshot yet (its
+      // first run, or the first since backups became per project), take one
+      // now instead of waiting for the next write.
+      if (!(await latestSnapshotWithData()) && countComments(live) > 0) {
+        await snapshot({ force: true });
+      }
+      return false;
+    }
     const dir = await latestSnapshotWithData();
     if (!dir) return false;
     await fs.mkdir(reviewPaths().dataDir, { recursive: true });

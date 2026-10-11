@@ -25,7 +25,7 @@ manifest and a data folder) and nothing else.
 | 1 | `@auis/core` + `@auis/server` + `@auis/next` (server side): the 16 Review Bridge routes run behind one `handle(Request)` | **done** (2026-10-10) |
 | 0 | Anchor-survival experiment on real apps (gate before wave 2) | **done** (2026-10-10): passed, see `docs/anchor-survival.md` |
 | 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **done** (2026-10-11) |
-| 3 | `auis init --only review` / `uninstall` + publishing the packages | **next** (fix the shared backup pool first, see wave 3) |
+| 3 | `auis init --only review` / `uninstall` + publishing the packages | **next** (its prerequisite, per-project backups, is done) |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
 
 Update this table in the same PR that moves a wave forward.
@@ -295,11 +295,11 @@ The bridge is mocked in these scripts, so they never write to the real data. The
 `npm test`, `npm run typecheck`, `npm run lint`, `npm run ds:check` and `npm run build`.
 
 Known gaps carried forward:
-- **The backup pool is shared across projects.** Backups live in
-  `~/.auis/review-bridge-backups` for every project on the machine. When a project has no
-  `comments.json`, it restores the newest snapshot in that pool, whatever project wrote
-  it. The host copy came up with another app's comments. This comes from wave 1, and it
-  must be fixed before `init` puts a bridge in a new repo (see wave 3).
+- **The backup pool was shared across projects.** Fixed right after wave 2, as wave 3's
+  prerequisite. Backups lived in `~/.auis/review-bridge-backups` for every project on the
+  machine. A project with no `comments.json` restored the newest snapshot in that pool,
+  whichever project had written it, and the host copy came up with another app's
+  comments. See wave 3.
 - Icons still come from the Material Symbols font, which the chrome links from Google
   Fonts when the page lacks it, along with Geist. Wave 4's Shadow DOM needs them inline.
   `loadFonts={false}` turns the links off.
@@ -320,10 +320,18 @@ Known gaps carried forward:
 **Goal.** `npx @auis/cli init --only review` in a Next App Router host.
 
 **Scope.**
-- First, the backup pool (found in wave 2). It has to be namespaced per project, for
-  example under a hash of the data dir. `ensureRestored()` may only restore from that
-  project's own snapshots. Today a new host restores another project's comments. Wave 3
-  writes `.auis/data/`, so the backup path must come from the same place.
+- **Prerequisite, done: per-project backups.** The default backup folder is
+  `~/.auis/review-bridge-backups/<projectBackupKey()>`, the first 16 hex characters of
+  the sha256 of the project's working directory. Koru's bridge uses the same key.
+  - `ensureRestored()` only sees that project's own snapshots.
+  - Snapshots from before the change sit at the folder's top level and are never
+    restored from.
+  - A project's first read backs it up if it has no snapshot yet.
+  - Tests: `kit/server/src/review/__tests__/backup-*.test.ts`.
+
+  The key follows the working directory, not the data folder. So when `init` moves a
+  host to `.auis/data/`, the missing `.auis/data/comments.json` is restored from that
+  project's own snapshots. That is a migration for free, and `init` should rely on it.
 - CLI: `init` stops being an alias of create (today `create`, `init` and `new` all
   scaffold — `CREATE_ALIASES` in `packages/auis/src/cli.mjs`). `create`/`new` keep
   scaffolding; `init` installs into the current repo. `init --dry-run` is `doctor` plus
