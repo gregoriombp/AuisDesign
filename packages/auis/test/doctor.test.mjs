@@ -199,6 +199,25 @@ describe("collisions and plan", () => {
   });
 });
 
+describe("what init brings", () => {
+  it("names the capabilities init installs, and only Review's", () => {
+    const doc = buildReport(makeHost(), "0.0.0");
+    assert.equal(doc.installable.ok, true);
+    assert.ok(doc.installable.capabilities.includes("review.pins"));
+    assert.ok(doc.installable.capabilities.every((id) => id.startsWith("review.")));
+  });
+
+  it("brings nothing where it cannot install", () => {
+    const root = mkdtempSync(join(tmpdir(), "auis-doctor-noinit-"));
+    temps.push(root);
+    write(root, "package.json", JSON.stringify({ name: "v", scripts: { dev: "vite" }, dependencies: { vite: "5", react: "18" } }));
+    const doc = buildReport(root, "0.0.0");
+    assert.equal(doc.installable.ok, false);
+    assert.deepEqual(doc.installable.capabilities, []);
+    assert.deepEqual(doc.plan, []);
+  });
+});
+
 describe("the two promises", () => {
   it("writes nothing at all", () => {
     const root = makeHost();

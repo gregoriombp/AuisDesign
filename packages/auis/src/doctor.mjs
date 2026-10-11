@@ -180,6 +180,21 @@ export function installPlan(d, root = ".") {
   return planInstall(d, root).steps.map(({ action, path, detail }) => ({ action, path, detail }));
 }
 
+/**
+ * The verdicts say what Auis can do in this repository; `init` installs only
+ * part of it today. Which rows it actually brings, so nobody reads "edit.text
+ * supported" as "init gives me Edit Mode".
+ */
+export const INSTALLED_BY_INIT = /^review\./;
+
+function installable(plan, caps) {
+  return {
+    ok: plan.ok,
+    reason: plan.reason ?? null,
+    capabilities: plan.ok ? caps.filter((c) => INSTALLED_BY_INIT.test(c.id)).map((c) => c.id) : [],
+  };
+}
+
 export function buildReport(root, cliVersion) {
   const d = detect(root);
   const caps = capabilities(d);
@@ -194,7 +209,7 @@ export function buildReport(root, cliVersion) {
     collisions: collisions(root),
     capabilities: caps,
     plan: installPlan(d, root),
-    installable: (({ ok, reason }) => ({ ok, reason: reason ?? null }))(planInstall(d, root)),
+    installable: installable(planInstall(d, root), caps),
     summary,
   };
 }
@@ -250,7 +265,7 @@ export function report(doc) {
 
   if (doc.collisions.length > 0) {
     write();
-    write(`  ${color.bold("Already yours")}  ${color.dim("auis will not overwrite any of these")}`);
+    write(`  ${color.bold("Already yours")}  ${color.dim("init does not touch any of these; the notes say how a future skills install would")}`);
     write();
     for (const c of doc.collisions) {
       write(`    ${color.cyan(c.path.padEnd(20))}${color.dim(c.note)}`);
@@ -266,6 +281,8 @@ export function report(doc) {
     }
     write();
     write(`  ${color.dim("Install Review with `npx @auis/cli init`; `npx @auis/cli uninstall` reverses it.")}`);
+    write(`  ${color.dim("init brings the review.* rows above. Edit, flows, State Mode and the skills run in a project")}`);
+    write(`  ${color.dim("created with `npx @auis/cli <dir>`; they are not installable into an existing app yet.")}`);
   } else {
     write(`  ${color.bold("auis init")}  ${color.dim(doc.installable.reason)}`);
   }
