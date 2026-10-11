@@ -1,4 +1,4 @@
-import type { ReviewComment } from "@/components/auis-review/types";
+import type { ReviewComment } from "@auis/core/types";
 
 /** States the edit PUT toggles between. Every other change is a transition. */
 const SOFT_STATES = new Set<ReviewComment["status"]>(["open", "backlog"]);

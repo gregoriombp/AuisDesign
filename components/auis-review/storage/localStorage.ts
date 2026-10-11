@@ -7,7 +7,7 @@ import type {
   ReviewExportPayload,
   ReviewIdentity,
   ReviewReply,
-} from "../types"
+} from "@auis/core/types"
 import type {
   ReviewArchiveFilter,
   ReviewArchivePage,

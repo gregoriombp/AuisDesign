@@ -6,7 +6,7 @@ import { withBridgeErrors } from "../../../_errors";
 import {
   canBridgeSessionWriteAsAgent,
   getReviewAgent,
-} from "@/lib/auis-review/agents";
+} from "@auis/core/agents";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

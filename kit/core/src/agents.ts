@@ -7,7 +7,6 @@
 // floating Auis dot, the avatar mark and chip rendering for rendered mentions.
 // What each agent can RUN (CLI, ceilings, models) lives in ./agentRuntime.
 
-import type { AuMentionChipTone } from "@/components/ui/AuMentionChip"
 import type { ReviewSkillSlug } from "./skills"
 import {
   REVIEW_AGENT_IDENTITIES,
@@ -22,6 +21,19 @@ export {
   isReservedReviewAgentIdentity,
 } from "./agentIdentity"
 
+/**
+ * Chip tone for a rendered @mention. Declared here, not imported from the UI, so
+ * this package stays free of the design system; AuMentionChip accepts every one.
+ */
+export type ReviewAgentTone =
+  | "neutral"
+  | "inverse"
+  | "teal"
+  | "purple"
+  | "amber"
+  | "pink"
+  | "blue"
+
 export interface ReviewAgent {
   /** Matches ReviewActor.id — the identity the agent's skills post as. */
   id: ReviewAgentId
@@ -32,7 +44,7 @@ export interface ReviewAgent {
   /** One-liner for the "@" menu row. */
   blurb: string
   /** Chip tone for rendered @mentions. */
-  tone: AuMentionChipTone
+  tone: ReviewAgentTone
   /** CSS var for the agent dot / icon tint. */
   accentVar: string
   /** Material Symbol glyph — the "agent" gesture, never a robot. */

@@ -18,7 +18,7 @@ import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { permalinkPath } from "@/lib/auis-review/permalink"
-import type { ReviewComment } from "@/components/auis-review/types"
+import type { ReviewComment } from "@auis/core/types"
 import { PageHero } from "../_primitives"
 
 type Tab = "open" | "in_review" | "archive"

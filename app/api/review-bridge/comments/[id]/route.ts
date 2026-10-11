@@ -14,13 +14,13 @@ import { canSeeComment, getBridgeSession, ownsRecord } from "../../_session";
 import type {
   ReviewActor,
   ReviewComment,
-} from "@/components/auis-review/types";
+} from "@auis/core/types";
 import {
   canonicalReviewAgentActor,
   canBridgeSessionWriteAsAgent,
   canReviewAgentSubmitForApproval,
   getReviewAgent,
-} from "@/lib/auis-review/agents";
+} from "@auis/core/agents";
 import { triggerMentionRun } from "../../_mention";
 import { mergeCommentEdit } from "../../_merge";
 import { isValidRevealPath } from "../../_reveal";

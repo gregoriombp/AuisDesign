@@ -9,7 +9,7 @@ import { useReviewStore } from "@/lib/auis-review/store"
 import { formatRelative } from "@/lib/auis-review/format"
 import { makeId } from "@/components/auis-review/storage/utils"
 import { REVIEW_PALETTE, SCHEMA_VERSION } from "@/components/auis-review/constants"
-import type { ReviewComment, ReviewPoint } from "@/components/auis-review/types"
+import type { ReviewComment, ReviewPoint } from "@auis/core/types"
 
 /* ─────────────────────────────────────────────────────────────────────
  * FigJam-style comments on the flow canvas. A comment is dropped on a node

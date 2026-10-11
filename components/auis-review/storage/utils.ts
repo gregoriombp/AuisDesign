@@ -1,5 +1,5 @@
 import { SCHEMA_VERSION } from "../constants"
-import type { ReviewActor, ReviewComment, ReviewExportPayload } from "../types"
+import type { ReviewActor, ReviewComment, ReviewExportPayload } from "@auis/core/types"
 
 export function makeId(prefix = "id"): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {

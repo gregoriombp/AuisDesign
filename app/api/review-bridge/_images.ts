@@ -2,7 +2,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 
-import type { ReviewComment } from "@/components/auis-review/types";
+import type { ReviewComment } from "@auis/core/types";
 
 /**
  * Externalizes Review Mode image attachments. Each `data:...;base64,...` used

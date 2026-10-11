@@ -26,12 +26,16 @@ writeFileSync(path.join(imagesDir, IMAGE_NAME), IMAGE_BYTES);
 const handle = createLegacyHandler();
 const BASE = "http://127.0.0.1:3000/api/review-bridge";
 
+// The assertions read arbitrary JSON shapes; typing each response adds nothing.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Json = any;
+
 async function call(
   method: string,
   route: string,
   body?: unknown,
   headers: Record<string, string> = {},
-): Promise<{ status: number; json: any }> {
+): Promise<{ status: number; json: Json }> {
   const res = await handle(
     new Request(`${BASE}/${route}`, {
       method,

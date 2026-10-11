@@ -16,9 +16,9 @@
 // switched on and have a CLI (lib/auis-review/agentRuntime.ts).
 
 import path from "node:path";
-import { parseReviewCommand } from "@/lib/auis-review/commandParse";
-import { runnableMentions } from "@/lib/auis-review/agentRuntime";
-import type { ReviewAuthorRole } from "@/components/auis-review/types";
+import { parseReviewCommand } from "@auis/core/commandParse";
+import { runnableMentions } from "@auis/core/agentRuntime";
+import type { ReviewAuthorRole } from "@auis/core/types";
 import { effectiveAuthorRole } from "./_session";
 import { getAgentSettings } from "./_store";
 

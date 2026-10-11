@@ -10,7 +10,7 @@ import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewAvatar } from "./ReviewAvatar"
 import { ModeFamilySwitch } from "@/components/auis/ModeFamilySwitch"
 import { useBuilderChromeHidden } from "@/lib/auis/useBuilderChromeHidden"
-import type { ReviewMode } from "./types"
+import type { ReviewMode } from "@auis/core/types"
 
 // Mirrors the motion tokens in globals.css (--dur-slow + --ease-out) so the bar
 // widens/shrinks in the same idiom as the rest of the DS.

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { getReviewAgent, getReviewAgentByHandle } from "@/lib/auis-review/agents"
+import { getReviewAgent, getReviewAgentByHandle } from "@auis/core/agents"
 
 /**
  * Avatar for the Review Mode actors:

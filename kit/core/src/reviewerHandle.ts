@@ -1,6 +1,15 @@
 // Pure and isomorphic (server + client). Extracted from ./reviewers because that
 // file is "use client" — a server route cannot import a client module.
 
+/** A human who can be @mentioned on the Review Bridge, with the handle typed after "@". */
+export interface ReviewerRef {
+  id: string
+  name: string
+  email?: string
+  /** Token typed after "@" (case-insensitive on parse, always lowercase here). */
+  handle: string
+}
+
 /** NFD + strip accents. The parser/autocomplete only accept `\w` — an accented
  *  handle would never close. */
 export function foldAscii(s: string): string {

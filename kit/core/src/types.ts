@@ -159,7 +159,7 @@ export type {
   ReviewAgentPermission,
   ReviewAgentSettings,
   ReviewAgentSettingsMap,
-} from "@/lib/auis-review/agentRuntime"
+} from "./agentRuntime"
 
 export interface ReviewResolution {
   actor: ReviewActor

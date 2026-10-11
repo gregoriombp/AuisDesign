@@ -15,7 +15,7 @@ import {
 } from "@/lib/auis-review/elementAnchor"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewPinMarker } from "./ReviewPinMarker"
-import type { ReviewDrawPath, ReviewPoint } from "./types"
+import type { ReviewDrawPath, ReviewPoint } from "@auis/core/types"
 
 // Converts the pointer event to doc coords using the SAME scroll base the render
 // uses (the main content container). It used to use the target's per-element

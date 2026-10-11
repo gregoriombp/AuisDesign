@@ -7,7 +7,7 @@ import { Icon } from "@/components/ui/Icon"
 import { useToast } from "@/components/ui/AuToast"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
-import type { ReviewExportPayload } from "./types"
+import type { ReviewExportPayload } from "@auis/core/types"
 
 export function ReviewExportModal() {
   const open = useReviewStore((s) => s.exportOpen)

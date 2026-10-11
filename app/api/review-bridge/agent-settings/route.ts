@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAgentSettings, setAgentSettings } from "../_store";
 import { getBridgeSession } from "../_session";
 import { mentionTriggerEnabled } from "../_mention";
-import { REVIEW_AGENTS } from "@/lib/auis-review/agents";
+import { REVIEW_AGENTS } from "@auis/core/agents";
 import {
   REVIEW_AGENT_RUNTIME,
   validateAgentSettings,
-} from "@/lib/auis-review/agentRuntime";
+} from "@auis/core/agentRuntime";
 import { withBridgeErrors } from "../_errors";
 
 export const runtime = "nodejs";

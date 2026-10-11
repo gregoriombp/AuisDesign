@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { ReviewComment } from "@/components/auis-review/types";
+import type { ReviewComment } from "@auis/core/types";
 import { mergeCommentEdit } from "../_merge";
 
 const admin = { canSetVisibility: true, isAgent: false };

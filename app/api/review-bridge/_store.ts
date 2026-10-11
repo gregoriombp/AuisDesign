@@ -13,8 +13,8 @@ import type {
   ReviewExportPayload,
   ReviewIdentity,
   ReviewReply,
-} from "@/components/auis-review/types";
-import { normalizeAgentSettingsMap } from "@/lib/auis-review/agentRuntime";
+} from "@auis/core/types";
+import { normalizeAgentSettingsMap } from "@auis/core/agentRuntime";
 
 /**
  * Serverless store of the Review Bridge. Review Mode posts here (same-origin)

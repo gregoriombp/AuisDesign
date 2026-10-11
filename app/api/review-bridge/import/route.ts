@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { importMerge } from "../_store";
 import { getBridgeSession } from "../_session";
-import type { ReviewExportPayload } from "@/components/auis-review/types";
+import type { ReviewExportPayload } from "@auis/core/types";
 import { withBridgeErrors } from "../_errors";
 
 export const runtime = "nodejs";

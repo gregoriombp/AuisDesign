@@ -6,7 +6,7 @@ import type {
   ReviewAuthorRole,
   ReviewCommentOrigin,
   ReviewCommentStatus,
-} from "@/components/auis-review/types";
+} from "@auis/core/types";
 import { withBridgeErrors } from "../_errors";
 
 // Touches the filesystem (review-bridge/data/*.json) — Node, never cached.

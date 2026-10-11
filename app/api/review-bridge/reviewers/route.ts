@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { listIdentities } from "../_store";
-import { deriveReviewerHandles } from "@/lib/auis-review/reviewerHandle";
-import type { ReviewerRef } from "@/lib/auis-review/reviewers";
-import { isReservedReviewAgentIdentity } from "@/lib/auis-review/agents";
+import { deriveReviewerHandles } from "@auis/core/reviewerHandle";
+import type { ReviewerRef } from "@auis/core/reviewerHandle";
+import { isReservedReviewAgentIdentity } from "@auis/core/agents";
 import { withBridgeErrors } from "../_errors";
 
 export const runtime = "nodejs";

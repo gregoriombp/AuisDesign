@@ -5,10 +5,11 @@
 // createReviewHandler() and this file goes away.
 import { NextRequest } from "next/server";
 
-type RouteModule = Record<
-  string,
-  (req: NextRequest, ctx: { params: Promise<Record<string, string>> }) => Promise<Response>
->;
+type RouteHandler = (
+  req: NextRequest,
+  ctx: { params: Promise<Record<string, string>> },
+) => Promise<Response>;
+type RouteModule = Record<string, unknown>;
 
 // Static segments first: Next prefers comments/archive over comments/[id].
 const TABLE: { pattern: string[]; load: () => Promise<RouteModule> }[] = [
@@ -56,8 +57,8 @@ export function createLegacyHandler(basePath = "/api/review-bridge") {
       if (!params) continue;
       const mod = await route.load();
       const fn = mod[request.method];
-      if (!fn) return new Response(null, { status: 405 });
-      return fn(new NextRequest(request), { params: Promise.resolve(params) });
+      if (typeof fn !== "function") return new Response(null, { status: 405 });
+      return (fn as RouteHandler)(new NextRequest(request), { params: Promise.resolve(params) });
     }
     return new Response(null, { status: 404 });
   };

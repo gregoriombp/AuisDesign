@@ -5,7 +5,7 @@ import type {
   ReviewAuthorRole,
   ReviewComment,
   ReviewReply,
-} from "@/components/auis-review/types";
+} from "@auis/core/types";
 
 /**
  * Review Bridge hierarchy, resolved ON THE SERVER — the client never dictates

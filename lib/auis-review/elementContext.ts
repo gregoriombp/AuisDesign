@@ -5,7 +5,7 @@ import type {
   ReviewCommentContext,
   ReviewElementAttributes,
   ReviewElementContext,
-} from "@/components/auis-review/types"
+} from "@auis/core/types"
 
 // A lean context of the element under the comment — feeds the prompt suggestion
 // (/api/review/suggest) and the magic pointer's label. Text/attributes only,

@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import { AuMentionChip } from "@/components/ui/AuMentionChip"
-import { getReviewAgent } from "@/lib/auis-review/agents"
-import { getReviewSkill } from "@/lib/auis-review/skills"
-import { parseReviewCommand } from "@/lib/auis-review/commandParse"
+import { getReviewAgent } from "@auis/core/agents"
+import { getReviewSkill } from "@auis/core/skills"
+import { parseReviewCommand } from "@auis/core/commandParse"
 import { useReviewers } from "@/lib/auis-review/reviewers"
 import { PersonHover } from "./PersonHover"
 

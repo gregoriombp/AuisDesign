@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAgentSettings, listComments } from "../_store";
 import { effectiveAuthorRole, getBridgeSession } from "../_session";
-import { parseReviewCommand } from "@/lib/auis-review/commandParse";
-import { getReviewAgent } from "@/lib/auis-review/agents";
+import { parseReviewCommand } from "@auis/core/commandParse";
+import { getReviewAgent } from "@auis/core/agents";
 import {
   getReviewSkill,
   isReviewSkillAvailableToAgent,
-} from "@/lib/auis-review/skills";
+} from "@auis/core/skills";
 import { withBridgeErrors } from "../_errors";
 
 export const runtime = "nodejs";

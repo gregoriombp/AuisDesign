@@ -7,11 +7,11 @@ import { ReviewAvatar } from "@/components/auis-review/ReviewAvatar"
 import { AuSegmented } from "@/components/ui/AuSegmented"
 import { AuToggle } from "@/components/ui/AuToggle"
 import { Icon } from "@/components/ui/Icon"
-import { REVIEW_AGENTS } from "@/lib/auis-review/agents"
+import { REVIEW_AGENTS } from "@auis/core/agents"
 import {
   getReviewAgentRuntime,
   type ReviewAgentPermission,
-} from "@/lib/auis-review/agentRuntime"
+} from "@auis/core/agentRuntime"
 import {
   agentSettingsOf,
   useAgentSettingsStore,

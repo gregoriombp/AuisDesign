@@ -2,7 +2,7 @@ import type {
   ReviewComment,
   ReviewCommentContext,
   ReviewReply,
-} from "@/components/auis-review/types";
+} from "@auis/core/types";
 
 /**
  * Read "views" for the review-bridge list/get endpoints (`?view=`).

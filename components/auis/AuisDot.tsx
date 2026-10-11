@@ -20,7 +20,7 @@ import {
   useAgentSettingsStore,
   agentSettingsOf,
 } from "@/lib/auis-review/agentSettingsStore";
-import { REVIEW_AGENTS } from "@/lib/auis-review/agents";
+import { REVIEW_AGENTS } from "@auis/core/agents";
 import { useBuilderChromeHidden } from "@/lib/auis/useBuilderChromeHidden";
 import { AgentsPanel } from "./AgentsPanel";
 

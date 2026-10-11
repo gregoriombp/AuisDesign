@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteIdentity, upsertIdentity } from "../../_store";
 import { getBridgeSession } from "../../_session";
-import type { ReviewIdentity } from "@/components/auis-review/types";
+import type { ReviewIdentity } from "@auis/core/types";
 import { withBridgeErrors } from "../../_errors";
 
 export const runtime = "nodejs";

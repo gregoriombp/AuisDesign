@@ -28,7 +28,7 @@ import { CommentText } from "./CommentText"
 import { AuthorName } from "./PersonHover"
 import { useImageAttach } from "@/lib/auis-review/useImageAttach"
 import { permalinkHref } from "@/lib/auis-review/permalink"
-import type { ReviewComment, ReviewPoint } from "./types"
+import type { ReviewComment, ReviewPoint } from "@auis/core/types"
 
 const THREAD_WIDTH = 360
 const GAP = 16

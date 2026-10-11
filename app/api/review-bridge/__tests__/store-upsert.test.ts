@@ -7,7 +7,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import type { ReviewComment } from "@/components/auis-review/types";
+import type { ReviewComment } from "@auis/core/types";
 
 const root = mkdtempSync(path.join(tmpdir(), "review-store-"));
 process.env.REVIEW_BRIDGE_BACKUP_DIR = path.join(root, "backups");
