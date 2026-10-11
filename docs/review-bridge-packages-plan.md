@@ -22,8 +22,8 @@ manifest and a data folder) and nothing else.
 
 | Wave | What | Status |
 |---|---|---|
-| 1 | `@auis/core` + `@auis/server` + `@auis/next` (server side): the 16 Review Bridge routes run behind one `handle(Request)` | **in progress** |
-| 0 | Anchor-survival experiment on real apps (gate before wave 2) | not started |
+| 1 | `@auis/core` + `@auis/server` + `@auis/next` (server side): the 16 Review Bridge routes run behind one `handle(Request)` | **done** (2026-10-10) |
+| 0 | Anchor-survival experiment on real apps (gate before wave 2) | **next** |
 | 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | not started |
 | 3 | `auis init --only review` / `uninstall` + publishing the packages | not started |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
@@ -117,6 +117,30 @@ the edit and flow bridges, publishing.
 
 **Verify.** `npm test` · `npm run typecheck` · `npm run lint` · `npm run ds:check` ·
 the curl, browser, mention-dry and scaffold checks above.
+
+**Shipped (2026-10-10).** Where things ended up, for whoever continues:
+
+| What | Where |
+|---|---|
+| Shared domain | `kit/core/src/` — `types`, `agentIdentity`, `agentRuntime`, `agents`, `commandParse`, `skills`, `reviewerHandle`; imported as `@auis/core/<module>` |
+| Server entry | `kit/server/src/review/handler.ts` — `createReviewHandler(options)` and the route table |
+| Options | `kit/server/src/review/config.ts` — `ReviewServerOptions`, `reviewPaths()` (read at the moment of use) |
+| Handlers | `kit/server/src/review/routes/*.ts` — one file per old route, standard `Request`/`Response` |
+| Helpers | `kit/server/src/review/{store,session,mention,backup,images,errors,project,merge,reveal,agentToken}.ts` |
+| Doc store | `kit/server/src/docstore/` (also used by `app/api/flow-suggestions`) |
+| Next adapter | `kit/next/src/index.ts` — `createReviewRoute(options)` |
+| The app's route | `app/api/review-bridge/[...path]/route.ts` |
+| Tests | `kit/server/src/review/__tests__/routes.test.ts` (parity, written against the old routes first), `kit/__tests__/boundaries.test.ts` |
+
+Verified: 95 tests; the same health JSON, comments and archive through the dev
+server; 404/405 from the router; the drawer loading in the browser with every call
+answered by the catch-all; `npm run mention:dry` reaching the bridge; and a project
+scaffolded by the published `@auis/cli@0.2.2` from the branch contains `kit/`,
+typechecks and passes the 95 tests.
+
+Known gaps carried forward: the auth seam is still "edit `kit/server/src/review/session.ts`"
+(a `resolveSession` option comes with wave 3/4); the edit and flow bridges still live
+in `app/api/`.
 
 ---
 
