@@ -7,6 +7,8 @@ Conventions for any AI Agent (Claude Code, Codex, Cursor, etc.) working in this 
 > **Before building anything, open [`docs/component-map.md`](docs/component-map.md)** — the index of "I need X → use Y → import path → when not to". It has **two layers**, and the distinction matters: **Layer A** is the 26 `Au*` in `components/ui/` — the UI the **Auis builder itself** is made of (the Review Bridge, Auis's own mark, and the primitives those stand on). They are importable and reusable, but they are not a catalog for your product. Four more ship one tier up as **Patterns** — `AuAppShell`, `AuSideNav`, `AuPromptComposer`, `AuDropzone` — composed starting points the builder itself does not use; adopt them or ignore them. Beyond those Auis ships no product chrome: no header, no nav rail, no notifications panel, no AI copilot. **Layer B** — your product's own components — **ships empty on purpose**; you populate it with the `auis-component` skill. So the map is the fastest way to find the right `Au*` **and** to see, honestly, when a thing doesn't exist yet and you have to build it.
 >
 > Continuing the design-system cleanup? Read [`docs/ds-cleanup-plan.md`](docs/ds-cleanup-plan.md) (what's done, what's left, how to resume) and run `npm run ds:check` for the live debt count.
+>
+> Turning the Review Bridge into installable packages (`kit/`: `@auis/core`, `@auis/server`, `@auis/next`)? Read [`docs/review-bridge-packages-plan.md`](docs/review-bridge-packages-plan.md) — waves, status, gates and how to resume.
 
 ## Context hygiene for agents
 
