@@ -25,7 +25,7 @@ manifest and a data folder) and nothing else.
 | 1 | `@auis/core` + `@auis/server` + `@auis/next` (server side): the 16 Review Bridge routes run behind one `handle(Request)` | **done** (2026-10-10) |
 | 0 | Anchor-survival experiment on real apps (gate before wave 2) | **done** (2026-10-10): passed, see `docs/anchor-survival.md` |
 | 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **done** (2026-10-11) |
-| 3 | `auis init --only review` / `uninstall` + publishing the packages | **next** (its prerequisite, per-project backups, is done) |
+| 3 | `auis init --only review` / `uninstall` + publishing the packages | **done** (2026-10-11); publishing waits on the owner's 2FA, see `docs/RELEASING.md` |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
 
 Update this table in the same PR that moves a wave forward.
@@ -43,11 +43,16 @@ the two disagree, this file wins:
   Code under `packages/` would vanish from every new project. Moving the kit into
   `packages/` later requires narrowing `PRUNE` to `packages/auis`, publishing the CLI,
   and only then moving the folders.
-- **Consumed through `tsconfig` paths, no workspaces yet.** `@auis/core`,
-  `@auis/server` and `@auis/next` resolve to `kit/<name>/src` via `compilerOptions.paths`
-  (Next/Turbopack) and `lib/__tests__/ts-extension-loader.mjs` (the Node test runner).
-  No `package.json` inside `kit/*` until wave 3: the nearest `package.json` decides how
-  Node loads `.ts` files, and adding one changes the test runner's behavior.
+- **Consumed through `tsconfig` paths, no workspaces.** Inside this repository
+  `@auis/*` resolve to `kit/<name>/src` via `compilerOptions.paths` (Next/Turbopack) and
+  `lib/__tests__/ts-extension-loader.mjs` (the Node test runner). Since wave 3 each
+  `kit/*` has a `package.json` (`"type": "module"`, exports into `dist/`) for
+  publishing; the app never reads `dist/`, and the tests ran unchanged with them.
+- **The host's URL is `/api/review-bridge`, not `/api/auis`.** The earlier plan put the
+  host route at `app/api/auis/[...auis]`. The chrome, the agents' prompts, the skills
+  and the mention runner all call `/api/review-bridge`; moving the host's URL would
+  have meant a client-side base path threaded through all of them for no gain. `init`
+  writes `app/api/review-bridge/[...path]/route.ts`.
 - **The public URL does not change.** The Auis app keeps serving
   `/api/review-bridge/*` (skills, the mention runner and every client call depend on
   it), now through a single catch-all route.
@@ -336,7 +341,8 @@ Known gaps carried forward:
   scaffold — `CREATE_ALIASES` in `packages/auis/src/cli.mjs`). `create`/`new` keep
   scaffolding; `init` installs into the current repo. `init --dry-run` is `doctor` plus
   the write plan, one code path.
-- What `init` writes in the host: `app/api/auis/[...auis]/route.ts` (about 6 lines),
+- What `init` writes in the host: `app/api/review-bridge/[...path]/route.ts` (see
+  Decisions for why not `app/api/auis`),
   two lines in the root layout, one dependency in `package.json`, a delimited block in
   `.gitignore`, `.auis/manifest.json` (every artifact it created or edited, with
   hashes) and `.auis/data/` (replaces `review-bridge/data/`). It never overwrites
@@ -344,7 +350,7 @@ Known gaps carried forward:
 - `auis uninstall` reads the manifest and restores the repo: `git status` clean.
 - Publishing: each package gets its `package.json`, a build to JS + `.d.ts`, and an
   `npm publish` the owner confirms (2FA). The CLI is republished.
-- The mention runner (`scripts/mention-run.mjs`) ships with `@auis/server` as a bin, so
+- The mention runner (then `scripts/mention-run.mjs`) ships with `@auis/server` as a bin, so
   hosts get the `@Claude` trigger.
 
 **Done when.** On the validation host: `init` → `git status` shows exactly the touch
@@ -352,6 +358,62 @@ points → pins work → `uninstall` → `git status` clean. `doctor` verdicts m
 the host actually does.
 
 ---
+
+**Shipped (2026-10-11).** Where things ended up:
+
+| What | Where |
+|---|---|
+| `init` / `uninstall` | `packages/auis/src/install.mjs`. `planInstall()` is the one plan: `doctor` prints it and `init` carries it out |
+| Manifest | `.auis/manifest.json` in the host: every artifact, with the sha256 of the file before and after `init` and the inserted lines; the original bytes of every edited file under `.auis/originals/` (gitignored) |
+| The layout lines | `import { AuisReview } from "@auis/next/client"` and `<AuisReview />` before `</body>`, in the file's quote and semicolon style. `AuisReview` (`kit/next/src/client.tsx`) holds its own Suspense boundary, the Next router and `ReviewChrome` |
+| The route | `createReviewRoute({ dataDir: ".auis/data" })` — the explicit option, not the singleton, as wave 1 asked |
+| Packages | `kit/*/package.json` (0.1.0, ESM, `exports` `.` and `./*` into `dist/`); `kit/scripts/build.mjs` (tsc file by file, `.js` added to relative imports, `chrome.css` copied, `"use client"` kept); `npm run kit:smoke` loads the build from `node_modules` the way an app would (CI runs it) |
+| Mention runner | `kit/server/bin/` (`mention-run.mjs`, `mention-cli.mjs`, a generic `mention-prompt.md`), the `auis-mention-run` bin. The route resolves the installed bin from the project's `package.json`; it passes its own origin as `AUIS_BRIDGE_URL`, which the runner accepts only on loopback, so a host on another port works. A project's `.auis/mention-prompt.md` (or Auis's `scripts/mention-prompt.md`) replaces the prompt |
+| CLI | 0.3.0: `init` is a command, no longer an alias of create; `doctor` only promises a shared queue where `init` can mount one (Next App Router) |
+
+How `uninstall` decides, per file: if it still has the bytes `init` left, the original
+bytes come back; if the user changed it, only what `init` inserted comes out (the import
+and element lines, the dependency, the `.gitignore` block) and the package manager
+re-syncs the lockfile; a route the user edited is kept with a warning (`--force`
+removes it), and the manifest stays while anything of `init`'s is left. The comments in
+`.auis/data` are moved to `~/.auis/review-bridge-backups/<project key>/uninstalled-<time>/`
+(the bridge's own per-project folder), not deleted, unless `--purge`.
+
+Verified on a clone of the validation host (Destiny Matrix), installing the four
+packages from a local Verdaccio registry built from this branch:
+- `init --dry-run` printed seven places and wrote nothing; `init` then touched exactly
+  those: `git status` showed `.gitignore`, `app/layout.tsx`, `package-lock.json` and
+  `package.json` modified, `.auis/` and `app/api/review-bridge/` new, nothing else.
+- `next build` passed with every page still prerendered static. The only build warning
+  is the host's own (`app/api/consult`).
+- In `next dev`: `/api/review-bridge/health` answered; Review opened from the pill; a pin
+  dropped on the hero was saved to `.auis/data/comments.json` (no `review-bridge/`
+  folder); its `@Claude` fired the trigger, which spawned the runner from
+  `node_modules/@auis/server/bin`, reached the bridge on the host's port (3100), and
+  built a dry run with the generic prompt.
+- `uninstall` restored every file and `git status` came back clean, including ignored
+  files other than `node_modules` and `.next`. The comment was in the project's backup
+  folder, next to the bridge's own snapshots.
+- Unit tests (`packages/auis/test/install.test.mjs`) cover the same round trip on a
+  fixture, a second `init` changing nothing, surgical removal after the user edits the
+  touched files, a route the user changed, a host with no `.gitignore`, and refusing
+  to overwrite an existing bridge route.
+
+Known gaps carried forward:
+- **Not on npm yet.** The four kit packages and `@auis/cli@0.3.0` wait for the owner's
+  publish (2FA): order and commands in `docs/RELEASING.md`. Until then `init` writes a
+  dependency the registry does not have.
+- The Agents panel lives in Auis's dot, which a host does not have. A host changes an
+  agent's ceiling or switches it off through `PUT /api/review-bridge/agent-settings`.
+  Claude starts on, with the `edit` ceiling (the trigger itself stays opt-in:
+  `AUIS_MENTION_TRIGGER=1`).
+- `uninstall` leaves the packages in `node_modules` until the next install, by design:
+  running one would rewrite the lockfile it just restored.
+- Only the Next App Router. `--only` accepts `review` alone; Edit, State Mode and the
+  flow driver are not installable into a host.
+- `auis init` adds `.auis/manifest.json` as an untracked file. Committing it lets a
+  teammate run `uninstall` too (without `.auis/originals/`, which is local, every file
+  takes the surgical path).
 
 ## Wave 4 and later
 

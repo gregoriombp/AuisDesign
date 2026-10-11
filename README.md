@@ -18,7 +18,7 @@ The template is **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-firs
 | You have | What works today |
 |---|---|
 | **Nothing yet** — a new product | `npx @auis/cli@latest my-product` creates the project with every surface working. |
-| **An existing product** | `npx @auis/cli@latest doctor` reads the repository and reports, capability by capability, what Auis could do in it. Installing into an existing repository (`auis init`) is not shipped yet. |
+| **An existing product** | `npx @auis/cli@latest doctor` reads the repository and reports, capability by capability, what Auis could do in it. In a **Next.js App Router** app, `npx @auis/cli@latest init` installs **Review** (pins, comments, the drawer, agent mentions); `uninstall` takes it back out. |
 
 In an existing repository the builder UI (Review, Edit, State Mode, the flow driver) needs **React 18+** today, because it mounts as a React tree. A mount that carries its own runtime — so it runs beside Vue, Svelte, Angular and others — is planned; it does not exist yet. The skills and the rulebook are plain files and work in any repository.
 
@@ -66,6 +66,24 @@ npx @auis/cli@latest doctor            # reads your repo, writes nothing
 It reports, capability by capability, what Auis can do in that codebase, what
 runs degraded, and what is unsupported — each with the reason and the honest
 alternative. It never writes, installs or asks. `--json` gives the full report.
+
+In a Next.js App Router app, install Review — pins, comments, the drawer and the
+`@Claude` mentions — without scaffolding anything else:
+
+```bash
+npx @auis/cli@latest init --dry-run    # what it would touch, writes nothing
+npx @auis/cli@latest init              # install
+npx @auis/cli@latest uninstall         # take it back out
+```
+
+`init` writes one route file (`app/api/review-bridge/[...path]/route.ts`), two
+lines in your root layout, one dependency (`@auis/next`), a block in
+`.gitignore` and a `.auis/` folder (the manifest, and the comments in
+`.auis/data`, gitignored). It never touches `AGENTS.md`, `globals.css`,
+`tsconfig.json` or your components, and the review chrome brings its own scoped
+styles, so your pages look exactly as before. `uninstall` reads the manifest
+and restores every file it edited; your comments move to the backups instead of
+being deleted. The packages behind it live in [`kit/`](kit).
 
 Full CLI docs: [`packages/auis`](packages/auis). Prefer a clone? That still works:
 
