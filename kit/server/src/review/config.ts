@@ -1,4 +1,6 @@
 import crypto from "node:crypto";
+import fs from "node:fs";
+import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 
@@ -18,7 +20,10 @@ export interface ReviewServerOptions {
    * folder given here or in the env is used as is.
    */
   backupDir?: string;
-  /** Script the mention trigger spawns. Default `<cwd>/scripts/mention-run.mjs`. */
+  /**
+   * Script the mention trigger spawns. Default: the `auis-mention-run` bin of
+   * the @auis/server installed in the project (resolved from `<cwd>`).
+   */
   mentionRunner?: string;
 }
 
@@ -69,6 +74,31 @@ export function reviewPaths() {
     poolDir: path.join(backupDir, "images"),
     mentionRunner: configured.mentionRunner
       ? path.resolve(configured.mentionRunner)
-      : path.join(process.cwd(), "scripts", "mention-run.mjs"),
+      : installedMentionRunner(),
   };
+}
+
+/**
+ * The runner of the @auis/server the project installed, or null. Resolved from
+ * the project's own package.json — not from this module's URL, which a bundler
+ * (Next) moves somewhere unrelated to node_modules.
+ */
+function installedMentionRunner(): string | null {
+  const BIN = "@auis/server/bin/mention-run.mjs";
+  const fromProject = createRequire(path.join(process.cwd(), "package.json"));
+  const attempts = [
+    () => fromProject.resolve(BIN),
+    // pnpm does not hoist: @auis/server is only reachable from @auis/next,
+    // the dependency `auis init` adds.
+    () => createRequire(fromProject.resolve("@auis/next/package.json")).resolve(BIN),
+  ];
+  for (const attempt of attempts) {
+    try {
+      const file = attempt();
+      if (fs.existsSync(file)) return file;
+    } catch {
+      // not installed this way; try the next
+    }
+  }
+  return null;
 }

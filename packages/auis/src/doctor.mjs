@@ -16,6 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { color, write } from "./ui.mjs";
 import { detect, detectAgentFiles } from "./detect.mjs";
+import { planInstall } from "./install.mjs";
 
 export const DOCTOR_VERSION = 1;
 
@@ -33,7 +34,10 @@ const unsupported = (id, because, remedy) => ({ id, verdict: "unsupported", beca
  */
 export function capabilities(d) {
   const out = [];
-  const serverBacked = d.devServer.fileWriting;
+  // `auis init` mounts the bridge's server as a Next App Router route. Other
+  // frameworks can write files too, but there is no adapter for them yet, so
+  // promising a shared queue there would be promising something init won't do.
+  const serverBacked = d.devServer.fileWriting && d.framework.name === "next" && d.router.name === "app-router";
 
   // --- Review -------------------------------------------------------------
   out.push(supported("review.pins", "Pins anchor through plain DOM — no markup, no wrapper, no provider in your components."));
@@ -56,8 +60,10 @@ export function capabilities(d) {
   } else {
     const why = d.framework.name === "unknown"
       ? "No JavaScript framework detected, so there is no dev server for Auis to mount routes on."
-      : `${d.framework.name}${d.router.name === "pages-router" ? " on the Pages Router" : ""} gives Auis no file-writing route to persist through.`;
-    out.push(degraded("review.persistence", why, "Comments live in each reviewer's browser; Export/Import moves them. A standalone server for a shared queue is planned; it does not exist yet."));
+      : d.devServer.fileWriting && d.framework.name !== "next"
+        ? `${d.framework.name} could serve the bridge, but its adapter does not exist yet — init installs into the Next.js App Router only.`
+        : `${d.framework.name}${d.router.name === "pages-router" ? " on the Pages Router" : ""} gives Auis no file-writing route to persist through.`;
+    out.push(degraded("review.persistence", why, "Comments live in each reviewer's browser; Export/Import moves them. Adapters for Vite, Express and Hono are planned; they do not exist yet."));
     out.push(degraded("review.mentions", why, "Mentions are recorded locally but no agent can read the queue until a server backs it."));
     out.push(unsupported("skills.bridges", why, "The bridge skills read a queue over HTTP; without one they have nothing to read."));
   }
@@ -166,27 +172,27 @@ export function collisions(root) {
   return out;
 }
 
-/** Exactly what `auis init` would touch. Same code path, so the two cannot drift. */
+/**
+ * Exactly what `auis init` would touch — the plan init itself carries out
+ * (install.mjs), so the two cannot drift. Empty when init cannot install here.
+ */
 export function installPlan(d, root = ".") {
-  const steps = [];
-  if (d.framework.name === "next" && d.router.name === "app-router") {
-    // The router detection already resolved which of the two roots is real;
-    // reuse it rather than testing the CLI's own working directory.
-    const base = d.rootLayout.path?.startsWith("src/") || fs.existsSync(path.join(root, "src/app"))
-      ? "src/app"
-      : "app";
-    steps.push({ action: "create", path: `${base}/api/auis/[...auis]/route.ts`, detail: "6 lines — re-exports the bridge handlers" });
-  }
-  steps.push({ action: "create", path: ".auis/manifest.json", detail: "what auis wrote, so update and uninstall can reverse it" });
-  steps.push({ action: "create", path: ".auis/data/", detail: "the comment and edit queues" });
-  if (d.rootLayout.path && d.rootLayout.patchable) {
-    steps.push({ action: "edit", path: d.rootLayout.path, detail: "+2 lines — one import, one <AuisBuilder /> before </body>" });
-  } else if (d.rootLayout.path) {
-    steps.push({ action: "print", path: d.rootLayout.path, detail: `${d.rootLayout.bodies} <body> tags — auis prints the two lines for you to place` });
-  }
-  steps.push({ action: "append", path: ".gitignore", detail: "2 lines, in a delimited block" });
-  steps.push({ action: "edit", path: "package.json", detail: "+1 dependency" });
-  return steps;
+  return planInstall(d, root).steps.map(({ action, path, detail }) => ({ action, path, detail }));
+}
+
+/**
+ * The verdicts say what Auis can do in this repository; `init` installs only
+ * part of it today. Which rows it actually brings, so nobody reads "edit.text
+ * supported" as "init gives me Edit Mode".
+ */
+export const INSTALLED_BY_INIT = /^review\./;
+
+function installable(plan, caps) {
+  return {
+    ok: plan.ok,
+    reason: plan.reason ?? null,
+    capabilities: plan.ok ? caps.filter((c) => INSTALLED_BY_INIT.test(c.id)).map((c) => c.id) : [],
+  };
 }
 
 export function buildReport(root, cliVersion) {
@@ -203,6 +209,7 @@ export function buildReport(root, cliVersion) {
     collisions: collisions(root),
     capabilities: caps,
     plan: installPlan(d, root),
+    installable: installable(planInstall(d, root), caps),
     summary,
   };
 }
@@ -258,7 +265,7 @@ export function report(doc) {
 
   if (doc.collisions.length > 0) {
     write();
-    write(`  ${color.bold("Already yours")}  ${color.dim("auis will not overwrite any of these")}`);
+    write(`  ${color.bold("Already yours")}  ${color.dim("init does not touch any of these; the notes say how a future skills install would")}`);
     write();
     for (const c of doc.collisions) {
       write(`    ${color.cyan(c.path.padEnd(20))}${color.dim(c.note)}`);
@@ -266,13 +273,19 @@ export function report(doc) {
   }
 
   write();
-  write(`  ${color.bold("What installing would touch")}  ${color.dim(`${doc.plan.length} places`)}`);
-  write();
-  for (const step of doc.plan) {
-    write(`    ${color.dim(step.action.padEnd(8))}${step.path.padEnd(34)}${color.dim(step.detail)}`);
+  if (doc.installable.ok) {
+    write(`  ${color.bold("What `auis init` would touch")}  ${color.dim(`${doc.plan.length} places`)}`);
+    write();
+    for (const step of doc.plan) {
+      write(`    ${color.dim(step.action.padEnd(8))}${step.path.padEnd(44)}${color.dim(step.detail)}`);
+    }
+    write();
+    write(`  ${color.dim("Install Review with `npx @auis/cli init`; `npx @auis/cli uninstall` reverses it.")}`);
+    write(`  ${color.dim("init brings the review.* rows above. Edit, flows, State Mode and the skills run in a project")}`);
+    write(`  ${color.dim("created with `npx @auis/cli <dir>`; they are not installable into an existing app yet.")}`);
+  } else {
+    write(`  ${color.bold("auis init")}  ${color.dim(doc.installable.reason)}`);
   }
-  write();
-  write(`  ${color.dim("There is no `auis init` yet — this is the footprint it will have.")}`);
 
   write();
   write(`  ${color.dim("Nothing was written — doctor only reads.")}`);

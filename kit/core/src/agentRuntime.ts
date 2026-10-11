@@ -1,7 +1,7 @@
 // The engine behind each Review Bridge agent: which CLI opens, which ceilings
 // the Agents panel offers, which models and at what effort. The panel reads it
 // to draw the row; the write routes, to decide whether a mention opens a
-// process; the runner (scripts/mention-run.mjs), through GET /agent-settings,
+// process; the runner (kit/server/bin/mention-run.mjs), through GET /agent-settings,
 // to build the command.
 //
 // RELATIVE import on purpose: this module runs under

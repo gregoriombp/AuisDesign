@@ -4,13 +4,17 @@
 // is why it survives the dev server's HMR, which would kill a supervisor living
 // inside Next.
 //
-//   node scripts/mention-run.mjs cmt-abc123 claude
-//   node scripts/mention-run.mjs cmt-abc123 claude,grok
-//   MENTION_DRY_RUN=1 node scripts/mention-run.mjs cmt-abc123 claude,grok
+//   npx auis-mention-run cmt-abc123 claude
+//   npx auis-mention-run cmt-abc123 claude,grok
+//   MENTION_DRY_RUN=1 npx auis-mention-run cmt-abc123 claude,grok
+//
+// It ships with @auis/server as the `auis-mention-run` bin; in the Auis app it
+// is kit/server/bin/mention-run.mjs (`npm run mention:dry`). It always runs in
+// the project's root (the cwd the route spawns it with).
 //
 // For each mentioned agent, in order: reads its ceiling and model from the
 // Agents panel, opens ITS CLI (claude or grok) with the ceiling's flags
-// (scripts/mention-cli.mjs), and checks whether a reply landed. Reply runs at
+// (./mention-cli.mjs, next to this file), and checks whether a reply landed. Reply runs at
 // once; Edit waits for the working-tree lock.
 //
 // No automatic retry, on purpose. The trigger fires once, on the write; if it
@@ -21,8 +25,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import {
   agentEnv,
+  bridgeBase,
   answeredSince,
   claudeArgs,
   errorReason,
@@ -33,10 +39,12 @@ import {
   resultText,
 } from "./mention-cli.mjs";
 
-// Fixed on purpose: a BRIDGE_BASE exported by the shell may point at a
-// deployment. A configurable base here would be too short a path for the agent
-// to resolve a comment somewhere other than this machine.
-const BASE = "http://127.0.0.1:3000";
+// Loopback only, on purpose: a BRIDGE_BASE exported by the shell may point at a
+// deployment, and a configurable base would be too short a path for the agent
+// to resolve a comment somewhere other than this machine. The route that spawns
+// this passes AUIS_BRIDGE_URL — its own origin, so a host on another port
+// works — and bridgeBase() refuses anything that is not this machine.
+const BASE = bridgeBase(process.env);
 const API = `${BASE}/api/review-bridge`;
 const REPO = process.cwd();
 
@@ -54,7 +62,13 @@ const LOCK_POLL_MS = 3 * 1000;
 // for the run and still leaves the tree half-edited. 5 gives room for the
 // common case without becoming a blank cheque. MENTION_MAX_USD adjusts it.
 const MAX_BUDGET_USD = process.env.MENTION_MAX_USD || "5";
-const PROMPT_FILE = "scripts/mention-prompt.md";
+// The project's own prompt wins (Auis keeps one at scripts/mention-prompt.md);
+// otherwise the one that ships next to this file, written for any repository.
+const PROMPT_FILES = [
+  path.join(REPO, ".auis", "mention-prompt.md"),
+  path.join(REPO, "scripts", "mention-prompt.md"),
+  fileURLToPath(new URL("./mention-prompt.md", import.meta.url)),
+];
 
 const [commentId, agentsArg] = process.argv.slice(2);
 const agentIds = (agentsArg || "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -227,7 +241,7 @@ function buildPrompt(run, roster, comment) {
     "{{AGENT_HANDLE}}": agent.handle ?? run.agentId,
     "{{PERMISSION}}": run.permission,
   };
-  let md = fs.readFileSync(path.join(REPO, PROMPT_FILE), "utf8");
+  let md = fs.readFileSync(PROMPT_FILES.find((f) => fs.existsSync(f)), "utf8");
   for (const [key, value] of Object.entries(values)) md = md.replaceAll(key, () => value);
   const json = JSON.stringify(comment, null, 2);
   return md.replaceAll("{{COMMENT_JSON}}", () => json);
@@ -408,7 +422,7 @@ async function runOne(planned, roster) {
 
 async function main() {
   if (!commentId || agentIds.length === 0) {
-    log("usage: node scripts/mention-run.mjs <commentId> <agentId[,agentId]>");
+    log("usage: auis-mention-run <commentId> <agentId[,agentId]>");
     process.exit(2);
   }
   // Read NOW, not at mention time, and again after every wait for the lock

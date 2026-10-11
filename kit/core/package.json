@@ -1,0 +1,38 @@
+{
+  "name": "@auis/core",
+  "version": "0.1.0",
+  "description": "The Review Bridge domain shared by its server and its chrome: comment types, agents, the @ and / command parser, DOM anchoring.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Gregório Pinheiro — Design Engineer UX/UI",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoriombp/AuisDesign.git",
+    "directory": "kit/core"
+  },
+  "homepage": "https://github.com/gregoriombp/AuisDesign/tree/main/kit/core#readme",
+  "bugs": {
+    "url": "https://github.com/gregoriombp/AuisDesign/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prepack": "node ../scripts/build.mjs core"
+  }
+}

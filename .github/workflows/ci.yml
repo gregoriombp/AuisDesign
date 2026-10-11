@@ -35,6 +35,11 @@ jobs:
       - name: Tests
         run: npm test
 
+      # The kit as an app would install it: built to dist/, loaded from
+      # node_modules through each package's exports, with Node's own resolver.
+      - name: Kit packages build and load
+        run: npm run kit:smoke
+
       - name: Design-system check
         run: npm run ds:check
         continue-on-error: true # informational: reports hardcode debt

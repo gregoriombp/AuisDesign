@@ -8,7 +8,7 @@
 // must not even be attempted on a public server — see `mentionTriggerEnabled`.
 //
 // Division of labour: only the gates and the detached spawn live here; all the
-// logic (lock, watchdog, failure reply) lives in `scripts/mention-run.mjs`,
+// logic (lock, watchdog, failure reply) lives in `kit/server/bin/mention-run.mjs`,
 // which survives the dev server's HMR. A supervisor inside Next would die on
 // the first file edit and the failure reply would never go out.
 //
@@ -71,6 +71,8 @@ export function triggerMentionRun(
   commentId: string,
   text: string,
   author: MentionAuthor,
+  /** Origin of the request that stored it: where the runner reaches the bridge. */
+  origin?: string,
 ): void {
   try {
     if (!mentionTriggerEnabled()) return;
@@ -85,7 +87,7 @@ export function triggerMentionRun(
         );
         return;
       }
-      await spawnRunner(commentId, agentIds);
+      await spawnRunner(commentId, agentIds, origin);
     })().catch((err) => {
       console.error("[mention-trigger] could not read the agent settings:", err);
     });
@@ -94,16 +96,29 @@ export function triggerMentionRun(
   }
 }
 
-async function spawnRunner(commentId: string, agentIds: string[]) {
+async function spawnRunner(commentId: string, agentIds: string[], origin?: string) {
   try {
+    const runner = reviewPaths().mentionRunner;
+    if (!runner) {
+      console.error(
+        "[mention-trigger] no runner: install @auis/server in this project or pass `mentionRunner`",
+      );
+      return;
+    }
     // Dynamic import, and AFTER the gate: in production this module is never
     // loaded, so there is no `child_process` reachable from a published route.
     const { spawn } = await import("node:child_process");
     const child = spawn(
       // The same node that runs Next — launchd/PATH do not enter the story.
       process.execPath,
-      [reviewPaths().mentionRunner, commentId, agentIds.join(",")],
-      { cwd: process.cwd(), detached: true, stdio: "ignore" },
+      [runner, commentId, agentIds.join(",")],
+      {
+        cwd: process.cwd(),
+        detached: true,
+        stdio: "ignore",
+        // The runner only accepts a loopback origin (bridgeBase in mention-cli.mjs).
+        env: origin ? { ...process.env, AUIS_BRIDGE_URL: origin } : process.env,
+      },
     );
     child.unref();
     console.log(

@@ -244,3 +244,16 @@ test("Grok streams streaming-messages-json: the answer is only the final message
   assert.equal(resultText(parsed), "The file says changed.");
   assert.equal(parsed.session_id, "s1");
 });
+
+test("bridgeBase: the spawning route's own origin, on this machine only", async () => {
+  const { bridgeBase, DEFAULT_BRIDGE_BASE } = await import("../mention-cli.mjs");
+  assert.equal(bridgeBase({}), DEFAULT_BRIDGE_BASE);
+  assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "http://localhost:3001" }), "http://localhost:3001");
+  assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "http://127.0.0.1:4000/some/path" }), "http://127.0.0.1:4000");
+  assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "http://[::1]:3000" }), "http://[::1]:3000");
+  // Never a deployment, never https, never garbage.
+  assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "https://localhost:3000" }), DEFAULT_BRIDGE_BASE);
+  assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "http://example.com" }), DEFAULT_BRIDGE_BASE);
+  assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "http://127.0.0.1.evil.com:3000" }), DEFAULT_BRIDGE_BASE);
+  assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "not a url" }), DEFAULT_BRIDGE_BASE);
+});

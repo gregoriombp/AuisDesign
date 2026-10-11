@@ -1,12 +1,16 @@
-# Releasing the installer
+# Releasing the installer and the kit
 
-`npx @auis/cli@latest my-product` is served by two npm packages that live in this
-repository:
+`npx @auis/cli@latest my-product` and `npx @auis/cli@latest init` are served by
+six npm packages that live in this repository:
 
 | Package | Directory | Status | Why it exists |
 |---|---|---|---|
 | [`@auis/cli`](https://www.npmjs.com/package/@auis/cli) | `packages/auis` | published | The CLI. `npx @auis/cli@latest` resolves this name; the binary it installs is still called `auis`. |
 | `create-auis` | `packages/create-auis` | not published | Alias so `npm create auis@latest` works. Depends on `@auis/cli`. |
+| `@auis/core` | `kit/core` | from 0.1.0 | The Review Bridge's shared domain. |
+| `@auis/server` | `kit/server` | from 0.1.0 | The Review Bridge server, and the `auis-mention-run` bin. |
+| `@auis/ui` | `kit/ui` | from 0.1.0 | The review chrome. |
+| `@auis/next` | `kit/next` | from 0.1.0 | The Next.js adapter — the one dependency `auis init` adds to an app. |
 
 The unscoped name `auis` is **not** ours and never was: npm rejects names it
 considers too similar to an existing package, and only says so at publish
@@ -32,7 +36,37 @@ within the minor (`^0.2.0` means `0.2.x`), so until `1.0.0` re-release
 `create-auis` whenever `@auis/cli` bumps its minor, and whenever its own `bin`
 changes.
 
-## Publishing
+## The kit (`@auis/core`, `server`, `ui`, `next`)
+
+The four kit packages share one version, bumped together in every
+`kit/*/package.json` (and in the `^x.y.z` ranges they declare on each other).
+`KIT_VERSION` in `packages/auis/src/install.mjs` is the range `init` writes; a
+test fails when it differs from `kit/next/package.json`. So a kit release that
+`init` should install is also a CLI release.
+
+Each package's `prepack` builds its `dist/` (`kit/scripts/build.mjs`: tsc, file
+by file, then `.js` added to relative imports and `chrome.css` copied), so
+`npm publish` from the folder is all it takes. Order matters, because each one
+depends on the ones before it, and `init` writes a version that has to exist:
+
+```bash
+npm whoami || npm login
+cd kit/core   && npm publish --access public
+cd ../server  && npm publish --access public
+cd ../ui      && npm publish --access public
+cd ../next    && npm publish --access public
+cd ../../packages/auis && npm publish --access public
+```
+
+npm asks for the owner's 2FA in the browser on each publish. Check a tarball
+before the first real publish with `npm pack --dry-run` in the folder.
+
+To try a release end to end without publishing, publish to a local registry
+(Verdaccio) with a throwaway `--userconfig`, then run `init` in a scratch copy
+of a host with `npm_config_userconfig` pointing at it. That is how wave 3 was
+validated (`docs/review-bridge-packages-plan.md`).
+
+## Publishing the CLI
 
 The repository secret `NPM_TOKEN` is an npm **automation** token for an account
 that owns the `@auis` scope (*Settings → Secrets and variables → Actions*).
@@ -88,3 +122,9 @@ Keep it that way.
 - `0.2.2` — `doctor` marks every capability that lives in the builder chrome
   (Review, Edit, flow driver, State Mode) unsupported when the host has no
   React 18+, and names the host's UI library (Vue, Svelte…) as the reason.
+- `0.3.0` — `init` installs Review into an existing Next.js App Router app
+  (`@auis/next@^0.1.0`) and `uninstall` reverses it. **Breaking:** `init` is no
+  longer a name for create — `npx @auis/cli init my-app` now refuses a folder
+  with no `package.json` and points to `npx @auis/cli my-app`. `doctor` prints
+  the plan `init` carries out, and only promises a shared comment queue where
+  `init` can mount one. `create-auis` needs a re-release with `^0.3.0`.

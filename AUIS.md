@@ -137,10 +137,10 @@ server, no port and no token in local development.
   ceiling — **Reply** (read and answer) or **Edit** (change code, send to review,
   answer) — plus the model where there is a choice. The comment's wording can
   ask for less than the ceiling, never more; CLI flags enforce it
-  (`scripts/mention-cli.mjs`), not the prompt alone. Claude runs `claude -p`;
+  (`kit/server/bin/mention-cli.mjs`), not the prompt alone. Claude runs `claude -p`;
   Grok runs xAI's Grok Build (`grok -p`); Codex is registered but has no engine
   yet and stays off.
-- `scripts/mention-run.mjs` runs the mentioned agents in order: Reply starts at
+- `kit/server/bin/mention-run.mjs` runs the mentioned agents in order: Reply starts at
   once, Edit waits for the working-tree lock, and one editor per message. When
   a Reply agent cannot post (its ceiling forbids it), the runner posts its final
   message; when nothing comes back, the runner posts the failure with its

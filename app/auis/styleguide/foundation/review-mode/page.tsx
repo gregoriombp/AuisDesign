@@ -173,7 +173,7 @@ export default function ReviewModeFoundationPage() {
           <code className="font-mono text-xs">AUIS_MENTION_TRIGGER=1</code>. Five
           gates: never in production, only the admin&apos;s own writes, never a write
           authored by an agent, only on creation, only for an agent switched on.{" "}
-          <code className="font-mono text-xs">scripts/mention-run.mjs</code> runs one
+          <code className="font-mono text-xs">kit/server/bin/mention-run.mjs</code> runs one
           editor at a time behind a working-tree lock and posts the failure in the
           thread when nothing comes back. The contract is in{" "}
           <code className="font-mono text-xs">review-bridge/README.md</code>.

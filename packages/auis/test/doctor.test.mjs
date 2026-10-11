@@ -195,7 +195,26 @@ describe("collisions and plan", () => {
     write(root, "package.json", JSON.stringify({ name: "s", scripts: { dev: "next dev" }, dependencies: { next: "16.0.0", react: "19.0.0" } }));
     write(root, "src/app/layout.tsx", "export default function L({children}){return <html><body>{children}</body></html>}");
     const steps = installPlan(detect(root), root);
-    assert.ok(steps.some((s) => s.path === "src/app/api/auis/[...auis]/route.ts"), JSON.stringify(steps.map((s) => s.path)));
+    assert.ok(steps.some((s) => s.path === "src/app/api/review-bridge/[...path]/route.js"), JSON.stringify(steps.map((s) => s.path)));
+  });
+});
+
+describe("what init brings", () => {
+  it("names the capabilities init installs, and only Review's", () => {
+    const doc = buildReport(makeHost(), "0.0.0");
+    assert.equal(doc.installable.ok, true);
+    assert.ok(doc.installable.capabilities.includes("review.pins"));
+    assert.ok(doc.installable.capabilities.every((id) => id.startsWith("review.")));
+  });
+
+  it("brings nothing where it cannot install", () => {
+    const root = mkdtempSync(join(tmpdir(), "auis-doctor-noinit-"));
+    temps.push(root);
+    write(root, "package.json", JSON.stringify({ name: "v", scripts: { dev: "vite" }, dependencies: { vite: "5", react: "18" } }));
+    const doc = buildReport(root, "0.0.0");
+    assert.equal(doc.installable.ok, false);
+    assert.deepEqual(doc.installable.capabilities, []);
+    assert.deepEqual(doc.plan, []);
   });
 });
 
