@@ -31,7 +31,8 @@
   },
   "files": [
     "dist",
-    "bin",
+    "bin/*.mjs",
+    "bin/*.md",
     "README.md"
   ],
   "scripts": {
