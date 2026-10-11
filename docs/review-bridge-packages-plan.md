@@ -25,7 +25,7 @@ manifest and a data folder) and nothing else.
 | 1 | `@auis/core` + `@auis/server` + `@auis/next` (server side): the 16 Review Bridge routes run behind one `handle(Request)` | **done** (2026-10-10) |
 | 0 | Anchor-survival experiment on real apps (gate before wave 2) | **done** (2026-10-10): passed, see `docs/anchor-survival.md` |
 | 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **done** (2026-10-11) |
-| 3 | `auis init --only review` / `uninstall` + publishing the packages | **done** (2026-10-11); publishing waits on the owner's 2FA, see `docs/RELEASING.md` |
+| 3 | `auis init --only review` / `uninstall` + publishing the packages | **done** (2026-10-11): `@auis/core`, `server`, `ui`, `next` 0.1.0 and `@auis/cli` 0.3.0 on npm |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
 
 Update this table in the same PR that moves a wave forward.
@@ -398,15 +398,19 @@ packages from a local Verdaccio registry built from this branch:
   host did; the plan it prints is the seven places `init` touched.
 - Scaffold proof: the published `@auis/cli@0.2.2` scaffolding from this branch gives a
   project with `kit/` (and `kit/server/bin`), which typechecks and passes the 105 tests.
+- After publishing, the same round trip against the real npm registry on a fresh clone,
+  with `npx @auis/cli@0.3.0`: `init` (the lockfile resolves `@auis/*` from
+  registry.npmjs.org) → the same seven places → `next build` → a pin and its `@Claude`
+  dry run → `uninstall` → `git status` clean. `npm audit` on the installed host lists
+  the same 17 advisories as the untouched host, none in `@auis/*`.
 - Unit tests (`packages/auis/test/install.test.mjs`) cover the same round trip on a
   fixture, a second `init` changing nothing, surgical removal after the user edits the
   touched files, a route the user changed, a host with no `.gitignore`, and refusing
   to overwrite an existing bridge route.
 
 Known gaps carried forward:
-- **Not on npm yet.** The four kit packages and `@auis/cli@0.3.0` wait for the owner's
-  publish (2FA): order and commands in `docs/RELEASING.md`. Until then `init` writes a
-  dependency the registry does not have.
+- The `@auis/server@0.1.0` tarball carries `bin/__tests__/mention-cli.test.mjs` (10 kB,
+  harmless). `files` now leaves it out; it goes with the next kit release.
 - The Agents panel lives in Auis's dot, which a host does not have. A host changes an
   agent's ceiling or switches it off through `PUT /api/review-bridge/agent-settings`.
   Claude starts on, with the `edit` ceiling (the trigger itself stays opt-in:
