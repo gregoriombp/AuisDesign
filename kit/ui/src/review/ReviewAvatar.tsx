@@ -5,7 +5,7 @@ import { getReviewAgent, getReviewAgentByHandle } from "@auis/core/agents"
 
 /**
  * Avatar for the Review Mode actors:
- *  · an agent   → its official mark (public/assets/agents/, from the registry)
+ *  · an agent   → its official mark (inline in the registry, @auis/core/agentMarks)
  *  · any human  → circle in the author's color with their initial
  *
  * The human branch is token-only (no raw hex) so it survives every brand theme

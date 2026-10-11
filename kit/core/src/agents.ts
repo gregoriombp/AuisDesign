@@ -7,6 +7,7 @@
 // floating Auis dot, the avatar mark and chip rendering for rendered mentions.
 // What each agent can RUN (CLI, ceilings, models) lives in ./agentRuntime.
 
+import { AGENT_MARKS } from "./agentMarks"
 import type { ReviewSkillSlug } from "./skills"
 import {
   REVIEW_AGENT_IDENTITIES,
@@ -49,7 +50,7 @@ export interface ReviewAgent {
   accentVar: string
   /** Material Symbol glyph — the "agent" gesture, never a robot. */
   icon: string
-  /** Official mark, served from public/assets/agents/ (ReviewAvatar, the "@" menu). */
+  /** Official mark as a data URI (ReviewAvatar, the "@" menu) — see agentMarks.ts. */
   mark: string
   canSubmitForApproval: boolean
   /** Skills this agent can run under the Edit ceiling. */
@@ -73,7 +74,7 @@ const AGENT_CONFIG: Record<
     tone: "amber",
     accentVar: "var(--au-purple-600)",
     icon: "agent",
-    mark: "/assets/agents/claude.svg",
+    mark: AGENT_MARKS.claude,
     skillSlugs: EXECUTOR_SKILLS,
   },
   codex: {
@@ -81,7 +82,7 @@ const AGENT_CONFIG: Record<
     tone: "neutral",
     accentVar: "var(--au-teal-600)",
     icon: "agent",
-    mark: "/assets/agents/openai.svg",
+    mark: AGENT_MARKS.codex,
     skillSlugs: EXECUTOR_SKILLS,
   },
   grok: {
@@ -89,7 +90,7 @@ const AGENT_CONFIG: Record<
     tone: "inverse",
     accentVar: "var(--fg-primary)",
     icon: "agent",
-    mark: "/assets/agents/grok.svg",
+    mark: AGENT_MARKS.grok,
     skillSlugs: EXECUTOR_SKILLS,
   },
 }

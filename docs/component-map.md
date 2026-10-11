@@ -50,7 +50,8 @@ starting line, not a gap.
    (Visa, Mastercard, Amex, Slack, WhatsApp). Auis ships **no** third-party logo registry
    and no brand illustrations — a DS component must never hardcode a mark (see AGENTS.md §4).
    The only marks in `public/assets/agents/` are the Review Bridge agents' (Claude, OpenAI,
-   Grok), rendered by the feature module `ReviewAvatar`, not by a DS component.
+   Grok). The review chrome (`@auis/ui`) shows an inline copy of them
+   (`kit/core/src/agentMarks.ts`), never a DS component.
 
 ---
 
