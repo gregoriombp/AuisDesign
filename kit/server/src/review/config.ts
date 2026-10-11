@@ -84,11 +84,21 @@ export function reviewPaths() {
  * (Next) moves somewhere unrelated to node_modules.
  */
 function installedMentionRunner(): string | null {
-  try {
-    const require = createRequire(path.join(process.cwd(), "package.json"));
-    const file = require.resolve("@auis/server/bin/mention-run.mjs");
-    return fs.existsSync(file) ? file : null;
-  } catch {
-    return null;
+  const BIN = "@auis/server/bin/mention-run.mjs";
+  const fromProject = createRequire(path.join(process.cwd(), "package.json"));
+  const attempts = [
+    () => fromProject.resolve(BIN),
+    // pnpm does not hoist: @auis/server is only reachable from @auis/next,
+    // the dependency `auis init` adds.
+    () => createRequire(fromProject.resolve("@auis/next/package.json")).resolve(BIN),
+  ];
+  for (const attempt of attempts) {
+    try {
+      const file = attempt();
+      if (fs.existsSync(file)) return file;
+    } catch {
+      // not installed this way; try the next
+    }
   }
+  return null;
 }
