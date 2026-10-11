@@ -394,6 +394,10 @@ packages from a local Verdaccio registry built from this branch:
 - `uninstall` restored every file and `git status` came back clean, including ignored
   files other than `node_modules` and `.next`. The comment was in the project's backup
   folder, next to the bridge's own snapshots.
+- `doctor` on the same clone: the five `review.*` rows say supported, which is what the
+  host did; the plan it prints is the seven places `init` touched.
+- Scaffold proof: the published `@auis/cli@0.2.2` scaffolding from this branch gives a
+  project with `kit/` (and `kit/server/bin`), which typechecks and passes the 105 tests.
 - Unit tests (`packages/auis/test/install.test.mjs`) cover the same round trip on a
   fixture, a second `init` changing nothing, surgical removal after the user edits the
   touched files, a route the user changed, a host with no `.gitignore`, and refusing
@@ -410,7 +414,14 @@ Known gaps carried forward:
 - `uninstall` leaves the packages in `node_modules` until the next install, by design:
   running one would rewrite the lockfile it just restored.
 - Only the Next App Router. `--only` accepts `review` alone; Edit, State Mode and the
-  flow driver are not installable into a host.
+  flow driver are not installable into a host. `doctor` lists which rows `init` brings
+  (`installable.capabilities`).
+- The peers say React 18+ and Next 14+. Only React 19 / Next 16 was run; 18 is inferred
+  from the code (no React 19-only API in `kit/ui` or `kit/next`, refs through
+  `forwardRef`).
+- Only npm was run end to end. Under pnpm `@auis/server` is not hoisted; the route finds
+  the runner through `@auis/next` instead (checked with a pnpm install from the local
+  registry, not with a running host).
 - `auis init` adds `.auis/manifest.json` as an untracked file. Committing it lets a
   teammate run `uninstall` too (without `.auis/originals/`, which is local, every file
   takes the surgical path).
