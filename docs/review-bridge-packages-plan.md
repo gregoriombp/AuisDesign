@@ -141,6 +141,13 @@ typechecks and passes the 95 tests.
 Known gaps carried forward: the auth seam is still "edit `kit/server/src/review/session.ts`"
 (a `resolveSession` option comes with wave 3/4); the edit and flow bridges still live
 in `app/api/`.
+- `configureReviewServer()` keeps the options at module level. Next may bundle the
+  catch-all and other routes (`app/api/flow-suggestions`) with separate instances of
+  `@auis/server`, so options given to `createReviewRoute()` would not reach
+  `getBridgeSession` or the doc store imported elsewhere. Harmless today (everything
+  runs on the defaults). Wave 3 passes `dataDir: ".auis/data"` and later
+  `resolveSession`: pass the config explicitly there instead of relying on the
+  singleton.
 
 ---
 
