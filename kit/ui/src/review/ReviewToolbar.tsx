@@ -188,7 +188,6 @@ function AccountAvatarMenu() {
 export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
   const chromeHidden = useChromeHidden()
   const active = useReviewStore((s) => s.active)
-  const identity = useReviewStore((s) => s.identity)
   const sheetOpen = useReviewStore((s) => s.sheetOpen)
   const toggleSheet = useReviewStore((s) => s.toggleSheet)
   const toggleActive = useReviewStore((s) => s.toggleActive)
@@ -211,14 +210,21 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
     null
   )
 
+  // Measured whenever either side changes size — not only when its content
+  // changes: the web fonts usually arrive after mount (in a host the chrome
+  // links them itself), and a width taken with the fallback font left the
+  // shell too wide or too narrow until the next re-measure.
   React.useLayoutEffect(() => {
-    if (pillRef.current && barRef.current) {
-      setWidths({
-        pill: pillRef.current.offsetWidth,
-        bar: barRef.current.offsetWidth,
-      })
-    }
-  }, [identity, openCount, inReviewCount])
+    const pill = pillRef.current
+    const bar = barRef.current
+    if (!pill || !bar) return
+    const observer = new ResizeObserver(() =>
+      setWidths({ pill: pill.offsetWidth, bar: bar.offsetWidth })
+    )
+    observer.observe(pill)
+    observer.observe(bar)
+    return () => observer.disconnect()
+  }, [])
 
   const target = widths ? (active ? widths.bar : widths.pill) : undefined
 
