@@ -23,8 +23,8 @@ manifest and a data folder) and nothing else.
 | Wave | What | Status |
 |---|---|---|
 | 1 | `@auis/core` + `@auis/server` + `@auis/next` (server side): the 16 Review Bridge routes run behind one `handle(Request)` | **done** (2026-10-10) |
-| 0 | Anchor-survival experiment on real apps (gate before wave 2) | **next** |
-| 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | not started |
+| 0 | Anchor-survival experiment on real apps (gate before wave 2) | **done** (2026-10-10): passed, see `docs/anchor-survival.md` |
+| 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **next** |
 | 3 | `auis init --only review` / `uninstall` + publishing the packages | not started |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
 
@@ -164,6 +164,13 @@ shadcn/Radix/zustand), then a Vite SPA and one non-React app.
 
 **Gate.** If survival is poor, fix anchoring first. Wave 2 does not start until the
 sheet exists.
+
+**Result (2026-10-10).** The sheet is [`docs/anchor-survival.md`](anchor-survival.md),
+produced by `scripts/anchor-survival.mjs`. 125 of 130 pins survived. Every failure was a
+data change in a list whose rows repeat the same label (a row inserted or removed moves
+the pin to the neighbour), which is not specific to any host. Layout, routers, reloads,
+SVG and a Vue app came through intact. The gate passes. The list fix (row context in the
+fingerprint) is tracked in the sheet as its own follow-up, outside wave 2.
 
 ---
 
