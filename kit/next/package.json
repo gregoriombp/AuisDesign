@@ -1,0 +1,48 @@
+{
+  "name": "@auis/next",
+  "version": "0.1.0",
+  "description": "Plugs the Auis Review Bridge into a Next.js App Router app: one catch-all route and one element in the root layout.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Gregório Pinheiro — Design Engineer UX/UI",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoriombp/AuisDesign.git",
+    "directory": "kit/next"
+  },
+  "homepage": "https://github.com/gregoriombp/AuisDesign/tree/main/kit/next#readme",
+  "bugs": {
+    "url": "https://github.com/gregoriombp/AuisDesign/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "prepack": "node ../scripts/build.mjs next"
+  },
+  "dependencies": {
+    "@auis/core": "^0.1.0",
+    "@auis/server": "^0.1.0",
+    "@auis/ui": "^0.1.0"
+  },
+  "peerDependencies": {
+    "next": ">=14",
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
+}

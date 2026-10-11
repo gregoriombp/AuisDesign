@@ -62,6 +62,7 @@
   "exclude": [
     "node_modules",
     "review-bridge",
-    "flow-bridge"
+    "flow-bridge",
+    "kit/*/dist"
   ]
 }

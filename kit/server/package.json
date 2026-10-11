@@ -1,0 +1,46 @@
+{
+  "name": "@auis/server",
+  "version": "0.1.0",
+  "description": "The Review Bridge server with no framework in it: one handle(Request) for every endpoint, the disk store, backups and the agent mention trigger.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Gregório Pinheiro — Design Engineer UX/UI",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoriombp/AuisDesign.git",
+    "directory": "kit/server"
+  },
+  "homepage": "https://github.com/gregoriombp/AuisDesign/tree/main/kit/server#readme",
+  "bugs": {
+    "url": "https://github.com/gregoriombp/AuisDesign/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./bin/*": "./bin/*",
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "prepack": "node ../scripts/build.mjs server"
+  },
+  "bin": {
+    "auis-mention-run": "bin/mention-run.mjs"
+  },
+  "dependencies": {
+    "@auis/core": "^0.1.0"
+  }
+}

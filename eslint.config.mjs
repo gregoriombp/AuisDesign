@@ -18,6 +18,7 @@ const eslintConfig = [
       "review-bridge/**",
       "flow-bridge/**",
       "storage/**",
+      "kit/*/dist/**",
       "public/**",
       "next-env.d.ts",
     ],
