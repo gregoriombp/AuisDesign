@@ -20,7 +20,7 @@ was never here.
 |---|---|---|
 | What | The **26** `Au*` files in `components/ui/`, plus 4 Patterns | Whatever you build |
 | Does it ship? | **Yes** — it is the tool's own UI | **No — empty on purpose** |
-| Why it exists | The Review Bridge, Auis's own mark, and the primitives those stand on | Your product |
+| Why it exists | The builder's modes and pages, Auis's own mark, and the primitives those stand on | Your product |
 | Can I import it? | Yes — freely | — |
 | Registered where | Already here (see [Layer A](#layer-a--auis-builder-components-what-ships)) | `/auis/styleguide`, as you add it (see [Layer B](#layer-b--your-products-components-empty-on-purpose)) |
 
@@ -58,9 +58,14 @@ starting line, not a gap.
 # Layer A — Auis builder components (what ships)
 
 The 26 `Au*` in `components/ui/`. They exist because the **Auis builder** needed them: the
-Review Bridge is built out of them, and the primitives underneath exist to serve it. You may
-import and reuse any of them in your own screens — just don't mistake this for a product
-catalog.
+Edit and State modes, the hub and the styleguide are built out of them. You may import and
+reuse any of them in your own screens — just don't mistake this for a product catalog.
+
+> **The Review Bridge chrome is not built from these any more.** It ships as `@auis/ui`
+> (`kit/ui`) so it can install into apps without Auis's components, and carries its own
+> copies of the primitives it needs in `kit/ui/src/primitives/`. To change how the review
+> chrome looks, edit those (and `kit/ui/src/styles/chrome.source.css`), not the `Au*`
+> here.
 
 > **Auis ships no product shell.** There is no dashboard layout, no sidebar, no header, no
 > nav rail, no notifications panel — and no AI copilot. Those belonged to the product Auis was
@@ -78,7 +83,7 @@ catalog.
 
 | Cluster | Components | What it powers |
 |---|---|---|
-| **Review Bridge** | `AuMentionMenu` · `AuMentionChip` | The comment/review layer: `@agent` / `/skill` picker and the chips those commands render as inside comment text. |
+| **Review Bridge** | `AuMentionMenu` · `AuMentionChip` | The `@agent` / `/skill` picker and the chips those commands render as inside comment text — for app pages that build review surfaces (the styleguide shows them). The review chrome itself uses its own copies in `kit/ui`. |
 | **Brand** | `AuLogo` | Auis's own mark — the builder chrome only. It renders the seeded brand from `app/auis/_data/brand.ts` (the user's logo, once `/auis/welcome` → `/api/setup` writes the overlay; the Auis default until then). No third-party logos and no illustrations ship: those belong to the product you build. |
 | **Primitives & feedback** | The remaining 18 | The bricks the two clusters above stand on. Genuinely generic — this is the part most worth reusing. |
 
