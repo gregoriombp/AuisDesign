@@ -3,8 +3,8 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import { Icon } from "@/components/ui/Icon"
-import { useGlobalHotkey } from "@/lib/hooks/useGlobalHotkey"
-import { useReviewStore } from "@/lib/auis-review/store"
+import { useGlobalHotkey } from "@auis/ui/useGlobalHotkey"
+import { useReviewStore } from "@auis/ui/review/store"
 import { useEditStore } from "@/lib/auis-edit/store"
 import { OverlayApplier } from "@/lib/auis-edit/applier"
 import {

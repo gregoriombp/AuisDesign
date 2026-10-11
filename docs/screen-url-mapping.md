@@ -104,19 +104,19 @@ onto scenarios needs an explicit inverse.
 **1. Old pins go orphan.** Comments saved before the screen had the param
 recorded the bare path. Once the live URL always carries the param, strict
 comparison exiles every one of them. `LEGACY_AXES` in
-[`lib/auis-review/urlMatch.ts`](../lib/auis-review/urlMatch.ts) is a literal
+[`kit/ui/src/review/urlMatch.ts`](../kit/ui/src/review/urlMatch.ts) is a literal
 table for this: a stored comment that says *nothing* about the axis matches any
 value of it, while a new pin stays strict. The looseness is one-directional — it
 belongs to the stored side, never to the current screen. **Add an entry whenever
 a screen with live comments starts writing a param**, and cover it in
-`lib/auis-review/__tests__/urlMatch.test.ts`.
+`kit/ui/src/review/__tests__/urlMatch.test.ts`.
 
 **2. `useSearchParams` does not see `replaceState(window.history.state, …)`.**
 Passing Next's own history state as `data` makes the write invisible to the App
 Router, so anything reading the router snapshot reports the address of the last
 real navigation. `mirror` writes with `null` and the router follows. Either way,
 the toolbar and `useCurrentUrl` read
-[`useLiveLocation`](../lib/auis-review/liveLocation.ts), which sees every write.
+[`useLiveLocation`](../kit/ui/src/liveLocation.ts), which sees every write.
 Without it the canvas hides the pin that was just dropped, because the pin knows
 the live URL and the canvas does not.
 

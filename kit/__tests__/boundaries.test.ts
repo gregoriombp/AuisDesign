@@ -62,9 +62,10 @@ test("@auis/next imports only the other kit packages, Next and React", () => {
   );
 });
 
-// What a host installs alongside the chrome. Adding to this list adds a
-// dependency to every host — keep it short.
-const UI_DEPENDENCIES = ["react", "react-dom", "zustand"];
+// What a host installs alongside the chrome (plus @radix-ui/*). Adding to this
+// list adds a dependency to every host — keep it short. clsx + tailwind-merge
+// keep `cn()` merging classes exactly as the primitives were written for.
+const UI_DEPENDENCIES = ["react", "react-dom", "zustand", "clsx", "tailwind-merge"];
 
 test("@auis/ui imports only @auis/core, React and its own dependencies", () => {
   assert.deepEqual(

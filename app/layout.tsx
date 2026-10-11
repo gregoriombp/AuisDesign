@@ -6,7 +6,7 @@ import { getBrand } from "@/app/auis/_data/brand"
 import { AuisDot } from "@/components/auis/AuisDot"
 import { FlowStateDriver } from "@/components/auis/FlowStateDriver"
 import { EditModeProvider } from "@/components/auis-edit/EditModeProvider"
-import { ReviewModeProvider } from "@/components/auis-review/ReviewModeProvider"
+import { AuisReview } from "@/components/auis/AuisReview"
 import { StatesModeProvider } from "@/components/auis-states/StatesModeProvider"
 import { AuToastProvider } from "@/components/ui/AuToast"
 import { NextReviewRouter } from "@auis/next/client"
@@ -53,7 +53,7 @@ export default async function RootLayout({
           <AuToastProvider>
             <NextReviewRouter>
               {children}
-              <ReviewModeProvider />
+              <AuisReview />
               <EditModeProvider />
               <StatesModeProvider />
               <FlowStateDriver />

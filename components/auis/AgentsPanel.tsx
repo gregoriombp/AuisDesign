@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 
-import { ReviewAvatar } from "@/components/auis-review/ReviewAvatar"
+import { ReviewAvatar } from "@auis/ui/review/ReviewAvatar"
 import { AuSegmented } from "@/components/ui/AuSegmented"
 import { AuToggle } from "@/components/ui/AuToggle"
 import { Icon } from "@/components/ui/Icon"
@@ -15,7 +15,7 @@ import {
 import {
   agentSettingsOf,
   useAgentSettingsStore,
-} from "@/lib/auis-review/agentSettingsStore"
+} from "@auis/ui/review/agentSettingsStore"
 import { cn } from "@/lib/utils"
 
 const PERMISSION_LABEL: Record<ReviewAgentPermission, string> = {

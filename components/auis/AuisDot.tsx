@@ -13,13 +13,13 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { useBrand } from "@/app/auis/_data/BrandProvider";
-import { useReviewStore } from "@/lib/auis-review/store";
+import { useReviewStore } from "@auis/ui/review/store";
 import { useEditStore } from "@/lib/auis-edit/store";
 import { useStatesStore } from "@/lib/auis-states/store";
 import {
   useAgentSettingsStore,
   agentSettingsOf,
-} from "@/lib/auis-review/agentSettingsStore";
+} from "@auis/ui/review/agentSettingsStore";
 import { REVIEW_AGENTS } from "@auis/core/agents";
 import { useChromeHidden } from "@auis/ui/router";
 import { AgentsPanel } from "./AgentsPanel";

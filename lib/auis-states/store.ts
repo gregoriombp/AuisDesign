@@ -1,7 +1,7 @@
 "use client"
 
 import { create } from "zustand"
-import { useReviewStore } from "@/lib/auis-review/store"
+import { useReviewStore } from "@auis/ui/review/store"
 import { useEditStore } from "@/lib/auis-edit/store"
 
 // Ephemeral flag (off after a reload). The screen state lives in the URL; the

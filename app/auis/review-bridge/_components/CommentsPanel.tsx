@@ -3,10 +3,10 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ReviewAvatar } from "@/components/auis-review/ReviewAvatar"
-import { AuthorName } from "@/components/auis-review/PersonHover"
-import { BacklogComposer } from "@/components/auis-review/BacklogComposer"
-import { ReviewFilterControls } from "@/components/auis-review/ReviewFilterBar"
+import { ReviewAvatar } from "@auis/ui/review/ReviewAvatar"
+import { AuthorName } from "@auis/ui/review/PersonHover"
+import { BacklogComposer } from "@auis/ui/review/BacklogComposer"
+import { ReviewFilterControls } from "@auis/ui/review/ReviewFilterBar"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuDropdownMenu, type AuDropdownItem } from "@/components/ui/AuDropdownMenu"
 import {
@@ -20,15 +20,15 @@ import { AuInput } from "@/components/ui/AuInput"
 import { AuPill } from "@/components/ui/AuPill"
 import { AuStatCard } from "@/components/ui/AuStatCard"
 import { Icon } from "@/components/ui/Icon"
-import { useReviewStore } from "@/lib/auis-review/store"
-import { permalinkPath } from "@/lib/auis-review/permalink"
+import { useReviewStore } from "@auis/ui/review/store"
+import { permalinkPath } from "@auis/ui/review/permalink"
 import {
   DEFAULT_REVIEW_FILTERS,
   applyReviewFilters,
   collectAuthorOptions,
   collectPageOptions,
   type ReviewListFilters,
-} from "@/lib/auis-review/commentFilters"
+} from "@auis/ui/review/commentFilters"
 import type { ReviewComment } from "@auis/core/types"
 
 // "backlog" = Future ideas — their home is HERE now (they left the drawer).

@@ -3,9 +3,9 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useStatesStore } from "@/lib/auis-states/store"
-import { useReviewStore } from "@/lib/auis-review/store"
+import { useReviewStore } from "@auis/ui/review/store"
 import { useEditStore } from "@/lib/auis-edit/store"
-import { useGlobalHotkey } from "@/lib/hooks/useGlobalHotkey"
+import { useGlobalHotkey } from "@auis/ui/useGlobalHotkey"
 import { matchScreenStates } from "@/lib/auis-states/registry"
 import { StatesToolbar } from "./StatesToolbar"
 

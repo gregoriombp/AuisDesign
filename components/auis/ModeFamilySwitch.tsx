@@ -1,7 +1,7 @@
 "use client"
 
 import { Icon } from "@/components/ui/Icon"
-import { useReviewStore } from "@/lib/auis-review/store"
+import { useReviewStore } from "@auis/ui/review/store"
 import { useEditStore } from "@/lib/auis-edit/store"
 import { useStatesStore } from "@/lib/auis-states/store"
 

@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation"
 import type { Node, NodeProps } from "@xyflow/react"
 
 import { Icon } from "@/components/ui/Icon"
-import { useReviewStore } from "@/lib/auis-review/store"
+import { useReviewStore } from "@auis/ui/review/store"
 import { formatRelative } from "@auis/core/format"
 import { makeId } from "@auis/core/storage/utils"
-import { REVIEW_PALETTE, SCHEMA_VERSION } from "@/components/auis-review/constants"
+import { REVIEW_PALETTE, SCHEMA_VERSION } from "@auis/ui/review/constants"
 import type { ReviewComment, ReviewPoint } from "@auis/core/types"
 
 /* ─────────────────────────────────────────────────────────────────────
