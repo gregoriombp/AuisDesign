@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { useLiveLocation } from "@/lib/auis-review/liveLocation"
+import { useLiveLocation } from "@auis/ui/liveLocation"
 import { Icon } from "@/components/ui/Icon"
 import { AuSegmented } from "@/components/ui/AuSegmented"
 import {

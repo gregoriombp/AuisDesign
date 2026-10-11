@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { usePathname } from "next/navigation"
+import { useReviewPathname } from "@auis/ui/router"
 import type { ReviewComment } from "@auis/core/types"
 import { useReviewStore } from "./store"
-import { useLiveLocation } from "./liveLocation"
+import { useLiveLocation } from "@auis/ui/liveLocation"
 import { canonicalizeReviewUrl, matchesCurrentReviewUrl } from "./urlMatch"
 
 /**
@@ -16,7 +16,7 @@ import { canonicalizeReviewUrl, matchesCurrentReviewUrl } from "./urlMatch"
  * server only the pathname is left.
  */
 export function useCurrentUrl(): string {
-  const pathname = usePathname() ?? ""
+  const pathname = useReviewPathname()
   const live = useLiveLocation()
   return canonicalizeReviewUrl(live || pathname)
 }

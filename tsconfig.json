@@ -39,6 +39,15 @@
       ],
       "@auis/next": [
         "./kit/next/src/index.ts"
+      ],
+      "@auis/next/*": [
+        "./kit/next/src/*"
+      ],
+      "@auis/ui": [
+        "./kit/ui/src/index.ts"
+      ],
+      "@auis/ui/*": [
+        "./kit/ui/src/*"
       ]
     },
     "target": "ES2017"

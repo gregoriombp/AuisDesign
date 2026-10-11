@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useReviewNavigate } from "@auis/ui/router"
 import { AuButton } from "@/components/ui/AuButton"
 import { AuDropdownMenu, type AuDropdownItem } from "@/components/ui/AuDropdownMenu"
 import { AuPill } from "@/components/ui/AuPill"
@@ -262,7 +262,7 @@ export function ReviewCommentCard({
   onToggleSelected,
   archived = false,
 }: Props) {
-  const router = useRouter()
+  const navigate = useReviewNavigate()
   const selectedId = useReviewStore((s) => s.selectedCommentId)
   const selectComment = useReviewStore((s) => s.selectComment)
   const setSheetOpen = useReviewStore((s) => s.setSheetOpen)
@@ -324,7 +324,7 @@ export function ReviewCommentCard({
     setActive(true)
     setSheetOpen(true)
     if (!isOnThisPage) {
-      router.push(permalinkPath(comment))
+      navigate(permalinkPath(comment))
       return
     }
     const scrollToStoredY = () => {

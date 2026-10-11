@@ -21,7 +21,7 @@ import {
   agentSettingsOf,
 } from "@/lib/auis-review/agentSettingsStore";
 import { REVIEW_AGENTS } from "@auis/core/agents";
-import { useBuilderChromeHidden } from "@/lib/auis/useBuilderChromeHidden";
+import { useChromeHidden } from "@auis/ui/router";
 import { AgentsPanel } from "./AgentsPanel";
 
 /**
@@ -30,7 +30,7 @@ import { AgentsPanel } from "./AgentsPanel";
  * model per agent, which is what the mention trigger obeys.
  */
 export function AuisDot() {
-  // useSearchParams (through useBuilderChromeHidden) requires Suspense on prerender.
+  // useChromeHidden reads the query, which requires Suspense on prerender.
   return (
     <React.Suspense fallback={null}>
       <AuisDotGate />
@@ -40,7 +40,7 @@ export function AuisDot() {
 
 /** `?chrome=0` (state matrix iframes, the PDF generator) hides the dot. */
 function AuisDotGate() {
-  const chromeHidden = useBuilderChromeHidden();
+  const chromeHidden = useChromeHidden();
   if (chromeHidden) return null;
   return <AuisDotInner />;
 }

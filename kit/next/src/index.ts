@@ -9,8 +9,9 @@
 //   export const GET = route.GET  // …and POST, PUT, PATCH, DELETE
 //
 // `runtime` and `dynamic` have to be written in the host's file: Next reads
-// them statically. The browser half of this adapter (the router hooks the
-// review UI needs) arrives with @auis/ui — see docs/review-bridge-packages-plan.md.
+// them statically. The browser half of this adapter (the router the review
+// chrome reads) is `@auis/next/client` — kept apart so this server entry never
+// pulls a client module.
 import { createReviewHandler, type ReviewServerOptions } from "@auis/server";
 
 type RouteHandler = (request: Request) => Promise<Response>;

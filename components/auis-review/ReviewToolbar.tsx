@@ -9,7 +9,7 @@ import { useStopDismiss } from "@/lib/auis-review/useStopDismiss"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewAvatar } from "./ReviewAvatar"
 import { ModeFamilySwitch } from "@/components/auis/ModeFamilySwitch"
-import { useBuilderChromeHidden } from "@/lib/auis/useBuilderChromeHidden"
+import { useChromeHidden } from "@auis/ui/router"
 import type { ReviewMode } from "@auis/core/types"
 
 // Mirrors the motion tokens in globals.css (--dur-slow + --ease-out) so the bar
@@ -148,7 +148,7 @@ function AccountAvatarMenu() {
 }
 
 export function ReviewToolbar() {
-  const chromeHidden = useBuilderChromeHidden()
+  const chromeHidden = useChromeHidden()
   const active = useReviewStore((s) => s.active)
   const identity = useReviewStore((s) => s.identity)
   const sheetOpen = useReviewStore((s) => s.sheetOpen)

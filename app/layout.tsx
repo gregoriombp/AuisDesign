@@ -9,6 +9,7 @@ import { EditModeProvider } from "@/components/auis-edit/EditModeProvider"
 import { ReviewModeProvider } from "@/components/auis-review/ReviewModeProvider"
 import { StatesModeProvider } from "@/components/auis-states/StatesModeProvider"
 import { AuToastProvider } from "@/components/ui/AuToast"
+import { NextReviewRouter } from "@auis/next/client"
 
 export const metadata: Metadata = {
   title: "Auis",
@@ -50,12 +51,14 @@ export default async function RootLayout({
       <body>
         <BrandProvider value={brand}>
           <AuToastProvider>
-            {children}
-            <ReviewModeProvider />
-            <EditModeProvider />
-            <StatesModeProvider />
-            <FlowStateDriver />
-            {dotEnabled ? <AuisDot /> : null}
+            <NextReviewRouter>
+              {children}
+              <ReviewModeProvider />
+              <EditModeProvider />
+              <StatesModeProvider />
+              <FlowStateDriver />
+              {dotEnabled ? <AuisDot /> : null}
+            </NextReviewRouter>
           </AuToastProvider>
         </BrandProvider>
       </body>

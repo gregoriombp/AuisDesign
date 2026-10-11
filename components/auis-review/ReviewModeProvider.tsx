@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { usePathname } from "next/navigation"
+import { useReviewPathname } from "@auis/ui/router"
 import { useGlobalHotkey } from "@/lib/hooks/useGlobalHotkey"
 import { useReviewStore } from "@/lib/auis-review/store"
 import { resolveAnchoredElement } from "@/lib/auis-review/elementAnchor"
@@ -42,7 +42,7 @@ export function ReviewModeProvider() {
   // Separate from "already handled": marking before the async work blocked the
   // second attempt, and the effect re-runs on every store poll (4s).
   const permalinkRunningRef = React.useRef<string | null>(null)
-  const pathname = usePathname()
+  const pathname = useReviewPathname()
 
   // Record the reveal trail (clicks on triggers: buttons that open modals,
   // wizard options, tabs) all the time — review active or not — so a comment
