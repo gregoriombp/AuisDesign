@@ -8,7 +8,7 @@
 
 import assert from "node:assert/strict"
 import { spawnSync } from "node:child_process"
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { tmpdir } from "node:os"
 import { after, describe, it } from "node:test"
@@ -287,6 +287,26 @@ describe("ds:check hook", () => {
     const root = makeRepo({ "components/P.tsx": palette })
     post(root, "components/P.tsx")
     assert.equal(stop(root, { stop_hook_active: true }).code, 0)
+  })
+
+  it("stop: blocks at most once per turn, even when new findings appear meanwhile", () => {
+    const root = makeRepo({ "components/P.tsx": `export const P = () => <div className="bg-blue-500" />\n` })
+    post(root, "components/P.tsx")
+    assert.equal(stop(root).code, 2)
+    // The agent keeps going and leaves a new turn-tier break behind (say, via Bash,
+    // which the edit hook never sees). Claude Code now sends stop_hook_active: true.
+    write(root, "components/P.tsx", `export const P = () => <div className="bg-red-500 text-gray-700" />\n`)
+    const again = stop(root, { stop_hook_active: true })
+    assert.equal(again.code, 0)
+    assert.equal(again.stderr, "")
+  })
+
+  it("is off by default: checking and running the hook never write settings", () => {
+    const root = makeRepo({ "components/Bad.tsx": BAD })
+    cli(root)
+    post(root, "components/Bad.tsx")
+    stop(root)
+    assert.equal(existsSync(join(root, ".claude")), false)
   })
 
   it("stop: sessions do not share state", () => {

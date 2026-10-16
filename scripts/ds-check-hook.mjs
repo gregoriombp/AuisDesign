@@ -12,6 +12,10 @@
  *          only what the agent has not been told yet. Skips when the agent is
  *          already continuing because of a stop hook, so it can never trap a turn.
  *
+ * OPTIONAL and OFF by default: nothing installs it but `on`. It is for agents that
+ * drift from the rules (external hosts, other agents); agents in this repo already
+ * follow them.
+ *
  *   on | off | status   install / remove / show the hooks in
  *          .claude/settings.local.json (personal, gitignored — never the shared
  *          settings.json). Runtime kill switch: AUIS_DS_CHECK_HOOK=0.
