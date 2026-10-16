@@ -38,7 +38,7 @@ an agent for something, it finds the reference immediately — and stops polluti
   kept on disk as a record of the initial setup, with a neutralized `description` (they no
   longer trigger) and a banner in the body redirecting to the `auis-*` ones.
 - **Guard-rail:** [`scripts/ds-check.mjs`](../scripts/ds-check.mjs) (`npm run ds:check`,
-  warn-only) — catches hardcoded hex, arbitrary values, raw `<svg>`, a raw primitive that
+  exits 2 on findings; `npm run ds:hook -- on` runs it as an agent hook) — catches hardcoded hex, arbitrary values, raw `<svg>`, a raw primitive that
   has an Au wrapper, and index drift.
 - Stale cleanup: the dead `knowledge-os` route removed from `PRODUCT_CONTEXT.md`.
 
@@ -89,8 +89,8 @@ everything into `Icon`. Triage each one into two destinations:
 - **Custom animation / visual** (hero animations, decorative orbs, brand
   illustrations) → **these are not icons.** They keep SVG/Canvas/WebGL and,
   when reused, become a **dedicated `Au*` component**. No such component ships in this
-  snapshot: `ds:check` allowlists raw `<svg>` only in `*Logo.tsx` (Auis's own mark) and
-  `Icon.tsx`. The task here is only to assess case-by-case whether some page-level `<svg>`
+  snapshot: `ds:check` exempts raw `<svg>` only in `*Logo.tsx` (Auis's own mark) and
+  `Icon.tsx`, both declared with a reason in `.auis/ds-check.json`. The task here is only to assess case-by-case whether some page-level `<svg>`
   still needs to be formalized as a component.
 
 Rule: the **triage** decides the destination of each `<svg>`; **only the normal ones become

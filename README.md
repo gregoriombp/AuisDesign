@@ -146,7 +146,8 @@ npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 | `npm test` | Node unit tests (review identities, flow-suggestion integrity) |
 | `npm run states:pdf` | Print the State Mode matrix to `auis-states-matrix.pdf` (needs a Chromium; see the script) |
 | `npm run build` / `typecheck` / `lint` | Build / types / lint |
-| `npm run ds:check` | Design-system lint (hardcode debt, hand-rolled overlays) |
+| `npm run ds:check` | Design-system lint (hardcode debt, hand-rolled overlays). Takes file paths and `--json`; exits `2` on findings, `1` if the scan fails. Exceptions, with a reason, in `.auis/ds-check.json` or a `ds-check-disable` comment |
+| `npm run ds:hook -- on` | Optional, off by default: run `ds:check` as Claude Code hooks while an agent works (objective rules after each edit, the full set once per turn, never blocking twice). Meant for agents that drift from the rules. Writes `.claude/settings.local.json`; `off` removes it, `status` |
 | `npm run skills:sync` / `skills:catalog` | Regenerate agent discovery trees / registry + catalog |
 
 ## Architecture
