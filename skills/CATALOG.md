@@ -1,16 +1,17 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **31 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **32 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
-## Design System (11)
+## Design System (12)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `auis-audit` | 🟣🟠🌐 | cowork | ⭐ | Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app compon |
 | `auis-brand` | 🟣🟠 | repo | ⭐ | Establishes a product's brand identity: app name, logo or mark, and one-line positioning. Reads the /auis/welcome intake or interviews for missing fac |
 | `auis-component` | 🟣🟠🌐 | cowork | ⭐ | Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always check |
+| `auis-critique` | 🟣🟠 | repo | — | Design-quality critique of one route, delivered as Review Mode pins instead of a throwaway report. Reads AGENTS.md, PRODUCT_CONTEXT.md and the route ( |
 | `auis-design-system-audit` | 🟣🟠 | repo | — | Audit the Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage. |
 | `auis-design-system-foundation` | 🟣🟠 | repo | — | Bootstrap or update the Auis design system foundation from a visual reference. This is the only skill allowed to create or change tokens. |
 | `auis-foundation` | 🟣🟠🌐 | cowork | ⭐ | Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Be |
@@ -85,4 +86,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 31: 30 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 8 have their own Codex variant (◐).
+Of the 32: 31 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 8 have their own Codex variant (◐).
