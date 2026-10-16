@@ -29,8 +29,9 @@ review-bridge/data/. The bridge base is ${BRIDGE_BASE:-http://127.0.0.1:3000};
 BRIDGE_AGENT_TOKEN is sent when set. Pins are signed as the agent named by
 AGENT_ID (default "claude"); the server stamps kind, color and status "open".
 
-Re-running is safe: a finding whose first line already exists as an open,
-in-review or backlog comment on the same route path is skipped.
+Re-running is safe: a finding is skipped when its first line already exists
+as an open, in-review or backlog comment on the same route path, or when this
+agent already has an active pin on the same element of the same URL.
 """
 
 import json
@@ -116,14 +117,25 @@ def main():
     ):
         fail(f"health check failed at {bridge} ({status}: {health})")
 
-    # Existing pins, to skip what an earlier run already filed.
-    existing = set()
+    # Existing pins, to skip what an earlier run already filed. Two keys: the
+    # same first line on the same route path, or this agent's pin on the same
+    # element of the same URL (a rerun that reworded the title). Only active
+    # comments count; an archived one means the problem was handled.
+    existing, anchored = set(), set()
     for st in ("open", "in_review", "backlog"):
         status, res = request("GET", f"{bridge}/comments?status={st}&view=preview")
         if status != 200:
             fail(f"could not list {st} comments ({status}: {res})")
         for c in res.get("comments", []):
             existing.add((c["url"].split("?")[0], first_line(c.get("text"))))
+    for url in sorted({(f.get("capture") or {}).get("url") for f in findings} - {None}):
+        status, res = request("GET", f"{bridge}/comments?url={urllib.parse.quote(url, safe='')}")
+        if status != 200:
+            fail(f"could not list comments on {url} ({status}: {res})")
+        for c in res.get("comments", []):
+            sel = ((c.get("anchor") or {}).get("el") or {}).get("selector")
+            if sel and c.get("authorId") == agent_id and c.get("status") in ("open", "in_review", "backlog"):
+                anchored.add((url, sel))
 
     pinned, skipped = [], []
     for f in findings:
@@ -141,8 +153,12 @@ def main():
             continue
         text = pin_text(f)
         key = (cap["url"].split("?")[0], first_line(text))
+        sel = ((cap.get("anchor") or {}).get("el") or {}).get("selector")
         if key in existing:
             skipped.append((f["title"], "already pinned on this route"))
+            continue
+        if (cap["url"], sel) in anchored:
+            skipped.append((f["title"], "this agent already has a pin on that element"))
             continue
         if len(pinned) >= MAX_PINS:
             skipped.append((f["title"], f"over the {MAX_PINS}-pin cap; list it in the summary"))
@@ -180,12 +196,14 @@ def main():
         if dry:
             pinned.append((cid, cap["url"], first_line(text)))
             existing.add(key)
+            anchored.add((cap["url"], sel))
             continue
         status, res = request("PUT", f"{bridge}/comments/{urllib.parse.quote(cid)}", body, agent_id)
         if status != 200 or not res.get("ok"):
             skipped.append((f["title"], f"bridge said {status}: {res}"))
             continue
         existing.add(key)
+        anchored.add((cap["url"], sel))
         pinned.append((cid, cap["url"], first_line(text)))
 
     label = "Would pin" if dry else "Pinned"

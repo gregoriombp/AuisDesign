@@ -264,9 +264,10 @@ BRIDGE_BASE=http://127.0.0.1:<port> AGENT_ID=claude \
 What the poster does, so you can reason about failures:
 
 - checks `/health` and refuses a bridge that is not this schema;
-- lists open, in-review and backlog comments and **skips any finding whose
-  first line already exists on the same route path**, so re-running a
-  critique does not double the inbox;
+- lists open, in-review and backlog comments and **skips a finding whose
+  first line already exists on the same route path, or whose element already
+  carries an active pin from this agent on the same URL**, so re-running a
+  critique (even with reworded titles) does not double the inbox;
 - creates each pin with `PUT /comments/<new id>`: a full `ReviewComment`
   (`schemaVersion: 3`, `status: "open"`, `origin: "page"`, `authorKind:
   "agent"`, `authorId`/`authorName` of the agent, the capture's url, viewport
