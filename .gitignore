@@ -94,7 +94,9 @@ auis-states-matrix.pdf
 
 # auis install manifest — which generated skill dirs belong to Auis (see
 # scripts/skills-sync.mjs). Generated state, like the trees it tracks.
-/.auis/
+# Except the ds:check exceptions: a reviewed, versioned decision (scripts/ds-check.mjs).
+/.auis/*
+!/.auis/ds-check.json
 
 # Review Bridge packages: built only to publish (kit/scripts/build.mjs)
 /kit/*/dist/

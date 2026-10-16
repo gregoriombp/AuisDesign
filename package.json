@@ -17,6 +17,7 @@
     "predev": "node scripts/skills-sync.mjs",
     "postinstall": "node scripts/skills-sync.mjs",
     "ds:check": "node scripts/ds-check.mjs",
+    "ds:hook": "node scripts/ds-check-hook.mjs",
     "ui:css": "node kit/ui/scripts/build-css.mjs",
     "kit:build": "node kit/scripts/build.mjs",
     "kit:smoke": "node kit/scripts/smoke.mjs",

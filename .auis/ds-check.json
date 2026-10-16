@@ -1,0 +1,20 @@
+{
+  "ignoreRules": [],
+  "ignoreFiles": [
+    {
+      "path": "**/*Logo.tsx",
+      "rules": ["hardcoded-color", "raw-svg"],
+      "reason": "Auis's own mark (AuLogo) is drawn as inline SVG with its brand colors; it is the one sanctioned raw <svg>."
+    },
+    {
+      "path": "components/ui/Icon.tsx",
+      "rules": ["hardcoded-color", "raw-svg"],
+      "reason": "Icon is the glyph renderer every other file goes through instead of a raw <svg>."
+    },
+    {
+      "path": "app/globals.css",
+      "reason": "The token source: the hex values and arbitrary values here define the tokens. Only the foundation skills edit it (AGENTS.md, Tokens are sacred)."
+    }
+  ],
+  "ignoreValues": []
+}
