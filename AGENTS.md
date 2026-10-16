@@ -182,6 +182,7 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 | `auis-new-component` | Add a new component to the DS using existing tokens (shadcn wrapper + showcase + nav). Always `Au*` in `components/ui/`. |
 | `auis-new-page` | Build a full page from a screenshot/Figma/brief, reusing DS components. |
 | `auis-design-system-audit` | Audit consistency (tokens/components/showcases/nav); optionally sync against a reference. |
+| `auis-critique` | Design-quality and accessibility critique of one route (hierarchy, primary task, DS consistency, states, contrast, labels, headings, target size). Files each P0–P2 finding as an open Review Mode pin through `/api/review-bridge/*`; never edits code. Fix them afterwards with `auis-review-bridge-solve`. |
 | `auis-update-states` | Register a screen's states in State Mode (`lib/auis-states/registry.ts`): axes (`?state=`, `?plan=`…), `?ge=` interactions, `previewPath`. Run after adding/removing a page state, modal, redirect or whole screen so `/auis/states` stays honest. Rules: `AUIS.md` → "State Mode" (the URL is the source of truth). |
 | `shadcn` | Consult shadcn docs/registry/CLI for primitives. It is a support skill only: all repo rules above still win (`Au*` wrapper, existing tokens, Material Symbols by default). |
 
@@ -214,6 +215,7 @@ The DS skills are **generic and Au-prefix-blind** — they emit `components/Cust
 | Build a page | `auis-new-page` | `design-system-new-page` | 
 | Bootstrap DS / tokens | `auis-design-system-foundation` | `setup-design-system-from-*` |
 | Audit consistency | `auis-design-system-audit` | — |
+| Critique design quality / accessibility of a route | `auis-critique` | `design:design-critique`, `design:accessibility-review` (they return a report; this files pins) |
 | Revise in-product copy / microcopy | `auis-ux-writing` | `ux-copy` (generic, EN), `auis-brand-voice` (marketing voice) |
 
 **Setup-only / neutralized skills (kept as a record, do NOT trigger).** Four generic

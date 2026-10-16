@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-09-24",
-  "count": 31,
+  "generated": "2026-10-16",
+  "count": 32,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -144,6 +144,19 @@
       "legacy": false,
       "divergent": false,
       "description": "Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always checks the shadcn registry first via MCP, prefers extending existing primit"
+    },
+    {
+      "name": "auis-critique",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Design-quality critique of one route, delivered as Review Mode pins instead of a throwaway report. Reads AGENTS.md, PRODUCT_CONTEXT.md and the route (code plus the rendered page), classifies the surface (Persuade, Operat"
     },
     {
       "name": "auis-design-system-audit",
