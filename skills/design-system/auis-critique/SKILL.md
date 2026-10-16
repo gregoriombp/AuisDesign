@@ -143,16 +143,25 @@ finding behind it.
 
 ### 4a. DS hygiene
 
+Scope it to the route: its `page.tsx` plus the local (non-`Au*`) components
+that page imports.
+
 ```bash
-npm run ds:check
+node scripts/ds-check.mjs app/<route>/page.tsx app/<route>/_components/Foo.tsx --json
 ```
 
-It scans the whole repo. Keep only lines whose file is the route's
-`page.tsx` or a local component that page imports. For each one kept, find the
-element that line renders (read the JSX, then locate it on screen) so the
-finding can be anchored. A ds:check line you cannot tie to a rendered element
-goes in the summary with its `file:line`, not in a pin. `note`-level results
-(arbitrary sizes) are P3 unless they visibly break the layout.
+Exit code `2` means it found primary findings (that is the result you want to
+read, not a failure); `1` means the scan itself broke. Each item in `findings`
+carries `rule`, `severity` (`warn` or `info`), `file`, `line`, `text` and
+`hint`. A finding in `suppressed` was excepted on purpose, with a reason, in
+`.auis/ds-check.json` or an inline `ds-check-disable` comment: respect it and
+do not pin it.
+
+For each `warn` finding, find the element that line renders (read the JSX,
+then locate it on screen) so it can be anchored, and cite `file:line` as the
+evidence. A finding you cannot tie to a rendered element goes in the summary,
+not in a pin. `info` results (arbitrary sizes) are P3 unless they visibly
+break the layout.
 
 ### 4b. Accessibility probe
 
@@ -306,7 +315,7 @@ Pinned (N), open in the inbox:
 
 Not pinned:
   - P3 · <polish items>
-  - ds:check lines with no rendered element: file:line ...
+  - ds:check findings with no rendered element: file:line ...
   - Not verified: <states you could not reach>
 
 Next: triage the pins at /auis/styleguide/review, then run
