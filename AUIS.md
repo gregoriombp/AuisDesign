@@ -151,7 +151,11 @@ server, no port and no token in local development.
   are `scripts/mention-prompt.md`. Before a Claude run it checks the CLI's
   login (`MENTION_CLAUDE_ACCOUNT` names the account that must pay; another one
   stops the run). After an Edit run it runs ESLint and `ds:check` on the files
-  that run changed and posts the result in the thread.
+  that run changed and posts the result in the thread. While an agent is queued or
+  working, the runner marks the comment (`PUT/DELETE
+  /api/review-bridge/comments/<id>/agent-run`): the thread shows the agent's
+  line with a spinner, the pin a turning badge and the drawer card a pill. A
+  mark from a runner that died expires after 50 minutes.
   `/api/review-bridge/dispatch-queue` reads the same settings as a read-only
   view and has no consumer.
 - Attachments are raster only (PNG, JPEG, GIF, WebP, AVIF). Any other data URI

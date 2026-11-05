@@ -99,3 +99,11 @@ test("authorship and creation come from the stored record", () => {
   assert.equal(merged.authorRole, "reviewer");
   assert.equal(merged.createdAt, 1000);
 });
+
+test("the agent-working mark comes only from the record, never from the client", () => {
+  const run = { agentId: "claude", phase: "running" as const, startedAt: 3000 };
+  const forged = mergeCommentEdit(comment(), comment({ agentRun: run }), admin);
+  assert.equal(forged.agentRun, undefined);
+  const kept = mergeCommentEdit(comment({ agentRun: run }), comment({ text: "edited" }), admin);
+  assert.deepEqual(kept.agentRun, run);
+});

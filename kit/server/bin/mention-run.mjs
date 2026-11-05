@@ -133,6 +133,35 @@ async function postReply(agentId, text) {
   }
 }
 
+// ── the "agent working" mark ─────────────────────────────────────────────────
+// The thread card and the pin read `agentRun` on the comment. Failing here only
+// removes the indicator; the run goes on.
+
+async function markRun(agentId, phase) {
+  try {
+    const res = await fetch(`${API}/comments/${encodeURIComponent(commentId)}/agent-run`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", "x-bridge-agent-id": agentId },
+      body: JSON.stringify({ phase }),
+    });
+    if (!res.ok) log(`warning: ${agentId}'s ${phase} mark did not land (HTTP ${res.status})`);
+  } catch (err) {
+    log(`warning: ${agentId}'s ${phase} mark did not land (${err.message})`);
+  }
+}
+
+async function clearRun(agentId) {
+  try {
+    const res = await fetch(`${API}/comments/${encodeURIComponent(commentId)}/agent-run`, {
+      method: "DELETE",
+      headers: { "x-bridge-agent-id": agentId },
+    });
+    if (!res.ok) log(`warning: ${agentId}'s mark was not cleared (HTTP ${res.status})`);
+  } catch (err) {
+    log(`warning: ${agentId}'s mark was not cleared (${err.message})`);
+  }
+}
+
 // ── working-tree lock ────────────────────────────────────────────────────────
 // The reason is not cost, it is git: two agents editing the same checkout at
 // the same time is corruption. Three mentions in a row become three tiny
@@ -361,7 +390,19 @@ function runCli(cli, bin, args, timeoutMs) {
 
 // ── one agent ────────────────────────────────────────────────────────────────
 
+// The mark goes in before any wait and comes out on every outcome, early
+// returns included (a lock that never came, the wrong account, an agent
+// switched off).
 async function runOne(planned, roster) {
+  if (!dryRun) await markRun(planned.agentId, planned.needsLock ? "queued" : "running");
+  try {
+    await runOneMarked(planned, roster);
+  } finally {
+    if (!dryRun) await clearRun(planned.agentId);
+  }
+}
+
+async function runOneMarked(planned, roster) {
   const { agentId } = planned;
   const locked = planned.needsLock && !dryRun ? await acquireLock() : false;
   if (planned.needsLock && !dryRun && !locked) {
@@ -414,6 +455,7 @@ async function runOne(planned, roster) {
       return;
     }
 
+    if (planned.needsLock) await markRun(agentId, "running");
     const dirtyBefore = dirtyPaths();
     log(
       `running ${agentId} · ${run.permission}` +
