@@ -218,9 +218,12 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
     const pill = pillRef.current
     const bar = barRef.current
     if (!pill || !bar) return
-    const observer = new ResizeObserver(() =>
-      setWidths({ pill: pill.offsetWidth, bar: bar.offsetWidth })
-    )
+    const observer = new ResizeObserver(() => {
+      const next = { pill: pill.offsetWidth, bar: bar.offsetWidth }
+      setWidths((prev) =>
+        prev && prev.pill === next.pill && prev.bar === next.bar ? prev : next
+      )
+    })
     observer.observe(pill)
     observer.observe(bar)
     return () => observer.disconnect()

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useReviewPathname } from "../router"
+import { useChromeHidden, useReviewPathname, useReviewSearchParams } from "../router"
 import { useGlobalHotkey } from "../useGlobalHotkey"
 import { useReviewStore } from "./store"
 import { resolveAnchoredElement } from "@auis/core/elementAnchor"
@@ -20,11 +20,57 @@ import { ReviewIdentityModal } from "./ReviewIdentityModal"
 import { ReviewThreadPopover } from "./ReviewThreadPopover"
 import { ReviewToolbar, type ReviewModeLink } from "./ReviewToolbar"
 
+/**
+ * Keeps the store's comment list current without asking the server for
+ * nothing.
+ *
+ * One read on mount, and another on every new `?reviewCommentId=`, feeds the
+ * permalink. The second covers arriving by client navigation: the layout does
+ * not remount, and a comment created after the load would not be in the list.
+ * The `/version` poll runs only while a Review surface is open: the active
+ * mode, the drawer or a comment's thread. `setActive(false)`, called by the
+ * edit and states modes, closes neither of the last two. Each opening reads the
+ * list again, since what changed while the poll was stopped never reached the
+ * store.
+ *
+ * Under `?chrome=0` (the states matrix, the PDF generator) there is no read on
+ * mount and no poll: the thumbnail shows only the product. Switching Review on
+ * there still reads the list once, through `toggleActive`.
+ *
+ * It lives inside the provider's Suspense: `useSearchParams`, directly and
+ * through `useChromeHidden`, breaks static prerender outside Suspense.
+ */
+function ReviewLiveSync() {
+  const chromeHidden = useChromeHidden()
+  const permalinkId = useReviewSearchParams().get("reviewCommentId")
+  const storage = useReviewStore((s) => s.storage)
+  const refreshFromStorage = useReviewStore((s) => s.refreshFromStorage)
+  const surfaceOpen = useReviewStore(
+    (s) => s.active || s.sheetOpen || s.threadCommentId !== null
+  )
+  const live = surfaceOpen && !chromeHidden
+
+  // `permalinkId` is not read in the body: it is in the dependencies so a new
+  // permalink reads the list again.
+  React.useEffect(() => {
+    if (chromeHidden) return
+    void refreshFromStorage()
+  }, [chromeHidden, permalinkId, refreshFromStorage])
+
+  React.useEffect(() => {
+    if (!live) return
+    void refreshFromStorage()
+    return storage.subscribe?.(() => {
+      void refreshFromStorage()
+    })
+  }, [live, refreshFromStorage, storage])
+
+  return null
+}
+
 export function ReviewModeProvider({ modes }: { modes?: ReviewModeLink[] } = {}) {
   const hydrateIdentity = useReviewStore((s) => s.hydrateIdentity)
   const hydrateSession = useReviewStore((s) => s.hydrateSession)
-  const refreshFromStorage = useReviewStore((s) => s.refreshFromStorage)
-  const storage = useReviewStore((s) => s.storage)
 
   const active = useReviewStore((s) => s.active)
   const toggleActive = useReviewStore((s) => s.toggleActive)
@@ -40,7 +86,8 @@ export function ReviewModeProvider({ modes }: { modes?: ReviewModeLink[] } = {})
   const sheetOpen = useReviewStore((s) => s.sheetOpen)
   const permalinkHandledRef = React.useRef<string | null>(null)
   // Separate from "already handled": marking before the async work blocked the
-  // second attempt, and the effect re-runs on every store poll (4s).
+  // second attempt. The effect re-runs on every new list in the store (the 4 s
+  // poll, while Review is open).
   const permalinkRunningRef = React.useRef<string | null>(null)
   const pathname = useReviewPathname()
 
@@ -63,12 +110,7 @@ export function ReviewModeProvider({ modes }: { modes?: ReviewModeLink[] } = {})
   React.useEffect(() => {
     void hydrateIdentity()
     void hydrateSession()
-    void refreshFromStorage()
-    const unsubscribe = storage.subscribe?.(() => {
-      void refreshFromStorage()
-    })
-    return unsubscribe
-  }, [hydrateIdentity, hydrateSession, refreshFromStorage, storage])
+  }, [hydrateIdentity, hydrateSession])
 
   // Permalink: open the review overlay and focus the pin when ?reviewCommentId=…
   // is present. If the pin lives inside a closed overlay (modal/drawer/tab), we
@@ -187,6 +229,7 @@ export function ReviewModeProvider({ modes }: { modes?: ReviewModeLink[] } = {})
 
   return (
     <React.Suspense fallback={null}>
+      <ReviewLiveSync />
       <ReviewCanvas />
       <ReviewMagicCursor />
       <ReviewCommentPopover />

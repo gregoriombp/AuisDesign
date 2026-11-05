@@ -148,8 +148,20 @@ server, no port and no token in local development.
   a Reply agent cannot post (its ceiling forbids it), the runner posts its final
   message; when nothing comes back, the runner posts the failure with its
   reason. Re-firing is a new reply, never a retry loop. The run's instructions
-  are `scripts/mention-prompt.md`. `/api/review-bridge/dispatch-queue` reads the
-  same settings as a read-only view and has no consumer.
+  are `scripts/mention-prompt.md`. Before a Claude run it checks the CLI's
+  login (`MENTION_CLAUDE_ACCOUNT` names the account that must pay; another one
+  stops the run). After an Edit run it runs ESLint and `ds:check` on the files
+  that run changed and posts the result in the thread.
+  `/api/review-bridge/dispatch-queue` reads the same settings as a read-only
+  view and has no consumer.
+- Attachments are raster only (PNG, JPEG, GIF, WebP, AVIF). Any other data URI
+  answers 415: an SVG is a document that can run script on the origin.
+- The Review Mode reads the comment list once on load and polls `/version`
+  every 4 s only while a Review surface is open: the mode itself, its drawer, or
+  a comment thread. Each opening reads the list again, and so does each new
+  `?reviewCommentId=` (a permalink reached by client navigation). Under
+  `?chrome=0` it neither reads on load nor polls. The poll pauses while the tab
+  is hidden.
 - The user approves or rejects afterwards from the inbox (`/auis/styleguide/review`)
   or the dashboard (`/auis/review-bridge`).
 

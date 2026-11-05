@@ -27,8 +27,8 @@ const BASE = argOf("--base", "http://127.0.0.1:3000").replace(/\/$/, "")
 const OUT = resolve(argOf("--out", "auis-states-matrix.pdf"))
 
 const FRAME = { width: 1280, height: 800 }
-// "networkidle" never settles with the review bridge polling (4s) — load +
-// a fixed breather for hydration gives a stable screenshot.
+// Load plus a fixed breather for hydration gives a stable screenshot, without
+// waiting for "networkidle".
 const SETTLE_MS = 1500
 
 const esc = (s) =>
