@@ -26,6 +26,8 @@ manifest and a data folder) and nothing else.
 | 0 | Anchor-survival experiment on real apps (gate before wave 2) | **done** (2026-10-10): passed, see `docs/anchor-survival.md` |
 | 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **done** (2026-10-11) |
 | 3 | `auis init --only review` / `uninstall` + publishing the packages | **done** (2026-10-11): `@auis/core`, `server`, `ui`, `next` 0.1.0 and `@auis/cli` 0.3.0 on npm |
+| 4a | `auis init` asks what to install: a module menu (`--only a,b`, `--yes`) that lists every module, with the reason each one cannot be picked yet; `doctor` prints the same list | **done** (2026-11-04), `@auis/cli` 0.4.0 |
+| 4b | The next installable module — see "What installs next" below | **design**, awaiting the owner's pick |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
 
 Update this table in the same PR that moves a wave forward.
@@ -429,6 +431,36 @@ Known gaps carried forward:
 - `auis init` adds `.auis/manifest.json` as an untracked file. Committing it lets a
   teammate run `uninstall` too (without `.auis/originals/`, which is local, every file
   takes the surgical path).
+
+## What installs next (design, 2026-11-04)
+
+`auis init` now shows a menu (`packages/auis/src/modules.mjs`). Review is the only row
+that can be picked; State Mode, Edit Mode, Styleguide and UX Flows are listed with
+the reason they cannot be. This section compares the candidates for the second row.
+
+The constraint they are judged against comes from the owner's direction for Auis:
+a module documents or acts on the **host's own** components and screens, never
+ships Auis's `Au*` components or tokens into the host, and installs through
+touch points `uninstall` can reverse, the same way Review does.
+
+| Candidate | What the host gets | What it takes | Size | Fit |
+|---|---|---|---|---|
+| **State Mode + flow driver** (`states`) | Switch a screen's states in place, and `?ge=` deep links that replay clicks to reach a modal, a menu or a wizard step. `doctor` rates the driver `supported` in any React 18+ host; State Mode is `degraded` because it needs a registry. | Move `FlowStateDriver`, `lib/auis/geRecipe.ts` (already pure and tested), the states store and types into `@auis/ui`. Rebuild `StatesToolbar` on the chrome's primitives, as wave 2 did for Review. Export `useScreenStateOverride` for the host's pages. `init` writes a host-owned `auis.states.ts` stub and passes it to the mount in the layout it already edits. No new server route; the matrix page stays Auis-only at first. | one wave | Strong: it acts on the host's screens through the DOM and the URL, with no host markup required. |
+| **Styleguide of the host's components** (`styleguide`) | A page listing the host's own components: props, variants, the tokens they use and where they are used. Live rendering comes later. | A scanner that reads the host's source; the deferred host "component canvas" `source.ts` (props, variants, tokens, consumers) is the seed, but it reads a hand-written nav, not an arbitrary repo. Plus a route the host mounts (`app/auis/styleguide/[...]`), and a decision on what "document" means before anything renders, because isolated rendering needs props and fixtures the scanner cannot invent. | two waves, research first | The most asked-for (it is what someone means by "install the styleguide") and the owner's stated direction, but the least defined. |
+| **Edit Mode** (`edit`) | Text edits and reordering in any host; style edits only with the host's tokens; variant, typography and icon swaps are `unsupported` until the host supplies a map. | The page-edits server into `@auis/server`, the inspector rebuilt on chrome primitives, and a host token and variant map. Materializing edits into code holds only for the App Router. | two waves | Partial: half its controls are keyed to Auis's own class names. |
+| **UX Flows** (`flows`) | Flow diagrams that are pages in the host. | Adds `@xyflow/react` to the host, plus the authoring skills. | one to two waves | Lowest demand; adds a heavy dependency. |
+
+**Recommendation: `states` next, then `styleguide` as its own designed wave.**
+`states` is the smallest new surface: no server route, the init touch points it
+needs already exist, its core was extracted and tested in the port, and it brings a
+second working row to the menu soon. `styleguide` is the one people ask for and the
+one that matters most to the direction, so it deserves a written design first,
+starting with an inventory-only first slice (no rendering), not a rushed build. Edit
+Mode waits for both.
+
+Each new module adds one entry to `MODULES`, its touch points to `planInstall` and the
+manifest, its verdict rows to `doctor`, and a Destiny Matrix round trip
+(init → build → use → uninstall) before release, the same gate wave 3 used.
 
 ## Wave 4 and later
 
