@@ -27,6 +27,7 @@ import path from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import {
+  accountCheck,
   agentEnv,
   bridgeBase,
   answeredSince,
@@ -35,6 +36,8 @@ import {
   grokArgs,
   parseCliJson,
   planRuns,
+  qualityNote,
+  qualityTargets,
   refreshRun,
   resultText,
 } from "./mention-cli.mjs";
@@ -210,6 +213,30 @@ function dirtyPaths() {
   );
 }
 
+/**
+ * After an Edit run: ESLint and, where the repository has it, ds:check on the
+ * files that run changed. The result goes to the thread with the reply: the
+ * headless agent sees neither the editor's panel nor the hooks of whoever is
+ * at the keyboard.
+ */
+function checkTouched(paths) {
+  const { lint, ds } = qualityTargets(paths);
+  const eslint = path.join(REPO, "node_modules", ".bin", "eslint");
+  const dsCheck = path.join(REPO, "scripts", "ds-check.mjs");
+  const lintFiles = fs.existsSync(eslint) ? lint : [];
+  const dsFiles = fs.existsSync(dsCheck) ? ds : [];
+  if (!lintFiles.length && !dsFiles.length) return null;
+  const run = (command, args) => {
+    const out = spawnSync(command, args, { cwd: REPO, encoding: "utf8", timeout: 120_000 });
+    return { code: out.status ?? 1, output: `${out.stdout ?? ""}${out.stderr ?? ""}` };
+  };
+  return qualityNote({
+    count: new Set([...lintFiles, ...dsFiles]).size,
+    lint: lintFiles.length ? run(eslint, lintFiles) : null,
+    ds: dsFiles.length ? run(process.execPath, [dsCheck, ...dsFiles]) : null,
+  });
+}
+
 // ── CLIs ─────────────────────────────────────────────────────────────────────
 
 function claudeBin() {
@@ -272,6 +299,18 @@ function commandFor(run, prompt) {
 // never reach the agent.
 function runEnv(cli) {
   return agentEnv(process.env, cli, BASE);
+}
+
+// Asked of the CLI itself, in the same environment the run gets (see
+// accountCheck). MENTION_CLAUDE_ACCOUNT names the account that should pay.
+function claudeAccount() {
+  const out = spawnSync(claudeBin(), ["auth", "status", "--json"], {
+    cwd: REPO,
+    env: runEnv("claude"),
+    encoding: "utf8",
+    timeout: 30_000,
+  });
+  return accountCheck(parseCliJson(out.stdout ?? ""), process.env.MENTION_CLAUDE_ACCOUNT);
 }
 
 function runCli(cli, bin, args, timeoutMs) {
@@ -351,6 +390,21 @@ async function runOne(planned, roster) {
       return;
     }
     const { bin, args } = commandFor(run, buildPrompt(run, roster, comment));
+    if (run.cli === "claude") {
+      const account = claudeAccount();
+      if (!account.ok) {
+        log(`${agentId}: wrong account — ${account.reason}`);
+        if (!dryRun) {
+          await postReply(
+            agentId,
+            `I did not start: ${account.reason}. Nothing was changed. ` +
+              "Log that account in on the terminal and mention me here again.",
+          );
+        }
+        return;
+      }
+      if (account.email) log(`${agentId}: account ${account.email}`);
+    }
     if (dryRun) {
       const shown = args.map((a, i) => (args[i - 1] === "-p" ? `<prompt ${a.length} chars>` : a));
       log(
@@ -385,10 +439,15 @@ async function runOne(planned, roster) {
     const reason = errorReason(parsed, stderr);
     if (code !== 0 && reason) log(`${agentId}: reason: ${reason}`);
 
+    const touched = [...dirtyPaths()].filter((p) => !dirtyBefore.has(p));
+    const quality = run.permission === "edit" ? checkTouched(touched) : null;
+    if (quality) log(`${agentId}: post-Edit check on ${touched.length} file(s)`);
+
     // Verdict: a reply from THIS run. A reply from a previous run does not count.
     const after = (await getComment(commentId)) ?? comment;
     if (answeredSince(after, agentId, startedAt)) {
       log(`${agentId}: replied — ok`);
+      if (quality) await postReply(agentId, quality);
       return;
     }
 
@@ -396,12 +455,11 @@ async function runOne(planned, roster) {
     // message IS the reply.
     const text = code === 0 && !timedOut ? resultText(parsed) : "";
     if (text) {
-      await postReply(agentId, text);
+      await postReply(agentId, quality ? `${text}\n\n${quality}` : text);
       log(`${agentId}: final message posted by the runner`);
       return;
     }
 
-    const touched = [...dirtyPaths()].filter((p) => !dirtyBefore.has(p));
     const why = timedOut
       ? "the run ran out of time and was interrupted"
       : `the run ended with an error (exit ${code})${reason ? `: ${reason}` : ""}`;
@@ -412,7 +470,7 @@ async function runOne(planned, roster) {
       : `I could not finish: ${why}. Nothing was changed in the code. ` +
         "Reply to me here again and I will try once more.";
     log(`${agentId}: no reply — posting the failure (${touched.length} file(s) touched)`);
-    await postReply(agentId, failure);
+    await postReply(agentId, quality ? `${failure}\n\n${quality}` : failure);
   } finally {
     if (locked) releaseLock();
   }

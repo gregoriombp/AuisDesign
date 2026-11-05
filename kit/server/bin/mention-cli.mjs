@@ -236,3 +236,64 @@ export function refreshRun(run, settings, runtime) {
     needsLock: run.needsLock,
   };
 }
+
+/**
+ * Who pays for a Claude run: the login of the config folder the child will
+ * use, as `claude auth status --json` reports it. With MENTION_CLAUDE_ACCOUNT
+ * set, any other account (or none) stops the run before it spends someone
+ * else's quota. Without it, any login passes.
+ */
+export function accountCheck(status, expected) {
+  const email = typeof status?.email === "string" ? status.email : "";
+  const want = typeof expected === "string" ? expected.trim() : "";
+  if (!status?.loggedIn || !email) {
+    return { ok: !want, email: "", reason: "the Claude CLI is not logged in for this config folder" };
+  }
+  if (want && email.toLowerCase() !== want.toLowerCase()) {
+    return { ok: false, email, reason: `the Claude CLI is logged in as ${email}, not as ${want}` };
+  }
+  return { ok: true, email, reason: "" };
+}
+
+const CODE_FILE = /\.(tsx?|jsx?|mjs|cjs)$/;
+const NOT_SOURCE = /(^|\/)(node_modules|\.next|dist|build|out|coverage)\//;
+
+/**
+ * The files the post-Edit check looks at, among the ones the run changed.
+ * ESLint: code files outside build output. ds:check (only in a repository that
+ * has `scripts/ds-check.mjs`, like Auis): screens, components and globals.css.
+ */
+export function qualityTargets(paths) {
+  const source = paths.filter((p) => !NOT_SOURCE.test(p));
+  const lint = source.filter((p) => CODE_FILE.test(p));
+  const ds = source.filter(
+    (p) => /(^|\/)globals\.css$/.test(p) || (/^(app|components|src)\//.test(p) && /\.tsx?$/.test(p)),
+  );
+  return { lint, ds };
+}
+
+/**
+ * The post-Edit check as thread text: clean is one line; a failure quotes the
+ * part of the output that points at the problem. Nothing checked → null.
+ */
+export function qualityNote({ count, lint, ds }) {
+  if (!count) return null;
+  const ran = [lint && "ESLint", ds && "ds:check"].filter(Boolean);
+  if (!ran.length) return null;
+  const problems = [];
+  if (lint && lint.code !== 0) problems.push(`ESLint:\n${trimOutput(lint.output)}`);
+  if (ds && ds.code !== 0) problems.push(`ds:check:\n${trimOutput(ds.output)}`);
+  if (!problems.length) {
+    return `Automatic check of the ${count} changed file(s): ${ran.join(" and ")} found nothing.`;
+  }
+  return `Automatic check of the ${count} changed file(s) found problems:\n\n${problems.join("\n\n")}`;
+}
+
+function trimOutput(text) {
+  return String(text ?? "")
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .filter((line) => line.trim() && !/^>\s/.test(line.trim()))
+    .slice(0, 20)
+    .join("\n");
+}
