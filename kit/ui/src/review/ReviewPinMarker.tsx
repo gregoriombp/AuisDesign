@@ -17,7 +17,7 @@ function initialOf(name: string): string {
 }
 
 const PIN_RADIUS = 12
-const PIN_STROKE = 2
+const PIN_STROKE = 1.5
 const TEXT_SIZE = 11
 
 export function ReviewPinMarker({
@@ -66,7 +66,7 @@ export function ReviewPinMarker({
       <circle
         r={PIN_RADIUS}
         fill="none"
-        stroke="var(--auis-bg-canvas)"
+        stroke="var(--auis-fg-primary)"
         strokeWidth={PIN_STROKE}
       />
       <text

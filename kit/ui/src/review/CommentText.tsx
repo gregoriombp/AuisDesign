@@ -1,19 +1,20 @@
 "use client"
 
 import * as React from "react"
-import { MentionChip } from "../primitives/MentionChip"
 import { getReviewAgent } from "@auis/core/agents"
 import { getReviewSkill } from "@auis/core/skills"
 import { parseReviewCommand } from "@auis/core/commandParse"
 import { useReviewers } from "./reviewers"
 import { PersonHover } from "./PersonHover"
+import { ReviewAvatar } from "./ReviewAvatar"
 
 /**
- * Renders a Review Bridge comment/reply body, painting @agent (with the
- * agent's mark) and /skill as MentionChips and @person as an inline link-toned mention (hover shows the
- * full name + e-mail), while leaving every other character verbatim (newlines
- * included, via the caller's whitespace-pre-wrap class). The segmentation is
- * lossless, so the text reads exactly as authored — only the commands light up.
+ * A Review Bridge comment or reply body. @agent becomes amber text with the
+ * agent's mark, /skill becomes purple text and @person a link-toned mention
+ * (hover shows the full name and e-mail). Everything else comes out as written,
+ * line breaks included through the caller's whitespace-pre-wrap: the
+ * segmentation loses no character, it only lights up the commands. The text
+ * runs without boxes in the middle of a sentence.
  */
 export function CommentText({
   text,
@@ -39,8 +40,9 @@ export function CommentText({
     [text, userHandles],
   )
 
+  // <div>, not <p>: callers pass block layout.
   return (
-    <p className={className}>
+    <div className={className}>
       {segments.map((seg, i) => {
         if (seg.type === "text") {
           return <React.Fragment key={i}>{seg.value}</React.Fragment>
@@ -48,14 +50,20 @@ export function CommentText({
         if (seg.type === "mention") {
           const agent = getReviewAgent(seg.agentId)
           return (
-            <MentionChip
+            <span
               key={i}
-              tone={agent?.tone ?? "neutral"}
-              iconSrc={agent?.mark}
-              icon={agent?.icon ?? "agent"}
+              className="whitespace-nowrap text-(--au-amber-700) dark:text-(--au-amber-400)"
             >
-              {agent?.handle ?? seg.value}
-            </MentionChip>
+              <ReviewAvatar
+                authorKind="agent"
+                authorId={seg.agentId}
+                authorName={agent?.name ?? seg.value}
+                colorToken="var(--au-amber-700)"
+                size={16}
+                className="mr-1 align-middle"
+              />
+              {agent?.name ?? seg.value}
+            </span>
           )
         }
         if (seg.type === "mentionUser") {
@@ -74,11 +82,15 @@ export function CommentText({
         // skill (/slug)
         const skill = getReviewSkill(seg.slug)
         return (
-          <MentionChip key={i} tone="neutral" icon={skill?.icon ?? "bolt"}>
-            {skill?.label ?? seg.value}
-          </MentionChip>
+          <span
+            key={i}
+            title={skill?.label}
+            className="text-(--au-purple-600) dark:text-(--au-purple-400)"
+          >
+            {seg.value}
+          </span>
         )
       })}
-    </p>
+    </div>
   )
 }
