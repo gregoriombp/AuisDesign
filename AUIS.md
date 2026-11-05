@@ -187,7 +187,12 @@ Registry entries declare, per route: `axes` (a query param each, built with
 optional shared axes reused by reference, `interactions` (`?ge=` click recipes
 replayed by `FlowStateDriver` — `t:<text>` clicks the first clickable whose text
 matches, `c:<css>` clicks a selector, `w:<ms>` waits, steps joined by `>>`), and
-`previewPath` when the route has a dynamic segment. `matchScreenStates` returns
+`previewPath` when the route has a dynamic segment. An interaction whose target
+exists only in one scenario (edit mode, a wizard step) declares it in `params`,
+as values of the screen's own axes: picking it in State Mode writes those params
+and the `?ge=` in one navigation. Labels are unique per screen, and
+`lib/auis-states/__tests__/registry.test.ts` rejects a param that is not an axis
+or a value outside its options. `matchScreenStates` returns
 the first matching entry, deepest first.
 
 A `?ge=` recipe replays on its own inside the states matrix, the UX-flow
@@ -195,7 +200,11 @@ previews (same-origin iframes) and on in-app navigation (State Mode). A link
 opened from outside — pasted, shared, a new tab — shows "This link replays
 clicks on this screen" and waits for **Replay**, so a link sent to someone never
 clicks inside their session. No step ever clicks a destructive action (delete,
-remove, pay, sign out).
+remove, pay, sign out). Each run records its progress on `<html>` (`data-ge-status`:
+`awaiting`, `driving`, `done`, `failed`, plus `data-ge-failed-step` and
+`data-ge-fail-reason`), and a headless script that sets
+`window.__auisGeAutoplay = true` with `addInitScript` skips the Replay click — a
+URL cannot set it. A new run stops the previous one before its next click.
 
 Two implementation patterns for a screen:
 
