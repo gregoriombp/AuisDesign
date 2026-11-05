@@ -50,6 +50,7 @@ export const REVIEW_AGENT_RUNTIME: Record<ReviewAgentId, ReviewAgentRuntime> = {
     models: [
       { id: "claude-opus-5-5", label: "Opus 5.5" },
       { id: "claude-fable-5-1", label: "Fable 5.1" },
+      { id: "claude-sonnet-5-5", label: "Sonnet 5.5" },
       { id: "claude-sonnet-5", label: "Sonnet 5" },
     ],
     // Reply stays on the model's default effort. Edit goes up to high — the
@@ -68,7 +69,7 @@ export const REVIEW_AGENT_RUNTIME: Record<ReviewAgentId, ReviewAgentRuntime> = {
   grok: {
     cli: "grok",
     permissions: ["reply", "edit"],
-    // The ids `grok models` lists for a grok.com account (Grok Build 1.0.41).
+    // The ids `grok models` lists for a grok.com account (Grok Build 1.0.52).
     models: [
       { id: "grok-4.7", label: "Grok 4.7" },
       { id: "grok-4.7-build-fast", label: "Grok 4.7 Fast" },
