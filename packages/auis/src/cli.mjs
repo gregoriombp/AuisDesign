@@ -39,7 +39,7 @@ export function parseArgs(argv) {
     force: false,
     yes: false,
     dryRun: false,
-    only: "review",
+    only: undefined,
     purge: false,
     help: false,
     version: false,
@@ -142,12 +142,12 @@ export function help() {
   write(`  ${c.bold("Usage")}`);
   write(`    npx @auis/cli@latest ${c.dim("[directory] [options]")}     ${c.dim("scaffold a new project")}`);
   write(`    npx @auis/cli@latest doctor ${c.dim("[directory]")}        ${c.dim("read an existing repo, write nothing")}`);
-  write(`    npx @auis/cli@latest init ${c.dim("[directory]")}          ${c.dim("install Review into an existing Next.js app")}`);
+  write(`    npx @auis/cli@latest init ${c.dim("[directory]")}          ${c.dim("pick what to install into an existing Next.js app")}`);
   write(`    npx @auis/cli@latest uninstall ${c.dim("[directory]")}     ${c.dim("take it back out, exactly")}`);
   write();
   write(`  ${c.bold("Options")}`);
   write(`        --json           doctor only: the full report as JSON`);
-  write(`        --only ${c.dim("<what>")}    init only: what to install ${c.dim(`(${ONLY.join(", ")}; the default)`)}`);
+  write(`        --only ${c.dim("<a,b>")}     init only: install these, skip the menu ${c.dim(`(${ONLY.join(", ")}; review installs today)`)}`);
   write(`        --dry-run        init only: print what it would touch, write nothing`);
   write(`        --purge          uninstall only: delete the comments instead of moving them to the backups`);
   write(`    -r, --ref ${c.dim("<ref>")}      branch, tag or commit of the template ${c.dim(`(default: ${DEFAULT_REF})`)}`);
@@ -156,7 +156,7 @@ export function help() {
   write(`        --no-git         skip git init and the first commit`);
   write(`        --force          create: scaffold into a directory that is not empty`);
   write(`                         uninstall: also remove files you changed since init`);
-  write(`    -y, --yes            take the defaults, never prompt`);
+  write(`    -y, --yes            take the defaults, never prompt ${c.dim("(init: every module that installs here)")}`);
   write(`    -h, --help           show this`);
   write(`    -v, --version        print the CLI version`);
   write();
@@ -165,6 +165,7 @@ export function help() {
   write(`    npx @auis/cli@latest . --no-install`);
   write(`    npx @auis/cli@latest doctor`);
   write(`    npx @auis/cli@latest init --dry-run`);
+  write(`    npx @auis/cli@latest init --only review --yes`);
   write();
   write(`  ${c.dim(REPO_URL)}`);
   write();
@@ -208,6 +209,7 @@ export async function run(argv = []) {
       install: options.install,
       packageManager: options.packageManager,
       only: options.only,
+      yes: options.yes,
     });
   }
   if (options.command === "uninstall") {

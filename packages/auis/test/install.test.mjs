@@ -114,6 +114,53 @@ async function quiet(fn) {
   }
 }
 
+// Swallows stderr too, for the cases that are meant to fail.
+async function silent(fn) {
+  const stderr = process.stderr.write.bind(process.stderr);
+  process.stderr.write = () => true;
+  try {
+    return await quiet(fn);
+  } finally {
+    process.stderr.write = stderr;
+  }
+}
+
+describe("init's module selection", () => {
+  it("--only with a module that cannot install yet writes nothing and fails", async () => {
+    const root = makeHost();
+    const before = snapshot(root);
+    assert.equal(await silent(() => init({ directory: root, install: false, only: "review,states" })), 1);
+    assert.equal(await silent(() => init({ directory: root, install: false, only: "nope" })), 1);
+    assert.deepEqual(changed(before, snapshot(root)), []);
+  });
+
+  it("a cancelled menu writes nothing", async () => {
+    const root = makeHost();
+    const before = snapshot(root);
+    const pick = async (_title, rows, { initialPicker, pickerReducer }) =>
+      pickerReducer(initialPicker(rows), "cancel");
+    assert.equal(await quiet(() => init({ directory: root, install: false, pick })), 0);
+    assert.deepEqual(changed(before, snapshot(root)), []);
+  });
+
+  it("the menu's pick is what the manifest records; --yes skips the menu", async () => {
+    const root = makeHost();
+    let shown = null;
+    const pick = async (_title, rows, { initialPicker, pickerReducer }) => {
+      shown = rows.map((r) => `${r.id}:${r.selectable}`);
+      return pickerReducer(initialPicker(rows), "enter");
+    };
+    assert.equal(await quiet(() => init({ directory: root, install: false, pick })), 0);
+    assert.deepEqual(shown, ["review:true", "states:false", "edit:false", "styleguide:false", "flows:false"]);
+    assert.deepEqual(JSON.parse(readFileSync(join(root, MANIFEST), "utf8")).only, ["review"]);
+
+    const other = makeHost();
+    const never = async () => assert.fail("--yes must not open the menu");
+    assert.equal(await quiet(() => init({ directory: other, install: false, yes: true, pick: never })), 0);
+    assert.deepEqual(JSON.parse(readFileSync(join(other, MANIFEST), "utf8")).only, ["review"]);
+  });
+});
+
 describe("patchLayout", () => {
   it("adds the import after the last import, in the file's style, and the element above </body>", () => {
     const out = patchLayout(LAYOUT);

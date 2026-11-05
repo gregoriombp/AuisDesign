@@ -239,5 +239,11 @@ describe("the two promises", () => {
     assert.ok(doc.summary.unsupported > 0);
     assert.ok(doc.summary.supported > 0, "the rulebook works even here");
     assert.equal(verdictOf(doc.capabilities, "skills.rulebook"), "supported");
+    // The menu init would show: every module listed, none installable here, each with a reason.
+    assert.deepEqual(doc.modules.map((m) => m.id), ["review", "states", "edit", "styleguide", "flows"]);
+    for (const m of doc.modules) {
+      assert.equal(m.installable, false, m.id);
+      assert.ok(m.reason, m.id);
+    }
   });
 });

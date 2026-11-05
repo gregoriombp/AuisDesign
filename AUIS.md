@@ -36,9 +36,11 @@ that runs with the Next.js app. That is the shape of the template a new Auis
 project starts from; the direction is a toolkit that installs into an existing
 product — React first, then other frameworks through a self-contained mount —
 without changing what is already there. The first piece of that ships:
-`npx @auis/cli init` installs Review into an existing Next.js App Router app
-(`uninstall` reverses it), and `npx @auis/cli doctor` reports what would work in
-a given repository. The self-contained mount for other frameworks does not ship
+`npx @auis/cli init` shows a menu of the modules Auis can install into an
+existing Next.js App Router app — Review installs today; State Mode, Edit Mode,
+the styleguide and UX Flows are listed with the reason they cannot be picked yet
+— and `uninstall` reverses it. `npx @auis/cli doctor` reports what would work in
+a given repository, the same module list included. The self-contained mount for other frameworks does not ship
 yet.
 
 - **Design system as source of truth:** official components live in

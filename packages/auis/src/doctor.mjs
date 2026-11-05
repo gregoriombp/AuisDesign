@@ -17,6 +17,7 @@ import path from "node:path";
 import { color, write } from "./ui.mjs";
 import { detect, detectAgentFiles } from "./detect.mjs";
 import { planInstall } from "./install.mjs";
+import { moduleChoices } from "./modules.mjs";
 
 export const DOCTOR_VERSION = 1;
 
@@ -195,6 +196,16 @@ function installable(plan, caps) {
   };
 }
 
+/** The menu `auis init` would show here: every module, and whether it can go in. */
+function modulesFor(plan) {
+  return moduleChoices({ planOk: plan.ok, planReason: plan.reason }).map(({ id, label, selectable, note }) => ({
+    id,
+    label,
+    installable: selectable,
+    reason: note,
+  }));
+}
+
 export function buildReport(root, cliVersion) {
   const d = detect(root);
   const caps = capabilities(d);
@@ -210,6 +221,7 @@ export function buildReport(root, cliVersion) {
     capabilities: caps,
     plan: installPlan(d, root),
     installable: installable(planInstall(d, root), caps),
+    modules: modulesFor(planInstall(d, root)),
     summary,
   };
 }
@@ -273,6 +285,14 @@ export function report(doc) {
   }
 
   write();
+  write(`  ${color.bold("Modules")}  ${color.dim("what `auis init` offers in this repository")}`);
+  write();
+  for (const m of doc.modules) {
+    const mark = m.installable ? color.green("✓") : color.dim("·");
+    write(`    ${mark} ${(m.installable ? color.bold : color.dim)(m.label.padEnd(14))}${m.installable ? color.dim("installs with `auis init`") : color.dim(m.reason)}`);
+  }
+
+  write();
   if (doc.installable.ok) {
     write(`  ${color.bold("What `auis init` would touch")}  ${color.dim(`${doc.plan.length} places`)}`);
     write();
@@ -280,9 +300,8 @@ export function report(doc) {
       write(`    ${color.dim(step.action.padEnd(8))}${step.path.padEnd(44)}${color.dim(step.detail)}`);
     }
     write();
-    write(`  ${color.dim("Install Review with `npx @auis/cli init`; `npx @auis/cli uninstall` reverses it.")}`);
-    write(`  ${color.dim("init brings the review.* rows above. Edit, flows, State Mode and the skills run in a project")}`);
-    write(`  ${color.dim("created with `npx @auis/cli <dir>`; they are not installable into an existing app yet.")}`);
+    write(`  ${color.dim("Pick what to install with `npx @auis/cli init`; `npx @auis/cli uninstall` reverses it.")}`);
+    write(`  ${color.dim("Every module runs today in a project created with `npx @auis/cli <dir>`.")}`);
   } else {
     write(`  ${color.bold("auis init")}  ${color.dim(doc.installable.reason)}`);
   }

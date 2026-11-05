@@ -49,20 +49,41 @@ npx @auis/cli@latest doctor
 capability with a reason, and an alternative when the answer is no. It writes
 nothing.
 
-In a **Next.js App Router** app, `init` installs **Review** — pins, comments,
-the drawer and the agent mentions — and nothing else:
+In a **Next.js App Router** app, `init` asks what to install:
 
 ```bash
-npx @auis/cli@latest init --dry-run    # print what it would touch
+npx @auis/cli@latest init --dry-run    # pick, then print what it would touch
 npx @auis/cli@latest init
 ```
+
+```
+  What should auis install?  ↑↓ move · space toggle · a all · enter install · esc cancel
+
+  ❯ ◉ Review      pins, comments, the drawer and agent mentions
+    ◯ State Mode  switch a screen's states in place, and ?ge= deep links that replay clicks
+                    it is not packaged for an existing app yet, and it needs a registry of your screens
+    ◯ Edit Mode   visual edits an agent turns into code
+                    it is not packaged yet, and it needs a map of your components and tokens
+    ◯ Styleguide  a living page of your own components and tokens
+                    it has to document your components, not Auis's, and that scanner does not exist yet
+    ◯ UX Flows    navigable flow diagrams that are pages in your app
+                    it is not packaged for an existing app yet
+```
+
+Today **Review** is the one that installs — pins, comments, the drawer and the
+agent mentions. The other modules stay on the menu, dimmed, with the reason they
+cannot be picked yet; they light up as each one is packaged. In CI or a script,
+skip the menu with `--only review` (or `--yes` for every module that installs
+here). `--only` with a module that cannot install says why and writes nothing.
+
+With Review picked, `init` prints what it touches, and touches nothing else:
 
 ```
   What init touches  7 places
 
     create  app/api/review-bridge/[...path]/route.ts    15 lines — the bridge's catch-all route
     edit    app/layout.tsx                              +2 lines — one import, one <AuisReview /> before </body>
-    edit    package.json                                +1 dependency — @auis/next@^0.1.0
+    edit    package.json                                +1 dependency — @auis/next@^0.2.0
     edit    package-lock.json                           npm install
     append  .gitignore                                  4 lines, in a delimited block
     create  .auis/manifest.json                         what auis wrote, so uninstall can reverse it
@@ -108,7 +129,8 @@ npx @auis/cli@latest init [directory]          install Review into an existing N
 npx @auis/cli@latest uninstall [directory]     take it back out, exactly
 
       --json           doctor only: the full report as JSON
-      --only <what>    init only: what to install (review; the default)
+      --only <a,b>     init only: install these and skip the menu
+                       (review, states, edit, styleguide, flows; review installs today)
       --dry-run        init only: print what it would touch, write nothing
       --purge          uninstall only: delete the comments instead of moving them to the backups
   -r, --ref <ref>      branch, tag or commit of the template (default: main)
@@ -118,6 +140,7 @@ npx @auis/cli@latest uninstall [directory]     take it back out, exactly
       --force          create: scaffold into a directory that is not empty
                        uninstall: also remove files you changed since init
   -y, --yes            take the defaults, never prompt
+                       (init: every module that installs in this repository)
   -h, --help           show usage
   -v, --version        print the CLI version
 ```
