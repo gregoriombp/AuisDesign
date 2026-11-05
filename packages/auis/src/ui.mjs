@@ -82,3 +82,64 @@ export async function ask(question, fallback) {
     rl.close();
   }
 }
+
+/**
+ * A checkbox menu in the terminal: ↑/↓ to move, space to toggle, a for all,
+ * enter to confirm, Esc to leave. Rows that cannot be picked stay visible,
+ * dimmed, with their reason. Resolves to the finished picker state (see
+ * modules.mjs), or null when stdin is not a TTY.
+ */
+export async function pickMany(title, rows, { initialPicker, pickerReducer }) {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) return null;
+  const readline = await import("node:readline");
+  let state = initialPicker(rows);
+  let drawn = 0;
+
+  const render = () => {
+    if (drawn > 0) process.stdout.write(`${ESC}[${drawn}A${ESC}[0J`);
+    const lines = [`  ${color.bold(title)}  ${color.dim("↑↓ move · space toggle · a all · enter install · esc cancel")}`, ""];
+    const width = Math.max(...state.rows.map((r) => r.label.length)) + 2;
+    state.rows.forEach((row, i) => {
+      const pointer = i === state.cursor ? color.cyan("❯") : " ";
+      const box = row.selectable ? (state.checked.includes(row.id) ? color.green("◉") : "◯") : color.dim("◯");
+      const label = row.selectable ? color.bold(row.label.padEnd(width)) : color.dim(row.label.padEnd(width));
+      lines.push(`  ${pointer} ${box} ${label}${color.dim(row.summary)}`);
+      if (!row.selectable) lines.push(`        ${" ".repeat(width)}${color.dim(row.note)}`);
+    });
+    lines.push("", state.hint ? `  ${color.yellow("!")} ${state.hint}` : "");
+    process.stdout.write(`${lines.join("\n")}\n`);
+    drawn = lines.length;
+  };
+
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+  process.stdout.write(`${ESC}[?25l`);
+  render();
+  try {
+    return await new Promise((resolve) => {
+      const onKey = (_str, key = {}) => {
+        const name =
+          key.ctrl && key.name === "c" ? "cancel"
+            : key.name === "escape" ? "cancel"
+              : key.name === "return" ? "enter"
+                : key.name === "space" ? "space"
+                  : key.name === "up" || key.name === "k" ? "up"
+                    : key.name === "down" || key.name === "j" ? "down"
+                      : key.name === "a" ? "all"
+                        : null;
+        if (!name) return;
+        state = pickerReducer(state, name);
+        render();
+        if (state.done || state.cancelled) {
+          process.stdin.off("keypress", onKey);
+          resolve(state);
+        }
+      };
+      process.stdin.on("keypress", onKey);
+    });
+  } finally {
+    process.stdin.setRawMode(false);
+    process.stdin.pause();
+    process.stdout.write(`${ESC}[?25h`);
+  }
+}

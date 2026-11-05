@@ -30,12 +30,20 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { color, fail, step, warn, write } from "./ui.mjs";
+import { color, fail, pickMany, step, warn, write } from "./ui.mjs";
 import { detect } from "./detect.mjs";
 import { exec } from "./template.mjs";
+import {
+  MODULE_IDS,
+  initialPicker,
+  moduleChoices,
+  pickedIds,
+  pickerReducer,
+  resolveOnly,
+} from "./modules.mjs";
 
 /** The kit version `init` writes. Kept equal to kit/next/package.json by a test. */
-export const KIT_VERSION = "0.1.0";
+export const KIT_VERSION = "0.2.0";
 export const KIT_PACKAGE = "@auis/next";
 export const MANIFEST_VERSION = 1;
 
@@ -55,7 +63,8 @@ const LOCKFILES = {
   bun: ["bun.lock", "bun.lockb"],
 };
 
-export const ONLY = ["review"];
+/** Every module `--only` names; which of them install today is in modules.mjs. */
+export const ONLY = MODULE_IDS;
 
 const sha = (buf) => crypto.createHash("sha256").update(buf).digest("hex");
 const abs = (root, rel) => path.join(root, rel);
@@ -275,8 +284,10 @@ export async function init({
   dryRun = false,
   install = true,
   packageManager,
-  only = "review",
+  only,
+  yes = false,
   kitRange = `^${KIT_VERSION}`,
+  pick = pickMany,
 } = {}) {
   const root = path.resolve(directory);
   if (!fs.existsSync(abs(root, "package.json"))) {
@@ -286,11 +297,6 @@ export async function init({
     );
     return 1;
   }
-  if (!ONLY.includes(only)) {
-    fail(`--only ${only}: only ${ONLY.join(", ")} can be installed into an existing app today.`);
-    return 1;
-  }
-
   const existing = readManifest(root);
   if (existing) {
     write(`  ${color.green("✓")} Already installed ${color.dim(`(${MANIFEST}, ${existing.createdAt})`)} — nothing to do.`);
@@ -301,6 +307,32 @@ export async function init({
 
   const d = detect(root);
   const plan = planInstall(d, root, { packageManager });
+
+  // What to install: `--only`, else the menu (a TTY without --yes), else every
+  // module that can go in here. Today that is Review alone; the menu still
+  // lists the rest, each with the reason it cannot be picked yet.
+  const choices = moduleChoices({ planOk: plan.ok, planReason: plan.reason });
+  let modules;
+  if (only !== undefined) {
+    const resolved = resolveOnly(only, choices);
+    if (!resolved.ok) {
+      fail(`${resolved.message}\n    Run ${color.bold("npx @auis/cli doctor")} for what Auis can do here.`);
+      return 1;
+    }
+    modules = resolved.ids;
+  } else {
+    const canPick = choices.some((c) => c.selectable);
+    const picked = canPick && !yes ? await pick("What should auis install?", choices, { initialPicker, pickerReducer }) : null;
+    if (picked?.cancelled) {
+      write();
+      write(`  ${color.dim("Nothing was installed.")}`);
+      write();
+      return 0;
+    }
+    modules = picked ? pickedIds(picked) : choices.filter((c) => c.selectable).map((c) => c.id);
+    if (picked) write();
+  }
+
   if (!plan.ok) {
     fail(`${plan.reason}\n    Run ${color.bold("npx @auis/cli doctor")} for what Auis can still do here.`);
     return 1;
@@ -409,7 +441,7 @@ export async function init({
   const manifest = {
     auisManifestVersion: MANIFEST_VERSION,
     createdAt: new Date().toISOString(),
-    only: [only],
+    only: modules,
     kit: { package: KIT_PACKAGE, range: kitRange },
     packageManager: plan.packageManager,
     artifacts,
