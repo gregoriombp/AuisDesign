@@ -22,6 +22,13 @@ export type ScreenStateInteraction = {
    * separated by `>>`. Outside the key of Pattern A screens — no remount.
    */
   ge: string
+  /**
+   * The scenario the recipe needs, as values of the screen's own axes (e.g.
+   * `{ mode: "edit" }`). State Mode writes them into the URL together with the
+   * `?ge=` when the interaction is picked, so the recipe runs where its target
+   * exists.
+   */
+  params?: Record<string, string>
 }
 
 export type ScreenStatesEntry = {

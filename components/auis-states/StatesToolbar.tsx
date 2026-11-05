@@ -85,18 +85,43 @@ export function StatesToolbar() {
   )
 
   // Fires (or clears) an interaction: writes ?ge= and the FlowStateDriver
-  // replays the clicks on the live screen — no remount, the axes stay as they are.
+  // replays the clicks on the live screen. The interaction's `params` go in the
+  // same navigation, as switching each axis would; the other axes stay. Clearing
+  // removes only the ?ge=.
   const applyInteraction = React.useCallback(
-    (ge: string | null) => {
+    (interaction: ScreenStateInteraction | null) => {
       const params = new URLSearchParams(searchParams.toString())
-      if (ge == null) params.delete("ge")
-      else params.set("ge", ge)
+      if (interaction == null) params.delete("ge")
+      else {
+        for (const [param, value] of Object.entries(interaction.params ?? {})) {
+          const axis = entry?.axes.find((candidate) => candidate.param === param)
+          if (value === axis?.defaultValue) params.delete(param)
+          else params.set(param, value)
+        }
+        params.set("ge", interaction.ge)
+      }
       params.delete("reviewCommentId")
       const qs = params.toString()
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
     },
-    [pathname, router, searchParams],
+    [entry, pathname, router, searchParams],
   )
+
+  // The active interaction is the current ?ge= whose scenario is still in the URL.
+  const activeInteraction = React.useMemo(() => {
+    const ge = searchParams.get("ge")
+    if (!entry || !ge) return null
+    return (
+      entry.interactions?.find(
+        (interaction) =>
+          interaction.ge === ge &&
+          Object.entries(interaction.params ?? {}).every(([param, value]) => {
+            const axis = entry.axes.find((candidate) => candidate.param === param)
+            return (axis ? currentOf(axis) : searchParams.get(param)) === value
+          }),
+      ) ?? null
+    )
+  }, [currentOf, entry, searchParams])
 
   // Escape leaves the mode — but only with a "clean" screen: if an overlay is
   // open (Radix dropdown/popover, AuModal or AuSheet of the scenario), Escape
@@ -152,7 +177,7 @@ export function StatesToolbar() {
               {entry.interactions && entry.interactions.length > 0 && (
                 <InteractionsControl
                   interactions={entry.interactions}
-                  currentGe={searchParams.get("ge")}
+                  active={activeInteraction}
                   onApply={applyInteraction}
                 />
               )}
@@ -268,27 +293,28 @@ function AxisControl({
 
 /**
  * States reachable through an interaction (open modal, open menu…): writes
- * ?ge= and the FlowStateDriver replays the clicks. Clicking the active
- * interaction clears the param (toggle) — the state axes are not touched.
+ * ?ge=, with the scenario the recipe needs, and the FlowStateDriver replays the
+ * clicks. Clicking the active interaction clears the ?ge= (toggle) and keeps
+ * the axes. Items are identified by label: two identical recipes can need
+ * different scenarios.
  */
 function InteractionsControl({
   interactions,
-  currentGe,
+  active,
   onApply,
 }: {
   interactions: ScreenStateInteraction[]
-  currentGe: string | null
-  onApply: (ge: string | null) => void
+  active: ScreenStateInteraction | null
+  onApply: (interaction: ScreenStateInteraction | null) => void
 }) {
-  const active = interactions.find((i) => i.ge === currentGe) ?? null
   const items: AuDropdownItem[] = [
     { id: "interactions-label", isLabel: true, label: "Interactions" },
     ...interactions.map(
       (i): AuDropdownItem => ({
-        id: i.ge,
+        id: i.label,
         label: i.label,
-        checked: i.ge === currentGe,
-        onSelect: () => onApply(i.ge === currentGe ? null : i.ge),
+        checked: i === active,
+        onSelect: () => onApply(i === active ? null : i),
       }),
     ),
   ]
