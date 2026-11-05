@@ -4,6 +4,7 @@ import { externalizeComment, externalizeImageList } from "./images";
 import { ensureRestored, snapshot } from "./backup";
 import type {
   ReviewActor,
+  ReviewAgentRun,
   ReviewAgentSettings,
   ReviewAgentSettingsMap,
   ReviewComment,
@@ -221,6 +222,46 @@ export async function upsertComment(
       return { a: main, result: undefined };
     },
   );
+}
+
+/**
+ * Marks or clears the agent run in progress on a comment. It writes straight
+ * into the record, with no upsert, and leaves `updatedAt` alone: the mark comes
+ * and goes on its own and does not count as activity on the comment. Clearing
+ * with `clearAgentId` only clears that agent's mark, so the end of one run does
+ * not wipe the next one's.
+ */
+export async function setCommentAgentRun(
+  id: string,
+  run: ReviewAgentRun | null,
+  clearAgentId?: string,
+): Promise<boolean> {
+  const apply = (current: ReviewComment): ReviewComment => {
+    const next: ReviewComment = { ...current };
+    if (run) next.agentRun = run;
+    else if (!clearAgentId || current.agentRun?.agentId === clearAgentId) delete next.agentRun;
+    return next;
+  };
+  const found = await docs.updatePair<MainDb, ArchiveDb, boolean>(
+    { key: MAIN_KEY, init: initMain },
+    { key: ARCHIVE_KEY, init: initArchive },
+    (rawMain, rawArchive) => {
+      const main = asMain(rawMain);
+      const idx = main.comments.findIndex((c) => c.id === id);
+      if (idx !== -1) {
+        main.comments[idx] = apply(main.comments[idx]!);
+        return { a: main, result: true };
+      }
+      const archive = asArchive(rawArchive);
+      const aIdx = archive.comments.findIndex((c) => c.id === id);
+      if (aIdx !== -1) {
+        archive.comments[aIdx] = apply(archive.comments[aIdx]!);
+        return { b: archive, result: true };
+      }
+      return { result: false };
+    },
+  );
+  return found ?? false;
 }
 
 export async function deleteComment(id: string): Promise<boolean> {

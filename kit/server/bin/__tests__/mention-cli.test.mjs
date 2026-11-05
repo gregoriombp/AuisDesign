@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   GIT_DENY,
+  accountCheck,
   agentEnv,
   answeredSince,
   claudeArgs,
@@ -10,6 +11,8 @@ import {
   grokArgs,
   parseCliJson,
   planRuns,
+  qualityNote,
+  qualityTargets,
   refreshRun,
   resultText,
 } from "../mention-cli.mjs";
@@ -256,4 +259,50 @@ test("bridgeBase: the spawning route's own origin, on this machine only", async 
   assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "http://example.com" }), DEFAULT_BRIDGE_BASE);
   assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "http://127.0.0.1.evil.com:3000" }), DEFAULT_BRIDGE_BASE);
   assert.equal(bridgeBase({ AUIS_BRIDGE_URL: "not a url" }), DEFAULT_BRIDGE_BASE);
+});
+
+test("the account check only stops a run when an expected account is set", () => {
+  assert.equal(accountCheck(null, undefined).ok, true);
+  assert.equal(accountCheck({ loggedIn: true, email: "a@x.dev" }, "").ok, true);
+  assert.equal(accountCheck({ loggedIn: true, email: "A@x.dev" }, " a@x.dev ").ok, true);
+  const other = accountCheck({ loggedIn: true, email: "b@x.dev" }, "a@x.dev");
+  assert.equal(other.ok, false);
+  assert.match(other.reason, /b@x\.dev, not as a@x\.dev/);
+  assert.equal(accountCheck({ loggedIn: false }, "a@x.dev").ok, false);
+});
+
+test("post-Edit checks only the code and screens the run changed", () => {
+  assert.deepEqual(
+    qualityTargets([
+      "components/ui/AuCard.tsx",
+      "app/globals.css",
+      "lib/area/x.ts",
+      "docs/component-map.md",
+      "scripts/tool.mjs",
+      "node_modules/pkg/index.js",
+      ".next/server/page.js",
+    ]),
+    {
+      lint: ["components/ui/AuCard.tsx", "lib/area/x.ts", "scripts/tool.mjs"],
+      ds: ["components/ui/AuCard.tsx", "app/globals.css"],
+    },
+  );
+});
+
+test("post-Edit is one line when clean and quotes the output when it fails", () => {
+  assert.equal(qualityNote({ count: 0, lint: null, ds: null }), null);
+  assert.equal(qualityNote({ count: 2, lint: null, ds: null }), null);
+  assert.match(
+    qualityNote({ count: 2, lint: { code: 0, output: "" }, ds: { code: 0, output: "" } }),
+    /ESLint and ds:check found nothing/,
+  );
+  assert.match(qualityNote({ count: 1, lint: { code: 0, output: "" }, ds: null }), /: ESLint found nothing/);
+  const note = qualityNote({
+    count: 1,
+    lint: { code: 0, output: "" },
+    ds: { code: 2, output: "> node scripts/ds-check.mjs\n  warn  arbitrary-value  p-[13px]\n" },
+  });
+  assert.match(note, /found problems/);
+  assert.match(note, /arbitrary-value/);
+  assert.doesNotMatch(note, /> node/);
 });

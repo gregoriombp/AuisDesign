@@ -5,11 +5,24 @@ import { fileToHighResDataUrl } from "./imageScale"
 
 export const MAX_ATTACH_IMAGES = 4
 
+/**
+ * The raster types the bridge stores. An SVG is a document that can run script,
+ * so the server answers it with 415; filtering here keeps it out of the draft.
+ */
+const RASTER_TYPE = /^image\/(png|jpe?g|gif|webp|avif)$/i
+
+/** The file picker's `accept`, the same list. */
+export const ATTACH_ACCEPT = "image/png,image/jpeg,image/gif,image/webp,image/avif"
+
+export function isAttachableImage(type: string): boolean {
+  return RASTER_TYPE.test(type)
+}
+
 /** Extract the image files from a clipboard payload (Cmd+V paste). */
 export function extractImagesFromClipboard(items: DataTransferItemList): File[] {
   const files: File[] = []
   for (const item of Array.from(items)) {
-    if (item.type.startsWith("image/")) {
+    if (isAttachableImage(item.type)) {
       const file = item.getAsFile()
       if (file) files.push(file)
     }
@@ -27,7 +40,7 @@ export function useImageAttach(initial: string[] = [], max = MAX_ATTACH_IMAGES) 
 
   const add = React.useCallback(
     async (files: File[]) => {
-      const eligible = files.filter((f) => f.type.startsWith("image/")).slice(0, max)
+      const eligible = files.filter((f) => isAttachableImage(f.type)).slice(0, max)
       if (eligible.length === 0) return
       const dataUrls = await Promise.all(eligible.map(fileToHighResDataUrl))
       setImages((prev) => [...prev, ...dataUrls].slice(0, max))

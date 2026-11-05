@@ -25,6 +25,9 @@ async function handleGET(
       headers: {
         "Content-Type": contentTypeFor(name),
         "Cache-Control": "public, max-age=31536000, immutable",
+        // A legacy .svg opened directly stays inert: no sniffing, no script.
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "sandbox",
       },
     });
   } catch {

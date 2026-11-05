@@ -1,22 +1,29 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "../primitives/Button"
-import { Spinner } from "../primitives/Spinner"
-import { Icon } from "../primitives/Icon"
 import { useReviewStore } from "./store"
-import { useImageAttach } from "./useImageAttach"
+import { ATTACH_ACCEPT, useImageAttach } from "./useImageAttach"
 import { useReviewCommandAutocomplete } from "./useReviewCommandAutocomplete"
 import { useVoiceTranscription } from "./useVoiceTranscription"
 import { fetchRewrite } from "./commentAssist"
 import type { ReviewElementContext } from "@auis/core/elementContext"
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
+import {
+  COMPOSER_SHELL_CLASS,
+  COMPOSER_TEXTAREA_CLASS,
+  ComposerRecording,
+  ComposerSendButton,
+  ComposerThumbnails,
+  ComposerToolButton,
+  useComposerAutosize,
+} from "./ComposerControls"
 
 /**
  * Reply composer with image attachments (paste or button), voice dictation and
  * "improve prompt" (wand) — the same toolbox as the pin composer, reused by the
- * drawer card and the anchored thread popover. Text OR image enables sending;
- * ⌘↵ sends.
+ * drawer card and the anchored thread popover, in the shared pill frame
+ * (ComposerControls). Text OR image enables sending; ⌘↵ sends, and Esc gives up
+ * when there is an onDone.
  */
 export function ReplyComposer({
   commentId,
@@ -42,6 +49,8 @@ export function ReplyComposer({
   const img = useImageAttach()
   const fileRef = React.useRef<HTMLInputElement>(null)
   const taRef = React.useRef<HTMLTextAreaElement>(null)
+  const shellRef = React.useRef<HTMLDivElement>(null)
+  useComposerAutosize(taRef, shellRef, text)
   // A reviewer does not command agents — their "@" only suggests people.
   const commands = useReviewCommandAutocomplete({
     textareaRef: taRef,
@@ -146,155 +155,104 @@ export function ReplyComposer({
 
   const recording = voice.status === "recording"
   const transcribing = voice.status === "transcribing"
+  const status = transcribing
+    ? "Transcribing…"
+    : rewriting
+      ? "Improving the text…"
+      : null
 
   return (
-    <div className="flex flex-col gap-2">
-      <textarea
-        ref={taRef}
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value)
-          if (undoText !== null) setUndoText(null)
-        }}
-        onPaste={img.onPaste}
-        placeholder="Write a reply… paste an image, or dictate"
-        rows={2}
-        className="w-full rounded-sm border border-(--auis-border-subtle) bg-(--auis-bg-surface) p-2 body-sm text-(--auis-fg-primary) focus:outline-hidden focus:border-(--auis-accent-brand) resize-none"
-        onKeyDown={(e) => {
-          if (commands.onKeyDown(e)) return
-          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void submit()
-        }}
-        onSelect={() => commands.sync()}
-        onBlur={() => commands.close()}
-      />
+    <div className="flex flex-col gap-1.5">
+      <ComposerThumbnails images={img.images} onRemove={img.remove} />
+
+      <div ref={shellRef} className={COMPOSER_SHELL_CLASS}>
+        {recording && (
+          <ComposerRecording
+            stream={voice.stream}
+            onDiscard={voice.cancel}
+            onStop={voice.stop}
+          />
+        )}
+        <div className={recording ? "hidden" : "flex-1 min-w-0"}>
+          <textarea
+            ref={taRef}
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value)
+              if (undoText !== null) setUndoText(null)
+            }}
+            onPaste={img.onPaste}
+            placeholder="Write a reply…"
+            aria-label="Reply"
+            rows={1}
+            className={COMPOSER_TEXTAREA_CLASS}
+            onKeyDown={(e) => {
+              if (commands.onKeyDown(e)) return
+              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") void submit()
+              if (e.key === "Escape" && onDone) {
+                e.preventDefault()
+                cancel()
+              }
+            }}
+            onSelect={() => commands.sync()}
+            onBlur={() => commands.close()}
+          />
+        </div>
+        {!recording && (
+          <>
+            <ComposerToolButton
+              icon="image"
+              label="Attach image (or paste with ⌘V)"
+              onClick={() => fileRef.current?.click()}
+              disabled={!img.canAddMore}
+            />
+            <ComposerToolButton
+              icon="mic"
+              label="Dictate"
+              onClick={voice.toggle}
+              busy={transcribing}
+            />
+            <ComposerToolButton
+              icon="auto_fix_high"
+              label="Improve the reply"
+              onClick={() => void handleRewrite()}
+              disabled={text.trim().length === 0}
+              busy={rewriting}
+            />
+            <ComposerSendButton
+              label="Send"
+              onClick={() => void submit()}
+              disabled={!canSubmit && !transcribing}
+              loading={submitting}
+            />
+          </>
+        )}
+      </div>
 
       <ReviewCommandMenu ac={commands} />
 
-      {assistError && (
-        <p className="m-0 body-xs text-(--auis-accent-danger)">{assistError}</p>
-      )}
-      {voice.error && (
-        <p className="m-0 body-xs text-(--auis-accent-danger)">{voice.error}</p>
-      )}
-
-      {img.images.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {img.images.map((src, idx) => (
-            <div key={idx} className="relative group/thumb">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt=""
-                className="h-14 w-14 rounded-sm object-cover border border-(--auis-border-subtle)"
-              />
-              <button
-                type="button"
-                onClick={() => img.remove(idx)}
-                aria-label="Remove image"
-                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
-              >
-                <Icon name="close" size={9} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="flex items-center justify-between gap-1">
-        <div className="flex items-center gap-1 min-w-0">
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={!img.canAddMore}
-            aria-label="Attach image"
-            title="Attach image (or paste with ⌘V)"
-            className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors disabled:opacity-40"
-          >
-            <Icon name="image" size={14} weight={600} />
-          </button>
-          <button
-            type="button"
-            onClick={voice.toggle}
-            disabled={transcribing}
-            aria-label={recording ? "Stop recording" : "Dictate"}
-            aria-pressed={recording}
-            title={recording ? "Stop recording" : "Dictate"}
-            className={[
-              "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors disabled:opacity-60",
-              recording
-                ? "bg-(--auis-accent-danger) text-(--auis-fg-on-inverse)"
-                : "text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover)",
-            ].join(" ")}
-          >
-            {transcribing ? (
-              <Spinner size="sm" aria-hidden="true" />
-            ) : (
-              <Icon
-                name={recording ? "stop" : "mic"}
-                size={14}
-                fill={recording ? 1 : 0}
-                weight={600}
-              />
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={handleRewrite}
-            disabled={rewriting || text.trim().length === 0}
-            aria-label="Improve the reply"
-            title="Improve the reply (magic wand)"
-            className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors disabled:opacity-50"
-          >
-            {rewriting ? (
-              <Spinner size="sm" aria-hidden="true" />
-            ) : (
-              <Icon name="auto_fix_high" size={14} weight={600} />
-            )}
-          </button>
-
-          {recording ? (
-            <span className="body-xs text-(--auis-accent-danger) flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-(--auis-accent-danger) animate-pulse" />
-              Recording
-            </span>
-          ) : transcribing ? (
-            <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
-              Transcribing…
-            </span>
-          ) : rewriting ? (
-            <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
-              Improving…
-            </span>
-          ) : undoText !== null ? (
+      {(assistError || voice.error || status || undoText !== null) && (
+        <div className="flex items-center gap-2 px-3 body-xs text-(--auis-fg-tertiary)">
+          {assistError || voice.error ? (
+            <span className="text-(--auis-accent-danger)">{assistError ?? voice.error}</span>
+          ) : status ? (
+            <span>{status}</span>
+          ) : (
             <button
               type="button"
               onClick={undoRewrite}
-              className="body-xs text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) underline underline-offset-2"
+              className="text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) underline underline-offset-2"
             >
               Undo
             </button>
-          ) : null}
+          )}
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          <Button variant="ghost" size="sm" onClick={cancel}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            loading={submitting}
-            disabled={!canSubmit && !recording && !transcribing}
-            onClick={() => void submit()}
-          >
-            Reply
-          </Button>
-        </div>
-      </div>
+      )}
 
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept={ATTACH_ACCEPT}
         multiple
         className="hidden"
         onChange={async (e) => {

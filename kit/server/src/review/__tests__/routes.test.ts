@@ -1,4 +1,4 @@
-// Parity tests for the 16 Review Bridge endpoints, driven through a standard
+// Parity tests for the Review Bridge endpoints, driven through a standard
 // Request against an isolated data folder (cwd and backups point at a temp dir
 // before the first request; the server reads its paths at the moment of use). These assertions were written against the per-file Next routes
 // before they moved behind @auis/server's handle(Request), and held unchanged.
@@ -267,6 +267,42 @@ test("images: 400 for an unsafe name, 404 when missing, bytes when present", asy
   assert.equal(res.headers.get("content-type"), "image/png");
   assert.match(res.headers.get("cache-control") ?? "", /immutable/);
   assert.deepEqual(new Uint8Array(await res.arrayBuffer()), IMAGE_BYTES);
+});
+
+test("images: an SVG attachment answers 415; legacy files are served inert", async () => {
+  const svg = comment("c-svg", { images: ["data:image/svg+xml;base64,PHN2Zz4="] });
+  const r = await call("PUT", "comments/c-svg", svg);
+  assert.equal(r.status, 415);
+  assert.match(r.json.error, /PNG, JPEG, GIF, WebP or AVIF/);
+  const res = await handle(new Request(`${BASE}/images/${IMAGE_NAME}`));
+  assert.equal(res.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(res.headers.get("content-security-policy"), "sandbox");
+});
+
+test("agent-run: the runner marks and clears; a client edit cannot forge it", async () => {
+  assert.equal((await call("PUT", "comments/c-run", comment("c-run"))).status, 200);
+  assert.equal((await call("PUT", "comments/c-run/agent-run", { phase: "queued" })).status, 400);
+  assert.equal(
+    (await call("PUT", "comments/c-run/agent-run", { phase: "thinking" }, AGENT)).json.error,
+    "invalid_phase",
+  );
+  assert.equal((await call("PUT", "comments/nope/agent-run", { phase: "running" }, AGENT)).status, 404);
+
+  assert.deepEqual((await call("PUT", "comments/c-run/agent-run", { phase: "running" }, AGENT)).json, { ok: true });
+  const stored = (await call("GET", "comments/c-run")).json.comment;
+  assert.equal(stored.agentRun.agentId, "claude");
+  assert.equal(stored.agentRun.phase, "running");
+  assert.equal(stored.updatedAt, 1000);
+
+  // The client's PUT carries no mark: the stored one survives the edit.
+  assert.equal((await call("PUT", "comments/c-run", comment("c-run", { text: "edited" }))).status, 200);
+  assert.equal((await call("GET", "comments/c-run")).json.comment.agentRun.phase, "running");
+
+  // Another agent's DELETE leaves Claude's mark alone; Claude's clears it.
+  await call("DELETE", "comments/c-run/agent-run", undefined, { "x-bridge-agent-id": "grok" });
+  assert.equal((await call("GET", "comments/c-run")).json.comment.agentRun.agentId, "claude");
+  assert.deepEqual((await call("DELETE", "comments/c-run/agent-run", undefined, AGENT)).json, { ok: true });
+  assert.equal((await call("GET", "comments/c-run")).json.comment.agentRun, undefined);
 });
 
 test("deleting a comment, then 404", async () => {

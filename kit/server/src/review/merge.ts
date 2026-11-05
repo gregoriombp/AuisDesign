@@ -15,7 +15,8 @@ export interface CommentEditPolicy {
  * record from its polling cache, which can be up to 4 s behind. From the
  * client only the editable fields count (text, images, anchor, context). From
  * the stored record come authorship and creation; the replies, which have
- * their own route (/replies); the resolution, which comes from transitions;
+ * their own route (/replies); the agent-run mark, which only the runner writes
+ * (/agent-run); the resolution, which comes from transitions;
  * and the status, except the open ↔ future-idea toggle by a non-agent.
  * Without this, an agent reply that arrived after the last poll vanished on a
  * text edit, the thread accepted a forged reply, and an admin's stale cache
@@ -35,6 +36,7 @@ export function mergeCommentEdit(
   keepFromExisting(merged, existing, "authorEmail");
   keepFromExisting(merged, existing, "authorRole");
   keepFromExisting(merged, existing, "replies");
+  keepFromExisting(merged, existing, "agentRun");
   keepFromExisting(merged, existing, "resolution");
 
   const togglesSoftState =
@@ -50,7 +52,13 @@ export function mergeCommentEdit(
   return merged;
 }
 
-type ServerOwnedField = "authorKind" | "authorEmail" | "authorRole" | "replies" | "resolution";
+type ServerOwnedField =
+  | "authorKind"
+  | "authorEmail"
+  | "authorRole"
+  | "replies"
+  | "agentRun"
+  | "resolution";
 
 function keepFromExisting<K extends ServerOwnedField>(
   target: ReviewComment,

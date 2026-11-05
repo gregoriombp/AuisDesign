@@ -1,5 +1,6 @@
 import { configureReviewServer, type ReviewServerOptions } from "./config";
 import { withBridgeErrors } from "./errors";
+import * as agentRun from "./routes/agentRun";
 import * as agentSettings from "./routes/agentSettings";
 import * as comment from "./routes/comment";
 import * as comments from "./routes/comments";
@@ -42,6 +43,7 @@ const ROUTES: { pattern: string[]; module: RouteModule }[] = [
   { pattern: ["comments"], module: comments },
   { pattern: ["comments", "archive"], module: commentsArchive },
   { pattern: ["comments", ":id"], module: comment },
+  { pattern: ["comments", ":id", "agent-run"], module: agentRun },
   { pattern: ["comments", ":id", "replies"], module: replies },
   { pattern: ["comments", ":id", "replies", ":replyId"], module: reply },
   { pattern: ["identity", ":id"], module: identity },

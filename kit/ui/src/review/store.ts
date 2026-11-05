@@ -223,6 +223,11 @@ function sessionColorToken(id: string): string {
 // goes to the network.
 let sessionInflight: Promise<void> | null = null
 
+/** The response is JSON: comparing the serialization checks every field. */
+function sameComments(a: readonly ReviewComment[], b: readonly ReviewComment[]): boolean {
+  return a.length === b.length && JSON.stringify(a) === JSON.stringify(b)
+}
+
 export const useReviewStore = create<ReviewState>()((set, get) => ({
   storage,
 
@@ -699,6 +704,10 @@ export const useReviewStore = create<ReviewState>()((set, get) => ({
   refreshFromStorage: async () => {
     try {
       const comments = await get().storage.listComments()
+      // An equal list keeps the reference. The provider's permalink restarts on
+      // every new `comments` and aborts a reveal in progress, and the re-read
+      // when Review opens lands right after the initial read.
+      if (sameComments(get().comments, comments)) return
       set({ comments })
     } catch (e) {
       console.warn("[review] failed to load comments:", e)

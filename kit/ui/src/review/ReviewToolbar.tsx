@@ -9,6 +9,7 @@ import { useStopDismiss } from "./useStopDismiss"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewAvatar } from "./ReviewAvatar"
 import { useChromeHidden } from "../router"
+import { useChromeDismissStore } from "../chromeDismiss"
 import type { ReviewMode } from "@auis/core/types"
 
 // Mirrors the motion tokens in globals.css (--auis-dur-slow + --auis-ease-out) so the bar
@@ -187,7 +188,12 @@ function AccountAvatarMenu() {
 
 export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
   const chromeHidden = useChromeHidden()
+  const dismissed = useChromeDismissStore((s) => s.dismissed)
   const active = useReviewStore((s) => s.active)
+  // `?chrome=0` (states matrix iframes, the PDF generator) hides everything.
+  // "Hide until refresh" hides only the collapsed pill: Cmd+Shift+Y still opens
+  // the bar.
+  const hidden = chromeHidden || (dismissed && !active)
   const sheetOpen = useReviewStore((s) => s.sheetOpen)
   const toggleSheet = useReviewStore((s) => s.toggleSheet)
   const toggleActive = useReviewStore((s) => s.toggleActive)
@@ -218,19 +224,20 @@ export function ReviewToolbar({ modes }: { modes?: ReviewModeLink[] }) {
     const pill = pillRef.current
     const bar = barRef.current
     if (!pill || !bar) return
-    const observer = new ResizeObserver(() =>
-      setWidths({ pill: pill.offsetWidth, bar: bar.offsetWidth })
-    )
+    const observer = new ResizeObserver(() => {
+      const next = { pill: pill.offsetWidth, bar: bar.offsetWidth }
+      setWidths((prev) =>
+        prev && prev.pill === next.pill && prev.bar === next.bar ? prev : next
+      )
+    })
     observer.observe(pill)
     observer.observe(bar)
     return () => observer.disconnect()
-  }, [])
+  }, [hidden])
 
   const target = widths ? (active ? widths.bar : widths.pill) : undefined
 
-  // `?chrome=0` (state matrix iframes, PDF generator): the thumbnail shows only
-  // the product — not even the collapsed pill appears.
-  if (chromeHidden) return null
+  if (hidden) return null
 
   return (
     <div

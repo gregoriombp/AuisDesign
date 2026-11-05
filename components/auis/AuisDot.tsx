@@ -22,6 +22,7 @@ import {
 } from "@auis/ui/review/agentSettingsStore";
 import { REVIEW_AGENTS } from "@auis/core/agents";
 import { useChromeHidden } from "@auis/ui/router";
+import { useChromeDismissStore } from "@auis/ui/chromeDismiss";
 import { AgentsPanel } from "./AgentsPanel";
 
 /**
@@ -48,7 +49,8 @@ function AuisDotGate() {
 function AuisDotInner() {
   const router = useRouter();
   const brand = useBrand();
-  const [visible, setVisible] = React.useState(true);
+  const dismissed = useChromeDismissStore((s) => s.dismissed);
+  const dismiss = useChromeDismissStore((s) => s.dismiss);
   const [agentsOpen, setAgentsOpen] = React.useState(false);
   const reviewActive = useReviewStore((s) => s.active);
   const toggleReview = useReviewStore((s) => s.toggleActive);
@@ -69,7 +71,7 @@ function AuisDotInner() {
     void hydrateSession();
   }, [hydrateAgents, hydrateSession]);
 
-  if (!visible) return null;
+  if (dismissed) return null;
 
   const go = (href: string) => router.push(href);
 
@@ -172,7 +174,12 @@ function AuisDotInner() {
       id: "hide",
       label: "Hide until refresh",
       icon: "close",
-      onSelect: () => setVisible(false),
+      // Also hides the Review pill. With Review on, it leaves it first: without
+      // the bar the mode would stay active with no control on screen.
+      onSelect: () => {
+        if (reviewActive) toggleReview();
+        dismiss();
+      },
     },
   ];
 

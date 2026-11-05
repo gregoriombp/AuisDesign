@@ -8,18 +8,21 @@ import {
 } from "../primitives/DropdownMenu"
 import { Pill } from "../primitives/Pill"
 import { Icon } from "../primitives/Icon"
+import { Spinner } from "../primitives/Spinner"
+import { getReviewAgent } from "@auis/core/agents"
 import { useReviewStore } from "./store"
 import { useCumulativeScrollOffset, useLayoutVersion } from "../scrollHooks"
 import {
   resolveDrawPoints,
   resolveElementPoint,
 } from "@auis/core/elementAnchor"
-import { formatFullTimestamp } from "@auis/core/format"
+import { formatFullTimestamp, formatRelative } from "@auis/core/format"
 import { elementFromCommentContext } from "@auis/core/elementContext"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
-import { ReplyRow } from "./ReviewCommentCard"
+import { AgentBadge, ReplyRow } from "./ReviewCommentCard"
 import { ReplyComposer } from "./ReplyComposer"
 import { UxFlowChip } from "./UxFlowChip"
+import { agentRunLabel, liveAgentRun } from "./agentRun"
 import { ReviewAvatar } from "./ReviewAvatar"
 import { CommentText } from "./CommentText"
 import { AuthorName } from "./PersonHover"
@@ -53,6 +56,7 @@ export function ReviewThreadPopover() {
   const archiveDirect = useReviewStore((s) => s.archiveDirect)
   const approveComment = useReviewStore((s) => s.approveComment)
   const rejectComment = useReviewStore((s) => s.rejectComment)
+  const reopenFromArchive = useReviewStore((s) => s.reopenFromArchive)
   const editComment = useReviewStore((s) => s.editComment)
   const moveToBacklog = useReviewStore((s) => s.moveToBacklog)
   const deleteComment = useReviewStore((s) => s.deleteComment)
@@ -144,6 +148,13 @@ export function ReviewThreadPopover() {
   const replies = Array.isArray(comment.replies) ? comment.replies : []
   const isResolved = comment.status === "resolved"
   const isInReview = comment.status === "in_review"
+  const agentRun = liveAgentRun(comment)
+  const agentName = agentRun
+    ? (getReviewAgent(agentRun.agentId)?.name ?? agentRun.agentId)
+    : ""
+  const resolvedBy =
+    comment.resolution?.approvedBy?.name ?? comment.resolution?.actor.name
+  const resolvedAt = comment.resolution?.approvedAt ?? comment.resolution?.at
 
   // Hierarchy: an admin moderates (status/visibility); a reviewer only touches
   // what is theirs. The server re-validates everything — here it only keeps the
@@ -174,6 +185,18 @@ export function ReviewThreadPopover() {
   }
 
   const dropdownItems: DropdownItem[] = [
+    // In review, Approve and Reject take the header and the side panel moves
+    // into the menu.
+    ...(isInReview && isAdmin
+      ? [
+          {
+            id: "open-sheet",
+            label: "Open in the side panel",
+            icon: "open_in_full",
+            onSelect: () => setSheetOpen(true),
+          } as DropdownItem,
+        ]
+      : []),
     ...(ownComment
       ? [{ id: "edit", label: "Edit", icon: "edit", onSelect: startEdit } as DropdownItem]
       : []),
@@ -227,58 +250,90 @@ export function ReviewThreadPopover() {
       style={{ zIndex: REVIEW_Z.popover, left, width: THREAD_WIDTH, ...vertical }}
     >
       <div
-        className="pointer-events-auto flex flex-col rounded-lg bg-(--auis-bg-raised) border border-(--auis-border-subtle) shadow-lg overflow-hidden"
+        className={[
+          "pointer-events-auto flex flex-col rounded-(--auis-radius-xl) bg-(--auis-bg-raised) border shadow-lg overflow-hidden",
+          isResolved
+            ? "border-(--au-emerald-300) dark:border-(--au-emerald-800)"
+            : "border-(--auis-border-subtle)",
+        ].join(" ")}
         style={{ maxHeight }}
       >
-        {/* Header */}
-        <header className="flex items-center gap-2 px-3 py-2.5 border-b border-(--auis-border-subtle)">
+        <header className="flex items-center gap-2 pl-3.5 pr-2 py-2.5 border-b border-(--auis-border-subtle)">
           <ReviewAvatar
             authorKind={comment.authorKind}
             authorId={comment.authorId}
             authorName={comment.authorName}
             colorToken={comment.authorColorToken}
-            size={24}
+            size={36}
           />
-          <div className="flex flex-col leading-tight min-w-0">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <AuthorName
-                name={comment.authorName}
-                email={comment.authorEmail}
-                role={comment.authorRole}
-                className="body-xs font-medium text-(--auis-fg-primary) truncate"
-              />
-              {comment.authorKind === "agent" && (
-                <span className="text-2xs px-1 py-0 rounded-xs bg-(--auis-bg-muted) text-(--auis-fg-tertiary)">
-                  agent
-                </span>
-              )}
-            </div>
-            <span className="text-2xs text-(--auis-fg-tertiary) tabular-nums">
-              {formatFullTimestamp(comment.createdAt)}
+          <div className="flex items-baseline gap-1.5 min-w-0 flex-1">
+            <AuthorName
+              name={comment.authorName}
+              email={comment.authorEmail}
+              role={comment.authorRole}
+              className="body-sm font-medium text-(--auis-fg-primary) truncate"
+            />
+            {comment.authorKind === "agent" && <AgentBadge />}
+            <span
+              className="shrink-0 body-xs text-(--auis-fg-tertiary) tabular-nums"
+              title={formatFullTimestamp(comment.createdAt)}
+            >
+              {formatRelative(comment.createdAt)}
             </span>
           </div>
           {comment.origin === "ux-flow" && <UxFlowChip flowRef={comment.flowRef} />}
 
-          <div className="ml-auto flex items-center gap-0.5">
+          <div className="flex items-center gap-0.5 shrink-0">
             {comment.visibility === "admins" && (
               <span
-                className="inline-flex items-center gap-1 body-xs text-(--auis-fg-tertiary)"
-                title="Visible to admins only"
+                className="h-7 w-7 inline-flex items-center justify-center text-(--auis-fg-tertiary)"
+                title="Private: only admins see it"
               >
-                <Icon name="lock" size={11} />
-                Private
+                <Icon name="lock" size={16} />
+                <span className="sr-only">Private</span>
               </span>
             )}
-            {isInReview && <Pill variant="beta">In review</Pill>}
-            <button
-              type="button"
-              onClick={() => setSheetOpen(true)}
-              aria-label="See more"
-              className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
-              title="See more (open in the side panel)"
-            >
-              <Icon name="open_in_full" size={13} />
-            </button>
+            {isInReview && (
+              <div role="group" aria-label="Review" className="flex items-center gap-0.5 mr-0.5">
+                <Pill variant="beta" className="mr-1">
+                  In review
+                </Pill>
+                {isAdmin && (
+                  <>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      iconOnly="check"
+                      iconSize={16}
+                      aria-label="Approve"
+                      title="Approve"
+                      onClick={() => void approveComment(comment.id)}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconOnly="undo"
+                      iconSize={20}
+                      aria-label="Reject"
+                      title="Reject"
+                      onClick={() => void rejectComment(comment.id)}
+                      className="bg-transparent! text-(--auis-fg-secondary)! hover:bg-(--auis-bg-hover)!"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+            {!(isInReview && isAdmin) && (
+              <button
+                type="button"
+                onClick={() => setSheetOpen(true)}
+                aria-label="Open in the side panel"
+                title="Open in the side panel"
+                className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
+              >
+                <Icon name="open_in_full" size={16} />
+              </button>
+            )}
             {!isResolved && !isInReview && isAdmin && (
               <button
                 type="button"
@@ -287,7 +342,20 @@ export function ReviewThreadPopover() {
                 title="Mark as resolved"
                 className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-accent-success) hover:bg-(--auis-bg-hover) transition-colors"
               >
-                <Icon name="check_circle" size={15} />
+                <Icon name="check_circle" size={20} />
+              </button>
+            )}
+            {isResolved && (
+              <button
+                type="button"
+                onClick={isAdmin ? () => void reopenFromArchive(comment.id) : undefined}
+                disabled={!isAdmin}
+                aria-pressed="true"
+                aria-label={isAdmin ? "Resolved. Reopen the conversation" : "Resolved"}
+                title={isAdmin ? "Reopen the conversation" : "Resolved"}
+                className="h-7 w-7 inline-flex items-center justify-center rounded-sm bg-(--au-emerald-100) dark:bg-(--au-emerald-900) text-(--auis-accent-success) transition-colors disabled:cursor-default"
+              >
+                <Icon name="check_circle" size={20} fill={1} />
               </button>
             )}
             <DropdownMenu
@@ -298,7 +366,7 @@ export function ReviewThreadPopover() {
                   aria-label="Actions"
                   className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
                 >
-                  <Icon name="more_horiz" size={15} />
+                  <Icon name="more_horiz" size={20} />
                 </button>
               }
               items={dropdownItems}
@@ -309,13 +377,13 @@ export function ReviewThreadPopover() {
               aria-label="Close"
               className="h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
             >
-              <Icon name="close" size={15} />
+              <Icon name="close" size={20} />
             </button>
           </div>
         </header>
 
         {/* Body: comment + replies */}
-        <div ref={bodyRef} className="flex-1 overflow-y-auto px-3 py-2.5">
+        <div ref={bodyRef} className="flex-1 overflow-y-auto px-3.5 py-3">
           {editing ? (
             <div className="flex flex-col gap-2">
               <textarea
@@ -375,7 +443,12 @@ export function ReviewThreadPopover() {
             <>
               {comment.text.length > 0 && (
                 <CommentText
-                  className="m-0 body-sm text-(--auis-fg-primary) whitespace-pre-wrap leading-relaxed"
+                  className={[
+                    "m-0 body-sm whitespace-pre-wrap leading-relaxed",
+                    isResolved
+                      ? "text-(--auis-fg-tertiary) line-through decoration-(--auis-fg-muted)"
+                      : "text-(--auis-fg-primary)",
+                  ].join(" ")}
                   text={comment.text}
                 />
               )}
@@ -383,8 +456,8 @@ export function ReviewThreadPopover() {
               {comment.images && comment.images.length > 0 && (
                 <div
                   className={[
-                    "flex flex-wrap gap-1.5",
-                    comment.text.length > 0 ? "mt-2" : "",
+                    "flex flex-wrap gap-2",
+                    comment.text.length > 0 ? "mt-2.5" : "",
                   ].join(" ")}
                 >
                   {comment.images.map((src, idx) => (
@@ -392,7 +465,7 @@ export function ReviewThreadPopover() {
                       key={idx}
                       type="button"
                       onClick={() => window.open(src, "_blank", "noopener")}
-                      className="rounded-sm overflow-hidden border border-(--auis-border-subtle) hover:border-(--auis-border-strong) transition-colors focus:outline-hidden"
+                      className="rounded-md overflow-hidden border border-(--auis-border-subtle) hover:border-(--auis-border-strong) transition-colors focus:outline-hidden"
                       aria-label={`View image ${idx + 1}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -404,50 +477,86 @@ export function ReviewThreadPopover() {
             </>
           )}
 
-          {comment.resolution?.summary && (
-            <p className="m-0 mt-2 body-xs text-(--auis-fg-tertiary) italic">
-              {comment.resolution.summary}
-            </p>
+          {isResolved ? (
+            <div className="mt-3 flex gap-2.5 rounded-md px-3 py-2.5 bg-(--au-emerald-100) dark:bg-(--au-emerald-900) border border-(--au-emerald-300) dark:border-(--au-emerald-800)">
+              <Icon
+                name="check_circle"
+                size={16}
+                fill={1}
+                className="mt-0.5 shrink-0 text-(--auis-accent-success)"
+              />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="body-xs font-medium text-(--auis-fg-primary) tabular-nums">
+                  {resolvedBy
+                    ? `Resolved by ${resolvedBy} · ${formatFullTimestamp(resolvedAt ?? comment.createdAt)}`
+                    : "Resolved"}
+                </span>
+                {comment.resolution?.summary && (
+                  <span className="body-xs text-(--auis-fg-secondary)">
+                    {comment.resolution.summary}
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : (
+            comment.resolution?.summary && (
+              <p className="m-0 mt-2 body-xs text-(--auis-fg-tertiary) italic">
+                {comment.resolution.summary}
+              </p>
+            )
           )}
 
           {replies.length > 0 && (
-            <div className="mt-2 pt-1 border-t border-(--auis-border-subtle) flex flex-col divide-y divide-(--auis-border-subtle)">
+            <div className="mt-3 flex flex-col gap-1">
               {replies.map((r) => (
                 <ReplyRow key={r.id} reply={r} commentId={comment.id} />
               ))}
             </div>
           )}
-        </div>
 
-        {/* Footer: approve/reject when in review, then the reply composer */}
-        <div className="border-t border-(--auis-border-subtle) p-2 flex flex-col gap-2">
-          {isInReview && isAdmin && (
-            <div className="flex items-center gap-1.5">
-              <Button
-                variant="primary"
-                size="sm"
-                iconLeft="check_circle"
-                onClick={() => void approveComment(comment.id)}
-              >
-                Approve
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                iconLeft="undo"
-                onClick={() => void rejectComment(comment.id)}
-              >
-                Reject
-              </Button>
+          {agentRun && (
+            <div className="mt-3 flex items-start gap-2" aria-live="polite">
+              <ReviewAvatar
+                authorKind="agent"
+                authorId={agentRun.agentId}
+                authorName={agentName}
+                colorToken="var(--auis-fg-tertiary)"
+                size={24}
+              />
+              <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                <div className="flex items-center gap-1.5 min-h-6">
+                  <span className="body-sm font-medium text-(--auis-fg-primary)">{agentName}</span>
+                  <AgentBadge />
+                </div>
+                <div className="rounded-md border border-(--auis-border-subtle) bg-(--auis-bg-surface) px-3 py-2.5 text-(--auis-fg-secondary)">
+                  <Spinner size="sm" label={agentRunLabel(agentRun)} />
+                </div>
+              </div>
             </div>
           )}
-
-          <ReplyComposer
-            key={comment.id}
-            commentId={comment.id}
-            element={elementFromCommentContext(comment.context)}
-          />
         </div>
+
+        {isResolved && isAdmin ? (
+          <div className="p-1 border-t border-(--auis-border-subtle)">
+            <Button
+              variant="ghost"
+              block
+              iconLeft="refresh"
+              onClick={() => void reopenFromArchive(comment.id)}
+              className="bg-transparent! border-transparent! text-(--auis-fg-secondary)! hover:bg-(--auis-bg-hover)!"
+            >
+              Reopen the conversation
+            </Button>
+          </div>
+        ) : (
+          <div className="px-2 pb-2 pt-1">
+            <ReplyComposer
+              key={comment.id}
+              commentId={comment.id}
+              element={elementFromCommentContext(comment.context)}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

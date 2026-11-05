@@ -17,6 +17,7 @@ import {
 import { STALE_DOCUMENT_HEIGHT_THRESHOLD } from "./constants"
 import { ReviewAvatar } from "./ReviewAvatar"
 import { ReplyComposer } from "./ReplyComposer"
+import { agentRunLabel, liveAgentRun } from "./agentRun"
 import { UxFlowChip } from "./UxFlowChip"
 import { CommentText } from "./CommentText"
 import { AuthorName } from "./PersonHover"
@@ -65,6 +66,15 @@ function whereItWas(comment: ReviewComment): string | null {
   return place ?? how
 }
 
+/** The small "Agent" label next to an agent's name. */
+export function AgentBadge() {
+  return (
+    <span className="shrink-0 inline-flex items-center h-5 px-1.5 rounded-xs bg-(--auis-bg-muted) body-xs font-medium text-(--auis-fg-secondary)">
+      Agent
+    </span>
+  )
+}
+
 export function ReplyRow({
   reply,
   commentId,
@@ -110,22 +120,18 @@ export function ReplyRow({
         authorId={reply.authorId}
         authorName={reply.authorName}
         colorToken={reply.authorColorToken}
-        size={20}
+        size={24}
       />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 leading-tight">
+        <div className="flex items-center gap-1.5 min-h-6">
           <AuthorName
             name={reply.authorName}
             email={reply.authorEmail}
             role={reply.authorRole}
-            className="body-xs font-medium text-(--auis-fg-primary) truncate"
+            className="body-sm font-medium text-(--auis-fg-primary) truncate"
           />
-          {isAgent && (
-            <span className="text-2xs px-1 py-0 rounded-xs bg-(--auis-bg-muted) text-(--auis-fg-tertiary)">
-              agent
-            </span>
-          )}
-          <span className="text-2xs text-(--auis-fg-tertiary) tabular-nums">
+          {isAgent && <AgentBadge />}
+          <span className="body-xs text-(--auis-fg-tertiary) tabular-nums">
             {formatRelative(reply.createdAt)}
             {reply.editedAt ? " · edited" : ""}
           </span>
@@ -378,6 +384,7 @@ export function ReviewCommentCard({
   }
 
   const isBacklog = comment.status === "backlog"
+  const agentRun = liveAgentRun(comment)
   // Hierarchy (UI mirror; the server re-validates): an admin moderates; a
   // reviewer edits/deletes only what is theirs and toggles open ↔ future idea
   // on their own pin.
@@ -534,6 +541,11 @@ export function ReviewCommentCard({
             </span>
           )}
           <StatusPill status={comment.status} />
+          {agentRun && (
+            <Pill variant="neutral" busy title={agentRunLabel(agentRun)}>
+              {agentRun.phase === "running" ? "Working" : "Queued"}
+            </Pill>
+          )}
           {stale && (
             <Pill variant="draft" dot={false}>
               Stale

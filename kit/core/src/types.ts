@@ -161,6 +161,13 @@ export type {
   ReviewAgentSettingsMap,
 } from "./agentRuntime"
 
+export interface ReviewAgentRun {
+  agentId: string
+  /** queued = waiting for the checkout's lock; running = the CLI has opened. */
+  phase: "queued" | "running"
+  startedAt: number
+}
+
 export interface ReviewResolution {
   actor: ReviewActor
   at: number
@@ -227,6 +234,12 @@ export interface ReviewComment {
   text: string
   images?: string[]
   status: ReviewCommentStatus
+  /**
+   * An agent run in progress on this comment. Only the local mention runner
+   * writes it: it marks on entering the queue and on starting, and clears it
+   * when it ends, replying or not. Optional, so older records load unchanged.
+   */
+  agentRun?: ReviewAgentRun
   resolution?: ReviewResolution
   replies?: ReviewReply[]
   /** Defaults to "page" when absent. */

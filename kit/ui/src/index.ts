@@ -13,3 +13,4 @@ export {
   type ReviewRouterAdapter,
 } from "./router"
 export { useLiveLocation } from "./liveLocation"
+export { useChromeDismissStore } from "./chromeDismiss"

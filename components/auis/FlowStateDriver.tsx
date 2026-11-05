@@ -32,6 +32,12 @@
  * in-app navigation (State Mode), the driver stays automatic. No step ever
  * clicks a destructive action (delete, remove, pay, sign out): the same rule
  * as the comment replay (`isDestructiveTarget`).
+ *
+ * Exception: a headless script can set `GE_AUTOPLAY_GLOBAL` before the load,
+ * and the load's recipe then runs without the click. Each run records its
+ * progress on `<html>` (`GE_ATTR`), which such a script reads to wait for the
+ * end and name the step that failed. Steps are read and run in
+ * `lib/auis/geRecipe.ts`.
  * ──────────────────────────────────────────────────────────────────── */
 
 import { Suspense, useEffect, useRef, useState } from "react"
@@ -41,25 +47,24 @@ import { AuButton } from "@/components/ui/AuButton"
 import { fireClick } from "@auis/core/fireClick"
 import { findClickableByText } from "@auis/core/findClickable"
 import { isDestructiveTarget } from "@auis/ui/review/revealTrail"
+import {
+  GE_ATTR,
+  GE_AUTOPLAY_GLOBAL,
+  GE_START_DELAY_MS,
+  runGeRecipe,
+  type GeFailReason,
+  type GeResult,
+  type GeStatus,
+} from "@/lib/auis/geRecipe"
 
-type DriveStatus = "awaiting" | "driving" | "done" | "failed"
-type FailReason = "missing" | "destructive"
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
-const STEP_TIMEOUT_MS = 5000
-const POLL_MS = 120
-const SETTLE_MS = 350
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-
-async function waitFor(find: () => HTMLElement | null): Promise<HTMLElement | null> {
-  const deadline = Date.now() + STEP_TIMEOUT_MS
-  while (Date.now() < deadline) {
-    const el = find()
-    if (el) return el
-    await sleep(POLL_MS)
-  }
-  return null
-}
+/**
+ * The most recent run. A new run (a `?ge=` change, or StrictMode's second mount
+ * in dev) stops the previous one before its next click. Without this both
+ * clicked together and a menu opened and closed.
+ */
+let latestRun = 0
 
 /** An iframe whose top is the app itself: the states matrix and the UX-flow previews. */
 function inSameOriginFrame(): boolean {
@@ -72,34 +77,34 @@ function inSameOriginFrame(): boolean {
   }
 }
 
-async function drive(
-  recipe: string,
-  onFail: (step: string, reason: FailReason) => void,
-): Promise<boolean> {
-  const steps = recipe.split(">>").map((s) => s.trim()).filter(Boolean)
-  for (const step of steps) {
-    const sep = step.indexOf(":")
-    const kind = sep === -1 ? step : step.slice(0, sep)
-    const arg = sep === -1 ? "" : step.slice(sep + 1).trim()
-    if (kind === "w") {
-      await sleep(Number(arg) || SETTLE_MS)
-      continue
-    }
-    const el = await waitFor(() =>
-      kind === "c" ? document.querySelector<HTMLElement>(arg) : findClickableByText(arg, { fuzzy: true }),
-    )
-    if (!el) {
-      onFail(step, "missing")
-      return false
-    }
-    if (isDestructiveTarget(el)) {
-      onFail(step, "destructive")
-      return false
-    }
-    fireClick(el)
-    await sleep(SETTLE_MS)
+function autoplayRequested(): boolean {
+  return (window as unknown as Record<string, unknown>)[GE_AUTOPLAY_GLOBAL] === true
+}
+
+function markGe(status: GeStatus | null, failure?: { step: string; reason: GeFailReason }) {
+  const root = document.documentElement
+  if (status) root.setAttribute(GE_ATTR.status, status)
+  else root.removeAttribute(GE_ATTR.status)
+  if (failure) {
+    root.setAttribute(GE_ATTR.failedStep, failure.step)
+    root.setAttribute(GE_ATTR.failReason, failure.reason)
+  } else {
+    root.removeAttribute(GE_ATTR.failedStep)
+    root.removeAttribute(GE_ATTR.failReason)
   }
-  return true
+}
+
+function drive(recipe: string, isCancelled: () => boolean): Promise<GeResult> {
+  return runGeRecipe<HTMLElement>(recipe, {
+    find: (step) =>
+      step.kind === "css"
+        ? document.querySelector<HTMLElement>(step.selector)
+        : findClickableByText(step.text, { fuzzy: true }),
+    click: fireClick,
+    isDestructive: isDestructiveTarget,
+    sleep,
+    isCancelled,
+  })
 }
 
 // useSearchParams requires Suspense on prerender — the wrapper keeps the layout
@@ -115,7 +120,7 @@ export function FlowStateDriver() {
 function FlowStateDriverInner() {
   const searchParams = useSearchParams()
   const recipe = searchParams.get("ge")
-  const [status, setStatus] = useState<DriveStatus | null>(null)
+  const [status, setStatus] = useState<GeStatus | null>(null)
   const [failedStep, setFailedStep] = useState<string | null>(null)
   const [blocked, setBlocked] = useState(false)
   const [approved, setApproved] = useState<string | null>(null)
@@ -125,39 +130,51 @@ function FlowStateDriverInner() {
   useEffect(() => {
     if (initialRecipe.current === undefined) initialRecipe.current = recipe
     if (!recipe) {
-      // Param removed (scenario change, mode exit) — just clear the badge.
+      // Param removed (scenario change, mode exit): just clear the badge. A run
+      // in progress carries on, since a step may have navigated.
       setStatus(null)
       setFailedStep(null)
+      markGe(null)
       return
     }
     const cameFromOutside = recipe === initialRecipe.current && !inSameOriginFrame()
-    if (cameFromOutside && approved !== recipe) {
+    if (cameFromOutside && approved !== recipe && !autoplayRequested()) {
       setStatus("awaiting")
       setFailedStep(null)
+      markGe("awaiting")
       return
     }
     let alive = true
+    const run = ++latestRun
+    const superseded = () => run !== latestRun
     setStatus("driving")
     setFailedStep(null)
     setBlocked(false)
+    markGe("driving")
     // Post-hydration (or post-navigation) breather before the first click.
-    sleep(400)
-      .then(() =>
-        drive(recipe, (step, reason) => {
-          if (!alive) return
-          setFailedStep(step)
-          setBlocked(reason === "destructive")
+    sleep(GE_START_DELAY_MS)
+      .then(() => drive(recipe, superseded))
+      .then((result) => {
+        if (result.status === "cancelled" || superseded()) return
+        if (result.status === "failed") {
+          markGe("failed", result)
           console.warn(
-            reason === "destructive"
-              ? `[FlowStateDriver] step blocked (destructive action): "${step}" (recipe: "${recipe}")`
-              : `[FlowStateDriver] step not found: "${step}" (recipe: "${recipe}")`,
+            result.reason === "destructive"
+              ? `[FlowStateDriver] step blocked (destructive action): "${result.step}" (recipe: "${recipe}")`
+              : `[FlowStateDriver] step not found: "${result.step}" (recipe: "${recipe}")`,
           )
-        }),
-      )
-      .then((ok) => {
+        } else {
+          markGe("done")
+        }
         if (!alive) return
-        setStatus(ok ? "done" : "failed")
-        if (ok) setTimeout(() => alive && setStatus(null), 1200)
+        if (result.status === "failed") {
+          setFailedStep(result.step)
+          setBlocked(result.reason === "destructive")
+          setStatus("failed")
+          return
+        }
+        setStatus("done")
+        setTimeout(() => alive && setStatus(null), 1200)
       })
     return () => {
       alive = false
