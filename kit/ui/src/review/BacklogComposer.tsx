@@ -4,7 +4,7 @@ import * as React from "react"
 import { Button } from "../primitives/Button"
 import { Icon } from "../primitives/Icon"
 import { useReviewStore } from "./store"
-import { useImageAttach } from "./useImageAttach"
+import { ATTACH_ACCEPT, useImageAttach } from "./useImageAttach"
 import { useReviewCommandAutocomplete } from "./useReviewCommandAutocomplete"
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
 
@@ -137,7 +137,7 @@ export function BacklogComposer() {
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept={ATTACH_ACCEPT}
         multiple
         className="hidden"
         onChange={async (e) => {

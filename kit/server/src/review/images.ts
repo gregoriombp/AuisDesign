@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import crypto from "node:crypto";
 
 import { reviewPaths } from "./config";
+import { UnsupportedImageTypeError, classifyImageValue } from "./imageTypes";
 
 import type { ReviewComment } from "@auis/core/types";
 
@@ -21,17 +22,6 @@ import type { ReviewComment } from "@auis/core/types";
 
 const ROUTE_PREFIX = "/api/review-bridge/images/";
 
-const MIME_EXT: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/jpg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/avif": "avif",
-  "image/svg+xml": "svg",
-};
-
-const DATA_URI_RE = /^data:([a-z0-9.+/-]+);base64,(.+)$/i;
 // Only valid content-addressed names can be served/accepted (anti traversal).
 const FILENAME_RE = /^[a-f0-9]{64}\.[a-z0-9]+$/;
 
@@ -47,29 +37,26 @@ export function isSafeImageName(name: string): boolean {
   return FILENAME_RE.test(name);
 }
 
-export function contentTypeFor(name: string): string {
-  const ext = name.slice(name.lastIndexOf(".") + 1).toLowerCase();
-  for (const [mime, e] of Object.entries(MIME_EXT)) if (e === ext) return mime;
-  return "application/octet-stream";
-}
+export { contentTypeFor } from "./imageTypes";
 
 /**
  * Persists a single data URI into the pool and returns its ref. Strings that
- * are not `data:...;base64,...` (already-externalized refs, http URLs) come
- * back untouched.
+ * are not a data URI (already-externalized refs, http URLs) come back
+ * untouched. A data URI outside the accepted raster types throws
+ * `UnsupportedImageTypeError`, which the route answers with 415 (`errors.ts`).
  */
 async function persistDataUri(value: string): Promise<string> {
-  const m = value.match(DATA_URI_RE);
-  if (!m) return value;
-  const mime = m[1].toLowerCase();
+  const decision = classifyImageValue(value);
+  if (decision.kind === "passthrough") return value;
+  if (decision.kind === "rejected") throw new UnsupportedImageTypeError(decision.declared);
   let buf: Buffer;
   try {
-    buf = Buffer.from(m[2], "base64");
+    buf = Buffer.from(decision.base64, "base64");
   } catch {
     return value;
   }
   if (buf.length === 0) return value;
-  const ext = MIME_EXT[mime] ?? "bin";
+  const { ext } = decision;
   const hash = crypto.createHash("sha256").update(buf).digest("hex");
   const filename = `${hash}.${ext}`;
   const dest = path.join(reviewPaths().imagesDir, filename);

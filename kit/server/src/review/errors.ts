@@ -1,5 +1,6 @@
 
 import { BridgeConflictError, BridgeUnavailableError } from "../docstore";
+import { UnsupportedImageTypeError } from "./imageTypes";
 
 /**
  * Without this, any storage failure bubbles up raw and Next answers with an
@@ -14,6 +15,10 @@ import { BridgeConflictError, BridgeUnavailableError } from "../docstore";
 export function bridgeErrorResponse(err: unknown): Response | null {
   if (err instanceof BridgeUnavailableError || err instanceof BridgeConflictError) {
     return Response.json({ error: err.message }, { status: 503 });
+  }
+  // An attachment outside the accepted raster types: the request's fault, no retry.
+  if (err instanceof UnsupportedImageTypeError) {
+    return Response.json({ error: err.message }, { status: 415 });
   }
   return null;
 }

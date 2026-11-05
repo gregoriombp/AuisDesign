@@ -5,7 +5,7 @@ import { Button } from "../primitives/Button"
 import { Spinner } from "../primitives/Spinner"
 import { Icon } from "../primitives/Icon"
 import { useReviewStore } from "./store"
-import { useImageAttach } from "./useImageAttach"
+import { ATTACH_ACCEPT, useImageAttach } from "./useImageAttach"
 import { useReviewCommandAutocomplete } from "./useReviewCommandAutocomplete"
 import { useVoiceTranscription } from "./useVoiceTranscription"
 import { fetchRewrite } from "./commentAssist"
@@ -294,7 +294,7 @@ export function ReplyComposer({
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept={ATTACH_ACCEPT}
         multiple
         className="hidden"
         onChange={async (e) => {

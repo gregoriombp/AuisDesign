@@ -8,6 +8,7 @@ import { useReviewStore } from "./store"
 import { useCumulativeScrollOffset } from "../scrollHooks"
 import { useStopDismiss } from "./useStopDismiss"
 import { fileToHighResDataUrl } from "./imageScale"
+import { ATTACH_ACCEPT, isAttachableImage } from "./useImageAttach"
 import {
   describeAnchorElement,
   type ReviewElementContext,
@@ -27,7 +28,7 @@ const MAX_IMAGES = 4
 function extractImagesFromClipboard(items: DataTransferItemList): File[] {
   const files: File[] = []
   for (const item of Array.from(items)) {
-    if (item.type.startsWith("image/")) {
+    if (isAttachableImage(item.type)) {
       const file = item.getAsFile()
       if (file) files.push(file)
     }
@@ -224,7 +225,7 @@ export function ReviewCommentPopover() {
 
   const addImages = React.useCallback(async (files: File[]) => {
     const eligible = files
-      .filter((f) => f.type.startsWith("image/"))
+      .filter((f) => isAttachableImage(f.type))
       .slice(0, MAX_IMAGES)
     if (eligible.length === 0) return
     const dataUrls = await Promise.all(eligible.map(fileToHighResDataUrl))
@@ -577,7 +578,7 @@ export function ReviewCommentPopover() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept={ATTACH_ACCEPT}
         multiple
         className="hidden"
         onChange={handleFileChange}
