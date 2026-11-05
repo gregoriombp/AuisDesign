@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import type { ReviewComment, ReviewPoint } from "@auis/core/types"
+import { liveAgentRun } from "./agentRun"
 
 type Props = {
   position: ReviewPoint
@@ -27,6 +28,7 @@ export function ReviewPinMarker({
   onClick,
 }: Props) {
   const resolved = comment.status === "resolved"
+  const working = liveAgentRun(comment) !== null
   const glyph = initialOf(comment.authorName)
   return (
     <g
@@ -80,6 +82,32 @@ export function ReviewPinMarker({
       >
         {glyph}
       </text>
+      {working && (
+        <g
+          transform={`translate(${PIN_RADIUS - 2} ${-(PIN_RADIUS - 2)})`}
+          aria-hidden="true"
+          style={{ pointerEvents: "none" }}
+        >
+          <circle r={6.5} fill="var(--auis-bg-raised)" />
+          <circle
+            r={4}
+            fill="none"
+            stroke="var(--auis-fg-secondary)"
+            strokeWidth={1.5}
+            strokeDasharray="17 8"
+            strokeLinecap="round"
+          >
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0"
+              to="360"
+              dur="1s"
+              repeatCount="indefinite"
+            />
+          </circle>
+        </g>
+      )}
     </g>
   )
 }
