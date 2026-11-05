@@ -9,6 +9,13 @@ import { NextRequest, NextResponse } from "next/server"
 // (.env.local), never in the client.
 const OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
 const MODEL = "gpt-4o-mini"
+/** Every call spends the OpenAI key (billed per use): the draft has a ceiling. */
+const MAX_DRAFT = 4000
+/** The element and the screen only situate the request: a short excerpt is enough. */
+const MAX_CONTEXT = 300
+
+const clip = (value: unknown): string =>
+  typeof value === "string" ? value.slice(0, MAX_CONTEXT) : ""
 
 type AssistMode = "complete" | "rewrite"
 
@@ -62,7 +69,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid body." }, { status: 400 })
   }
 
-  const draft = body.draft?.trim()
+  const rawDraft = typeof body.draft === "string" ? body.draft : ""
+  const draft = rawDraft.trim()
   if (!draft) {
     return NextResponse.json(
       { error: "The comment draft is empty. Type something before asking for a suggestion." },
@@ -70,14 +78,26 @@ export async function POST(request: NextRequest) {
     )
   }
   const mode: AssistMode = body.mode === "complete" ? "complete" : "rewrite"
+  // A continuation depends only on the end of the text: complete sends the
+  // tail, untrimmed. A clipped rewrite would return only part of the comment,
+  // so it refuses instead.
+  const draftTail = rawDraft.slice(-MAX_DRAFT)
+  if (mode === "rewrite" && draft.length > MAX_DRAFT) {
+    return NextResponse.json(
+      {
+        error: `This comment is too long to rewrite. Shorten it to ${MAX_DRAFT.toLocaleString("en-US")} characters or fewer.`,
+      },
+      { status: 413 }
+    )
+  }
 
   const el = body.element
   const elementCtx = el
     ? [
-        el.tag ? `tag: ${el.tag}` : null,
-        el.role ? `role: ${el.role}` : null,
-        el.label ? `accessible label: ${el.label}` : null,
-        el.text ? `visible text: "${el.text}"` : null,
+        el.tag ? `tag: ${clip(el.tag)}` : null,
+        el.role ? `role: ${clip(el.role)}` : null,
+        el.label ? `accessible label: ${clip(el.label)}` : null,
+        el.text ? `visible text: "${clip(el.text)}"` : null,
       ]
         .filter(Boolean)
         .join("; ")
@@ -86,12 +106,12 @@ export async function POST(request: NextRequest) {
   const elementLine = elementCtx
     ? `Element selected on screen — ${elementCtx}.`
     : "No specific element selected."
-  const locationLine = el?.location ? `Where it is: ${el.location}.` : null
-  const pageLine = body.page ? `Screen: ${body.page}.` : null
+  const locationLine = el?.location ? `Where it is: ${clip(el.location)}.` : null
+  const pageLine = body.page ? `Screen: ${clip(body.page)}.` : null
 
   const userMsg =
     mode === "complete"
-      ? [elementLine, locationLine, pageLine, `Text so far: "${body.draft}"`, "Continue."]
+      ? [elementLine, locationLine, pageLine, `Text so far: "${draftTail}"`, "Continue."]
           .filter(Boolean)
           .join("\n")
       : [elementLine, locationLine, pageLine, `Reviewer's draft: "${draft}"`, "Rewrite the comment."]
