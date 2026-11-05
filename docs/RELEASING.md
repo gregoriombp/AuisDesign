@@ -7,10 +7,10 @@ six npm packages that live in this repository:
 |---|---|---|---|
 | [`@auis/cli`](https://www.npmjs.com/package/@auis/cli) | `packages/auis` | published | The CLI. `npx @auis/cli@latest` resolves this name; the binary it installs is still called `auis`. |
 | `create-auis` | `packages/create-auis` | not published | Alias so `npm create auis@latest` works. Depends on `@auis/cli`. |
-| [`@auis/core`](https://www.npmjs.com/package/@auis/core) | `kit/core` | published (0.1.0) | The Review Bridge's shared domain. |
-| [`@auis/server`](https://www.npmjs.com/package/@auis/server) | `kit/server` | published (0.1.0) | The Review Bridge server, and the `auis-mention-run` bin. |
-| [`@auis/ui`](https://www.npmjs.com/package/@auis/ui) | `kit/ui` | published (0.1.0) | The review chrome. |
-| [`@auis/next`](https://www.npmjs.com/package/@auis/next) | `kit/next` | published (0.1.0) | The Next.js adapter — the one dependency `auis init` adds to an app. |
+| [`@auis/core`](https://www.npmjs.com/package/@auis/core) | `kit/core` | published (0.1.0; 0.2.0 ready) | The Review Bridge's shared domain. |
+| [`@auis/server`](https://www.npmjs.com/package/@auis/server) | `kit/server` | published (0.1.0; 0.2.0 ready) | The Review Bridge server, and the `auis-mention-run` bin. |
+| [`@auis/ui`](https://www.npmjs.com/package/@auis/ui) | `kit/ui` | published (0.1.0; 0.2.0 ready) | The review chrome. |
+| [`@auis/next`](https://www.npmjs.com/package/@auis/next) | `kit/next` | published (0.1.0; 0.2.0 ready) | The Next.js adapter — the one dependency `auis init` adds to an app. |
 
 The unscoped name `auis` is **not** ours and never was: npm rejects names it
 considers too similar to an existing package, and only says so at publish
@@ -128,3 +128,10 @@ Keep it that way.
   with no `package.json` and points to `npx @auis/cli my-app`. `doctor` prints
   the plan `init` carries out, and only promises a shared comment queue where
   `init` can mount one. `create-auis` needs a re-release with `^0.3.0`.
+- `0.4.0` — `init` asks what to install: a checkbox menu of every module (Review
+  installs today; State Mode, Edit Mode, Styleguide and UX Flows are listed with
+  the reason they cannot be picked yet). `--only a,b` skips the menu and refuses,
+  with the reason, a module that cannot install; `--yes` takes every module that
+  installs. `doctor` prints the same list. `init` writes `@auis/next@^0.2.0`,
+  together with the kit 0.2.0 (the pill composer, the agent-working state,
+  raster-only attachments).

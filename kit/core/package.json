@@ -1,6 +1,6 @@
 {
   "name": "@auis/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The Review Bridge domain shared by its server and its chrome: comment types, agents, the @ and / command parser, DOM anchoring.",
   "type": "module",
   "license": "MIT",
