@@ -25,6 +25,10 @@ export type ButtonProps = Omit<
   iconLeft?: string
   iconRight?: string
   iconOnly?: string
+  /** Glyph size in px; defaults to the size's own (22 for an `sm` icon button). */
+  iconSize?: number
+  /** Filled glyph (1) for an active or "stop" state. */
+  iconFill?: 0 | 1
   loading?: boolean
   block?: boolean
   asChild?: boolean
@@ -38,6 +42,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       iconLeft,
       iconRight,
       iconOnly,
+      iconSize: iconSizeProp,
+      iconFill = 0,
       loading,
       block,
       disabled,
@@ -48,7 +54,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) {
-    const iconSize = iconOnly
+    const iconSize = iconSizeProp ?? (iconOnly
       ? size === "sm"
         ? 22
         : size === "lg"
@@ -58,7 +64,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ? 18
         : size === "lg"
           ? 24
-          : 22
+          : 22)
     const className_ = cn(
       "auis-btn",
       `auis-btn--${variant}`,
@@ -81,7 +87,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         child,
         {},
         iconOnly ? (
-          <Icon name={iconOnly} size={iconSize} weight={300} />
+          <Icon name={iconOnly} size={iconSize} weight={300} fill={iconFill} />
         ) : (
           <>
             {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}
@@ -112,7 +118,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...rest}
       >
         {iconOnly ? (
-          <Icon name={iconOnly} size={iconSize} weight={300} />
+          <Icon name={iconOnly} size={iconSize} weight={300} fill={iconFill} />
         ) : (
           <>
             {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}

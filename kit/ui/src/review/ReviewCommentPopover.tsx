@@ -1,8 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "../primitives/Button"
-import { Spinner } from "../primitives/Spinner"
 import { Icon } from "../primitives/Icon"
 import { useReviewStore } from "./store"
 import { useCumulativeScrollOffset } from "../scrollHooks"
@@ -19,6 +17,15 @@ import { useReviewCommandAutocomplete } from "./useReviewCommandAutocomplete"
 import { fetchRewrite } from "./commentAssist"
 import { OVERLAY_DATA_ATTR, REVIEW_Z } from "./constants"
 import { ReviewCommandMenu } from "./ReviewCommandMenu"
+import {
+  COMPOSER_SHELL_CLASS,
+  COMPOSER_TEXTAREA_CLASS,
+  ComposerRecording,
+  ComposerSendButton,
+  ComposerThumbnails,
+  ComposerToolButton,
+  useComposerAutosize,
+} from "./ComposerControls"
 import type { ReviewPoint } from "@auis/core/types"
 
 const POPOVER_WIDTH = 360
@@ -40,7 +47,6 @@ export function ReviewCommentPopover() {
   const pendingAnchor = useReviewStore((s) => s.pendingAnchor)
   const identity = useReviewStore((s) => s.identity)
   const saveComment = useReviewStore((s) => s.saveComment)
-  const cancelPending = useReviewStore((s) => s.cancelPending)
   const sessionRole = useReviewStore((s) => s.sessionRole)
   const sessionShared = useReviewStore((s) => s.sessionShared)
   const openIdentityModal = useReviewStore((s) => s.openIdentityModal)
@@ -60,7 +66,9 @@ export function ReviewCommentPopover() {
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
   const mirrorRef = React.useRef<HTMLDivElement>(null)
+  const shellRef = React.useRef<HTMLDivElement>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+  useComposerAutosize(textareaRef, shellRef, text)
   const scroll = useCumulativeScrollOffset()
   const stopDismiss = useStopDismiss<HTMLDivElement>()
 
@@ -309,203 +317,125 @@ export function ReviewCommentPopover() {
     >
       <form
         onSubmit={submit}
-        className="pointer-events-auto rounded-lg bg-(--auis-bg-raised) border border-(--auis-border-subtle) shadow-lg flex flex-col overflow-hidden"
+        className="pointer-events-auto flex flex-col gap-1.5 p-2 rounded-(--auis-radius-xl) bg-(--auis-bg-raised) border border-(--auis-border-subtle) shadow-lg"
       >
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-(--auis-border-subtle)">
-          <span
-            className="h-5 w-5 rounded-full flex items-center justify-center body-xs font-semibold text-(--auis-fg-on-inverse)"
-            style={{ background: identity.colorToken }}
-          >
-            {identity.name.charAt(0).toUpperCase()}
-          </span>
-          <span className="body-xs font-medium text-(--auis-fg-primary)">
-            {identity.name}
-          </span>
-          {sessionShared && (
-            <button
-              type="button"
-              onClick={() => openIdentityModal("new")}
-              title="Shared account — comment as someone else"
-              className="body-xs text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) underline underline-offset-2 decoration-dotted"
-            >
-              switch
-            </button>
+        <ComposerThumbnails
+          images={images}
+          onRemove={removeImage}
+          onAdd={() => fileInputRef.current?.click()}
+          canAdd={images.length < MAX_IMAGES}
+        />
+
+        <div ref={shellRef} className={COMPOSER_SHELL_CLASS}>
+          {recording && (
+            <ComposerRecording
+              stream={voice.stream}
+              onDiscard={voice.cancel}
+              onStop={voice.stop}
+            />
           )}
-          <span className="body-xs text-(--auis-fg-tertiary) ml-auto inline-flex items-center gap-1.5">
-            {adminsOnly && (
-              <span className="inline-flex items-center gap-0.5 text-(--auis-fg-secondary)">
-                <Icon name="lock" size={10} />
-                Private
-              </span>
-            )}
-            {pendingAnchor.kind === "draw" ? "Freehand mark" : "Pin"}
-          </span>
-        </div>
-
-        {/* Textarea + mirror layer that draws the ghost text ahead of the
-            caret. The mirror sits BEHIND (transparent text only to push the
-            ghost into position); the textarea, with a transparent background,
-            shows the real text on top. Identical metrics keep it aligned. */}
-        <div className="relative">
-          <div
-            ref={mirrorRef}
-            aria-hidden="true"
-            className="absolute inset-0 px-3 py-2 body-sm whitespace-pre-wrap break-words overflow-hidden pointer-events-none select-none"
-            style={{ color: "transparent" }}
-          >
-            {text}
-            {ghost && <span className="text-(--auis-fg-tertiary)">{ghost}</span>}
-          </div>
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value)
-              setCaretAtEnd(
-                e.target.selectionStart === e.target.value.length
-              )
-              if (undoText !== null) setUndoText(null)
-            }}
-            onSelect={(e) => {
-              const ta = e.currentTarget
-              setCaretAtEnd(
-                ta.selectionStart === ta.value.length &&
-                  ta.selectionEnd === ta.value.length
-              )
-              commands.sync()
-            }}
-            onScroll={syncScroll}
-            onPaste={handlePaste}
-            onBlur={() => commands.close()}
-            onKeyDown={(e) => {
-              if (commands.onKeyDown(e)) return
-              if (e.key === "Tab" && ghost && !e.shiftKey) {
-                e.preventDefault()
-                acceptGhost()
-              } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault()
-                void submit()
-              } else if (e.key === "Escape") {
-                if (ghost) {
+          {/* Textarea + mirror layer that draws the ghost text ahead of the
+              caret. The mirror sits BEHIND (transparent text only to push the
+              ghost into position); the textarea, with a transparent background,
+              shows the real text on top. Identical metrics keep it aligned. */}
+          <div className={recording ? "hidden" : "relative flex-1 min-w-0"}>
+            <div
+              ref={mirrorRef}
+              aria-hidden="true"
+              className="absolute inset-0 py-1 body-sm whitespace-pre-wrap break-words overflow-hidden pointer-events-none select-none"
+              style={{ color: "transparent" }}
+            >
+              {text}
+              {ghost && <span className="text-(--auis-fg-tertiary)">{ghost}</span>}
+            </div>
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value)
+                setCaretAtEnd(
+                  e.target.selectionStart === e.target.value.length
+                )
+                if (undoText !== null) setUndoText(null)
+              }}
+              onSelect={(e) => {
+                const ta = e.currentTarget
+                setCaretAtEnd(
+                  ta.selectionStart === ta.value.length &&
+                    ta.selectionEnd === ta.value.length
+                )
+                commands.sync()
+              }}
+              onScroll={syncScroll}
+              onPaste={handlePaste}
+              onBlur={() => commands.close()}
+              onKeyDown={(e) => {
+                if (commands.onKeyDown(e)) return
+                if (e.key === "Tab" && ghost && !e.shiftKey) {
                   e.preventDefault()
-                  e.stopPropagation()
-                  clearGhost()
+                  acceptGhost()
+                } else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  e.preventDefault()
+                  void submit()
+                } else if (e.key === "Escape") {
+                  if (ghost) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    clearGhost()
+                  }
+                  // no ghost: let the provider handle it (cancels the pending anchor)
                 }
-                // no ghost: let the provider handle it (cancels the pending anchor)
-              }
-            }}
-            placeholder="Write the feedback… paste an image, or dictate"
-            rows={3}
-            className="relative w-full resize-none px-3 py-2 bg-transparent body-sm text-(--auis-fg-primary) placeholder:text-(--auis-fg-tertiary) focus:outline-hidden"
-            style={{ zIndex: 1 }}
-          />
+              }}
+              placeholder="Write the feedback…"
+              aria-label="Comment"
+              rows={1}
+              className={`relative ${COMPOSER_TEXTAREA_CLASS}`}
+              style={{ zIndex: 1 }}
+            />
+          </div>
+          {!recording && (
+            <>
+              <ComposerToolButton
+                icon="image"
+                label="Attach image (or paste with ⌘V)"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={images.length >= MAX_IMAGES}
+              />
+              <ComposerToolButton
+                icon="mic"
+                label="Dictate"
+                onClick={voice.toggle}
+                busy={transcribing}
+              />
+              <ComposerToolButton
+                icon="auto_fix_high"
+                label="Improve the comment"
+                onClick={() => void handleRewrite()}
+                disabled={text.trim().length === 0}
+                busy={rewriting}
+              />
+              <ComposerSendButton
+                type="submit"
+                label="Save comment"
+                disabled={!canSubmit && !transcribing}
+                loading={submitting}
+              />
+            </>
+          )}
         </div>
 
-        {saveError && (
-          <p className="mx-3 mb-2 body-xs text-(--auis-accent-danger)">{saveError}</p>
-        )}
-        {assistError && (
-          <p className="mx-3 mb-2 body-xs text-(--auis-accent-danger)">
-            {assistError}
-          </p>
-        )}
-        {voice.error && (
-          <p className="mx-3 mb-2 body-xs text-(--auis-accent-danger)">
-            {voice.error}
+        {(saveError || assistError || voice.error) && (
+          <p className="m-0 px-2 body-xs text-(--auis-accent-danger)">
+            {saveError ?? assistError ?? voice.error}
           </p>
         )}
 
-        {images.length > 0 && (
-          <div className="px-3 pb-2 flex flex-wrap gap-2">
-            {images.map((src, idx) => (
-              <div key={idx} className="relative group/thumb">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={src}
-                  alt=""
-                  className="h-16 w-16 rounded-sm object-cover border border-(--auis-border-subtle)"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImage(idx)}
-                  className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-(--auis-bg-raised) border border-(--auis-border-subtle) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) opacity-0 group-hover/thumb:opacity-100 transition-opacity"
-                  aria-label="Remove image"
-                >
-                  <Icon name="close" size={9} />
-                </button>
-              </div>
-            ))}
-            {images.length < MAX_IMAGES && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="h-16 w-16 rounded-sm border border-dashed border-(--auis-border-default) flex items-center justify-center text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:border-(--auis-border-strong) transition-colors"
-                aria-label="Add image"
-              >
-                <Icon name="add" size={16} />
-              </button>
-            )}
-          </div>
-        )}
-
-        <div className="px-2 py-2 flex items-center justify-between gap-2 border-t border-(--auis-border-subtle)">
+        <div className="flex items-center justify-between gap-2 pl-0.5 pr-1.5 body-xs text-(--auis-fg-tertiary)">
           <div className="flex items-center gap-1 min-w-0">
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors"
-              aria-label="Attach image"
-              title="Attach image (or paste with ⌘V)"
-              disabled={images.length >= MAX_IMAGES}
-            >
-              <Icon name="image" size={14} weight={600} />
-            </button>
-            <button
-              type="button"
-              onClick={voice.toggle}
-              disabled={transcribing}
-              aria-label={recording ? "Stop recording" : "Dictate"}
-              aria-pressed={recording}
-              title={recording ? "Stop recording" : "Dictate"}
-              className={[
-                "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors disabled:opacity-60",
-                recording
-                  ? "bg-(--auis-accent-danger) text-(--auis-fg-on-inverse)"
-                  : "text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover)",
-              ].join(" ")}
-            >
-              {transcribing ? (
-                <Spinner size="sm" aria-hidden="true" />
-              ) : (
-                <Icon
-                  name={recording ? "stop" : "mic"}
-                  size={14}
-                  fill={recording ? 1 : 0}
-                  weight={600}
-                />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={handleRewrite}
-              disabled={rewriting || text.trim().length === 0}
-              aria-label="Improve the comment"
-              title="Improve the comment (magic wand)"
-              className="shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover) transition-colors disabled:opacity-50"
-            >
-              {rewriting ? (
-                <Spinner size="sm" aria-hidden="true" />
-              ) : (
-                <Icon name="auto_fix_high" size={14} weight={600} />
-              )}
-            </button>
             {isAdmin && (
               <button
                 type="button"
                 onClick={() => setAdminsOnly((v) => !v)}
-                aria-label={
-                  adminsOnly ? "Make visible to the team" : "Visible to admins only"
-                }
                 aria-pressed={adminsOnly}
                 title={
                   adminsOnly
@@ -513,65 +443,46 @@ export function ReviewCommentPopover() {
                     : "Visible to the team — click to keep it between admins"
                 }
                 className={[
-                  "shrink-0 h-7 w-7 inline-flex items-center justify-center rounded-sm transition-colors",
-                  adminsOnly
-                    ? "bg-(--auis-bg-inverse) text-(--auis-fg-on-inverse)"
-                    : "text-(--auis-fg-tertiary) hover:text-(--auis-fg-primary) hover:bg-(--auis-bg-hover)",
+                  "shrink-0 h-6 inline-flex items-center gap-1 px-1.5 rounded-xs transition-colors hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)",
+                  adminsOnly ? "text-(--auis-fg-primary) font-medium" : "",
                 ].join(" ")}
               >
-                <Icon name={adminsOnly ? "lock" : "lock_open"} size={14} weight={600} />
+                <Icon name={adminsOnly ? "lock" : "lock_open"} size={16} />
+                Private
               </button>
             )}
-
-            {recording ? (
-              <span className="body-xs text-(--auis-accent-danger) flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-(--auis-accent-danger) animate-pulse" />
-                Recording
-              </span>
-            ) : transcribing ? (
-              <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
-                Transcribing…
-              </span>
+            {sessionShared && (
+              <button
+                type="button"
+                onClick={() => openIdentityModal("new")}
+                title="Shared account — comment as someone else"
+                className="h-6 min-w-0 truncate px-1.5 rounded-xs transition-colors hover:bg-(--auis-bg-hover) hover:text-(--auis-fg-primary)"
+              >
+                As {identity.name} · Switch
+              </button>
+            )}
+          </div>
+          <span className="shrink-0">
+            {transcribing ? (
+              "Transcribing…"
             ) : rewriting ? (
-              <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">Improving…</span>
+              "Improving the text…"
             ) : undoText !== null ? (
               <button
                 type="button"
                 onClick={undoRewrite}
-                className="body-xs text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) underline underline-offset-2"
+                className="text-(--auis-fg-secondary) hover:text-(--auis-fg-primary) underline underline-offset-2"
               >
                 Undo
               </button>
             ) : ghost ? (
-              <span className="body-xs text-(--auis-fg-tertiary) truncate min-w-0">
-                Tab to complete
-              </span>
+              "Tab to complete"
+            ) : isAdmin ? (
+              "@ agent · / skill · ⌘↵ sends"
             ) : (
-              <span className="body-xs text-(--auis-fg-tertiary) flex items-center gap-1">
-                <Icon name="keyboard_command_key" size={11} />
-                ⌘↵
-              </span>
+              "⌘↵ sends · Esc cancels"
             )}
-          </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={cancelPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="sm"
-              disabled={!canSubmit && !recording && !transcribing}
-              loading={submitting}
-            >
-              Save
-            </Button>
-          </div>
+          </span>
         </div>
       </form>
 

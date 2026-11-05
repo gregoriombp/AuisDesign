@@ -22,6 +22,8 @@ export function useVoiceTranscription(onText: (text: string) => void) {
   const recorderRef = React.useRef<MediaRecorder | null>(null)
   const chunksRef = React.useRef<Blob[]>([])
   const streamRef = React.useRef<MediaStream | null>(null)
+  // The same stream, as state: the recording's wave reads its volume.
+  const [stream, setStream] = React.useState<MediaStream | null>(null)
   // When true, the next `onstop` DISCARDS the audio (no transcription) — this is
   // the "interrupted" path: leaving/clicking outside cancels the speech without
   // turning it into text.
@@ -30,6 +32,7 @@ export function useVoiceTranscription(onText: (text: string) => void) {
   const cleanupStream = React.useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop())
     streamRef.current = null
+    setStream(null)
   }, [])
 
   React.useEffect(() => () => cleanupStream(), [cleanupStream])
@@ -78,6 +81,7 @@ export function useVoiceTranscription(onText: (text: string) => void) {
       return
     }
     streamRef.current = stream
+    setStream(stream)
     chunksRef.current = []
     const recorder = new MediaRecorder(stream)
     recorderRef.current = recorder
@@ -125,5 +129,5 @@ export function useVoiceTranscription(onText: (text: string) => void) {
     else if (status === "idle") void start()
   }, [status, start, stop])
 
-  return { status, error, toggle, stop, cancel }
+  return { status, error, stream, toggle, stop, cancel }
 }
