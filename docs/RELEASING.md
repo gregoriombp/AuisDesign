@@ -7,10 +7,10 @@ six npm packages that live in this repository:
 |---|---|---|---|
 | [`@auis/cli`](https://www.npmjs.com/package/@auis/cli) | `packages/auis` | published | The CLI. `npx @auis/cli@latest` resolves this name; the binary it installs is still called `auis`. |
 | `create-auis` | `packages/create-auis` | not published | Alias so `npm create auis@latest` works. Depends on `@auis/cli`. |
-| [`@auis/core`](https://www.npmjs.com/package/@auis/core) | `kit/core` | published (0.1.0; 0.2.0 ready) | The Review Bridge's shared domain. |
-| [`@auis/server`](https://www.npmjs.com/package/@auis/server) | `kit/server` | published (0.1.0; 0.2.0 ready) | The Review Bridge server, and the `auis-mention-run` bin. |
-| [`@auis/ui`](https://www.npmjs.com/package/@auis/ui) | `kit/ui` | published (0.1.0; 0.2.0 ready) | The review chrome. |
-| [`@auis/next`](https://www.npmjs.com/package/@auis/next) | `kit/next` | published (0.1.0; 0.2.0 ready) | The Next.js adapter — the one dependency `auis init` adds to an app. |
+| [`@auis/core`](https://www.npmjs.com/package/@auis/core) | `kit/core` | published (0.2.0) | The Review Bridge's shared domain. |
+| [`@auis/server`](https://www.npmjs.com/package/@auis/server) | `kit/server` | published (0.2.0) | The Review Bridge server, and the `auis-mention-run` bin. |
+| [`@auis/ui`](https://www.npmjs.com/package/@auis/ui) | `kit/ui` | published (0.2.0) | The review chrome. |
+| [`@auis/next`](https://www.npmjs.com/package/@auis/next) | `kit/next` | published (0.2.0) | The Next.js adapter — the one dependency `auis init` adds to an app. |
 
 The unscoped name `auis` is **not** ours and never was: npm rejects names it
 considers too similar to an existing package, and only says so at publish
@@ -135,3 +135,10 @@ Keep it that way.
   installs. `doctor` prints the same list. `init` writes `@auis/next@^0.2.0`,
   together with the kit 0.2.0 (the pill composer, the agent-working state,
   raster-only attachments).
+- `0.4.1` — `uninstall` cleans the lockfile when `init` could not install (the
+  install failed, or `--no-install`) and the person ran it afterwards: the kit's
+  entries used to stay in the lockfile. Kit 0.2.0 and CLI 0.4.0 went to npm on
+  2026-11-06; a round trip on a fresh Destiny Matrix clone against the real
+  registry passed (`init` → `next build` → bridge live → `uninstall`), with
+  `npm audit` listing the same 22 advisories as the untouched host, none in
+  `@auis/*`.
