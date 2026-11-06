@@ -9,7 +9,7 @@ Instead of designing in one tool and rebuilding in another, Auis gives you:
 - **Edit Mode** — non-destructive visual edits (text, tokens, variants, icons) that agents materialize into real code.
 - **UX Flows as code** — a dedicated hub (`/auis/ux-flow`) of navigable flow diagrams that are React pages, not static pictures, with comments, structural suggestions and compiled multi-scenario views.
 - **State Mode** — every registered screen rendered in every state, side by side (`/auis/states`), driven by URL params; switch states in place on any screen with ⌘⇧S.
-- **31 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
+- **32 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
 
 The template is **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-first. That is the shape of a new Auis project, not a requirement for yours: the direction is a toolkit that installs into an existing product without changing what is already there.
 
@@ -49,13 +49,7 @@ cd my-product
 npm run dev            # Next.js on http://127.0.0.1:3000
 ```
 
-| Flag | What it does |
-|---|---|
-| `--pm npm\|pnpm\|yarn\|bun` | package manager (default: the one you ran it with) |
-| `--ref <branch\|tag\|commit>` | which version of the template to unpack (default: `main`) |
-| `--no-install` / `--no-git` | skip dependency installation / git init |
-| `--force` | scaffold into a directory that is not empty |
-| `-y, --yes` | take the defaults, never prompt |
+Every command and flag is in [CLI reference](#cli-reference) below.
 
 Already have a product? Run `doctor` inside its repository:
 
@@ -67,12 +61,16 @@ It reports, capability by capability, what Auis can do in that codebase, what
 runs degraded, and what is unsupported — each with the reason and the honest
 alternative. It never writes, installs or asks. `--json` gives the full report.
 
-In a Next.js App Router app, install Review — pins, comments, the drawer and the
-`@Claude` mentions — without scaffolding anything else:
+In a Next.js App Router app, `init` asks what to install, as a checkbox menu of
+every module. **Review** — pins, comments, the drawer and the `@Claude` mentions —
+is the one that installs today; State Mode, Edit Mode, Styleguide and UX Flows
+are listed, dimmed, with the reason they cannot be picked yet. Nothing else gets
+scaffolded:
 
 ```bash
-npx @auis/cli@latest init --dry-run    # what it would touch, writes nothing
+npx @auis/cli@latest init --dry-run    # pick, then print what it would touch, write nothing
 npx @auis/cli@latest init              # install
+npx @auis/cli@latest init --only review --yes   # no menu, for CI and scripts
 npx @auis/cli@latest uninstall         # take it back out
 ```
 
@@ -85,7 +83,36 @@ styles, so your pages look exactly as before. `uninstall` reads the manifest
 and restores every file it edited; your comments move to the backups instead of
 being deleted. The packages behind it live in [`kit/`](kit).
 
-Full CLI docs: [`packages/auis`](packages/auis). Prefer a clone? That still works:
+### CLI reference
+
+The CLI is [`@auis/cli`](https://www.npmjs.com/package/@auis/cli) (the binary it
+installs is `auis`). Run it with `npx @auis/cli@latest`; there is no unscoped `auis`
+package, so `npx auis` does not work.
+
+| Command | What it does |
+|---|---|
+| `npx @auis/cli@latest [directory]` | Scaffold a new project (`create` and `new` are the same command). With no directory it asks for one (`auis-app` with `--yes`); `.` means the current directory. |
+| `npx @auis/cli@latest doctor [directory]` | Read an existing repository and report what Auis can do in it. Writes nothing. |
+| `npx @auis/cli@latest init [directory]` | Pick modules and install them into an existing Next.js App Router app. |
+| `npx @auis/cli@latest uninstall [directory]` | Reverse `init` from `.auis/manifest.json`. |
+
+| Flag | Applies to | What it does |
+|---|---|---|
+| `-r, --ref <ref>` (`--branch`) | create | Branch, tag or commit of the template (default: `main`) |
+| `--pm <npm\|pnpm\|yarn\|bun>` (`--use`) | create, init | Package manager (default: detected) |
+| `--no-install` (`--skip-install`) | create, init, uninstall | Skip installing dependencies |
+| `--no-git` (`--skip-git`) | create | Skip `git init` and the first commit |
+| `--force` | create, uninstall | create: scaffold into a directory that is not empty. uninstall: also remove files you changed since `init` |
+| `--json` | doctor | The full report as JSON, without the banner |
+| `--only <a,b>` | init | Install these modules and skip the menu (`review`, `states`, `edit`, `styleguide`, `flows`; only `review` installs today). A module that cannot install says why and nothing is written |
+| `--dry-run` | init | Print what it would touch, write nothing |
+| `--purge` | uninstall | Delete the comments instead of moving them to `~/.auis/review-bridge-backups/<project>/` |
+| `-y, --yes` | create, init | Take the defaults, never prompt (init: every module that installs here) |
+| `-h, --help` | all | Show usage |
+| `-v, --version` | all | Print the CLI version |
+
+Needs Node.js 20 or newer. More detail, with sample output:
+[`packages/auis`](packages/auis). Prefer a clone? That still works:
 
 ```bash
 git clone https://github.com/gregoriombp/AuisDesign.git my-product
@@ -136,14 +163,18 @@ npm run skills:sync      # regenerate .claude/skills (Claude Code) + .agents/ski
 npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 ```
 
-31 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
+32 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
 
 ## Commands
 
 | Command | What it does |
 |---|---|
 | `npm run dev` | Dev server (predev syncs skills) |
-| `npm test` | Node unit tests (review identities, flow-suggestion integrity) |
+| `npm test` | Node unit tests for the app, the scripts and the kit (`lib/`, `app/`, `scripts/`, `kit/`) |
+| `npm run test:cli` | The CLI's own tests (`packages/auis/test`) |
+| `npm run kit:build` / `kit:smoke` | Build the four `@auis/*` packages to `dist/` / load what was built from a throwaway app's `node_modules`, the way an installed app would |
+| `npm run ui:css` | Rebuild the review chrome's scoped stylesheet (`kit/ui`) |
+| `npm run mention:dry -- <commentId> <agent>` | Run the mention runner for one comment without opening the agent's CLI (`MENTION_DRY_RUN=1`; agents comma-separated, e.g. `claude,grok`) |
 | `npm run states:pdf` | Print the State Mode matrix to `auis-states-matrix.pdf` (needs a Chromium; see the script) |
 | `npm run build` / `typecheck` / `lint` | Build / types / lint |
 | `npm run ds:check` | Design-system lint (hardcode debt, hand-rolled overlays). Takes file paths and `--json`; exits `2` on findings, `1` if the scan fails. Exceptions, with a reason, in `.auis/ds-check.json` or a `ds-check-disable` comment |
