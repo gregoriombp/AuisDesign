@@ -125,6 +125,40 @@ async function silent(fn) {
   }
 }
 
+describe("uninstall after an install init could not run", () => {
+  it("runs the install that drops the kit from a lockfile init never recorded", async () => {
+    const root = makeHost();
+    // init with no install: the lockfile is untouched, so the manifest has no lockfile artifact.
+    assert.equal(await quiet(() => init({ directory: root, install: false, yes: true })), 0);
+    const manifest = JSON.parse(readFileSync(join(root, MANIFEST), "utf8"));
+    assert.equal(manifest.artifacts.some((a) => a.kind === "lockfile"), false);
+    // The person runs the install themselves, as init told them to.
+    write(root, "package-lock.json", '{ "lockfileVersion": 3, "packages": { "node_modules/@auis/next": { "version": "0.2.0" } } }\n');
+
+    const calls = [];
+    const run = async (command, args) => {
+      calls.push([command, ...args].join(" "));
+      write(root, "package-lock.json", '{ "lockfileVersion": 3 }\n');
+      return { ok: true };
+    };
+    assert.equal(await quiet(() => uninstall({ directory: root, run })), 0);
+    assert.deepEqual(calls, ["npm install"]);
+    assert.doesNotMatch(readFileSync(join(root, "package-lock.json"), "utf8"), /@auis\/next/);
+  });
+
+  it("does not install when the lockfile never named the kit", async () => {
+    const root = makeHost();
+    assert.equal(await quiet(() => init({ directory: root, install: false, yes: true })), 0);
+    const calls = [];
+    const run = async (command, args) => {
+      calls.push([command, ...args].join(" "));
+      return { ok: true };
+    };
+    assert.equal(await quiet(() => uninstall({ directory: root, run })), 0);
+    assert.deepEqual(calls, []);
+  });
+});
+
 describe("init's module selection", () => {
   it("--only with a module that cannot install yet writes nothing and fails", async () => {
     const root = makeHost();

@@ -517,7 +517,27 @@ function restore(root, artifact, surgical) {
   return "edited";
 }
 
-export async function uninstall({ directory = ".", install = true, purge = false, force = false } = {}) {
+/**
+ * True when the host's lockfile still names the kit. It happens when init could
+ * not install (the install failed, or --no-install) and the person ran it
+ * afterwards, as init told them to: the lockfile changed after init, so the
+ * manifest holds nothing to restore it from.
+ */
+function lockfileNamesKit(root, packageManager) {
+  for (const file of LOCKFILES[packageManager ?? "npm"] ?? []) {
+    const bytes = readMaybe(abs(root, file));
+    if (bytes && bytes.includes(KIT_PACKAGE)) return true;
+  }
+  return false;
+}
+
+export async function uninstall({
+  directory = ".",
+  install = true,
+  purge = false,
+  force = false,
+  run = exec,
+} = {}) {
   const root = path.resolve(directory);
   const manifest = readManifest(root);
   if (!manifest) {
@@ -599,9 +619,13 @@ export async function uninstall({ directory = ".", install = true, purge = false
     }
   }
 
+  // The dependency is gone from package.json by now, so an install drops the
+  // kit's entries from a lockfile init never got to record.
+  if (!needsInstall && lockfileNamesKit(root, manifest.packageManager)) needsInstall = true;
+
   if (needsInstall && install) {
     const pm = manifest.packageManager ?? "npm";
-    const { ok } = await exec(pm, ["install"], { cwd: root, inherit: true });
+    const { ok } = await run(pm, ["install"], { cwd: root, inherit: true });
     if (ok) step("lockfile", color.dim(`${pm} install`));
     else warn(`${pm} install failed — run it yourself to drop ${manifest.kit?.package ?? KIT_PACKAGE} from the lockfile.`);
   }
