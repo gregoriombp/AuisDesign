@@ -127,7 +127,8 @@ Keep it that way.
   longer a name for create — `npx @auis/cli init my-app` now refuses a folder
   with no `package.json` and points to `npx @auis/cli my-app`. `doctor` prints
   the plan `init` carries out, and only promises a shared comment queue where
-  `init` can mount one. `create-auis` needs a re-release with `^0.3.0`.
+  `init` can mount one. `create-auis` needed a re-release with `^0.3.0`; it was
+  never published, and its range is `^0.4.1` now.
 - `0.4.0` — `init` asks what to install: a checkbox menu of every module (Review
   installs today; State Mode, Edit Mode, Styleguide and UX Flows are listed with
   the reason they cannot be picked yet). `--only a,b` skips the menu and refuses,

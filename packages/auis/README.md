@@ -8,7 +8,7 @@ npx @auis/cli@latest my-product
 ```
 
 ```
-  auis  0.2.2
+  auis  0.4.1
   code-native design builder
 
   ✓ Template  main · tarball
@@ -37,7 +37,7 @@ codebase, and AI agents build against them under enforced rules:
 - **Edit Mode** — non-destructive visual edits that agents materialize into code.
 - **UX Flows as code** (`/auis/ux-flow`) — navigable flow diagrams that are React pages.
 - **State Mode** (`/auis/states`) — every registered screen in every state, side by side.
-- **31 agent skills** — execution contracts for Claude Code, Codex and Cursor.
+- **32 agent skills** — execution contracts for Claude Code, Codex and Cursor.
 
 ## Existing repository?
 
@@ -125,7 +125,7 @@ planned; it does not exist yet.
 ```
 npx @auis/cli@latest [directory] [options]     scaffold a new project
 npx @auis/cli@latest doctor [directory]        read an existing repo, write nothing
-npx @auis/cli@latest init [directory]          install Review into an existing Next.js app
+npx @auis/cli@latest init [directory]          pick what to install into an existing Next.js app
 npx @auis/cli@latest uninstall [directory]     take it back out, exactly
 
       --json           doctor only: the full report as JSON
@@ -153,7 +153,8 @@ npx @auis/cli@latest .                   # current directory
 npx @auis/cli@latest my-product --pm pnpm --no-git
 npx @auis/cli@latest my-product --ref v1.0.0
 npx @auis/cli@latest doctor              # what Auis can do in the current repo, writes nothing
-npx @auis/cli@latest init                # install Review into the current Next.js app
+npx @auis/cli@latest init                # pick what to install into the current Next.js app
+npx @auis/cli@latest init --only review --yes   # same, no menu (CI, scripts)
 npx @auis/cli@latest uninstall           # and take it back out
 ```
 

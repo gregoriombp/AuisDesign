@@ -14,7 +14,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@auis/cli": "^0.3.0"
+    "@auis/cli": "^0.4.1"
   },
   "keywords": [
     "auis",
