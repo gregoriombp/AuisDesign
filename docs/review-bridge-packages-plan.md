@@ -26,7 +26,7 @@ manifest and a data folder) and nothing else.
 | 0 | Anchor-survival experiment on real apps (gate before wave 2) | **done** (2026-10-10): passed, see `docs/anchor-survival.md` |
 | 2 | `@auis/ui`: the review chrome stops wearing the product's tokens; browser half of `@auis/next` | **done** (2026-10-11) |
 | 3 | `auis init --only review` / `uninstall` + publishing the packages | **done** (2026-10-11): `@auis/core`, `server`, `ui`, `next` 0.1.0 and `@auis/cli` 0.3.0 on npm |
-| 4a | `auis init` asks what to install: a module menu (`--only a,b`, `--yes`) that lists every module, with the reason each one cannot be picked yet; `doctor` prints the same list | **done** (2026-11-04), `@auis/cli` 0.4.0 |
+| 4a | `auis init` asks what to install: a module menu (`--only a,b`, `--yes`) that lists every module, with the reason each one cannot be picked yet; `doctor` prints the same list | **done** (2026-11-04); kit 0.2.0 and `@auis/cli` 0.4.0 on npm 2026-11-06 |
 | 4b | The next installable module — see "What installs next" below | **design**, awaiting the owner's pick |
 | 4+ | Shadow DOM, adapters beyond Next, the other bridges | not started |
 
