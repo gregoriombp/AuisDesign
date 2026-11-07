@@ -209,14 +209,31 @@ export function removeGitignoreBlock(source) {
  * with a reason when it cannot install there; otherwise the steps, each with
  * enough detail for doctor to print and for init to carry out.
  */
+const FRAMEWORK_LABEL = {
+  nuxt: "Nuxt", remix: "Remix", astro: "Astro", sveltekit: "SvelteKit",
+  angular: "Angular", vite: "Vite", cra: "Create React App",
+};
+
+/** Why this folder is not a place init can install into, said plainly. */
+function whatIsHere(d, root) {
+  if (d.framework.name === "unknown") {
+    return fs.existsSync(abs(root, "package.json"))
+      ? "the package.json here declares no framework. Run it from your app's root"
+      : "there is no package.json here. Run it from your app's root";
+  }
+  if (d.framework.name === "next") {
+    return d.router.name === "pages-router"
+      ? "this Next.js app is on the Pages Router"
+      : "this Next.js app has no app/layout";
+  }
+  return `this is ${FRAMEWORK_LABEL[d.framework.name] ?? d.framework.name}`;
+}
+
 export function planInstall(d, root, { packageManager } = {}) {
   if (d.framework.name !== "next" || d.router.name !== "app-router") {
-    const found = d.framework.name === "unknown"
-      ? "no JavaScript framework"
-      : `${d.framework.name}${d.router.name === "pages-router" ? " on the Pages Router" : ""}`;
     return {
       ok: false,
-      reason: `auis init installs into a Next.js App Router app today; this is ${found}.`,
+      reason: `auis init installs into a Next.js App Router app today, and ${whatIsHere(d, root)}.`,
       steps: [],
     };
   }

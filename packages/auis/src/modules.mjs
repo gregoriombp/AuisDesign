@@ -82,7 +82,9 @@ export function resolveOnly(value, choices) {
   }
   for (const id of asked) {
     const row = choices.find((c) => c.id === id);
-    if (!row.selectable) return { ok: false, message: `${row.label} cannot be installed here: ${row.note}.` };
+    if (!row.selectable) {
+      return { ok: false, message: `${row.label} cannot be installed here: ${String(row.note).replace(/\.$/, "")}.` };
+    }
   }
   return { ok: true, ids: MODULE_IDS.filter((id) => asked.includes(id)) };
 }
