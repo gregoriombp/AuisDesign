@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 25 108 127" fill="#111111" role="img" aria-labelledby="title">
-  <title id="title">Auis</title>
-  <path fill-rule="evenodd" d="M15.86 144.84H-.23L43.75 30.31h16.33l46.87 114.53H89.69l-13.36-34.68H28.44l-12.58 34.68Zm29.53-80.62L32.81 97.81h38.83L59.69 66.09q-5.47-14.45-8.13-23.75-2.18 11.02-6.17 21.88Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -60.5 716 716" role="img" aria-labelledby="title">
+  <title id="title">Auis Design</title>
+  <style>
+    path { fill: #181818; }
+    @media (prefers-color-scheme: dark) { path { fill: #F5F5F5; } }
+  </style>
+  <path d="M0 594.671L271.132 50.3576C283.008 26.573 307.248 0 333.831 0C360.413 0 384.654 26.573 396.53 50.3576L667.661 594.671C603.986 469.078 474.716 390.565 333.831 390.565C192.945 390.565 63.6751 469.078 0 594.671Z"/>
 </svg>
