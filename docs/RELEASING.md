@@ -143,3 +143,10 @@ Keep it that way.
   registry passed (`init` → `next build` → bridge live → `uninstall`), with
   `npm audit` listing the same 22 advisories as the untouched host, none in
   `@auis/*`.
+- `0.4.2` — `doctor` and `init` no longer read the worktree copies Claude Code
+  keeps under `.claude/worktrees/`: they counted every file twice and reported a
+  stale copy's code as the app's (an `attachShadow` in a worktree flagged the
+  host as using web components). `init` run outside an app now says what is
+  wrong with the folder (no `package.json`, or one that declares no framework)
+  and to run it from the app's root, instead of "this is no JavaScript
+  framework". `--only` no longer ends a refusal with two periods.

@@ -264,8 +264,21 @@ describe("the plan", () => {
     write(root, "package.json", JSON.stringify({ name: "v", scripts: { dev: "vite" }, dependencies: { vite: "5", react: "18" } }));
     const plan = planInstall(detect(root), root);
     assert.equal(plan.ok, false);
-    assert.match(plan.reason, /Next\.js App Router/);
+    assert.match(plan.reason, /Next\.js App Router app today, and this is Vite\.$/);
     assert.deepEqual(installPlan(detect(root), root), []);
+  });
+
+  it("tells someone in the wrong folder to go to their app's root", () => {
+    const bare = mkdtempSync(join(tmpdir(), "auis-init-bare-"));
+    temps.push(bare);
+    assert.match(planInstall(detect(bare), bare).reason, /there is no package\.json here\. Run it from your app's root\.$/);
+
+    const lib = mkdtempSync(join(tmpdir(), "auis-init-lib-"));
+    temps.push(lib);
+    write(lib, "package.json", JSON.stringify({ name: "a-cli", bin: { x: "cli.mjs" } }));
+    const reason = planInstall(detect(lib), lib).reason;
+    assert.match(reason, /the package\.json here declares no framework\. Run it from your app's root\.$/);
+    assert.doesNotMatch(reason, /JavaScript framework/);
   });
 
   it("writes the kit version that is actually in kit/next", () => {

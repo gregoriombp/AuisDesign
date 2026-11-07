@@ -56,6 +56,11 @@ describe("resolveOnly", () => {
   it("refuses an empty list", () => {
     assert.equal(resolveOnly(" , ", rows).ok, false);
   });
+
+  it("ends a plan's reason with one period, not two", () => {
+    const blocked = moduleChoices({ planOk: false, planReason: "No root layout." });
+    assert.equal(resolveOnly("review", blocked).message, "Review cannot be installed here: No root layout.");
+  });
 });
 
 describe("pickerReducer", () => {

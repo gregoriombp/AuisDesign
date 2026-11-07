@@ -19,6 +19,14 @@ const SKIP_DIRS = new Set([
   "dist", "build", "out", "coverage", "vendor", "__pycache__",
 ]);
 
+/**
+ * Paths below the root that hold copies of the repository rather than its
+ * source. Claude Code keeps each worktree as a full checkout under
+ * `.claude/worktrees/`: reading them would count every file twice, eat the scan
+ * cap, and report what a stale copy does as what the app does.
+ */
+const SKIP_PATHS = new Set([".claude/worktrees"]);
+
 const SOURCE_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue", ".svelte", ".astro"]);
 
 function read(root, rel) {
@@ -58,7 +66,8 @@ export function sourceFiles(root, limit = 4000) {
       if (entry.name.startsWith(".") && entry.name !== ".claude") continue;
       const p = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (!SKIP_DIRS.has(entry.name)) walk(p);
+        const rel = path.relative(root, p).split(path.sep).join("/");
+        if (!SKIP_DIRS.has(entry.name) && !SKIP_PATHS.has(rel)) walk(p);
       } else if (SOURCE_EXT.has(path.extname(entry.name))) {
         out.push(p);
       }

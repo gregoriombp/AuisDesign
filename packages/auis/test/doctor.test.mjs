@@ -95,6 +95,18 @@ describe("detect", () => {
     assert.equal(detect(root).tokens.customProperties, 2);
   });
 
+  it("does not read the worktree copies Claude Code keeps under .claude/worktrees", () => {
+    const shadow = "export const el = document.createElement('div').attachShadow({ mode: 'open' })\n";
+    const root = makeHost();
+    write(root, ".claude/worktrees/old-branch/components/Widget.tsx", shadow);
+    const d = detect(root);
+    assert.equal(d.webComponents.present, false, "a stale copy is not the app");
+    assert.equal(d.sourceFileCount, detect(makeHost()).sourceFileCount, "and its files are not counted");
+
+    write(root, "components/Widget.tsx", shadow);
+    assert.deepEqual(detect(root).webComponents.evidence, ["components/Widget.tsx"], "the app's own file still is");
+  });
+
   it("says unknown rather than guessing when there is no framework", () => {
     const root = mkdtempSync(join(tmpdir(), "auis-doctor-bare-"));
     temps.push(root);
