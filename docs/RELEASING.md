@@ -128,7 +128,7 @@ Keep it that way.
   with no `package.json` and points to `npx @auis/cli my-app`. `doctor` prints
   the plan `init` carries out, and only promises a shared comment queue where
   `init` can mount one. `create-auis` needed a re-release with `^0.3.0`; it was
-  never published, and its range is `^0.4.1` now.
+  never published, and its range is `^0.5.0` now.
 - `0.4.0` — `init` asks what to install: a checkbox menu of every module (Review
   installs today; State Mode, Edit Mode, Styleguide and UX Flows are listed with
   the reason they cannot be picked yet). `--only a,b` skips the menu and refuses,
@@ -150,3 +150,12 @@ Keep it that way.
   wrong with the folder (no `package.json`, or one that declares no framework)
   and to run it from the app's root, instead of "this is no JavaScript
   framework". `--only` no longer ends a refusal with two periods.
+- `0.5.0` — not on npm yet. The scaffold prunes `.github/readme` (the images of
+  the Auis README) and `.gitattributes` (which only export-ignores them). The
+  tarball already leaves both out, so this only changes the `git clone`
+  fallback, which does not read `export-ignore`. The kit stays at 0.2.0: the
+  `turbopackIgnore` marks added to `kit/server` on 2026-11-12 fix this
+  repository's own build, where the kit is consumed as source. An app that
+  installed 0.2.0 from npm was checked on Next 16.2.10 and 16.4.6 before
+  deciding: no tracing warning, and no project file in the bridge route's
+  trace. A kit release for it would change nothing in an installed app.

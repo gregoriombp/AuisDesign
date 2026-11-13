@@ -140,7 +140,14 @@ describe("conflictsIn", () => {
 
 describe("package", () => {
   it("prunes the contributor-only files and its own source", () => {
-    for (const entry of ["CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "packages", ".git"]) {
+    for (const entry of [
+      "CONTRIBUTING.md",
+      "CODE_OF_CONDUCT.md",
+      "packages",
+      ".git",
+      ".github/readme",
+      ".gitattributes",
+    ]) {
       assert.ok(PRUNE.includes(entry), `${entry} should be pruned`);
     }
     assert.ok(!PRUNE.includes("LICENSE"), "the MIT notice travels with the code");

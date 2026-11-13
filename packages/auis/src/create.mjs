@@ -18,6 +18,11 @@ export const PRUNE = [
   ".git",
   ".github/ISSUE_TEMPLATE",
   ".github/PULL_REQUEST_TEMPLATE.md",
+  // The images of the Auis README, and the attributes file whose only job is
+  // to keep them out of the tarball. The tarball already leaves both behind;
+  // this covers the `git clone` fallback, which does not read export-ignore.
+  ".github/readme",
+  ".gitattributes",
   "CONTRIBUTING.md",
   "CODE_OF_CONDUCT.md",
   "docs/EXTRACTION-AUDIT.md",
