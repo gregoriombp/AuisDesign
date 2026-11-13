@@ -8,7 +8,7 @@ npx @auis/cli@latest my-product
 ```
 
 ```
-  auis  0.4.2
+  auis  0.5.0
   code-native design builder
 
   ✓ Template  main · tarball
@@ -171,8 +171,8 @@ falling back to `git clone --depth 1`. The CLI itself has zero dependencies;
 
 Everything in the repository, minus the parts that only concern contributing to
 Auis (`.github/ISSUE_TEMPLATE`, `PULL_REQUEST_TEMPLATE.md`, `CONTRIBUTING.md`,
-`CODE_OF_CONDUCT.md`, the extraction/cleanup notes, and this `packages/`
-directory), plus:
+`CODE_OF_CONDUCT.md`, the extraction/cleanup notes, the images of the Auis
+README, and this `packages/` directory), plus:
 
 - `package.json` renamed to your project, `0.1.0`, `private: true`, with an
   `auis` field recording the template ref it came from;
