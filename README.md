@@ -1,6 +1,20 @@
+<p align="center">
+  <a href="https://www.auis.design">
+    <img src=".github/readme/hero.png" alt="Auis Design, the code-native design builder. Agents build. You decide." width="100%">
+  </a>
+</p>
+
 # Auis Design
 
 **Auis is a code-native design builder.** It replaces most of the design-tool loop with a live environment where the design system, the screens, the UX flows, and the review process all live **in the codebase** — and where AI agents (Claude Code, Codex, Cursor) do the building under strict, skill-encoded rules.
+
+[Site](https://www.auis.design) · [Docs](https://www.auis.design/docs) · [Features](https://www.auis.design/features) · [Demos](https://www.auis.design/demo) · [Changelog](https://www.auis.design/changelog) · [npm](https://www.npmjs.com/package/@auis/cli)
+
+```bash
+npx @auis/cli@latest my-product
+```
+
+## What you get
 
 Instead of designing in one tool and rebuilding in another, Auis gives you:
 
@@ -10,6 +24,14 @@ Instead of designing in one tool and rebuilding in another, Auis gives you:
 - **UX Flows as code** — a dedicated hub (`/auis/ux-flow`) of navigable flow diagrams that are React pages, not static pictures, with comments, structural suggestions and compiled multi-scenario views.
 - **State Mode** — every registered screen rendered in every state, side by side (`/auis/states`), driven by URL params; switch states in place on any screen with ⌘⇧S.
 - **32 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
+
+<p align="center">
+  <a href="https://www.auis.design/features">
+    <img src=".github/readme/surfaces.png" alt="Four cards from auis.design: Styleguide, Review Mode, UX Flows and State Mode" width="100%">
+  </a>
+</p>
+
+> **About the images.** They are captures of [auis.design](https://www.auis.design), where each surface is drawn in code and runs as a demo in the browser. The screens inside them ("Ledger", "Items") are the site's sample product, not a screenshot of your app. To see the real thing, run the command above and open `/auis`.
 
 The template is **Next.js (App Router) + Tailwind v4 + shadcn/ui**, desktop-first. That is the shape of a new Auis project, not a requirement for yours: the direction is a toolkit that installs into an existing product without changing what is already there.
 
@@ -28,9 +50,37 @@ Created by **Gregório Pinheiro** — Design Engineer UX/UI, a creator of comple
 
 ---
 
+## Review Mode
+
+Review Mode sits on top of the running app (⌘⇧Y). Pick a tool in the bottom bar — **freehand** to circle a region, **pin** to mark a spot, the **magic pointer** to anchor the pin to an element so it follows reflow — then type, paste an image or dictate. Every comment carries the route, a readable location trail and the element it points at, so an agent can act on it without guessing.
+
+Comments land in a local queue. `auis-review-bridge-solve` resolves it in a batch, or you mention an agent in the comment itself (see [step 8](#starting-your-own-design-system)). Either way the work comes back as **in review**, and you approve or reject it — in the thread, in the side panel, or in the inbox at `/auis/styleguide/review`.
+
+<p align="center">
+  <a href="https://www.auis.design/demo/review">
+    <img src=".github/readme/review-mode.png" alt="Review Mode as drawn on auis.design: a pin on a button, the thread with the agent's change, and Approve / Reject" width="100%">
+  </a>
+</p>
+
+Try it without installing anything: [auis.design/demo/review](https://www.auis.design/demo/review).
+
+## State Mode
+
+Every state of a screen is a URL. A screen registers its axes (`?state=`, `?plan=`…) in `lib/auis-states/registry.ts`, and `/auis/states` renders every registered screen in every registered state, side by side. Each cell is a real deep link. `auis-update-states` keeps the registry honest after a page changes.
+
+<p align="center">
+  <a href="https://www.auis.design/demo/states">
+    <img src=".github/readme/state-mode.png" alt="The State Mode demo on auis.design: one screen in five states (default, empty, loading, error, no permission), each with its own URL" width="100%">
+  </a>
+</p>
+
+Demo: [auis.design/demo/states](https://www.auis.design/demo/states).
+
+---
+
 ## Requirements
 
-- **Node.js ≥ 20** and npm
+- **Node.js ≥ 20** and npm (the repository's own test suite, `npm test`, needs Node 22.6 or newer)
 - An AI coding agent for the full experience: **Claude Code**, **Codex**, or **Cursor** (the builder UI runs without one, but skills are the point)
 - Optional: **Figma MCP** (for flow/design import skills)
 
@@ -133,11 +183,21 @@ routes — `npm run dev` is all you need. Then open the builder surfaces:
 | Projects workbench | `/auis/projects` |
 | Builder roadmap | `/auis/roadmap` |
 
+Three modes are available on every screen: Review (⌘⇧Y), Edit (⌘⇧E) and State (⌘⇧S).
+
 > The repository ships a neutral, documented **Layer A**: the foundations and components used by the Auis builder itself. Your product's **Layer B** starts empty and grows through the component and page skills. See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md).
 
 ## Starting your own design system
 
-The intended loop (each step is a skill your agent runs):
+Every step is a skill your agent runs, and the last one is yours.
+
+<p align="center">
+  <a href="https://www.auis.design/#how">
+    <img src=".github/readme/skills-pipeline.png" alt="The six steps as shown on auis.design: Foundation, Components, Pages, Flows, Review, Your call. The Foundation step turns a visual reference into design tokens" width="100%">
+  </a>
+</p>
+
+The intended loop:
 
 0. **`auis-setup`** — the recommended first move. Run `/auis-setup`, or open `/auis/welcome` and it will walk you through it: your project name, a one-line "what is your product", and a logo upload. It's a guided orchestrator — it sequences the three creators below (brand → tokens → voice), checking in between each. The hub (`/auis`) shows a "Welcome — set up your brand" card until setup is done.
 1. **`auis-brand`** — establishes your product's identity: the app name, the one-line positioning, and your logo/mark, wired into the app chrome so the builder reads as *your* product, not Auis. *This is the only skill allowed to establish brand.*
@@ -147,7 +207,7 @@ The intended loop (each step is a skill your agent runs):
 5. **`auis-page`** — build full pages from a screenshot, Figma URL, wireframe, or written description, mapping every element to existing components first.
 6. **`auis-flow` / `auis-create-ux-flow`** — design feature flows as navigable diagrams tied to real routes and files, listed in the UX Flow hub; `auis-create-ux-flow-golden-eye` compiles several journeys into one view, and `auis-update-states` registers each screen's states for the State Mode matrix.
 7. **`auis-ux-writing`** — make every string in a screen sound like your product, using the voice from step 3.
-8. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve. Or mention `@claude` or `@grok` in a comment: with `AUIS_MENTION_TRIGGER=1` in `.env.local` the write itself opens that agent's CLI, under the ceiling (Reply or Edit) you set in the floating dot's Agents panel — no loop, nothing polling.
+8. **Review Mode → `auis-review-bridge-solve`** — comment visually on the running app; agents resolve the queue; you approve. Or mention `@claude` or `@grok` in a comment: with `AUIS_MENTION_TRIGGER=1` in `.env.local` the write itself opens that agent's CLI, under the ceiling (Reply or Edit) you set in the floating dot's Agents panel — no loop, nothing polling. `auis-critique` uses the same queue the other way round: it reviews one route for design quality and accessibility and files each finding as a pin, without editing code.
 9. **`auis-audit`** — verify every component used in the app is documented in the styleguide.
 
 Brand, tokens, and voice are the three things Auis will never invent for you — the three creators `auis-setup` sequences: `auis-brand` derives your identity from the name and logo you give it, `auis-foundation` derives the tokens from a design you show it, `auis-voice` derives the voice from a product you show it. Everything downstream consumes them.
@@ -170,7 +230,7 @@ npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 | Command | What it does |
 |---|---|
 | `npm run dev` | Dev server (predev syncs skills) |
-| `npm test` | Node unit tests for the app, the scripts and the kit (`lib/`, `app/`, `scripts/`, `kit/`) |
+| `npm test` | Node unit tests for the app, the scripts and the kit (`lib/`, `app/`, `scripts/`, `kit/`). Needs Node 22.6+ (it type-strips the `.ts` tests) |
 | `npm run test:cli` | The CLI's own tests (`packages/auis/test`) |
 | `npm run kit:build` / `kit:smoke` | Build the four `@auis/*` packages to `dist/` / load what was built from a throwaway app's `node_modules`, the way an installed app would |
 | `npm run ui:css` | Rebuild the review chrome's scoped stylesheet (`kit/ui`) |
@@ -187,6 +247,7 @@ npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 - [`AUIS.md`](AUIS.md) — mental model and surfaces.
 - [`PRODUCT_CONTEXT.md`](PRODUCT_CONTEXT.md) — template for **your** product's voice and vocabulary (writing skills read it).
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — engine internals; [`docs/component-map.md`](docs/component-map.md) — "need X → use Y" index; [`docs/EXTRACTION-AUDIT.md`](docs/EXTRACTION-AUDIT.md) — the public/private boundary and recovery decisions.
+- [`kit/`](kit) — the Review Bridge as four installable packages (`@auis/core`, `@auis/server`, `@auis/ui`, `@auis/next`); [`packages/auis`](packages/auis) — the CLI.
 
 ## Security notes
 
