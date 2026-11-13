@@ -1,3 +1,5 @@
 # README images: the repository page shows them, a new project has no use for
-# them. export-ignore keeps the folder out of the tarball the CLI downloads.
+# them. export-ignore keeps the folder, and this file, out of the tarball the
+# CLI downloads. The clone fallback prunes both (PRUNE in packages/auis).
 /.github/readme export-ignore
+/.gitattributes export-ignore
