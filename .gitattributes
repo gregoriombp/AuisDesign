@@ -1,0 +1,3 @@
+# README images: the repository page shows them, a new project has no use for
+# them. export-ignore keeps the folder out of the tarball the CLI downloads.
+/.github/readme export-ignore
