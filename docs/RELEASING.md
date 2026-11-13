@@ -150,7 +150,7 @@ Keep it that way.
   wrong with the folder (no `package.json`, or one that declares no framework)
   and to run it from the app's root, instead of "this is no JavaScript
   framework". `--only` no longer ends a refusal with two periods.
-- `0.5.0` — not on npm yet. The scaffold prunes `.github/readme` (the images of
+- `0.5.0` — on npm since 2026-11-13. The scaffold prunes `.github/readme` (the images of
   the Auis README) and `.gitattributes` (which only export-ignores them). The
   tarball already leaves both out, so this only changes the `git clone`
   fallback, which does not read `export-ignore`. The kit stays at 0.2.0: the
@@ -159,3 +159,6 @@ Keep it that way.
   installed 0.2.0 from npm was checked on Next 16.2.10 and 16.4.6 before
   deciding: no tracing warning, and no project file in the bridge route's
   trace. A kit release for it would change nothing in an installed app.
+  Checked from a clean directory against the registry after the publish:
+  `npx @auis/cli@latest` scaffolds without `.gitattributes` or
+  `.github/readme`, and `doctor` on the result writes nothing.
