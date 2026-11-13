@@ -41,7 +41,7 @@ Every design system component **must** start with `Au`. No exceptions within the
 | Navigation entry | `navigation.ts` with descriptive `name` (e.g. `"Dropdown Menu"`) and `href: "/auis/styleguide/components/au-[name]"` |
 
 > **Showcase href convention:** Legacy components (built before this rule) live at
-> `/auis/styleguide/components/[name]/` (e.g. `buttons/`, `cards/`). New components
+> `/auis/styleguide/components/[name]/` (today only `icon/`). New components
 > go to `/auis/styleguide/components/au-[name]/`. **Never rename existing showcase
 > folders** — doing so breaks live routes. The `name` field in `navigation.ts` uses
 > descriptive labels, not the raw `Au[Name]` identifier.
@@ -91,7 +91,7 @@ The flow for new components:
 
 **Current repo state (known debt):**
 
-shadcn is already initialized (`components.json` exists, `@radix-ui/*` packages are installed), but only **two** primitives are actually vendored today: `components/ui/badge.tsx` and `components/ui/popover.tsx`. There is no `button.tsx`, `card.tsx`, `table.tsx`, `chart.tsx` or `calendar.tsx` in this repo — **don't import one, it isn't there; install it first.** The existing `Au*` components were built before the decision to adopt shadcn — they use Radix directly or are hand-rolled in Tailwind. **This is known debt.** When you touch one of them:
+shadcn is already initialized (`components.json` exists, `@radix-ui/*` packages are installed), but only **three** primitives are actually vendored today: `components/ui/badge.tsx`, `components/ui/popover.tsx` and `components/ui/radio-group.tsx`. There is no `button.tsx`, `card.tsx`, `table.tsx`, `chart.tsx` or `calendar.tsx` in this repo — **don't import one, it isn't there; install it first.** The existing `Au*` components were built before the decision to adopt shadcn — they use Radix directly or are hand-rolled in Tailwind. **This is known debt.** When you touch one of them:
 
 1. Install the corresponding shadcn primitive (`npx shadcn@latest add [name]`) — it lands at `components/ui/[name].tsx` (lowercase).
 2. Refactor the `Au[Name].tsx` to import and wrap the primitive.
