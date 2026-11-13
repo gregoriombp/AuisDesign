@@ -12,6 +12,14 @@ const eslintConfig = [
   {
     ignores: [
       ".next/**",
+      // Per-user build caches (NEXT_DIST_DIR, see next.config.ts).
+      ".next-*/**",
+      // Agent-local trees, all gitignored: the generated skill copies and the
+      // worktrees agents open under .claude/worktrees — each a full checkout
+      // with its own .next. Linting them reports another branch's code (and
+      // its build output) as this one's.
+      ".claude/**",
+      ".agents/**",
       "node_modules/**",
       "bridge/**",
       "bridge-edit/**",
