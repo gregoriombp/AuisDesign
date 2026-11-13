@@ -53,16 +53,21 @@ export function projectBackupKey(cwd: string = process.cwd()): string {
  * Resolved on every call, not when the module loads: the cwd and the env are
  * read at the moment of use, which is what lets a test (or a host) point the
  * bridge somewhere else before the first request.
+ *
+ * The `turbopackIgnore` comments: these folders come from options or the env,
+ * so the bundler cannot know them at build time. Left unmarked, Next's file
+ * tracing gives up and copies the whole project into the server output of
+ * every route that imports the bridge. They hold runtime data, never code.
  */
 export function reviewPaths() {
   const dataDir = configured.dataDir
-    ? path.resolve(configured.dataDir)
+    ? path.resolve(/* turbopackIgnore: true */ configured.dataDir)
     : path.join(process.cwd(), "review-bridge", "data");
   const envBackup = process.env.REVIEW_BRIDGE_BACKUP_DIR;
   const backupDir = configured.backupDir
-    ? path.resolve(configured.backupDir)
+    ? path.resolve(/* turbopackIgnore: true */ configured.backupDir)
     : envBackup
-      ? path.resolve(envBackup)
+      ? path.resolve(/* turbopackIgnore: true */ envBackup)
       : path.join(os.homedir(), ".auis", "review-bridge-backups", projectBackupKey());
   return {
     dataDir,
@@ -73,7 +78,7 @@ export function reviewPaths() {
     snapshotsDir: path.join(backupDir, "snapshots"),
     poolDir: path.join(backupDir, "images"),
     mentionRunner: configured.mentionRunner
-      ? path.resolve(configured.mentionRunner)
+      ? path.resolve(/* turbopackIgnore: true */ configured.mentionRunner)
       : installedMentionRunner(),
   };
 }

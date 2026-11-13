@@ -213,7 +213,7 @@ export default function FooPage() {
 ## Living example
 
 The canonical reference page is
-[components/buttons/page.tsx](../app/auis/styleguide/components/buttons/page.tsx).
+[components/au-button/page.tsx](../app/auis/styleguide/components/au-button/page.tsx).
 Use it as a mirror when creating a new page.
 
 ## Migrating existing pages
