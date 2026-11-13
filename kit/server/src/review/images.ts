@@ -59,7 +59,7 @@ async function persistDataUri(value: string): Promise<string> {
   const { ext } = decision;
   const hash = crypto.createHash("sha256").update(buf).digest("hex");
   const filename = `${hash}.${ext}`;
-  const dest = path.join(reviewPaths().imagesDir, filename);
+  const dest = path.join(/* turbopackIgnore: true */ reviewPaths().imagesDir, filename);
   await fs.mkdir(reviewPaths().imagesDir, { recursive: true });
   try {
     await fs.access(dest); // already there → dedup, do not rewrite
