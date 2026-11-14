@@ -6,6 +6,7 @@
 //   node dev-server.mjs <mode>
 //
 //   ok         a well-behaved server
+//   site       the same, serving small HTML pages with links (for the app's smoke test)
 //   fail       prints an error and exits 1 before it is ready
 //   silent     stays alive and never takes the lock
 //   stubborn   a server that ignores the request to stop
@@ -39,8 +40,25 @@ function writeLock(port, startedAt = Date.now()) {
   );
 }
 
+/** A page per path: its own path as a heading, and one link of each kind the app has a rule for. */
+function page(url) {
+  const shown = url.replace(/[&<>"]/g, (char) => `&#${char.charCodeAt(0)};`);
+  return `<!doctype html>
+<meta charset="utf-8">
+<title>fixture ${shown}</title>
+<h1 id="path">${shown}</h1>
+<p><a id="internal" href="/somewhere">a page of this project</a></p>
+<p><a id="external" href="https://example.com/outside">another site</a></p>
+<p><a id="new-tab" href="https://example.com/new-tab" target="_blank" rel="noopener">another site, in a new tab</a></p>
+<p><a id="custom-scheme" href="auis-smoke-nothing://nowhere">not a web link, and a scheme no app handles</a></p>`;
+}
+
 function serve(onListening) {
-  const server = http.createServer((_request, response) => response.end("fixture"));
+  const server = http.createServer((request, response) => {
+    if (mode !== "site") return response.end("fixture");
+    response.setHeader("content-type", "text/html; charset=utf-8");
+    response.end(page(request.url ?? "/"));
+  });
   server.listen(0, "127.0.0.1", () => onListening(server.address().port));
 }
 
