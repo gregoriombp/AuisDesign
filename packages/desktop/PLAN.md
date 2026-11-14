@@ -22,7 +22,7 @@ anything that is deployed: everything that works in a browser today keeps workin
 | W0 | Skeleton: one project from the command line — start or attach, show, stop on quit | **done** (2026-11-14) |
 | W1 | The look: the app's own chrome (launcher, project toolbar, log strip) as a real renderer, in the current Auis Design direction | **done** (2026-11-14) |
 | W2 | Core hardening: unit tests for the main-process modules; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; the navigation rules; a CI job | **done** (2026-11-14) |
-| W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | next |
+| W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | implemented; local gate passed, CI pending (2026-11-14) |
 | W4 | New project from the app (`npx @auis/cli`) | not started |
 | W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | not started |
 
@@ -186,6 +186,7 @@ content-security policy allows nothing from the network.
 ```
 packages/desktop/
   scripts/build.mjs        esbuild: main and preload (node, cjs), renderer (browser), the two pages
+  test/smoke/              Playwright-Electron gate; npm run smoke builds and opens the app
   src/shared/app.ts        product name and bundle id
   src/shared/ipc.ts        channel names, payload types, the layout both sides agree on
   src/shared/workspace.ts  where a project's view may go: allowed origins, web links, in-app routes
@@ -198,6 +199,7 @@ packages/desktop/
   src/main/security.ts     app:// protocol, who may call IPC, navigation and permission guards
   src/main/windows/        project.ts (the launcher window is small enough to live in index.ts)
   src/main/index.ts        lifecycle, the launcher, the IPC router
+  src/main/menu.ts         native menu; commands target the focused project's view
   src/preload/chrome.ts    contextBridge → window.auisDesktop
   src/renderer/            one bundle, two pages: launcher.html, project.html
   test/                    node --test, one file per module; fixtures/ holds the stand-in dev server
@@ -265,8 +267,35 @@ install is under way cancels it.
 | W4 | New project ends on `/auis/welcome` |
 | W5 | `npm --prefix packages/desktop run dist` → `release/Auis-Design-0.1.0-arm64.dmg`; `codesign -dv` shows `Signature=adhoc`; `codesign --verify --deep --strict` exits 0; the manual list passes from a Finder launch |
 
-W0's `--capture=<dir>` and `--quit-after=<ms>` exist only so that gate can run
-unattended. The W3 smoke replaces them; remove them there.
+### What W3 established
+
+- **The gate opens the real Electron app.** `npm run smoke` builds it and runs
+  four Playwright scenarios with temporary project folders, a separate profile,
+  and an offline HTTP fixture that implements the Next dev-lock contract. It
+  checks install/start, toolbar navigation, native menu actions, external-link
+  routing, the sandbox, logs, crash/restart, attach, Close and Quit. Native folder
+  selection and the OS browser handoff are stubbed at those boundaries only.
+- **The app has a native menu.** File opens folders or returns to Projects; View
+  navigates/reloads the focused project, toggles its log, restarts its server or
+  opens its current page in the browser. Edit and Window use native roles. Project
+  commands disable in the launcher and follow server/history state.
+- **Close and Quit both await cleanup.** Closing during a restart cancels its
+  queued replacement and waits for the earlier stop too. On Mac, closing the last
+  window leaves the app available in the Dock; activating it opens the launcher.
+- **The log has one copy of every line.** Its initial snapshot and a buffered
+  event may overlap; the renderer refreshes the bounded history on each batch.
+- **Local verification:** 71 desktop unit tests, all four Electron smoke scenarios,
+  173 root tests, both typechecks, desktop build and root lint passed. The lint
+  result retains the same 33 existing warnings.
+- **The old capture/quit flags are gone.** Screenshots, accessibility snapshots,
+  main-process logs and Playwright traces live in ignored `output/smoke/` under
+  this package. CI retains them for seven days in the `desktop-smoke` artifact.
+  The smoke runs in the `desktop-smoke` macOS job; the W2 unit/build job remains
+  independent on Linux. No root install or Playwright browser download is needed.
+
+The HTTP fixture deliberately does not prove Next compatibility, HMR, Finder
+environment lookup, agent mentions or microphone permission. Those real-project
+and packaged-app checks remain in W5's manual gate.
 
 ## After v1
 
