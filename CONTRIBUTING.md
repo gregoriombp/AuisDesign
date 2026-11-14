@@ -53,9 +53,16 @@ npm install --prefix packages/desktop
 npm --prefix packages/desktop start -- /path/to/a/project
 npm --prefix packages/desktop run typecheck
 npm --prefix packages/desktop test      # unit tests; they start real processes and take a few seconds
+npm --prefix packages/desktop run smoke # builds and opens Electron; use a graphical macOS session
 ```
 
 The living plan — waves, status, gates and what comes after v1 — is [`packages/desktop/PLAN.md`](packages/desktop/PLAN.md). Read its status table before continuing the work.
+
+The desktop smoke uses temporary projects and an isolated profile. It saves screenshots,
+snapshots, logs and Playwright traces in `packages/desktop/output/smoke/` (gitignored).
+The `desktop-smoke` CI job runs it on macOS and uploads that evidence. The fixture
+reproduces Next's dev-lock contract without downloading a project or contacting a service;
+the plan separately lists the real-project and packaged-app checks.
 
 ## Commit style
 

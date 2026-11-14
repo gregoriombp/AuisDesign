@@ -23,6 +23,7 @@ import { createProjectStore, displayPath, type Project, type ProjectStore } from
 import { APP_ORIGIN, isChrome, registerAppScheme, serveApp, trustChrome } from "./security.ts";
 import { whyNotRunnable } from "./detect.ts";
 import { openProjectWindow, type ProjectWindow } from "./windows/project.ts";
+import { installApplicationMenu } from "./menu.ts";
 
 const PRELOAD = path.join(__dirname, "../preload/chrome.cjs");
 const RENDERER = path.join(__dirname, "../renderer");
@@ -33,16 +34,12 @@ let launcher: BrowserWindow | null = null;
 let tools: ToolInfo[] | null = null;
 let quitting = false;
 let finished = false;
+let refreshMenu = () => {};
 
 const log = (message: string) => console.log(`[auis-desktop] ${message}`);
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 interface Options {
   root: string | null;
-  /** Gate only: a folder to write captures of the windows into. The W3 smoke replaces it. */
-  capture: string | null;
-  /** Gate only: quit by itself after this long. The W3 smoke replaces it. */
-  quitAfterMs: number | null;
 }
 
 /**
@@ -51,13 +48,10 @@ interface Options {
  * its switches in front of it. So it is recognised by what it points at.
  */
 function parseArgs(argv: string[], appPath: string | null): Options {
-  const options: Options = { root: null, capture: null, quitAfterMs: null };
+  const options: Options = { root: null };
   let skippedApp = appPath === null;
   for (const arg of argv) {
-    if (arg.startsWith("--capture=")) options.capture = arg.slice("--capture=".length);
-    else if (arg.startsWith("--quit-after=")) {
-      options.quitAfterMs = Number(arg.slice("--quit-after=".length)) || null;
-    } else if (arg.startsWith("-")) continue;
+    if (arg.startsWith("-")) continue;
     else if (!skippedApp && path.resolve(arg) === appPath) skippedApp = true;
     else if (options.root === null) options.root = arg;
   }
@@ -82,6 +76,7 @@ function summarize(project: Project): ProjectSummary {
 const launcherState = (): LauncherState => ({ projects: store.list().map(summarize), tools });
 
 function pushLauncher() {
+  refreshMenu();
   if (launcher && !launcher.isDestroyed()) {
     launcher.webContents.send(CHANNELS.launcherChanged, launcherState());
   }
@@ -219,25 +214,6 @@ function registerIpc() {
   handle(CHANNELS.projectDismissNotice, (event) => senderProject(event)?.dismissNotice());
 }
 
-// ── Gate affordance ───────────────────────────────────────────────────────
-
-async function capture(dir: string) {
-  await sleep(3500);
-  fs.mkdirSync(dir, { recursive: true });
-  const save = async (name: string, contents: Electron.WebContents) => {
-    const image = await contents.capturePage();
-    fs.writeFileSync(path.join(dir, `${name}.png`), image.toPNG());
-  };
-  if (launcher && !launcher.isDestroyed()) await save("launcher", launcher.webContents);
-  for (const opened of projectWindows.values()) {
-    await save("chrome", opened.window.webContents);
-    const view = opened.view();
-    if (view) await save("view", view.webContents);
-    log(`captured ${opened.state().route} · window ${opened.window.getMediaSourceId()}`);
-  }
-  if (launcher && !launcher.isDestroyed()) log(`captured launcher · window ${launcher.getMediaSourceId()}`);
-}
-
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 
 app.setName(PRODUCT_NAME);
@@ -259,7 +235,12 @@ if (!app.requestSingleInstanceLock()) {
       app.exit(0);
     });
   });
-  app.on("window-all-closed", () => app.quit());
+  app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") app.quit();
+  });
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) openLauncher();
+  });
   app.on("second-instance", () => openLauncher());
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
     process.on(signal, () => app.quit());
@@ -270,6 +251,21 @@ if (!app.requestSingleInstanceLock()) {
     store = createProjectStore(path.join(app.getPath("userData"), "projects.json"));
     serveApp(RENDERER);
     registerIpc();
+    refreshMenu = installApplicationMenu({
+      openFolder: () => {
+        void pickFolder(BrowserWindow.getFocusedWindow());
+      },
+      openLauncher: () => {
+        openLauncher();
+      },
+      focusedProject: () => {
+        const focused = BrowserWindow.getFocusedWindow();
+        for (const opened of projectWindows.values()) {
+          if (opened.window === focused) return opened;
+        }
+        return null;
+      },
+    });
 
     if (options.root) {
       // Under `npm --prefix`, cwd is this package; INIT_CWD is where the user stood.
@@ -285,8 +281,5 @@ if (!app.requestSingleInstanceLock()) {
       openLauncher();
     }
     void readTools();
-
-    if (options.capture) await capture(options.capture);
-    if (options.quitAfterMs !== null) setTimeout(() => app.quit(), options.quitAfterMs);
   });
 }

@@ -98,6 +98,8 @@ export function createProjectServer(root: string, options: ProjectServerOptions 
   /** Bumped by every start and stop, so a superseded run stops reporting. */
   let run = 0;
   let watcher: NodeJS.Timeout | null = null;
+  // Close/Quit must also await a stop that Restart already began.
+  let ending: Promise<void> = Promise.resolve();
   const stateListeners: Array<(state: ServerState) => void> = [];
   const logListeners: Array<(lines: string[]) => void> = [];
 
@@ -326,7 +328,8 @@ export function createProjectServer(root: string, options: ProjectServerOptions 
       // trying again starts from a clean folder instead of meeting it.
       const leftover = child?.pid;
       child = null;
-      await endGroup(leftover);
+      ending = Promise.all([ending, endGroup(leftover)]).then(() => {});
+      await ending;
       if (failure !== run) return;
       setState({
         status: "error",
@@ -340,13 +343,14 @@ export function createProjectServer(root: string, options: ProjectServerOptions 
     current.status === "starting" || current.status === "installing" || current.status === "running";
 
   const stop = async () => {
-    run++;
+    const id = ++run;
     stopWatching();
     const groups = [child?.pid, installer?.pid];
     child = null;
     installer = null;
-    await Promise.all(groups.map(endGroup));
-    setState({ status: "idle" });
+    ending = Promise.all([ending, ...groups.map(endGroup)]).then(() => {});
+    await ending;
+    if (id === run) setState({ status: "idle" });
   };
 
   return {
@@ -357,8 +361,11 @@ export function createProjectServer(root: string, options: ProjectServerOptions 
     install: () => (busy() ? Promise.resolve() : begin("install")),
     stop,
     restart: async () => {
-      await stop();
-      await begin("start");
+      const stopped = stop();
+      const id = run;
+      await stopped;
+      // Close/Quit during Restart supersedes the replacement start too.
+      if (id === run) await begin("start");
     },
     onState: (listener) => void stateListeners.push(listener),
     onLog: (listener) => void logListeners.push(listener),
