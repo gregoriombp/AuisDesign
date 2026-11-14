@@ -35,8 +35,6 @@ export interface ProjectWindow {
   openInBrowser(): void;
   copyNoticeCommand(): Promise<void>;
   dismissNotice(): void;
-  /** The project's page, when the server is up. For the gate's capture only. */
-  view(): WebContentsView | null;
   /** Ends the server if this window started it. Safe to call more than once. */
   stop(): Promise<void>;
 }
@@ -191,7 +189,20 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
   };
 
   win.on("resize", layout);
-  win.on("close", () => void stop());
+  // A native Close command must wait for the owned server, just like Quit.
+  // Keep the window registered until then so Quit can still find its cleanup.
+  let closing = false;
+  let closeReady = false;
+  win.on("close", (event) => {
+    if (closeReady) return;
+    event.preventDefault();
+    closing = true;
+    void stop().then(() => {
+      closeReady = true;
+      removeView();
+      if (!win.isDestroyed()) win.close();
+    });
+  });
   win.on("closed", () => {
     if (flush) clearTimeout(flush);
     options.onClosed();
@@ -206,7 +217,6 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
     contentsId,
     state,
     logs: () => server.logs(),
-    view: () => view,
     stop,
     navigate(action) {
       const contents = view?.webContents;
@@ -228,10 +238,12 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
       push();
     },
     async restart() {
+      if (closing) return;
       stopping = null;
       await server.restart();
     },
     async install() {
+      if (closing) return;
       stopping = null;
       await server.install();
     },
