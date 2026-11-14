@@ -18,7 +18,7 @@ was never here.
 
 | | **Layer A — Auis builder components** | **Layer B — your product's components** |
 |---|---|---|
-| What | The **26** `Au*` files in `components/ui/`, plus 4 Patterns | Whatever you build |
+| What | The **26** `Au*` files in `components/ui/`, plus 5 Patterns | Whatever you build |
 | Does it ship? | **Yes** — it is the tool's own UI | **No — empty on purpose** |
 | Why it exists | The builder's modes and pages, Auis's own mark, and the primitives those stand on | Your product |
 | Can I import it? | Yes — freely | — |
@@ -119,6 +119,7 @@ build it (see [Genuinely missing something?](#genuinely-missing-something)).
 | Progress | `AuProgress` | `@/components/ui/AuProgress` | Determinate progress bar. |
 | Breadcrumb | `AuBreadcrumb` | `@/components/ui/AuBreadcrumb` | The compact breadcrumb atom. |
 | Breadcrumb bar | `AuBreadcrumbsBar` | `@/components/ui/AuBreadcrumbsBar` | Full-width navigation trail with an optional trailing action. Use the atom when you do not need the strip. |
+| Node editor / workflow canvas | `AuWorkflowCanvas` (+`AuWorkflowNode`, `AuWorkflowNote`, `AuWorkflowToolbar`, `AuWorkflowViewControls`) | `@/components/ui/AuWorkflowCanvas` | **Pattern.** React Flow draws pan/zoom, edges, handles and the minimap; every control is an `Au*`. Don't use React Flow's `<Controls>` — use `AuWorkflowViewControls`. A read-only journey diagram → the UX Flow tool (`/auis/ux-flow`). |
 | Side navigation / app shell / notifications | *(nothing ships)* | — | **Layer B.** Auis ships no sidebar, nav rail, header, dashboard layout, or notifications panel. Build what your product needs on `AuButton` + `Icon` + tokens. |
 
 ## Full Layer A inventory (26)
@@ -144,8 +145,8 @@ a file in `components/ui/`. Mirrors the taxonomy in
 `AuMentionMenu` mentions (Review Bridge) · `AuMentionChip` mention/skill chips (Review Bridge) ·
 `AuLogo` Auis mark.
 
-Four more `Au*` ship one tier up, as **Patterns** — `AuAppShell`, `AuSideNav`,
-`AuPromptComposer`, `AuDropzone`. The builder itself imports none of them: they are composed
+Five more `Au*` ship one tier up, as **Patterns** — `AuAppShell`, `AuSideNav`,
+`AuPromptComposer`, `AuDropzone`, `AuWorkflowCanvas`. The builder itself imports none of them: they are composed
 starting points, not the tool's own UI. Beyond them Auis ships no product chrome — no header,
 no nav rail, no notifications panel.
 
@@ -278,7 +279,7 @@ pass them in as props (see AGENTS.md §4).
 
 ## shadcn primitives — what's actually here
 
-`components/ui/` ships **34** `.tsx` files: the **30** `Au*`, plus `Icon.tsx`, plus exactly
+`components/ui/` ships **35** `.tsx` files: the **31** `Au*`, plus `Icon.tsx`, plus exactly
 **three** shadcn primitives — `badge.tsx`, `popover.tsx` and `radio-group.tsx`. There is no `card.tsx`,
 `button.tsx`, `table.tsx`, `chart.tsx` or `calendar.tsx` in this repo, and no `tool-ui/`
 subsystem. Don't import one; it isn't there.
