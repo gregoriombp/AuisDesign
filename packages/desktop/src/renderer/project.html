@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The chrome loads nothing from the network: everything is 'self', which is app://auis. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>Auis Design</title>
+    <link rel="stylesheet" href="./main.css" />
+  </head>
+  <body data-view="project">
+    <div id="root"></div>
+    <script src="./main.js" defer></script>
+  </body>
+</html>

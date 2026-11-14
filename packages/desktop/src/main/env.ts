@@ -9,7 +9,10 @@
 //
 // This module does not import `electron`, so it runs under `node --test`.
 
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import type { ToolInfo, ToolName } from "../shared/ipc.ts";
 
 export type Env = Record<string, string>;
 export type EnvSource = "interactive" | "login" | "fallback";
@@ -122,4 +125,49 @@ export async function resolveShellEnv(
     env: { ...base, PATH: [...known, ...missing].join(":") },
     source: "fallback",
   };
+}
+
+const TOOLS: ToolName[] = ["node", "npm", "git", "claude", "codex"];
+
+/** The first executable called `name` on `env.PATH`, the way a shell would find it. */
+export function findOnPath(name: string, env: Env): string | null {
+  for (const dir of (env.PATH ?? "").split(":")) {
+    if (!dir) continue;
+    const candidate = path.join(dir, name);
+    try {
+      fs.accessSync(candidate, fs.constants.X_OK);
+      if (fs.statSync(candidate).isFile()) return candidate;
+    } catch {
+      /* not here */
+    }
+  }
+  return null;
+}
+
+/** `v24.12.0`, `git version 2.50.1 (Apple Git-155)`, `2.1.4 (Claude Code)` → the number. */
+export function parseVersion(output: string): string | null {
+  return output.match(/\d+\.\d+(?:\.\d+)?/)?.[0] ?? null;
+}
+
+function versionOf(file: string, env: Env): Promise<string | null> {
+  return new Promise((resolve) => {
+    execFile(file, ["--version"], { env, timeout: 5000 }, (error, stdout) => {
+      resolve(error ? null : parseVersion(stdout));
+    });
+  });
+}
+
+/**
+ * What the project's processes will find in this environment. A tool that is
+ * on the PATH but does not answer `--version` still counts as present, with
+ * its version unknown, rather than as missing.
+ */
+export async function probeTools(env: Env): Promise<ToolInfo[]> {
+  return Promise.all(
+    TOOLS.map(async (name): Promise<ToolInfo> => {
+      const file = findOnPath(name, env);
+      if (!file) return { name, version: null };
+      return { name, version: (await versionOf(file, env)) ?? "found" };
+    }),
+  );
 }

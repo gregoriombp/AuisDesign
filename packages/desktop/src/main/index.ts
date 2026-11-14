@@ -1,47 +1,47 @@
-// Auis for Mac — the W0 skeleton (see ../../PLAN.md).
+// Auis Design for Mac — lifecycle (see ../../PLAN.md).
 //
-// One project, named on the command line. The app asks the user's shell for
-// its environment, attaches to that folder's dev server or starts it, shows the
-// product in a window, and on quit stops exactly what it started.
-//
-// What is deliberately not here yet: the toolbar and the launcher (W1), and the
-// supervisor's state machine with its tests (W2). The status strip at the top
-// of the window is a placeholder for that toolbar.
+// The app opens on the launcher: the projects it knows, a way to open a
+// folder, and what it found in the user's shell. Each project gets its own
+// window. Given a folder on the command line, it opens that project directly.
+// On quit, every dev server the app started is stopped before the app exits.
 
-import { app, BrowserWindow, WebContentsView, shell, type Session } from "electron";
-import { spawn, type ChildProcess } from "node:child_process";
-import { createHash } from "node:crypto";
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type IpcMainInvokeEvent } from "electron";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { PRODUCT_NAME } from "../shared/app.ts";
-import { resolveShellEnv, type Env } from "./env.ts";
-import { liveDevServer, pidAlive, readDevLock, type DevServerInfo } from "./nextLock.ts";
+import {
+  CHANNELS,
+  type LauncherState,
+  type NavigateAction,
+  type ProjectSummary,
+  type ToolInfo,
+} from "../shared/ipc.ts";
+import { probeTools, resolveShellEnv } from "./env.ts";
+import { liveDevServer } from "./nextLock.ts";
+import { createProjectStore, displayPath, type Project, type ProjectStore } from "./projects.ts";
+import { APP_ORIGIN, isChrome, registerAppScheme, serveApp, trustChrome } from "./security.ts";
+import { manifestProblem } from "./server.ts";
+import { openProjectWindow, type ProjectWindow } from "./windows/project.ts";
 
-const BAR_HEIGHT = 36;
-const READY_TIMEOUT_MS = 90_000;
-const HTTP_TIMEOUT_MS = 30_000;
-const STOP_GRACE_MS = 5_000;
+const PRELOAD = path.join(__dirname, "../preload/chrome.cjs");
+const RENDERER = path.join(__dirname, "../renderer");
 
-/** What the page of a project may ask the system for. Electron's default is everything. */
-const ALLOWED_PERMISSIONS = new Set(["media", "clipboard-sanitized-write", "fullscreen"]);
-
-type Tone = "busy" | "ok" | "error";
-
-/** The dev server, only when this app started it. An attached server is never ours to stop. */
-let server: ChildProcess | null = null;
+const projectWindows = new Map<string, ProjectWindow>();
+let store: ProjectStore;
+let launcher: BrowserWindow | null = null;
+let tools: ToolInfo[] | null = null;
 let quitting = false;
 let finished = false;
-let exitCode = 0;
 
 const log = (message: string) => console.log(`[auis-desktop] ${message}`);
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-const stripAnsi = (text: string) => text.replace(/\u001b\[[0-9;]*m/g, "");
 
 interface Options {
   root: string | null;
-  /** W0 gate only: a folder to write `view.png` and `chrome.png` into once the project shows. */
+  /** Gate only: a folder to write captures of the windows into. The W3 smoke replaces it. */
   capture: string | null;
-  /** W0 gate only: quit by itself after this long. The Playwright smoke replaces both in W3. */
+  /** Gate only: quit by itself after this long. The W3 smoke replaces it. */
   quitAfterMs: number | null;
 }
 
@@ -64,318 +64,226 @@ function parseArgs(argv: string[], appPath: string | null): Options {
   return options;
 }
 
-function resolveRoot(input: string): string {
-  // Under `npm --prefix`, cwd is this package; INIT_CWD is where the user stood.
-  const absolute = path.resolve(process.env.INIT_CWD ?? process.cwd(), input);
-  // The real path is the project's identity: Auis keys its data and backups on
-  // it, so a symlinked spelling must not become a second project.
-  return fs.realpathSync(absolute);
+// ── Launcher ──────────────────────────────────────────────────────────────
+
+function summarize(project: Project): ProjectSummary {
+  const base = { id: project.id, name: project.name, displayPath: displayPath(project.path) };
+  const open = projectWindows.get(project.id);
+  if (open) {
+    const server = open.state().server;
+    return { ...base, status: "open", port: server.status === "running" ? server.port : null };
+  }
+  if (!fs.existsSync(project.path)) return { ...base, status: "missing", port: null };
+  // A server someone started in a terminal counts: opening the project attaches to it.
+  const running = liveDevServer(project.path);
+  return { ...base, status: running ? "running" : "stopped", port: running?.port ?? null };
 }
 
-// ── Window ────────────────────────────────────────────────────────────────
+const launcherState = (): LauncherState => ({ projects: store.list().map(summarize), tools });
 
-function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
-}
-
-/**
- * The placeholder chrome: one line of status. It is a self-contained data URL
- * with no script and no network, so it needs no preload and no IPC. System
- * colors keep it legible in light and dark without inventing a palette.
- */
-function statusPage(tone: Tone, title: string, detail: string): string {
-  const dot = tone === "ok" ? "Highlight" : tone === "error" ? "Mark" : "GrayText";
-  const html = `<!doctype html>
-<meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
-<title>${escapeHtml(title)}</title>
-<style>
-  :root { color-scheme: light dark; }
-  body { margin: 0; font: 13px/1 system-ui, sans-serif; background: Canvas; color: CanvasText; }
-  header { height: ${BAR_HEIGHT}px; display: flex; align-items: center; gap: 8px; padding: 0 14px;
-    box-sizing: border-box; border-bottom: 1px solid GrayText; white-space: nowrap; overflow: hidden; }
-  i { width: 8px; height: 8px; border-radius: 50%; background: ${dot}; flex: none; }
-  b { font-weight: 600; }
-  span { color: GrayText; overflow: hidden; text-overflow: ellipsis; }
-</style>
-<header><i></i><b>${escapeHtml(title)}</b><span>${escapeHtml(detail)}</span></header>`;
-  return `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
-}
-
-function setStatus(win: BrowserWindow, tone: Tone, title: string, detail: string) {
-  log(`${title} — ${detail}`);
-  if (!win.isDestroyed()) void win.loadURL(statusPage(tone, title, detail));
-}
-
-function sameOrigin(url: string, origin: string): boolean {
-  try {
-    return new URL(url).origin === origin;
-  } catch {
-    return false;
+function pushLauncher() {
+  if (launcher && !launcher.isDestroyed()) {
+    launcher.webContents.send(CHANNELS.launcherChanged, launcherState());
   }
 }
 
-function openExternally(url: string) {
-  // Only web links leave the app. A page must not hand `file:` or a custom
-  // scheme to the system through us.
-  if (/^https?:\/\//i.test(url)) void shell.openExternal(url);
-}
-
-function guardPermissions(ses: Session, origin: string) {
-  ses.setPermissionRequestHandler((_contents, permission, callback, details) => {
-    callback(ALLOWED_PERMISSIONS.has(permission) && sameOrigin(details.requestingUrl, origin));
+function openLauncher(): BrowserWindow {
+  if (launcher && !launcher.isDestroyed()) {
+    launcher.focus();
+    return launcher;
+  }
+  const win = new BrowserWindow({
+    width: 1080,
+    height: 760,
+    minWidth: 860,
+    minHeight: 560,
+    title: PRODUCT_NAME,
+    titleBarStyle: "hiddenInset",
+    trafficLightPosition: { x: 18, y: 18 },
+    backgroundColor: nativeTheme.shouldUseDarkColors ? "#030507" : "#f1f2f4",
+    webPreferences: { preload: PRELOAD, contextIsolation: true, sandbox: true, nodeIntegration: false },
   });
-  ses.setPermissionCheckHandler(
-    (_contents, permission, requestingOrigin) =>
-      ALLOWED_PERMISSIONS.has(permission) && sameOrigin(requestingOrigin, origin),
-  );
+  trustChrome(win.webContents);
+  // A server may have been started or stopped in a terminal while we were away.
+  win.on("focus", pushLauncher);
+  win.on("closed", () => {
+    launcher = null;
+  });
+  void win.loadURL(`${APP_ORIGIN}/launcher.html`);
+  launcher = win;
+  return win;
 }
 
-/**
- * The project's page: no preload, no Node, its own storage partition, and it
- * stays on the project's origin. Anything else opens in the default browser.
- */
-async function showProject(win: BrowserWindow, root: string, appUrl: string) {
-  const origin = new URL(appUrl).origin;
-  const id = createHash("sha256").update(root).digest("hex").slice(0, 16);
-  const view = new WebContentsView({
-    webPreferences: {
-      partition: `persist:ws-${id}`,
-      contextIsolation: true,
-      sandbox: true,
-      nodeIntegration: false,
-      webSecurity: true,
+/** What the user's shell has, read once from their home folder. */
+async function readTools() {
+  const { env, source } = await resolveShellEnv({ cwd: os.homedir() });
+  log(`environment from the ${source} shell`);
+  tools = await probeTools(env);
+  pushLauncher();
+}
+
+// ── Projects ──────────────────────────────────────────────────────────────
+
+function openProject(project: Project): ProjectWindow {
+  const existing = projectWindows.get(project.id);
+  if (existing) {
+    existing.window.focus();
+    return existing;
+  }
+  const opened = openProjectWindow(project, {
+    preload: PRELOAD,
+    onChanged: pushLauncher,
+    onClosed: () => {
+      projectWindows.delete(project.id);
+      pushLauncher();
     },
   });
-  const contents = view.webContents;
+  projectWindows.set(project.id, opened);
+  pushLauncher();
+  return opened;
+}
 
-  guardPermissions(contents.session, origin);
-  contents.on("will-navigate", (event) => {
-    if (sameOrigin(event.url, origin)) return;
-    event.preventDefault();
-    openExternally(event.url);
+async function pickFolder(parent: BrowserWindow | null) {
+  const options = { properties: ["openDirectory" as const], message: "Choose a project folder" };
+  const result = parent
+    ? await dialog.showOpenDialog(parent, options)
+    : await dialog.showOpenDialog(options);
+  const folder = result.filePaths[0];
+  if (result.canceled || !folder) return;
+
+  const problem = manifestProblem(folder);
+  if (problem) {
+    const box = { type: "info" as const, message: "This folder is not a project", detail: problem };
+    if (parent) await dialog.showMessageBox(parent, box);
+    else await dialog.showMessageBox(box);
+    return;
+  }
+  openProject(store.open(folder));
+}
+
+// ── IPC ───────────────────────────────────────────────────────────────────
+
+/** Registers a handler that only the app's own chrome can call. */
+function handle<Args extends unknown[]>(
+  channel: string,
+  handler: (event: IpcMainInvokeEvent, ...args: Args) => unknown,
+) {
+  ipcMain.handle(channel, (event, ...args) => {
+    if (!isChrome(event)) throw new Error("not allowed");
+    return handler(event, ...(args as Args));
   });
-  contents.on("will-redirect", (event) => {
-    if (sameOrigin(event.url, origin)) return;
-    event.preventDefault();
-    openExternally(event.url);
+}
+
+/** The project window an IPC call came from. A window can only act on itself. */
+function senderProject(event: IpcMainInvokeEvent): ProjectWindow | null {
+  for (const opened of projectWindows.values()) {
+    if (opened.contentsId === event.sender.id) return opened;
+  }
+  return null;
+}
+
+function isNavigateAction(value: unknown): value is NavigateAction {
+  if (typeof value !== "object" || value === null) return false;
+  const { type, route } = value as { type?: unknown; route?: unknown };
+  if (type === "back" || type === "forward" || type === "reload") return true;
+  return type === "route" && typeof route === "string";
+}
+
+function registerIpc() {
+  handle(CHANNELS.launcherState, () => launcherState());
+  handle(CHANNELS.launcherOpenFolder, (event) =>
+    pickFolder(BrowserWindow.fromWebContents(event.sender)),
+  );
+  handle(CHANNELS.launcherOpenProject, (_event, id: unknown) => {
+    const project = typeof id === "string" ? store.get(id) : null;
+    if (project && fs.existsSync(project.path)) openProject(store.open(project.path));
   });
-  contents.setWindowOpenHandler(({ url }) => {
-    if (sameOrigin(url, origin)) void contents.loadURL(url);
-    else openExternally(url);
-    return { action: "deny" };
+  handle(CHANNELS.launcherRemoveProject, (_event, id: unknown) => {
+    // Forgetting a project that is open would orphan its window's entry.
+    if (typeof id === "string" && !projectWindows.has(id)) store.remove(id);
+    pushLauncher();
   });
 
-  win.contentView.addChildView(view);
-  const layout = () => {
-    const [width, height] = win.getContentSize();
-    view.setBounds({ x: 0, y: BAR_HEIGHT, width, height: Math.max(0, height - BAR_HEIGHT) });
+  handle(CHANNELS.projectState, (event) => senderProject(event)?.state() ?? null);
+  handle(CHANNELS.projectLogs, (event) => senderProject(event)?.logs() ?? []);
+  handle(CHANNELS.projectNavigate, (event, action: unknown) => {
+    if (isNavigateAction(action)) senderProject(event)?.navigate(action);
+  });
+  handle(CHANNELS.projectSetLogsOpen, (event, open: unknown) => {
+    senderProject(event)?.setLogsOpen(open === true);
+  });
+  handle(CHANNELS.projectRestart, (event) => senderProject(event)?.restart());
+  handle(CHANNELS.projectOpenInBrowser, (event) => senderProject(event)?.openInBrowser());
+}
+
+// ── Gate affordance ───────────────────────────────────────────────────────
+
+async function capture(dir: string) {
+  await sleep(3500);
+  fs.mkdirSync(dir, { recursive: true });
+  const save = async (name: string, contents: Electron.WebContents) => {
+    const image = await contents.capturePage();
+    fs.writeFileSync(path.join(dir, `${name}.png`), image.toPNG());
   };
-  layout();
-  win.on("resize", layout);
-
-  // An Auis project opens on its hub; a host app opens on its own home.
-  const start = fs.existsSync(path.join(root, "app", "auis")) ? "/auis" : "/";
-  await contents.loadURL(origin + start);
-  return view;
-}
-
-// ── Dev server ────────────────────────────────────────────────────────────
-
-/**
- * Starts the project's own `dev` script and resolves once Next's lock says the
- * server is ours and up. No port is passed: forcing one disables Next's own
- * retry (3000 → 3010) and breaks `dev` scripts that are more than `next dev`.
- */
-function startServer(root: string, env: Env): Promise<DevServerInfo> {
-  return new Promise((resolve, reject) => {
-    const startedAt = Date.now();
-    let output = "";
-    let settled = false;
-
-    // `detached` puts npm, Next and everything they fork in one process group,
-    // which is what lets quit stop the whole tree and nothing else.
-    const child = spawn("npm", ["run", "dev"], {
-      cwd: root,
-      env,
-      detached: true,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    server = child;
-
-    const settle = (finish: () => void) => {
-      if (settled) return;
-      settled = true;
-      clearInterval(poll);
-      clearTimeout(timer);
-      finish();
-    };
-    const onData = (chunk: Buffer) => {
-      const text = chunk.toString("utf8");
-      output = (output + text).slice(-8000);
-      for (const line of text.split("\n")) if (line.trim()) console.log(`[dev] ${line}`);
-    };
-    child.stdout?.on("data", onData);
-    child.stderr?.on("data", onData);
-
-    child.once("error", (error) => {
-      server = null;
-      settle(() => reject(new Error(`could not run npm: ${error.message}`)));
-    });
-    child.once("exit", (code) => {
-      server = null;
-      settle(() => {
-        // Next refuses a second instance in the same folder. If that is what
-        // happened, someone started one between our check and our spawn: attach.
-        const existing = liveDevServer(root, env);
-        if (existing && /already running/.test(stripAnsi(output))) resolve(existing);
-        else reject(new Error(`the dev server exited with code ${code} before it was ready`));
-      });
-    });
-
-    const poll = setInterval(() => {
-      const info = readDevLock(root, env);
-      // `startedAt` rules out a lock left behind by a server that was killed.
-      if (info && info.startedAt >= startedAt && pidAlive(info.pid)) settle(() => resolve(info));
-    }, 250);
-    const timer = setTimeout(() => {
-      settle(() => reject(new Error(`the dev server was not ready after ${READY_TIMEOUT_MS / 1000}s`)));
-    }, READY_TIMEOUT_MS);
-  });
-}
-
-/** The lock appears a moment before the first request can be answered. */
-async function waitForHttp(appUrl: string) {
-  const deadline = Date.now() + HTTP_TIMEOUT_MS;
-  while (Date.now() < deadline && !quitting) {
-    try {
-      await fetch(appUrl, { method: "HEAD", redirect: "manual" });
-      return;
-    } catch {
-      await sleep(300);
-    }
+  if (launcher && !launcher.isDestroyed()) await save("launcher", launcher.webContents);
+  for (const opened of projectWindows.values()) {
+    await save("chrome", opened.window.webContents);
+    const view = opened.view();
+    if (view) await save("view", view.webContents);
+    log(`captured ${opened.state().route} · window ${opened.window.getMediaSourceId()}`);
   }
-  if (!quitting) throw new Error(`${appUrl} did not answer`);
-}
-
-function groupAlive(pgid: number): boolean {
-  try {
-    process.kill(-pgid, 0);
-    return true;
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM";
-  }
-}
-
-function signalGroup(pgid: number, signal: NodeJS.Signals) {
-  try {
-    process.kill(-pgid, signal);
-  } catch {
-    /* already gone */
-  }
-}
-
-/** Stops the server this app started: ask first, so Next removes its lock, then insist. */
-async function stopServer() {
-  const pgid = server?.pid;
-  if (!pgid || !groupAlive(pgid)) return;
-
-  signalGroup(pgid, "SIGTERM");
-  const deadline = Date.now() + STOP_GRACE_MS;
-  while (groupAlive(pgid) && Date.now() < deadline) await sleep(100);
-  if (!groupAlive(pgid)) return;
-
-  signalGroup(pgid, "SIGKILL");
-  while (groupAlive(pgid) && Date.now() < deadline + 2000) await sleep(50);
+  if (launcher && !launcher.isDestroyed()) log(`captured launcher · window ${launcher.getMediaSourceId()}`);
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-async function open(options: Options, win: BrowserWindow) {
-  if (!options.root) throw new Error("no project folder given: npm start -- <folder>");
-  const root = resolveRoot(options.root);
-  const name = path.basename(root);
-  win.setTitle(`${PRODUCT_NAME} — ${name}`);
-
-  setStatus(win, "busy", name, "Reading your shell environment…");
-  const { env, source } = await resolveShellEnv({ cwd: root });
-  log(`environment from the ${source} shell`);
-  if (quitting) return;
-
-  let info = liveDevServer(root, env);
-  if (info) {
-    log(`attached to a running dev server (pid ${info.pid})`);
-  } else {
-    setStatus(win, "busy", name, "Starting the dev server…");
-    info = await startServer(root, env);
-    log(server ? `started the dev server (pid ${info.pid})` : `attached to pid ${info.pid}`);
-    server?.once("exit", (code) => {
-      if (!quitting) setStatus(win, "error", name, `The dev server stopped (code ${code}).`);
-    });
-  }
-  if (quitting) return;
-
-  await waitForHttp(info.appUrl);
-  if (quitting) return;
-
-  const owner = server ? "started by Auis" : "attached";
-  setStatus(win, "ok", name, `${info.appUrl} · ${owner}`);
-  const view = await showProject(win, root, info.appUrl);
-
-  if (options.capture) {
-    await sleep(2500);
-    fs.mkdirSync(options.capture, { recursive: true });
-    const page = await view.webContents.capturePage();
-    fs.writeFileSync(path.join(options.capture, "view.png"), page.toPNG());
-    const chrome = await win.webContents.capturePage();
-    fs.writeFileSync(path.join(options.capture, "chrome.png"), chrome.toPNG());
-    log(`captured ${view.webContents.getURL()} · window ${win.getMediaSourceId()}`);
-  }
-}
-
 app.setName(PRODUCT_NAME);
+registerAppScheme();
 
 if (!app.requestSingleInstanceLock()) {
   app.exit(0);
 } else {
-  // Quit is asynchronous on purpose: the app must not disappear while the
+  // Quit is asynchronous on purpose: the app must not disappear while a
   // server it started is still running.
   app.on("before-quit", (event) => {
     if (finished) return;
     event.preventDefault();
     if (quitting) return;
     quitting = true;
-    void stopServer().finally(() => {
+    const stops = [...projectWindows.values()].map((opened) => opened.stop());
+    void Promise.allSettled(stops).finally(() => {
       finished = true;
-      app.exit(exitCode);
+      app.exit(0);
     });
   });
   app.on("window-all-closed", () => app.quit());
+  app.on("second-instance", () => openLauncher());
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
     process.on(signal, () => app.quit());
   }
 
   void app.whenReady().then(async () => {
     const options = parseArgs(process.argv.slice(1), app.isPackaged ? null : app.getAppPath());
-    const win = new BrowserWindow({
-      width: 1360,
-      height: 900,
-      title: PRODUCT_NAME,
-      webPreferences: { contextIsolation: true, sandbox: true, nodeIntegration: false },
-    });
-    // The window is named after the project, not after whatever page is in it.
-    win.on("page-title-updated", (event) => event.preventDefault());
-    // The chrome never navigates and never opens a window.
-    win.webContents.on("will-navigate", (event) => event.preventDefault());
-    win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    store = createProjectStore(path.join(app.getPath("userData"), "projects.json"));
+    serveApp(RENDERER);
+    registerIpc();
 
-    try {
-      await open(options, win);
-    } catch (error) {
-      exitCode = 1;
-      const message = error instanceof Error ? error.message : String(error);
-      setStatus(win, "error", "Could not open the project", message);
+    if (options.root) {
+      // Under `npm --prefix`, cwd is this package; INIT_CWD is where the user stood.
+      const folder = path.resolve(process.env.INIT_CWD ?? process.cwd(), options.root);
+      const problem = fs.existsSync(folder) ? manifestProblem(folder) : "That folder does not exist.";
+      if (problem) {
+        log(`cannot open ${folder}: ${problem}`);
+        openLauncher();
+      } else {
+        openProject(store.open(folder));
+      }
+    } else {
+      openLauncher();
     }
+    void readTools();
+
+    if (options.capture) await capture(options.capture);
     if (options.quitAfterMs !== null) setTimeout(() => app.quit(), options.quitAfterMs);
   });
 }

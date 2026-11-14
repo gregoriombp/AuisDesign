@@ -20,9 +20,9 @@ anything that is deployed: everything that works in a browser today keeps workin
 | Wave | What | Status |
 |---|---|---|
 | W0 | Skeleton: one project from the command line — start or attach, show, stop on quit | **done** (2026-11-14) |
-| W1 | The look: the app's own chrome (toolbar, launcher) as a real renderer, in the current Auis visual direction | next |
-| W2 | Core: `env`, `detect`, `nextLock`, `server` (the supervisor), `projects`, `workspace`, with unit tests and a CI job | not started |
-| W3 | Launcher and project window wired to the core; `security.ts`; Playwright-Electron smoke | not started |
+| W1 | The look: the app's own chrome (launcher, project toolbar, log strip) as a real renderer, in the current Auis Design direction | **done** (2026-11-14) |
+| W2 | Core hardening: unit tests for `env`, `nextLock`, `projects`, `server`; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; `workspace`; a CI job | next |
+| W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | not started |
 | W4 | New project from the app (`npx @auis/cli`) | not started |
 | W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | not started |
 
@@ -41,9 +41,9 @@ Owner's (2026-11-14):
   signed in through that site's own login. No new backend.
 - **Signing comes later.** v1 is ad-hoc signed and for testing only. Developer ID,
   notarization and auto-update need an Apple Developer Program account.
-- **The look follows the current Auis visual direction**, taken from where the newest
-  version of the Auis chrome lives. W1 starts by reading that reference and writing
-  the direction down here before any UI is built.
+- **The look follows the current Auis Design direction**, taken from where the newest
+  version of the hub lives. It is written down under "The look" below, and it applies
+  to the app's own chrome only: the hub inside this repository is a separate port.
 
 Technical:
 
@@ -110,31 +110,74 @@ Run for real on macOS 27, Apple Silicon, Electron 45.3, Next 16.4:
 Not yet exercised: launching from Finder (where the shell lookup matters most), a
 mention run, the microphone prompt, HMR after an edit. They are W5's manual checks.
 
+## The look
+
+The app's chrome follows the current Auis Design direction. The rules, so the next
+screen is built from them and not from memory:
+
+- **Canvas and cards.** A quiet neutral canvas (`#f1f2f4`; `#030507` in dark). White
+  cards with a 24px radius and a border so subtle it only shows in dark. Shadow only
+  on hover. One card level: a card never holds another card.
+- **Type.** Instrument Serif for exactly one display line per screen (64px, 1.05).
+  Geist for everything else, at weights 400 and 500 — never bolder. Geist Mono only
+  for what a program printed (the log). Numbers that change use tabular figures.
+- **Emphasis is dark, not colour.** One primary button per screen, a black pill. A
+  selected control goes dark too. Information is gray, never blue. Colour is spent
+  only on a 6px status dot: green for up, red for a problem, gray for idle.
+- **Icons.** Material Symbols Rounded, filled, at 14, 16, 20 or 32px, with a firmer
+  weight and grade at the small sizes.
+- **Drawn previews.** A card's picture is drawn in code from the same tokens, on a
+  sheet of 32px graph paper. No screenshots, no assets, so it follows light and dark.
+- **Motion.** 120, 180 and 280ms on the project's own curves. One authored moment per
+  screen (the launcher's cards settle in once); everything else is a paint
+  transition. Reduced motion turns it all off.
+- **Copy.** English. A control names its action; an error names the problem and what
+  to do next. No eyebrow above a heading, no emoji.
+
+It lives in `src/renderer/desktop.css`. Those tokens belong to this app: they are not
+the product's design system and not the review chrome's `--auis-*` set. The four
+fonts ship inside the app (npm packages, bundled by esbuild), because the chrome's
+content-security policy allows nothing from the network.
+
+## What W1 established
+
+- The chrome is a real renderer served from `app://auis/`, with a preload that
+  exposes named functions and IPC handlers that only answer the app's own pages.
+- The project window uses a hidden-inset title bar: the toolbar is the title bar,
+  with the traffic lights in its left gap.
+- When a dev server fails or dies, the log strip opens by itself: what the server
+  printed is the answer.
+- The launcher counts a server someone started in a terminal as running; opening
+  that project attaches to it.
+- Playwright drives both pages and can emulate dark. `--user-data-dir=<dir>` gives a
+  run its own project list, which is what a test must use so it never touches the
+  real one.
+
 ## Architecture
 
 ```
 packages/desktop/
-  scripts/build.mjs        esbuild: main (node, cjs); preload and renderer join in W1
+  scripts/build.mjs        esbuild: main and preload (node, cjs), renderer (browser), the two pages
   src/shared/app.ts        product name and bundle id
-  src/shared/ipc.ts        (W1) channel names and payload types
+  src/shared/ipc.ts        channel names, payload types, the layout both sides agree on
   src/shared/workspace.ts  (W2) {kind:'local',path} | {kind:'remote',url}; isAllowedNavigation()
-  src/main/env.ts          the user's shell environment for a folder
+  src/main/env.ts          the user's shell environment for a folder; which tools it has
   src/main/nextLock.ts     Next's dev lock: read, validate, liveness
-  src/main/detect.ts       (W2) what kind of project a folder is; package manager; deps installed
-  src/main/server.ts       (W2) the supervisor: state machine, logs, install, restart
-  src/main/projects.ts     (W2) the persisted project list
+  src/main/server.ts       one project's dev server: attach or start, state, log, stop
+  src/main/projects.ts     the persisted project list
+  src/main/detect.ts       (W2) project kind, Node version, missing dependencies
   src/main/cli.ts          (W4) arguments for `npx @auis/cli`
-  src/main/security.ts     (W3) app:// protocol, sender validation, navigation and permission guards
-  src/main/windows/        (W3) launcher.ts, project.ts
-  src/main/index.ts        lifecycle
-  src/preload/chrome.ts    (W1) contextBridge → window.auisDesktop
-  src/renderer/            (W1) one bundle, two HTML entries: launcher, toolbar
+  src/main/security.ts     app:// protocol, who may call IPC, navigation and permission guards
+  src/main/windows/        project.ts (the launcher window is small enough to live in index.ts)
+  src/main/index.ts        lifecycle, the launcher, the IPC router
+  src/preload/chrome.ts    contextBridge → window.auisDesktop
+  src/renderer/            one bundle, two pages: launcher.html, project.html
   test/                    (W2) node --test
 ```
 
-Modules under `src/main/` other than `index.ts`, `security.ts` and `windows/` do not
-import `electron`, so they run under `node --test`. Nothing Node- or
-Electron-flavoured goes into `kit/ui` (`kit/__tests__/boundaries.test.ts`).
+`env`, `nextLock`, `server` and `projects` do not import `electron`, so they run under
+`node --test`. Nothing Node- or Electron-flavoured goes into `kit/ui`
+(`kit/__tests__/boundaries.test.ts`).
 
 ### The supervisor (W2 hardens what W0 does inline)
 
@@ -170,9 +213,9 @@ Electron-flavoured goes into `kit/ui` (`kit/__tests__/boundaries.test.ts`).
 | Wave | Proof |
 |---|---|
 | W0 | `npm --prefix packages/desktop start -- <project>` shows the project; after quit no process from that folder remains and `<project>/.next/dev/lock` is gone; root `npm run typecheck` and `npm run lint` exit 0 |
-| W1 | The toolbar and the launcher render in the app, light and dark, from `app://auis/`; a screenshot of each is in the PR |
+| W1 | Driven in the built app, light and dark, from `app://auis/`: the launcher empty and with a list (featured, recent, a missing folder); a project starting, running, failing and with the log open; quit leaves no process and no lock |
 | W2 | `npm --prefix packages/desktop test` → `# fail 0`; the `desktop` job is green in CI |
-| W3 | `npm --prefix packages/desktop run smoke` passes: open a fixture, Starting → Running, navigate from the toolbar, an external link leaves the view alone, no `require` in the page, logs show, kill → Crashed → Restart, quit leaves no process and no lock |
+| W3 | `npm --prefix packages/desktop run smoke` passes: open a fixture, Starting → Running, navigate from the toolbar, an external link leaves the view alone, no `require` in the page, logs show, kill → Stopped → Start again, quit leaves no process and no lock |
 | W4 | New project ends on `/auis/welcome` |
 | W5 | `npm --prefix packages/desktop run dist` → `release/Auis-Design-0.1.0-arm64.dmg`; `codesign -dv` shows `Signature=adhoc`; `codesign --verify --deep --strict` exits 0; the manual list passes from a Finder launch |
 
