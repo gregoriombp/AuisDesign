@@ -16,6 +16,7 @@ import {
 } from "electron";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { isAllowedNavigation, isWebLink } from "../shared/workspace.ts";
 
 export const APP_ORIGIN = "app://auis";
 
@@ -57,45 +58,37 @@ export function isChrome(event: IpcMainInvokeEvent): boolean {
   return chrome.has(event.sender.id) && (event.senderFrame?.url ?? "").startsWith(`${APP_ORIGIN}/`);
 }
 
-export function sameOrigin(url: string, origin: string): boolean {
-  try {
-    return new URL(url).origin === origin;
-  } catch {
-    return false;
-  }
-}
-
 export function openExternally(url: string) {
   // Only web links leave the app. A page must not hand `file:` or a custom
   // scheme to the system through us.
-  if (/^https?:\/\//i.test(url)) void shell.openExternal(url);
+  if (isWebLink(url)) void shell.openExternal(url);
 }
 
-function guardPermissions(ses: Session, origin: string) {
+function guardPermissions(ses: Session, origins: readonly string[]) {
   ses.setPermissionRequestHandler((_contents, permission, callback, details) => {
-    callback(ALLOWED_PERMISSIONS.has(permission) && sameOrigin(details.requestingUrl, origin));
+    callback(ALLOWED_PERMISSIONS.has(permission) && isAllowedNavigation(details.requestingUrl, origins));
   });
   ses.setPermissionCheckHandler(
     (_contents, permission, requestingOrigin) =>
-      ALLOWED_PERMISSIONS.has(permission) && sameOrigin(requestingOrigin, origin),
+      ALLOWED_PERMISSIONS.has(permission) && isAllowedNavigation(requestingOrigin, origins),
   );
 }
 
-/** Keeps a project's page on the project's origin; everything else opens in the browser. */
-export function guardProject(contents: WebContents, origin: string) {
-  guardPermissions(contents.session, origin);
+/** Keeps a project's page on the workspace's origins; everything else opens in the browser. */
+export function guardProject(contents: WebContents, origins: readonly string[]) {
+  guardPermissions(contents.session, origins);
   contents.on("will-navigate", (event) => {
-    if (sameOrigin(event.url, origin)) return;
+    if (isAllowedNavigation(event.url, origins)) return;
     event.preventDefault();
     openExternally(event.url);
   });
   contents.on("will-redirect", (event) => {
-    if (sameOrigin(event.url, origin)) return;
+    if (isAllowedNavigation(event.url, origins)) return;
     event.preventDefault();
     openExternally(event.url);
   });
   contents.setWindowOpenHandler(({ url }) => {
-    if (sameOrigin(url, origin)) void contents.loadURL(url);
+    if (isAllowedNavigation(url, origins)) void contents.loadURL(url);
     else openExternally(url);
     return { action: "deny" };
   });

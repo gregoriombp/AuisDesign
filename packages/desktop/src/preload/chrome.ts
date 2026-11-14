@@ -34,7 +34,10 @@ const bridge: DesktopBridge = {
     navigate: (action: NavigateAction) => ipcRenderer.invoke(CHANNELS.projectNavigate, action),
     setLogsOpen: (open: boolean) => ipcRenderer.invoke(CHANNELS.projectSetLogsOpen, open),
     restart: () => ipcRenderer.invoke(CHANNELS.projectRestart),
+    install: () => ipcRenderer.invoke(CHANNELS.projectInstall),
     openInBrowser: () => ipcRenderer.invoke(CHANNELS.projectOpenInBrowser),
+    copyNoticeCommand: () => ipcRenderer.invoke(CHANNELS.projectCopyNoticeCommand),
+    dismissNotice: () => ipcRenderer.invoke(CHANNELS.projectDismissNotice),
   },
 };
 

@@ -65,7 +65,10 @@
   --dur-base: 180ms;
   --dur-slow: 280ms;
 
+  /* These three mirror TOOLBAR_HEIGHT, NOTICE_HEIGHT and LOGS_HEIGHT in
+     shared/ipc.ts: the main process lays the project view out around them. */
   --toolbar-height: 52px;
+  --notice-height: 44px;
   --logs-height: 260px;
 }
 
@@ -416,6 +419,57 @@ p {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* ── Project window: the port notice, a strip under the toolbar ───────── */
+
+.notice {
+  position: fixed;
+  inset: var(--toolbar-height) 0 auto 0;
+  height: var(--notice-height);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 16px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-default);
+  font-size: 13px;
+  color: var(--fg-secondary);
+}
+
+.notice > .icon {
+  color: var(--fg-tertiary);
+}
+
+.notice-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* What to type is code: the one place the chrome's own text is mono. */
+.notice code {
+  flex: none;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-fill);
+  border: 1px solid var(--border-subtle);
+  font: 400 12px/1.5 var(--font-mono);
+  color: var(--fg-primary);
+  white-space: nowrap;
+  user-select: text;
+  cursor: text;
+}
+
+.notice-gap {
+  flex: 1;
+}
+
+.btn-small {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 13px;
 }
 
 /* ── Project window: what shows while there is no page to show ────────── */

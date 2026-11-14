@@ -5,7 +5,7 @@
 // them.
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import type { ProjectState, ServerState } from "../shared/ipc.ts";
+import type { PortNotice, ProjectState, ServerState } from "../shared/ipc.ts";
 import { desktop, Icon, IconButton, Status, type Tone } from "./ui.tsx";
 
 const SURFACES = [
@@ -36,6 +36,7 @@ function serverStatus(server: ServerState): { tone: Tone; label: string; port: s
     };
   }
   if (server.status === "starting") return { tone: "busy", label: "Starting", port: "", hint: "" };
+  if (server.status === "installing") return { tone: "busy", label: "Installing", port: "", hint: "" };
   if (server.status === "error") return { tone: "danger", label: "Not running", port: "", hint: "" };
   if (server.status === "stopped") return { tone: "danger", label: "Stopped", port: "", hint: "" };
   return { tone: "idle", label: "Idle", port: "", hint: "" };
@@ -45,17 +46,24 @@ function StageState({ state }: { state: ProjectState }) {
   const { server, name } = state;
   if (server.status === "running" || server.status === "idle") return null;
 
+  const working = server.status === "starting" || server.status === "installing";
   let icon = "progress_activity";
   let title = `Starting ${name}`;
   let detail = "";
-  let action: string | null = null;
+  let action: { label: string; run: () => Promise<void> } | null = null;
   if (server.status === "starting") {
     detail = PHASE[server.phase];
+  } else if (server.status === "installing") {
+    title = "Installing dependencies";
+    detail = `Running ${server.command}. The log shows its progress.`;
   } else if (server.status === "error") {
     icon = "error";
     title = `${name} could not start`;
     detail = server.message;
-    action = "Try again";
+    action =
+      server.action === "install"
+        ? { label: "Install dependencies", run: desktop.project.install }
+        : { label: "Try again", run: desktop.project.restart };
   } else {
     icon = "power_settings_new";
     title = "The dev server stopped";
@@ -63,24 +71,59 @@ function StageState({ state }: { state: ProjectState }) {
       server.code === null
         ? "It was stopped from outside the app."
         : `It exited with code ${server.code}. The log has the details.`;
-    action = "Start again";
+    action = { label: "Start again", run: desktop.project.restart };
   }
 
+  const run = action?.run;
   return (
     <div className="stage-state" data-logs={state.logsOpen}>
       <div className="state" role="status">
         <span className="state-mark">
-          <Icon name={icon} className={server.status === "starting" ? "spin" : undefined} />
+          <Icon name={icon} className={working ? "spin" : undefined} />
         </span>
         <h2>{title}</h2>
         <p>{detail}</p>
-        {action && (
-          <button type="button" className="btn btn-primary" onClick={() => void desktop.project.restart()}>
-            {action}
+        {action && run && (
+          <button type="button" className="btn btn-primary" onClick={() => void run()}>
+            {action.label}
           </button>
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * The agent skills look for a project's bridge on port 3000 unless told
+ * otherwise. On any other port they would reach nothing, or another project.
+ */
+function Notice({ notice }: { notice: PortNotice }) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1600);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  const message = `Agent skills expect port 3000. This project is on ${notice.port}: run this in your agent's terminal first.`;
+  return (
+    <aside className="notice" aria-label="Port notice">
+      <Icon name="info" size={16} />
+      <span className="notice-text" title={message}>
+        {message}
+      </span>
+      <code>{notice.command}</code>
+      <span className="notice-gap" />
+      <button
+        type="button"
+        className="btn btn-secondary btn-small"
+        onClick={() => void desktop.project.copyNoticeCommand().then(() => setCopied(true))}
+      >
+        {copied ? "Copied" : "Copy command"}
+      </button>
+      <IconButton icon="close" label="Dismiss" onClick={() => void desktop.project.dismissNotice()} />
+    </aside>
   );
 }
 
@@ -108,9 +151,10 @@ function Logs({ onClose }: { onClose: () => void }) {
   }, [lines]);
 
   return (
-    <section className="logs" aria-label="Dev server log">
+    <section className="logs" aria-label="Log">
       <div className="logs-head">
-        Dev server
+        {/* Not "Dev server": an install prints here too. */}
+        Log
         <IconButton icon="close" label="Hide the log" onClick={onClose} />
       </div>
       <pre
@@ -199,7 +243,7 @@ export function ProjectChrome() {
         </Status>
         <IconButton
           icon="terminal"
-          label={state.logsOpen ? "Hide the dev server log" : "Show the dev server log"}
+          label={state.logsOpen ? "Hide the log" : "Show the log"}
           pressed={state.logsOpen}
           onClick={() => setLogs(!state.logsOpen)}
         />
@@ -211,6 +255,7 @@ export function ProjectChrome() {
         />
       </header>
 
+      {state.notice && <Notice notice={state.notice} />}
       <StageState state={state} />
       {state.logsOpen && <Logs onClose={() => setLogs(false)} />}
     </>

@@ -21,7 +21,7 @@ import { probeTools, resolveShellEnv } from "./env.ts";
 import { liveDevServer } from "./nextLock.ts";
 import { createProjectStore, displayPath, type Project, type ProjectStore } from "./projects.ts";
 import { APP_ORIGIN, isChrome, registerAppScheme, serveApp, trustChrome } from "./security.ts";
-import { manifestProblem } from "./server.ts";
+import { whyNotRunnable } from "./detect.ts";
 import { openProjectWindow, type ProjectWindow } from "./windows/project.ts";
 
 const PRELOAD = path.join(__dirname, "../preload/chrome.cjs");
@@ -151,7 +151,7 @@ async function pickFolder(parent: BrowserWindow | null) {
   const folder = result.filePaths[0];
   if (result.canceled || !folder) return;
 
-  const problem = manifestProblem(folder);
+  const problem = whyNotRunnable(folder);
   if (problem) {
     const box = { type: "info" as const, message: "This folder is not a project", detail: problem };
     if (parent) await dialog.showMessageBox(parent, box);
@@ -213,7 +213,10 @@ function registerIpc() {
     senderProject(event)?.setLogsOpen(open === true);
   });
   handle(CHANNELS.projectRestart, (event) => senderProject(event)?.restart());
+  handle(CHANNELS.projectInstall, (event) => senderProject(event)?.install());
   handle(CHANNELS.projectOpenInBrowser, (event) => senderProject(event)?.openInBrowser());
+  handle(CHANNELS.projectCopyNoticeCommand, (event) => senderProject(event)?.copyNoticeCommand());
+  handle(CHANNELS.projectDismissNotice, (event) => senderProject(event)?.dismissNotice());
 }
 
 // ── Gate affordance ───────────────────────────────────────────────────────
@@ -271,7 +274,7 @@ if (!app.requestSingleInstanceLock()) {
     if (options.root) {
       // Under `npm --prefix`, cwd is this package; INIT_CWD is where the user stood.
       const folder = path.resolve(process.env.INIT_CWD ?? process.cwd(), options.root);
-      const problem = fs.existsSync(folder) ? manifestProblem(folder) : "That folder does not exist.";
+      const problem = whyNotRunnable(folder);
       if (problem) {
         log(`cannot open ${folder}: ${problem}`);
         openLauncher();

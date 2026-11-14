@@ -3,18 +3,21 @@
 //
 // The toolbar cannot draw over the project view (a child view composites above
 // the window's own page), so nothing here overlaps: the view is resized to
-// leave the toolbar and the log strip uncovered.
+// leave the toolbar, the port notice and the log strip uncovered.
 
-import { BrowserWindow, WebContentsView, nativeTheme } from "electron";
-import fs from "node:fs";
-import path from "node:path";
+import { BrowserWindow, WebContentsView, clipboard, nativeTheme } from "electron";
 import {
   CHANNELS,
+  DEFAULT_BRIDGE_PORT,
   LOGS_HEIGHT,
+  NOTICE_HEIGHT,
   TOOLBAR_HEIGHT,
   type NavigateAction,
+  type PortNotice,
   type ProjectState,
 } from "../../shared/ipc.ts";
+import { resolveRoute } from "../../shared/workspace.ts";
+import { detectProject } from "../detect.ts";
 import { displayPath, type Project } from "../projects.ts";
 import { APP_ORIGIN, guardProject, openExternally, trustChrome } from "../security.ts";
 import { createProjectServer } from "../server.ts";
@@ -28,8 +31,11 @@ export interface ProjectWindow {
   navigate(action: NavigateAction): void;
   setLogsOpen(open: boolean): void;
   restart(): Promise<void>;
+  install(): Promise<void>;
   openInBrowser(): void;
-  /** The project's page, when the server is up. For the W0 gate's capture only. */
+  copyNoticeCommand(): Promise<void>;
+  dismissNotice(): void;
+  /** The project's page, when the server is up. For the gate's capture only. */
   view(): WebContentsView | null;
   /** Ends the server if this window started it. Safe to call more than once. */
   stop(): Promise<void>;
@@ -42,19 +48,18 @@ interface Options {
   onClosed(): void;
 }
 
-function hasAuisSurfaces(root: string): boolean {
-  return (
-    fs.existsSync(path.join(root, "app", "auis")) ||
-    fs.existsSync(path.join(root, "src", "app", "auis"))
-  );
-}
-
 export function openProjectWindow(project: Project, options: Options): ProjectWindow {
   const server = createProjectServer(project.path);
-  const hasAuis = hasAuisSurfaces(project.path);
+  const kind = detectProject(project.path)?.kind ?? "other";
+  // Only a project with the Auis surfaces has a hub to open and shortcuts to offer.
+  const hasAuis = kind === "auis";
+  // The agent skills talk to the bridge, which both kinds of Auis project have.
+  const hasBridge = kind === "auis" || kind === "auis-review";
   let view: WebContentsView | null = null;
   let logsOpen = false;
   let route = "/";
+  /** The port whose notice was dismissed. A restart on another port shows it again. */
+  let dismissedPort: number | null = null;
   let pending: string[] = [];
   let flush: NodeJS.Timeout | null = null;
   let stopping: Promise<void> | null = null;
@@ -80,10 +85,18 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
   // The window is named after the project, not after the page inside it.
   win.on("page-title-updated", (event) => event.preventDefault());
 
+  const notice = (): PortNotice | null => {
+    const running = server.state();
+    if (running.status !== "running" || !hasBridge) return null;
+    if (running.port === DEFAULT_BRIDGE_PORT || running.port === dismissedPort) return null;
+    return { port: running.port, command: `export BRIDGE_BASE=${new URL(running.url).origin}` };
+  };
+
   const state = (): ProjectState => ({
     name: project.name,
     displayPath: displayPath(project.path),
     hasAuis,
+    notice: notice(),
     server: server.state(),
     route,
     canGoBack: view?.webContents.navigationHistory.canGoBack() ?? false,
@@ -92,21 +105,18 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
     logsOpen,
   });
 
-  const push = () => {
-    if (!win.isDestroyed()) win.webContents.send(CHANNELS.projectChanged, state());
-    options.onChanged();
-  };
-
   const layout = () => {
     if (!view || win.isDestroyed()) return;
     const [width, height] = win.getContentSize();
+    const top = TOOLBAR_HEIGHT + (notice() ? NOTICE_HEIGHT : 0);
     const bottom = logsOpen ? LOGS_HEIGHT : 0;
-    view.setBounds({
-      x: 0,
-      y: TOOLBAR_HEIGHT,
-      width,
-      height: Math.max(0, height - TOOLBAR_HEIGHT - bottom),
-    });
+    view.setBounds({ x: 0, y: top, width, height: Math.max(0, height - top - bottom) });
+  };
+
+  const push = () => {
+    layout();
+    if (!win.isDestroyed()) win.webContents.send(CHANNELS.projectChanged, state());
+    options.onChanged();
   };
 
   const removeView = () => {
@@ -131,7 +141,7 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
       },
     });
     const contents = view.webContents;
-    guardProject(contents, origin);
+    guardProject(contents, [origin]);
 
     const track = () => {
       try {
@@ -149,7 +159,7 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
 
     win.contentView.addChildView(view);
     layout();
-    // An Auis project opens on its hub; a host app opens on its own home.
+    // A project with the Auis surfaces opens on its hub; any other on its own home.
     void contents.loadURL(origin + (hasAuis ? "/auis" : "/")).catch(() => {
       /* a failed first load shows in the view itself; the toolbar's reload retries it */
     });
@@ -158,10 +168,10 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
   server.onState((next) => {
     if (next.status === "running") showView(next.url);
     else removeView();
-    // When the server fails or dies, what it printed is the answer: show it.
-    if ((next.status === "error" || next.status === "stopped") && server.logs().length > 0) {
-      logsOpen = true;
-    }
+    // An install is watched through what it prints, and when the server fails
+    // or dies, what it printed is the answer: either way, show the log.
+    const failed = (next.status === "error" || next.status === "stopped") && server.logs().length > 0;
+    if (next.status === "installing" || failed) logsOpen = true;
     push();
   });
   server.onLog((lines) => {
@@ -206,24 +216,40 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
       else if (action.type === "reload") contents.reload();
       else {
         const running = server.state();
-        // Only an in-app path: a renderer must not be able to send the view elsewhere.
         if (running.status !== "running") return;
-        if (!action.route.startsWith("/") || action.route.startsWith("//")) return;
-        void contents.loadURL(new URL(running.url).origin + action.route);
+        // Only a path on the project's own origin: the chrome must not be able
+        // to send the view anywhere else.
+        const target = resolveRoute(new URL(running.url).origin, action.route);
+        if (target) void contents.loadURL(target);
       }
     },
     setLogsOpen(open) {
       logsOpen = open;
-      layout();
       push();
     },
     async restart() {
       stopping = null;
       await server.restart();
     },
+    async install() {
+      stopping = null;
+      await server.install();
+    },
     openInBrowser() {
       const running = server.state();
-      if (running.status === "running") openExternally(new URL(running.url).origin + route);
+      if (running.status !== "running") return;
+      const target = resolveRoute(new URL(running.url).origin, route);
+      if (target) openExternally(target);
+    },
+    async copyNoticeCommand() {
+      // Awaited, so the toolbar only says "Copied" once it is on the clipboard.
+      const current = notice();
+      if (current) await clipboard.writeText(current.command);
+    },
+    dismissNotice() {
+      const running = server.state();
+      if (running.status === "running") dismissedPort = running.port;
+      push();
     },
   };
 }
