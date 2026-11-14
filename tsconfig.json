@@ -63,6 +63,7 @@
     "node_modules",
     "review-bridge",
     "flow-bridge",
-    "kit/*/dist"
+    "kit/*/dist",
+    "packages/desktop"
   ]
 }
