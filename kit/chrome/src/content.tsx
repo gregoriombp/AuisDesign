@@ -43,6 +43,18 @@ for (const [family, file] of [["Geist", "geist.woff2"], ["Material Symbols Round
   void font.load().then(f => document.fonts.add(f)).catch(() => {})
 }
 
+/** Where a note's marker sits in the viewport right now, or null when its target is gone. */
+function markerPoint(n: Note): { x: number; y: number; points?: ReviewPoint[] } | null {
+  const target = resolveAnchoredElement(n.anchor, { strict: true })
+  const rect = target?.getBoundingClientRect()
+  if (n.anchor.el && (!rect || rect.width === 0 || rect.height === 0)) return null
+  const scroll = getContentScroll()
+  if (n.anchor.kind === "pin") return { x: rect && n.anchor.el ? rect.x + rect.width * n.anchor.el.fx : n.anchor.position.x - scroll.x, y: rect && n.anchor.el ? rect.y + rect.height * n.anchor.el.fy : n.anchor.position.y - scroll.y }
+  const points = n.anchor.el ? resolveDrawPoints(n.anchor.el) : n.anchor.path.points.map(p => ({ x: p.x - scroll.x, y: p.y - scroll.y }))
+  if (!points?.length) return null
+  return { x: points.reduce((s, p) => s + p.x, 0) / points.length, y: points.reduce((s, p) => s + p.y, 0) / points.length, points }
+}
+
 function App() {
   const [active, setActive] = React.useState(true)
   const [mode, setMode] = React.useState<Mode>("magic")
@@ -62,10 +74,15 @@ function App() {
   const refresh = React.useCallback(() => { void request<Note[]>("list").then(setNotes).catch(e => setError(e.message)) }, [])
   const pageNotes = notes.filter(n => n.pageKey === pageKey(url) && n.status === "open").sort((a, b) => a.createdAt - b.createdAt)
   const closeComposer = React.useCallback(() => { setPending(null); setMode("cursor"); refresh() }, [refresh])
+  // The listener is registered once. Re-registering on every URL change used to tear it
+  // down mid-capture, and Chrome could then drop the pending reply to the export request.
+  const urlRef = React.useRef(location.href)
   React.useEffect(() => {
     refresh()
     const updateUrl = () => {
-      if (location.href !== url) { setUrl(location.href); setPending(null); setMode("cursor"); setHover(null); invalidatePrimaryScrollCache() }
+      if (location.href === urlRef.current) return
+      urlRef.current = location.href
+      setUrl(location.href); setPending(null); setMode("cursor"); setHover(null); invalidatePrimaryScrollCache(); refresh()
     }
     const messages = (m: { type?: string; notes?: Note[] }, _sender: chrome.runtime.MessageSender, reply: (value: unknown) => void) => {
       if (m.type === "auis-toggle") setActive(v => !v)
@@ -80,7 +97,7 @@ function App() {
     chrome.runtime.onMessage.addListener(messages)
     window.addEventListener("popstate", updateUrl); window.addEventListener("hashchange", updateUrl)
     return () => { chrome.runtime.onMessage.removeListener(messages); window.removeEventListener("popstate", updateUrl); window.removeEventListener("hashchange", updateUrl) }
-  }, [refresh, url])
+  }, [refresh])
   React.useEffect(() => {
     if (!active) return
     syncNativeLayer()
@@ -99,14 +116,8 @@ function App() {
     return () => window.removeEventListener("keydown", key)
   }, [active])
   const positioned = pageNotes.map((n, i) => {
-    const target = resolveAnchoredElement(n.anchor, { strict: true })
-    const rect = target?.getBoundingClientRect()
-    if (n.anchor.el && (!rect || rect.width === 0 || rect.height === 0)) return null
-    const scroll = getContentScroll()
-    if (n.anchor.kind === "pin") return { note: n, number: i + 1, x: rect && n.anchor.el ? rect.x + rect.width * n.anchor.el.fx : n.anchor.position.x - scroll.x, y: rect && n.anchor.el ? rect.y + rect.height * n.anchor.el.fy : n.anchor.position.y - scroll.y }
-    const points = n.anchor.el ? resolveDrawPoints(n.anchor.el) : n.anchor.path.points.map(p => ({ x: p.x - scroll.x, y: p.y - scroll.y }))
-    if (!points?.length) return null
-    return { note: n, number: i + 1, x: points.reduce((s, p) => s + p.x, 0) / points.length, y: points.reduce((s, p) => s + p.y, 0) / points.length, points }
+    const point = markerPoint(n)
+    return point && { note: n, number: i + 1, ...point }
   }).filter(v => v !== null)
   React.useEffect(() => {
     const el = canvas.current; if (!el) return
@@ -128,15 +139,16 @@ function App() {
     const scroll = getContentScroll()
     const anchor: ReviewAnchor = points ? { kind: "draw", path: { points: points.map(p => ({ x: p.x + scroll.x, y: p.y + scroll.y })), strokeColorToken: "var(--au-blue-600)", strokeWidth: 3 }, centroid: { x: point.x + scroll.x, y: point.y + scroll.y }, el: captureDrawAnchor(points) || undefined } : { kind: "pin", position: { x: point.x + scroll.x, y: point.y + scroll.y }, el: captureElementAnchor(point.x, point.y) || undefined }
     const context = buildReviewCommentContext(anchor); context.pageUrl = originalUrl
-    const note: Note = { id: crypto.randomUUID(), version: 1, text: "", status: "open", createdAt: Date.now(), ...relocating, url: originalUrl, pageKey: pageKey(originalUrl), title: document.title, updatedAt: Date.now(), anchor, context, shot: undefined }
+    // A repositioned note keeps its previous capture until a new one succeeds.
+    const note: Note = { id: crypto.randomUUID(), version: 1, text: "", status: "open", createdAt: Date.now(), ...relocating, url: originalUrl, pageKey: pageKey(originalUrl), title: document.title, updatedAt: Date.now(), anchor, context, shot: relocating?.shot }
     try {
       host.style.setProperty("visibility", "hidden", "important")
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())))
       const data = await request<string>("capture", { url: originalUrl })
       note.shot = { data, width: innerWidth, height: innerHeight, pin: point, points }
-    } catch (e) { setError(`Captura indisponível: ${(e as Error).message} O comentário ainda pode ser salvo.`) }
+    } catch (e) { setError(`Captura indisponível: ${(e as Error).message} ${relocating?.shot ? "O comentário mantém a captura anterior." : "O comentário ainda pode ser salvo."}`) }
     finally { host.style.removeProperty("visibility"); setBusy(false); setStroke([]); setMode("cursor") }
-    if (location.href !== originalUrl) { setError("A página mudou. Selecione o elemento novamente."); return }
+    if (pageKey(location.href) !== pageKey(originalUrl)) { setError("A página mudou. Selecione o elemento novamente."); return }
     setRelocating(null); setPending(note)
   }
   function locate(note: Note) {
@@ -146,7 +158,9 @@ function App() {
     setSheet(false); el.scrollIntoView({ block: "center", behavior: "smooth" }); setPending(note)
   }
   const capturing = active && mode !== "cursor" && !pending && !sheet && !busy
-  const pin = pending?.shot?.pin || { x: innerWidth / 2, y: innerHeight / 2 }
+  // The composer follows the marker as it is now (after a scroll, a resize or locate()),
+  // not where it was when the screenshot was taken.
+  const pin = (pending && (positioned.find(p => p.note.id === pending.id) || markerPoint(pending))) || pending?.shot?.pin || { x: innerWidth / 2, y: innerHeight / 2 }
   if (!active) return <Button className="ar-collapsed" variant="inverse" size="sm" iconLeft="chat_bubble_outline" onClick={() => setActive(true)}>AuisRewiew</Button>
   return <>
     <canvas ref={canvas} className="ar-canvas" aria-label={capturing ? "Área de anotação" : undefined} style={{ pointerEvents: capturing ? "auto" : "none", cursor: mode === "draw" ? "crosshair" : "default" }}
@@ -156,7 +170,8 @@ function App() {
       onPointerCancel={() => { drawing.current = null; setStroke([]) }}
       onPointerUp={e => { e.stopPropagation(); const pts = drawing.current; drawing.current = null; if (pts && pts.length > 2) void annotate({ x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length }, pts); else setStroke([]) }} />
     {hover && mode === "magic" && !pending && !busy && <div className="ar-highlight" style={{ left: hover.rect.x, top: hover.rect.y, width: hover.rect.width, height: hover.rect.height }}><span>{hover.label}</span></div>}
-    {positioned.map(p => <Button key={p.note.id} size="sm" className="ar-pin" variant="primary" aria-label={`Abrir comentário ${p.number}`} style={{ left: p.x, top: p.y }} onClick={() => setPending(p.note)}>{p.number}</Button>)}
+    {/* While a comment is open, the other pins wait: switching would drop its unsaved text, attachments or recording. */}
+    {positioned.map(p => <Button key={p.note.id} size="sm" className="ar-pin" variant="primary" aria-label={`Abrir comentário ${p.number}`} style={{ left: p.x, top: p.y }} disabled={busy || (!!pending && pending.id !== p.note.id)} title={pending && pending.id !== p.note.id ? "Salve ou cancele o comentário aberto primeiro." : undefined} onClick={() => setPending(p.note)}>{p.number}</Button>)}
     <div className="ar-toolbar" role="toolbar" aria-label="AuisRewiew"><img className="ar-toolbar-logo" src={chrome.runtime.getURL("icon48.png")} alt="AuisRewiew" /><span className="ar-divider" />
       {([{ id: "cursor", icon: "arrow_selector_tool", label: "Navegar" }, { id: "draw", icon: "draw", label: "Desenhar" }, { id: "pin", icon: "location_on", label: "Adicionar pin" }, { id: "magic", icon: "auto_awesome", label: "Selecionar elemento" }] as const).map(tool => <Button key={tool.id} size="sm" className={mode === "magic" && tool.id === "magic" ? "ar-magic-active" : undefined} variant={mode === tool.id ? "inverse" : "ghost"} iconOnly={tool.icon} iconSize={16} iconWeight="auto" iconFill={mode === tool.id && tool.id === "magic" ? 1 : 0} title={tool.label} aria-label={tool.label} aria-pressed={mode === tool.id} disabled={!!pending || busy} onClick={() => { setMode(tool.id); setHover(null) }} />)}
       <span className="ar-divider" /><Button size="sm" variant={sheet ? "inverse" : "ghost"} iconLeft="forum" iconSize={16} disabled={!!pending || busy} aria-label={`Comentários (${pageNotes.length})`} onClick={() => { setSheet(true); setMode("cursor") }}>{pageNotes.length || null}</Button>
