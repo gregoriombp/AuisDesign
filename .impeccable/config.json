@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "geist",
+        "files": [
+          "kit/chrome/src/extension.css"
+        ],
+        "createdAt": "2026-11-14T05:07:43.286Z",
+        "reason": "Agent: AuisRewiew adapts the existing Review Bridge as requested; Geist is its canonical typeface in kit/ui/src/styles/chrome.source.css. Preserve that visual identity."
+      }
+    ]
+  }
+}
