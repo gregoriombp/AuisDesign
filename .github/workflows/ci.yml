@@ -7,6 +7,31 @@ on:
     branches: [main]
 
 jobs:
+  # The Mac supervisor owns real process groups; exercise that lifecycle on macOS.
+  # Desktop stays an independent install, so the root never downloads Electron.
+  desktop:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            packages/desktop/package-lock.json
+      - name: Install shared renderer dependencies
+        run: npm ci
+      - name: Install desktop dependencies
+        run: npm ci --prefix packages/desktop
+      - name: Desktop typecheck
+        run: npm --prefix packages/desktop run typecheck
+      - name: Desktop tests
+        run: npm --prefix packages/desktop test
+      - name: Desktop build
+        run: npm --prefix packages/desktop run build
+
   # The app and the full suite. Node 22 because `npm test` type-strips the .ts
   # tests, which needs --experimental-strip-types (22.6+). Node 20 could not run
   # them, which is why they had never run here.

@@ -19,6 +19,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Env } from "./env.ts";
+import { isLoopback } from "../shared/workspace.ts";
 
 export interface DevServerInfo {
   pid: number;
@@ -45,16 +46,17 @@ export function parseDevLock(raw: string): DevServerInfo | null {
   if (typeof data !== "object" || data === null) return null;
   const { pid, port, hostname, appUrl, startedAt } = data as Record<string, unknown>;
   if (
-    typeof pid !== "number" ||
-    typeof port !== "number" ||
+    typeof pid !== "number" || !Number.isSafeInteger(pid) || pid <= 0 ||
+    typeof port !== "number" || !Number.isInteger(port) || port < 1 || port > 65535 ||
     typeof appUrl !== "string" ||
-    typeof startedAt !== "number"
+    typeof startedAt !== "number" || !Number.isSafeInteger(startedAt) || startedAt <= 0
   ) {
     return null;
   }
   try {
     const url = new URL(appUrl);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (!isLoopback(appUrl)) return null;
+    if (Number(url.port || (url.protocol === "https:" ? 443 : 80)) !== port) return null;
   } catch {
     return null;
   }
@@ -77,6 +79,7 @@ export function readDevLock(root: string, env: Env = {}): DevServerInfo | null {
 
 /** True when the process exists. `EPERM` means it exists and is not ours. */
 export function pidAlive(pid: number): boolean {
+  if (!Number.isSafeInteger(pid) || pid <= 0) return false;
   try {
     process.kill(pid, 0);
     return true;

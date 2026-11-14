@@ -16,6 +16,7 @@ import {
 } from "electron";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { isAllowedNavigation, webOrigin, type Workspace } from "../shared/workspace.ts";
 
 export const APP_ORIGIN = "app://auis";
 
@@ -68,34 +69,34 @@ export function sameOrigin(url: string, origin: string): boolean {
 export function openExternally(url: string) {
   // Only web links leave the app. A page must not hand `file:` or a custom
   // scheme to the system through us.
-  if (/^https?:\/\//i.test(url)) void shell.openExternal(url);
+  if (webOrigin(url)) void shell.openExternal(url);
 }
 
-function guardPermissions(ses: Session, origin: string) {
+function guardPermissions(ses: Session, workspace: Workspace) {
   ses.setPermissionRequestHandler((_contents, permission, callback, details) => {
-    callback(ALLOWED_PERMISSIONS.has(permission) && sameOrigin(details.requestingUrl, origin));
+    callback(ALLOWED_PERMISSIONS.has(permission) && isAllowedNavigation(workspace, details.requestingUrl));
   });
   ses.setPermissionCheckHandler(
     (_contents, permission, requestingOrigin) =>
-      ALLOWED_PERMISSIONS.has(permission) && sameOrigin(requestingOrigin, origin),
+      ALLOWED_PERMISSIONS.has(permission) && isAllowedNavigation(workspace, requestingOrigin),
   );
 }
 
 /** Keeps a project's page on the project's origin; everything else opens in the browser. */
-export function guardProject(contents: WebContents, origin: string) {
-  guardPermissions(contents.session, origin);
+export function guardProject(contents: WebContents, workspace: Workspace) {
+  guardPermissions(contents.session, workspace);
   contents.on("will-navigate", (event) => {
-    if (sameOrigin(event.url, origin)) return;
+    if (isAllowedNavigation(workspace, event.url)) return;
     event.preventDefault();
     openExternally(event.url);
   });
   contents.on("will-redirect", (event) => {
-    if (sameOrigin(event.url, origin)) return;
+    if (isAllowedNavigation(workspace, event.url)) return;
     event.preventDefault();
     openExternally(event.url);
   });
   contents.setWindowOpenHandler(({ url }) => {
-    if (sameOrigin(url, origin)) void contents.loadURL(url);
+    if (isAllowedNavigation(workspace, url)) void contents.loadURL(url);
     else openExternally(url);
     return { action: "deny" };
   });

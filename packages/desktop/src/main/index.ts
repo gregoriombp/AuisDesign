@@ -5,7 +5,7 @@
 // window. Given a folder on the command line, it opens that project directly.
 // On quit, every dev server the app started is stopped before the app exits.
 
-import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type IpcMainInvokeEvent } from "electron";
+import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeTheme, type IpcMainInvokeEvent } from "electron";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -21,7 +21,8 @@ import { probeTools, resolveShellEnv } from "./env.ts";
 import { liveDevServer } from "./nextLock.ts";
 import { createProjectStore, displayPath, type Project, type ProjectStore } from "./projects.ts";
 import { APP_ORIGIN, isChrome, registerAppScheme, serveApp, trustChrome } from "./security.ts";
-import { manifestProblem } from "./server.ts";
+import { manifestProblem } from "./detect.ts";
+import { bridgeNotice } from "../shared/workspace.ts";
 import { openProjectWindow, type ProjectWindow } from "./windows/project.ts";
 
 const PRELOAD = path.join(__dirname, "../preload/chrome.cjs");
@@ -143,7 +144,7 @@ function openProject(project: Project): ProjectWindow {
   return opened;
 }
 
-async function pickFolder(parent: BrowserWindow | null) {
+async function pickFolder(parent: BrowserWindow | null, replaceId?: string) {
   const options = { properties: ["openDirectory" as const], message: "Choose a project folder" };
   const result = parent
     ? await dialog.showOpenDialog(parent, options)
@@ -158,7 +159,9 @@ async function pickFolder(parent: BrowserWindow | null) {
     else await dialog.showMessageBox(box);
     return;
   }
-  openProject(store.open(folder));
+  const project = store.open(folder);
+  if (replaceId && replaceId !== project.id) store.remove(replaceId);
+  openProject(project);
 }
 
 // ── IPC ───────────────────────────────────────────────────────────────────
@@ -203,6 +206,12 @@ function registerIpc() {
     if (typeof id === "string" && !projectWindows.has(id)) store.remove(id);
     pushLauncher();
   });
+  handle(CHANNELS.launcherLocateProject, (event, id: unknown) => {
+    const project = typeof id === "string" ? store.get(id) : null;
+    if (project && !projectWindows.has(project.id) && !fs.existsSync(project.path)) {
+      return pickFolder(BrowserWindow.fromWebContents(event.sender), project.id);
+    }
+  });
 
   handle(CHANNELS.projectState, (event) => senderProject(event)?.state() ?? null);
   handle(CHANNELS.projectLogs, (event) => senderProject(event)?.logs() ?? []);
@@ -213,6 +222,12 @@ function registerIpc() {
     senderProject(event)?.setLogsOpen(open === true);
   });
   handle(CHANNELS.projectRestart, (event) => senderProject(event)?.restart());
+  handle(CHANNELS.projectInstall, (event) => senderProject(event)?.install());
+  handle(CHANNELS.projectCopyBridgeCommand, (event) => {
+    const state = senderProject(event)?.state();
+    const command = state && bridgeNotice(state.server);
+    if (command) clipboard.writeText(command);
+  });
   handle(CHANNELS.projectOpenInBrowser, (event) => senderProject(event)?.openInBrowser());
 }
 
