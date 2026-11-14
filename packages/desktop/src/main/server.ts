@@ -1,61 +1,27 @@
-// One project's dev server, as the app sees it: attach to the one that is
-// already running in the folder, or start the project's own `dev` script, and
-// on stop end exactly what was started here.
-//
-// This is the W1 seed of the supervisor. It carries the behaviour W0 proved
-// (lock-based attach and readiness, process-group stop) behind a state the
-// toolbar can show. W2 hardens it — dependency install, Node version, crash
-// detail — and gives it unit tests (see ../../PLAN.md).
-//
-// This module does not import `electron`, so it runs under `node --test`.
-
-import { spawn, type ChildProcess } from "node:child_process";
-import fs from "node:fs";
-import path from "node:path";
+// One project's supervisor. Only process groups started here are ours to stop.
+// No Electron imports: lifecycle tests use real child processes and HTTP servers.
+import { spawn, execFile, type ChildProcess } from "node:child_process";
+import { setTimeout as delay } from "node:timers/promises";
 import type { ServerState } from "../shared/ipc.ts";
-import { resolveShellEnv, type Env } from "./env.ts";
-import { liveDevServer, pidAlive, readDevLock, type DevServerInfo } from "./nextLock.ts";
+import { findOnPath, resolveShellEnv, type Env } from "./env.ts";
+import { detectProject, readNode, nodeProblem } from "./detect.ts";
+import {
+  liveDevServer,
+  pidAlive,
+  readDevLock,
+  type DevServerInfo,
+} from "./nextLock.ts";
 
-const READY_TIMEOUT_MS = 90_000;
-const HTTP_TIMEOUT_MS = 30_000;
-const STOP_GRACE_MS = 5_000;
 const MAX_LOG_LINES = 2000;
+const stripAnsi = (text: string) =>
+  text.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "");
 
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-const stripAnsi = (text: string) => text.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "");
-
-type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
-
-/** The lockfile says which package manager the project is installed with. */
-export function packageManagerOf(root: string): PackageManager {
-  if (fs.existsSync(path.join(root, "pnpm-lock.yaml"))) return "pnpm";
-  if (fs.existsSync(path.join(root, "yarn.lock"))) return "yarn";
-  if (fs.existsSync(path.join(root, "bun.lock")) || fs.existsSync(path.join(root, "bun.lockb"))) {
-    return "bun";
-  }
-  return "npm";
-}
-
-/** Why a folder is not a project the app can run, in words for the person who picked it, or null. */
-export function manifestProblem(root: string): string | null {
-  let manifest: { scripts?: Record<string, string> };
-  try {
-    manifest = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
-  } catch {
-    return "This folder has no package.json, so there is no project to run.";
-  }
-  if (!manifest.scripts?.dev) return "This project has no dev script in its package.json.";
-  return null;
-}
-
-/** Why a project cannot start right now, or null. */
-export function projectProblem(root: string): string | null {
-  const manifest = manifestProblem(root);
-  if (manifest) return manifest;
-  if (!fs.existsSync(path.join(root, "node_modules"))) {
-    return `Dependencies are not installed. Run ${packageManagerOf(root)} install in this folder, then try again.`;
-  }
-  return null;
+export interface ServerOptions {
+  resolveEnv?: typeof resolveShellEnv;
+  readyTimeoutMs?: number;
+  httpTimeoutMs?: number;
+  stopGraceMs?: number;
+  pollMs?: number;
 }
 
 function groupAlive(pgid: number): boolean {
@@ -75,205 +41,343 @@ function signalGroup(pgid: number, signal: NodeJS.Signals) {
   }
 }
 
+/** A fresh lock alone is not ours: someone may have won the start race. */
+function inGroup(pid: number, pgid: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    execFile(
+      "/bin/ps",
+      ["-o", "pgid=", "-p", String(pid)],
+      { timeout: 1000 },
+      (error, stdout) => {
+        resolve(!error && Number(stdout.trim()) === pgid);
+      },
+    );
+  });
+}
+
 export interface ProjectServer {
   state(): ServerState;
   logs(): string[];
-  /** True while a server started here is still running. */
   owns(): boolean;
   start(): Promise<void>;
+  install(): Promise<void>;
   stop(): Promise<void>;
   restart(): Promise<void>;
   onState(listener: (state: ServerState) => void): void;
   onLog(listener: (lines: string[]) => void): void;
 }
 
-export function createProjectServer(root: string): ProjectServer {
+export function createProjectServer(
+  root: string,
+  options: ServerOptions = {},
+): ProjectServer {
+  const readyTimeout = options.readyTimeoutMs ?? 90_000;
+  const httpTimeout = options.httpTimeoutMs ?? 30_000;
+  const stopGrace = options.stopGraceMs ?? 5_000;
+  const pollMs = options.pollMs ?? 250;
   let current: ServerState = { status: "idle" };
-  /** The dev server, only when it was started here. An attached one is never ours to stop. */
-  let child: ChildProcess | null = null;
+  // Keep the group even after its leader exits: grandchildren can outlive npm.
+  let group: number | null = null;
+  let controller: AbortController | null = null;
+  let operation: Promise<void> | null = null;
+  let stopping: Promise<void> | null = null;
+  let restartPending: Promise<void> | null = null;
+  let intent = 0;
+  let watcher: NodeJS.Timeout | null = null;
   let env: Env = {};
   let lines: string[] = [];
-  /** Bumped by every start and stop, so a superseded start stops reporting. */
-  let run = 0;
-  let watcher: NodeJS.Timeout | null = null;
   const stateListeners: Array<(state: ServerState) => void> = [];
   const logListeners: Array<(lines: string[]) => void> = [];
-
   const setState = (next: ServerState) => {
     current = next;
     for (const listener of stateListeners) listener(next);
   };
-
   const log = (text: string) => {
     const fresh = stripAnsi(text)
-      .split("\n")
+      .split(/\r?\n/)
       .map((line) => line.trimEnd())
-      .filter((line) => line.trim().length > 0);
-    if (fresh.length === 0) return;
+      .filter((line) => line.trim());
     lines = [...lines, ...fresh].slice(-MAX_LOG_LINES);
-    for (const listener of logListeners) listener(fresh);
+    if (fresh.length) for (const listener of logListeners) listener(fresh);
   };
-
   const stopWatching = () => {
     if (watcher) clearInterval(watcher);
     watcher = null;
   };
-
-  /** An attached server has no exit event for us: watch its pid instead. */
-  const watchAttached = (info: DevServerInfo, id: number) => {
-    stopWatching();
-    watcher = setInterval(() => {
-      if (id !== run) return stopWatching();
-      if (pidAlive(info.pid)) return;
-      stopWatching();
-      setState({ status: "stopped", code: null });
-    }, 2000);
+  const terminateGroup = async (pgid: number | null) => {
+    if (!pgid) return;
+    signalGroup(pgid, "SIGTERM");
+    const deadline = Date.now() + stopGrace;
+    while (groupAlive(pgid) && Date.now() < deadline) await delay(50);
+    if (groupAlive(pgid)) signalGroup(pgid, "SIGKILL");
+    // Reap before a subsequent start. Bound the wait (some systems retain zombies).
+    const reapDeadline = Date.now() + 1000;
+    while (groupAlive(pgid) && Date.now() < reapDeadline) await delay(25);
+    if (group === pgid) group = null;
   };
-
-  /**
-   * Starts the project's own `dev` script and resolves once Next's lock says
-   * the server is ours and up. No port is passed: forcing one disables Next's
-   * own retry (3000 → 3010) and breaks `dev` scripts that are more than
-   * `next dev`.
-   */
-  const spawnServer = (id: number): Promise<DevServerInfo> =>
-    new Promise((resolve, reject) => {
-      const startedAt = Date.now();
-      let output = "";
-      let settled = false;
-
-      // `detached` puts the package manager, Next and everything they fork in
-      // one process group, which is what lets stop end the whole tree.
-      const spawned = spawn(packageManagerOf(root), ["run", "dev"], {
-        cwd: root,
-        env,
-        detached: true,
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-      child = spawned;
-
-      const settle = (finish: () => void) => {
-        if (settled) return;
-        settled = true;
-        clearInterval(poll);
-        clearTimeout(timer);
-        finish();
-      };
-      const onData = (chunk: Buffer) => {
-        const text = chunk.toString("utf8");
-        output = (output + text).slice(-8000);
-        log(text);
-      };
-      spawned.stdout?.on("data", onData);
-      spawned.stderr?.on("data", onData);
-
-      spawned.once("error", (error) => {
-        if (child === spawned) child = null;
-        settle(() => reject(new Error(`Could not run the dev script: ${error.message}`)));
-      });
-      spawned.once("exit", (code) => {
-        if (child === spawned) child = null;
-        if (settled) {
-          // It was running and it stopped on its own.
-          if (id === run && current.status === "running") setState({ status: "stopped", code });
-          return;
-        }
-        settle(() => {
-          // Next refuses a second instance in the same folder. If that is what
-          // happened, someone started one between our check and our spawn.
-          const existing = liveDevServer(root, env);
-          if (existing && /already running/.test(stripAnsi(output))) resolve(existing);
-          else reject(new Error(`The dev server exited with code ${code} before it was ready.`));
-        });
-      });
-
-      const poll = setInterval(() => {
-        const info = readDevLock(root, env);
-        // `startedAt` rules out a lock left behind by a server that was killed.
-        if (info && info.startedAt >= startedAt && pidAlive(info.pid)) settle(() => resolve(info));
-      }, 250);
-      const timer = setTimeout(() => {
-        settle(() =>
-          reject(new Error(`The dev server was not ready after ${READY_TIMEOUT_MS / 1000} seconds.`)),
-        );
-      }, READY_TIMEOUT_MS);
-    });
-
-  /** The lock appears a moment before the first request can be answered. */
-  const waitForHttp = async (appUrl: string, id: number) => {
-    const deadline = Date.now() + HTTP_TIMEOUT_MS;
-    while (Date.now() < deadline && id === run) {
+  const waitForHttp = async (url: string, signal: AbortSignal) => {
+    const deadline = Date.now() + httpTimeout;
+    while (Date.now() < deadline) {
+      signal.throwIfAborted();
       try {
-        await fetch(appUrl, { method: "HEAD", redirect: "manual" });
+        await fetch(url, {
+          method: "HEAD",
+          redirect: "manual",
+          signal: AbortSignal.any([
+            signal,
+            AbortSignal.timeout(Math.max(1, deadline - Date.now())),
+          ]),
+        });
         return;
       } catch {
-        await sleep(300);
+        signal.throwIfAborted();
+        await delay(pollMs, undefined, { signal });
       }
     }
-    if (id === run) throw new Error(`${appUrl} did not answer.`);
+    throw new Error(
+      `${url} did not answer within ${httpTimeout / 1000} seconds. Check the log, then try again.`,
+    );
   };
 
-  const start = async () => {
-    const id = ++run;
-    stopWatching();
-    try {
-      const problem = projectProblem(root);
-      if (problem) throw new Error(problem);
+  const spawnOwned = (command: string, args: string[], signal: AbortSignal) => {
+    signal.throwIfAborted();
+    const child = spawn(command, args, {
+      cwd: root,
+      env,
+      detached: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    group = child.pid ?? null;
+    child.stdout?.on("data", (chunk: Buffer) => log(chunk.toString("utf8")));
+    child.stderr?.on("data", (chunk: Buffer) => log(chunk.toString("utf8")));
+    return child;
+  };
 
-      setState({ status: "starting", phase: "environment" });
-      const resolved = await resolveShellEnv({ cwd: root });
-      env = resolved.env;
-      if (id !== run) return;
+  const waitForExit = (child: ChildProcess): Promise<number | null> =>
+    new Promise((resolve, reject) => {
+      child.once("error", reject);
+      child.once("exit", resolve);
+    });
 
-      let info = liveDevServer(root, env);
-      if (info) {
-        log(`Attached to the dev server already running in this folder (pid ${info.pid}).`);
-      } else {
+  const spawnServer = async (
+    command: string,
+    signal: AbortSignal,
+  ): Promise<{ info: DevServerInfo; owned: boolean }> => {
+    const startedAt = Date.now();
+    const child = spawnOwned(command, ["run", "dev"], signal);
+    const pgid = child.pid ?? null;
+    let exited = false;
+    let exitCode: number | null = null;
+    let failure: Error | null = null;
+    // Register synchronously so ENOENT cannot become an unhandled event.
+    child.once("error", (error) => {
+      failure = error;
+      exited = true;
+    });
+    child.once("exit", (code) => {
+      exited = true;
+      exitCode = code;
+      if (!signal.aborted && current.status === "running" && current.owned) {
+        // Stop stray descendants too. The UI changes only after cleanup completes.
+        void terminateGroup(pgid).then(() => {
+          if (!signal.aborted) setState({ status: "stopped", code });
+        });
+      }
+    });
+    const deadline = Date.now() + readyTimeout;
+    while (Date.now() < deadline) {
+      signal.throwIfAborted();
+      if (exited) {
+        await terminateGroup(pgid);
+        signal.throwIfAborted();
+        const existing = liveDevServer(root, env);
+        // Another starter may have won the lock. Its process is never ours.
+        if (existing && existing.startedAt >= startedAt)
+          return { info: existing, owned: false };
+        throw (
+          failure ??
+          new Error(
+            `The dev server exited with code ${exitCode} before it was ready. Check the log, then try again.`,
+          )
+        );
+      }
+      const info = readDevLock(root, env);
+      if (
+        info &&
+        pgid &&
+        info.startedAt >= startedAt &&
+        pidAlive(info.pid) &&
+        (await inGroup(info.pid, pgid))
+      ) {
+        return { info, owned: true };
+      }
+      await delay(pollMs, undefined, { signal });
+    }
+    throw new Error(
+      `The dev server was not ready after ${readyTimeout / 1000} seconds. Check the log, then try again.`,
+    );
+  };
+
+  const launch = async (install: boolean, signal: AbortSignal) => {
+    const detected = detectProject(root);
+    if (!detected.ok) {
+      setState({
+        status: "error",
+        code: detected.code,
+        message: detected.message,
+      });
+      return;
+    }
+    setState({ status: "starting", phase: "environment" });
+    const resolved = await (options.resolveEnv ?? resolveShellEnv)({
+      cwd: root,
+    });
+    signal.throwIfAborted();
+    env = resolved.env;
+    const node = await readNode(root, env);
+    signal.throwIfAborted();
+    const problem = nodeProblem(node, detected.project.nodeRange);
+    if (problem) {
+      setState({ status: "error", code: "environment", message: problem });
+      return;
+    }
+
+    let info = liveDevServer(root, env);
+    let owned = false;
+    if (info) {
+      log(
+        `Attached to the dev server already running in this folder (pid ${info.pid}).`,
+      );
+    } else {
+      const pm = detected.project.packageManager;
+      const command = findOnPath(pm, env);
+      if (!command) {
+        setState({
+          status: "error",
+          code: "environment",
+          message: `${pm} was not found in this folder's shell. Install or enable ${pm}, then try again.`,
+        });
+        return;
+      }
+      if (detected.project.missingDependencies.length > 0) {
+        if (!install) {
+          setState({
+            status: "deps-missing",
+            packageManager: pm,
+            missing: detected.project.missingDependencies,
+          });
+          return;
+        }
+        setState({ status: "installing", packageManager: pm });
+        log(`Running ${pm} install in this project.`);
+        const installed = spawnOwned(command, ["install"], signal);
+        const code = await waitForExit(installed);
+        signal.throwIfAborted();
+        await terminateGroup(installed.pid ?? null);
+        signal.throwIfAborted();
+        if (code !== 0)
+          throw new Error(
+            `${pm} install exited with code ${code}. Check the log, then try again.`,
+          );
+        const check = detectProject(root);
+        if (!check.ok) throw new Error(check.message);
+        if (check.project.missingDependencies.length)
+          throw new Error(
+            `${pm} install finished, but dependencies are still missing. Check the log and the project's package.json.`,
+          );
+      }
+      // Recheck after install: a terminal could have started the project meanwhile.
+      info = liveDevServer(root, env);
+      if (!info) {
         setState({ status: "starting", phase: "server" });
-        info = await spawnServer(id);
+        ({ info, owned } = await spawnServer(command, signal));
       }
-      if (id !== run) return;
-
-      setState({ status: "starting", phase: "response" });
-      await waitForHttp(info.appUrl, id);
-      if (id !== run) return;
-
-      const owned = child !== null;
-      if (!owned) watchAttached(info, id);
-      setState({ status: "running", url: info.appUrl, port: info.port, owned });
-    } catch (error) {
-      if (id !== run) return;
-      setState({ status: "error", message: error instanceof Error ? error.message : String(error) });
     }
-  };
-
-  /** Ask first, so Next removes its lock, then insist. */
-  const stop = async () => {
-    run++;
+    signal.throwIfAborted();
+    setState({ status: "starting", phase: "response" });
+    await waitForHttp(info.appUrl, signal);
+    signal.throwIfAborted();
+    // A process can die while the first response is compiling.
+    if (!pidAlive(info.pid))
+      throw new Error(
+        "The dev server stopped before its first page was ready. Check the log, then try again.",
+      );
+    setState({ status: "running", url: info.appUrl, port: info.port, owned });
     stopWatching();
-    const pgid = child?.pid;
-    if (pgid && groupAlive(pgid)) {
-      signalGroup(pgid, "SIGTERM");
-      const deadline = Date.now() + STOP_GRACE_MS;
-      while (groupAlive(pgid) && Date.now() < deadline) await sleep(100);
-      if (groupAlive(pgid)) {
-        signalGroup(pgid, "SIGKILL");
-        while (groupAlive(pgid) && Date.now() < deadline + 2000) await sleep(50);
-      }
-    }
-    child = null;
-    setState({ status: "idle" });
+    watcher = setInterval(
+      () => {
+        if (signal.aborted) return stopWatching();
+        if (pidAlive(info.pid)) return;
+        stopWatching();
+        void terminateGroup(owned ? group : null).then(() => {
+          if (!signal.aborted) setState({ status: "stopped", code: null });
+        });
+      },
+      Math.max(pollMs, 250),
+    );
   };
 
+  const begin = (install = false): Promise<void> => {
+    if (stopping) return stopping;
+    if (operation) return operation;
+    if (current.status === "running") return Promise.resolve();
+    // An Install IPC call is only meaningful after this window's missing-deps state.
+    if (install && current.status !== "deps-missing") return Promise.resolve();
+    stopWatching();
+    controller?.abort();
+    controller = new AbortController();
+    const signal = controller.signal;
+    const task = launch(install, signal).catch(async (error: unknown) => {
+      if (signal.aborted) return;
+      await terminateGroup(group);
+      if (!signal.aborted)
+        setState({
+          status: "error",
+          code: "launch-failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+    });
+    operation = task;
+    void task.finally(() => {
+      if (operation === task) operation = null;
+    });
+    return task;
+  };
+  const stop = (): Promise<void> => {
+    intent++;
+    if (stopping) return stopping;
+    controller?.abort();
+    stopWatching();
+    // An env lookup may still be finishing; cancellation prevents it from spawning.
+    const task = terminateGroup(group).then(() => setState({ status: "idle" }));
+    stopping = task;
+    void task.finally(() => {
+      if (stopping === task) stopping = null;
+    });
+    return task;
+  };
   return {
     state: () => current,
-    logs: () => lines,
-    owns: () => child !== null,
-    start,
+    logs: () => [...lines],
+    owns: () => group !== null,
+    start: () => begin(),
+    install: () => begin(true),
     stop,
-    restart: async () => {
-      await stop();
-      await start();
+    restart: () => {
+      if (restartPending) return restartPending;
+      const prior = operation;
+      const stopped = stop();
+      const expected = intent;
+      const task = stopped.then(async () => {
+        await prior;
+        // Closing the window while Restart waits must cancel the queued start.
+        if (intent === expected) await begin();
+      });
+      restartPending = task;
+      void task.finally(() => {
+        if (restartPending === task) restartPending = null;
+      });
+      return task;
     },
     onState: (listener) => void stateListeners.push(listener),
     onLog: (listener) => void logListeners.push(listener),

@@ -6,18 +6,19 @@
 // leave the toolbar and the log strip uncovered.
 
 import { BrowserWindow, WebContentsView, nativeTheme } from "electron";
-import fs from "node:fs";
-import path from "node:path";
 import {
   CHANNELS,
   LOGS_HEIGHT,
   TOOLBAR_HEIGHT,
+  PORT_NOTICE_HEIGHT,
   type NavigateAction,
   type ProjectState,
 } from "../../shared/ipc.ts";
 import { displayPath, type Project } from "../projects.ts";
 import { APP_ORIGIN, guardProject, openExternally, trustChrome } from "../security.ts";
 import { createProjectServer } from "../server.ts";
+import { detectProject } from "../detect.ts";
+import { bridgeNotice, workspaceRoute, type Workspace } from "../../shared/workspace.ts";
 
 export interface ProjectWindow {
   project: Project;
@@ -28,6 +29,7 @@ export interface ProjectWindow {
   navigate(action: NavigateAction): void;
   setLogsOpen(open: boolean): void;
   restart(): Promise<void>;
+  install(): Promise<void>;
   openInBrowser(): void;
   /** The project's page, when the server is up. For the W0 gate's capture only. */
   view(): WebContentsView | null;
@@ -42,16 +44,11 @@ interface Options {
   onClosed(): void;
 }
 
-function hasAuisSurfaces(root: string): boolean {
-  return (
-    fs.existsSync(path.join(root, "app", "auis")) ||
-    fs.existsSync(path.join(root, "src", "app", "auis"))
-  );
-}
-
 export function openProjectWindow(project: Project, options: Options): ProjectWindow {
   const server = createProjectServer(project.path);
-  const hasAuis = hasAuisSurfaces(project.path);
+  const detected = detectProject(project.path);
+  const hasAuis = detected.ok && detected.project.hasAuis;
+  let workspace: Workspace | null = null;
   let view: WebContentsView | null = null;
   let logsOpen = false;
   let route = "/";
@@ -101,11 +98,12 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
     if (!view || win.isDestroyed()) return;
     const [width, height] = win.getContentSize();
     const bottom = logsOpen ? LOGS_HEIGHT : 0;
+    const top = TOOLBAR_HEIGHT + (bridgeNotice(server.state()) ? PORT_NOTICE_HEIGHT : 0);
     view.setBounds({
       x: 0,
-      y: TOOLBAR_HEIGHT,
+      y: top,
       width,
-      height: Math.max(0, height - TOOLBAR_HEIGHT - bottom),
+      height: Math.max(0, height - top - bottom),
     });
   };
 
@@ -118,6 +116,7 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
 
   const showView = (appUrl: string) => {
     const origin = new URL(appUrl).origin;
+    workspace = { kind: "local", path: project.path, origin };
     removeView();
     view = new WebContentsView({
       webPreferences: {
@@ -131,7 +130,7 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
       },
     });
     const contents = view.webContents;
-    guardProject(contents, origin);
+    guardProject(contents, workspace);
 
     const track = () => {
       try {
@@ -162,6 +161,7 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
     if ((next.status === "error" || next.status === "stopped") && server.logs().length > 0) {
       logsOpen = true;
     }
+    if (next.status === "installing") logsOpen = true;
     push();
   });
   server.onLog((lines) => {
@@ -181,7 +181,17 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
   };
 
   win.on("resize", layout);
-  win.on("close", () => void stop());
+  // Keep the window registered until cleanup finishes, so Quit also waits for it.
+  let closeReady = false;
+  win.on("close", (event) => {
+    if (closeReady) return;
+    event.preventDefault();
+    void stop().then(() => {
+      closeReady = true;
+      removeView();
+      if (!win.isDestroyed()) win.close();
+    });
+  });
   win.on("closed", () => {
     if (flush) clearTimeout(flush);
     options.onClosed();
@@ -208,8 +218,8 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
         const running = server.state();
         // Only an in-app path: a renderer must not be able to send the view elsewhere.
         if (running.status !== "running") return;
-        if (!action.route.startsWith("/") || action.route.startsWith("//")) return;
-        void contents.loadURL(new URL(running.url).origin + action.route);
+        const url = workspace && workspaceRoute(workspace, action.route);
+        if (url) void contents.loadURL(url).catch(() => { /* Reload can retry. */ });
       }
     },
     setLogsOpen(open) {
@@ -220,6 +230,10 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
     async restart() {
       stopping = null;
       await server.restart();
+    },
+    async install() {
+      stopping = null;
+      await server.install();
     },
     openInBrowser() {
       const running = server.state();

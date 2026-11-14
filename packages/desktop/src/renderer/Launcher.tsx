@@ -3,7 +3,12 @@
 // is a quieter way to the same place.
 
 import { useEffect, useState, type CSSProperties } from "react";
-import type { LauncherState, ProjectSummary, ToolInfo, ToolName } from "../shared/ipc.ts";
+import type {
+  LauncherState,
+  ProjectSummary,
+  ToolInfo,
+  ToolName,
+} from "../shared/ipc.ts";
 import { FolderPreview, ProjectPreview } from "./previews.tsx";
 import { desktop, Icon, IconButton, Status, type Tone } from "./ui.tsx";
 
@@ -22,9 +27,12 @@ const order = (index: number) => ({ "--order": index }) as CSSProperties;
 
 function projectStatus(project: ProjectSummary): { tone: Tone; label: string } {
   const port = project.port ? ` on :${project.port}` : "";
-  if (project.status === "open") return { tone: "success", label: `Open${port}` };
-  if (project.status === "running") return { tone: "success", label: `Running${port}` };
-  if (project.status === "missing") return { tone: "danger", label: "Folder not found" };
+  if (project.status === "open")
+    return { tone: "success", label: `Open${port}` };
+  if (project.status === "running")
+    return { tone: "success", label: `Running${port}` };
+  if (project.status === "missing")
+    return { tone: "danger", label: "Folder not found" };
   return { tone: "idle", label: "Stopped" };
 }
 
@@ -40,9 +48,15 @@ function Featured({ project }: { project: ProjectSummary | null }) {
             <h2 className="card-title">
               <span>No project yet</span>
             </h2>
-            <p className="card-support">Open a folder that has a dev script. Auis starts it here.</p>
+            <p className="card-support">
+              Open a folder that has a dev script. Auis starts it here.
+            </p>
           </div>
-          <button type="button" className="btn btn-primary" onClick={() => void desktop.launcher.openFolder()}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => void desktop.launcher.openFolder()}
+          >
             Open folder
             <Icon name="arrow_forward" size={16} />
           </button>
@@ -67,13 +81,22 @@ function Featured({ project }: { project: ProjectSummary | null }) {
           <p className="card-support">{project.displayPath}</p>
         </div>
         {missing ? (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => void desktop.launcher.removeProject(project.id)}
-          >
-            Forget project
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => void desktop.launcher.locateProject(project.id)}
+            >
+              Locate folder
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => void desktop.launcher.removeProject(project.id)}
+            >
+              Forget project
+            </button>
+          </>
         ) : (
           <button
             type="button"
@@ -98,7 +121,7 @@ function Recent({ projects }: { projects: ProjectSummary[] }) {
           const status = projectStatus(project);
           const missing = project.status === "missing";
           return (
-            <li className="row" key={project.id}>
+            <li className="row" key={project.id} data-missing={missing}>
               <button
                 type="button"
                 className="row-main"
@@ -109,11 +132,22 @@ function Recent({ projects }: { projects: ProjectSummary[] }) {
                 <span className="row-detail">{project.displayPath}</span>
                 <Status tone={status.tone}>{status.label}</Status>
               </button>
+              {missing && (
+                <IconButton
+                  icon="folder_open"
+                  label={`Locate ${project.name}`}
+                  onClick={() =>
+                    void desktop.launcher.locateProject(project.id)
+                  }
+                />
+              )}
               {project.status !== "open" && (
                 <IconButton
                   icon="close"
                   label={`Forget ${project.name}`}
-                  onClick={() => void desktop.launcher.removeProject(project.id)}
+                  onClick={() =>
+                    void desktop.launcher.removeProject(project.id)
+                  }
                 />
               )}
             </li>
@@ -125,19 +159,27 @@ function Recent({ projects }: { projects: ProjectSummary[] }) {
 }
 
 function Environment({ tools }: { tools: ToolInfo[] | null }) {
-  const missing = tools?.filter((tool) => REQUIRED.has(tool.name) && tool.version === null) ?? [];
+  const missing =
+    tools?.filter((tool) => REQUIRED.has(tool.name) && tool.version === null) ??
+    [];
   return (
     <section className="card" style={order(3)}>
       <h2 className="card-head">Your shell</h2>
       <div className="rows" role="list">
         {(tools ?? []).map((tool) => {
           const found = tool.version !== null;
-          const tone: Tone = found ? "success" : REQUIRED.has(tool.name) ? "danger" : "idle";
+          const tone: Tone = found
+            ? "success"
+            : REQUIRED.has(tool.name)
+              ? "danger"
+              : "idle";
           return (
             <div className="env-row" role="listitem" key={tool.name}>
               <span className="env-name">{TOOL_LABEL[tool.name]}</span>
               <Status tone={tone}>
-                <span className="tabular">{found ? tool.version : "Not found"}</span>
+                <span className="tabular">
+                  {found ? tool.version : "Not found"}
+                </span>
               </Status>
             </div>
           );
@@ -151,8 +193,9 @@ function Environment({ tools }: { tools: ToolInfo[] | null }) {
       {missing.length > 0 && (
         <p className="card-note">
           {missing.map((tool) => TOOL_LABEL[tool.name]).join(" and ")}{" "}
-          {missing.length === 1 ? "is" : "are"} not on your PATH. Projects cannot start until{" "}
-          {missing.length === 1 ? "it is" : "they are"} installed.
+          {missing.length === 1 ? "is" : "are"} not on your PATH. Projects
+          cannot start until {missing.length === 1 ? "it is" : "they are"}{" "}
+          installed.
         </p>
       )}
     </section>
@@ -179,7 +222,10 @@ export function Launcher() {
             Auis Design
             <Icon name="south_east" size={32} />
           </h1>
-          <p>Open a project and Auis runs it here: its dev server, the product and the builder, in one window.</p>
+          <p>
+            Open a project and Auis runs it here: its dev server, the product
+            and the builder, in one window.
+          </p>
         </header>
 
         <div className="grid">
@@ -204,7 +250,9 @@ export function Launcher() {
                     <span className="card-title">
                       <span>Open folder</span>
                     </span>
-                    <span className="card-support">Any project with a dev script</span>
+                    <span className="card-support">
+                      A Next.js project with a dev script
+                    </span>
                   </span>
                   <span className="go">
                     <Icon name="arrow_outward" size={16} />

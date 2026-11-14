@@ -32,9 +32,11 @@ export interface LauncherState {
 export type ServerState =
   | { status: "idle" }
   | { status: "starting"; phase: "environment" | "server" | "response" }
+  | { status: "deps-missing"; packageManager: string; missing: string[] }
+  | { status: "installing"; packageManager: string }
   | { status: "running"; url: string; port: number; owned: boolean }
   | { status: "stopped"; code: number | null }
-  | { status: "error"; message: string };
+  | { status: "error"; code: "folder-missing" | "project-invalid" | "environment" | "launch-failed"; message: string };
 
 export interface ProjectState {
   name: string;
@@ -64,6 +66,7 @@ export interface DesktopBridge {
     openFolder(): Promise<void>;
     openProject(id: string): Promise<void>;
     removeProject(id: string): Promise<void>;
+    locateProject(id: string): Promise<void>;
   };
   project: {
     state(): Promise<ProjectState | null>;
@@ -73,6 +76,8 @@ export interface DesktopBridge {
     navigate(action: NavigateAction): Promise<void>;
     setLogsOpen(open: boolean): Promise<void>;
     restart(): Promise<void>;
+    install(): Promise<void>;
+    copyBridgeCommand(): Promise<void>;
     openInBrowser(): Promise<void>;
   };
 }
@@ -83,6 +88,7 @@ export const CHANNELS = {
   launcherOpenFolder: "launcher:open-folder",
   launcherOpenProject: "launcher:open-project",
   launcherRemoveProject: "launcher:remove-project",
+  launcherLocateProject: "launcher:locate-project",
   projectState: "project:state",
   projectChanged: "project:changed",
   projectLogs: "project:logs",
@@ -90,9 +96,12 @@ export const CHANNELS = {
   projectNavigate: "project:navigate",
   projectSetLogsOpen: "project:set-logs-open",
   projectRestart: "project:restart",
+  projectInstall: "project:install",
+  projectCopyBridgeCommand: "project:copy-bridge-command",
   projectOpenInBrowser: "project:open-in-browser",
 } as const;
 
 /** Layout the main process and the toolbar agree on, in CSS pixels. */
 export const TOOLBAR_HEIGHT = 52;
+export const PORT_NOTICE_HEIGHT = 64;
 export const LOGS_HEIGHT = 260;

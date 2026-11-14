@@ -25,6 +25,7 @@ const bridge: DesktopBridge = {
     openFolder: () => ipcRenderer.invoke(CHANNELS.launcherOpenFolder),
     openProject: (id: string) => ipcRenderer.invoke(CHANNELS.launcherOpenProject, id),
     removeProject: (id: string) => ipcRenderer.invoke(CHANNELS.launcherRemoveProject, id),
+    locateProject: (id: string) => ipcRenderer.invoke(CHANNELS.launcherLocateProject, id),
   },
   project: {
     state: () => ipcRenderer.invoke(CHANNELS.projectState),
@@ -34,6 +35,8 @@ const bridge: DesktopBridge = {
     navigate: (action: NavigateAction) => ipcRenderer.invoke(CHANNELS.projectNavigate, action),
     setLogsOpen: (open: boolean) => ipcRenderer.invoke(CHANNELS.projectSetLogsOpen, open),
     restart: () => ipcRenderer.invoke(CHANNELS.projectRestart),
+    install: () => ipcRenderer.invoke(CHANNELS.projectInstall),
+    copyBridgeCommand: () => ipcRenderer.invoke(CHANNELS.projectCopyBridgeCommand),
     openInBrowser: () => ipcRenderer.invoke(CHANNELS.projectOpenInBrowser),
   },
 };

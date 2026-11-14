@@ -408,6 +408,26 @@ p {
   padding: 0 10px;
 }
 
+/* The native project view leaves room for this persistent notice. */
+.port-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 16px;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-default);
+  color: var(--fg-secondary);
+  font-size: 12px;
+}
+
+.port-notice code {
+  display: inline-block;
+  color: var(--fg-primary);
+  font: inherit;
+  user-select: text;
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }
@@ -463,6 +483,7 @@ p {
   text-wrap: pretty;
   user-select: text;
   cursor: text;
+  overflow-wrap: anywhere;
 }
 
 .state .btn {
@@ -726,6 +747,7 @@ button.card:hover .go {
 }
 
 .row:hover .icon-btn,
+.row[data-missing="true"] .icon-btn,
 .row:focus-within .icon-btn {
   opacity: 1;
 }

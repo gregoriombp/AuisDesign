@@ -66,25 +66,35 @@ function askShell(
   return new Promise((resolve) => {
     // `$1` and `$2` instead of interpolation: the folder is the user's, and a
     // path with a quote in it must not become shell syntax.
-    const script = `cd -- "$1" 2>/dev/null; printf '%s' "$2"; /usr/bin/env -0; printf '%s' "$2"`;
+    const script = `cd -- "$1" 2>/dev/null || exit; printf '%s' "$2"; /usr/bin/env -0; printf '%s' "$2"`;
     let stdout = "";
     let settled = false;
+    let timer: NodeJS.Timeout | null = null;
     const finish = (env: Env | null) => {
       if (settled) return;
       settled = true;
+      if (timer) clearTimeout(timer);
+      // Startup files may leave a child holding stdout open. Bound the lookup
+      // itself, and clean its isolated group instead of waiting for `close`.
+      if (child.pid) {
+        try { process.kill(-child.pid, "SIGKILL"); } catch { /* already gone */ }
+      }
       resolve(env);
     };
 
     const child = spawn(shell, [flags, script, "auis-env", cwd, MARKER], {
       // No stdin: a startup file that prompts must fail, not wait forever.
       stdio: ["ignore", "pipe", "ignore"],
+      cwd,
+      detached: true,
       // oh-my-zsh checks for updates in interactive shells and asks a question.
       env: { ...base, DISABLE_AUTO_UPDATE: "true" },
-      timeout: timeoutMs,
     });
+    timer = setTimeout(() => finish(null), timeoutMs);
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {
       stdout += chunk;
+      if (stdout.length > 1024 * 1024) finish(null);
     });
     child.on("error", () => finish(null));
     child.on("close", () => finish(parseEnvOutput(stdout)));

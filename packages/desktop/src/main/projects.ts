@@ -36,8 +36,9 @@ function isProject(value: unknown): value is Project {
   return (
     typeof id === "string" &&
     typeof folder === "string" &&
+    path.isAbsolute(folder) && id === projectId(folder) &&
     typeof name === "string" &&
-    typeof lastOpenedAt === "number"
+    typeof lastOpenedAt === "number" && Number.isFinite(lastOpenedAt)
   );
 }
 
@@ -75,6 +76,7 @@ export function createProjectStore(file: string): ProjectStore {
     get: (id) => read().find((project) => project.id === id) ?? null,
     open(folder) {
       const real = fs.realpathSync(folder);
+      if (!fs.statSync(real).isDirectory()) throw new Error("Choose a project folder, not a file.");
       const project: Project = {
         id: projectId(real),
         path: real,

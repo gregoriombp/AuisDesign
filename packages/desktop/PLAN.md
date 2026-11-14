@@ -21,7 +21,7 @@ anything that is deployed: everything that works in a browser today keeps workin
 |---|---|---|
 | W0 | Skeleton: one project from the command line — start or attach, show, stop on quit | **done** (2026-11-14) |
 | W1 | The look: the app's own chrome (launcher, project toolbar, log strip) as a real renderer, in the current Auis Design direction | **done** (2026-11-14) |
-| W2 | Core hardening: unit tests for `env`, `nextLock`, `projects`, `server`; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; `workspace`; a CI job | next |
+| W2 | Core hardening: unit tests for `env`, `nextLock`, `projects`, `server`; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; `workspace`; a CI job | implemented; local gate passed, CI pending (2026-11-14) |
 | W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | not started |
 | W4 | New project from the app (`npx @auis/cli`) | not started |
 | W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | not started |
@@ -160,26 +160,56 @@ packages/desktop/
   scripts/build.mjs        esbuild: main and preload (node, cjs), renderer (browser), the two pages
   src/shared/app.ts        product name and bundle id
   src/shared/ipc.ts        channel names, payload types, the layout both sides agree on
-  src/shared/workspace.ts  (W2) {kind:'local',path} | {kind:'remote',url}; isAllowedNavigation()
+  src/shared/workspace.ts  local/remote location, explicit origins, guarded routes, bridge notice
   src/main/env.ts          the user's shell environment for a folder; which tools it has
   src/main/nextLock.ts     Next's dev lock: read, validate, liveness
   src/main/server.ts       one project's dev server: attach or start, state, log, stop
   src/main/projects.ts     the persisted project list
-  src/main/detect.ts       (W2) project kind, Node version, missing dependencies
+  src/main/detect.ts       project kind, Node semver requirement, missing dependencies
   src/main/cli.ts          (W4) arguments for `npx @auis/cli`
   src/main/security.ts     app:// protocol, who may call IPC, navigation and permission guards
   src/main/windows/        project.ts (the launcher window is small enough to live in index.ts)
   src/main/index.ts        lifecycle, the launcher, the IPC router
   src/preload/chrome.ts    contextBridge → window.auisDesktop
   src/renderer/            one bundle, two pages: launcher.html, project.html
-  test/                    (W2) node --test
+  test/                    node --test; real child-process and HTTP fixtures
 ```
 
 `env`, `nextLock`, `server` and `projects` do not import `electron`, so they run under
 `node --test`. Nothing Node- or Electron-flavoured goes into `kit/ui`
 (`kit/__tests__/boundaries.test.ts`).
 
-### The supervisor (W2 hardens what W0 does inline)
+### What W2 established
+
+- `detect` distinguishes an Auis scaffold, an installed host, and plain Next.js;
+  rejects unsupported projects before waiting for a lock; validates `engines.node`
+  with npm's semver parser and reports the actual Node version and executable.
+  v1 requires Next.js 16+ and its dev-lock contract. The shell's `NEXT_DIST_DIR`
+  is supported; arbitrary `distDir` settings in executable Next config are not
+  evaluated by the desktop app.
+- Missing dependencies are resolved from the project, including hoisted packages.
+  Install runs the declared package manager (lockfile fallback), streams its log,
+  checks the result and starts the project. It happens only after the user clicks
+  **Install dependencies**. Opening an already running project attaches without
+  installing anything.
+- Cancellation during environment lookup, install, lock wait or HTTP wait cannot
+  load a late page. HTTP wait is bounded; failed starts stop their process group;
+  ownership requires both a fresh lock and membership in the spawned process group.
+  Close waits for cleanup, including children that outlive their package manager.
+- A non-3000 server gets a persistent bridge-address notice, with a copy action.
+  The native view reserves that space. Missing folders have **Locate** and **Forget**.
+- Navigation and permissions use the workspace's explicit origins. IPC routes are
+  checked after URL parsing as well, so backslashes cannot escape the local origin.
+  Remote workspace types are groundwork only; opening a hosted URL is still post-v1.
+- Local gate: 36 tests passed, desktop build/typecheck and root lint/typecheck/tests
+  passed. The `desktop` CI job runs the tests and build on macOS with Node 22.
+- Exercised in the built Electron app with a separate profile and a real Next.js
+  fixture: empty/recent/missing launcher states, Install → Running on a fallback
+  port, bridge command copied, `/auis` loaded without Node access, Locate replacing
+  a missing entry, and quit leaving neither the owned PID nor its lock. Chrome
+  checked in light and dark. Finder launch and the W3 automated smoke remain ahead.
+
+### The supervisor
 
 1. **Folder** missing → `folder-missing` (Locate / Remove).
 2. **Environment** from the user's shell, per folder: interactive login shell, then
@@ -189,7 +219,8 @@ packages/desktop/
 4. **Node** missing or below `engines.node ?? >=20.9` → say which one was found, where.
 5. **Attach** when the lock exists, its pid is alive and the port answers. Never stop
    an attached server.
-6. **Dependencies** missing → `deps-missing`, with an Install action.
+6. **Dependencies** missing → `deps-missing`, with an Install action. Installation
+   can run the project's lifecycle scripts; the action says so before it runs.
 7. **Start** `<pm> run dev`, detached, with no port argument.
 8. **Ready** when the lock's `startedAt` is ours and its pid is in our process group.
    "already running" in the output → attach. Exit before ready → `crashed`. 90 s → `timeout`.
