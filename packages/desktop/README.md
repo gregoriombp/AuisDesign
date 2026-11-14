@@ -52,7 +52,8 @@ npm --prefix packages/desktop run verify:mac -- '/Applications/Auis Design.app'
 `smoke:packaged` runs the W3 scenarios against the actual signed `app.asar` bundle,
 with temporary projects and an isolated profile. Evidence is saved to
 `output/smoke-packaged/`. The macOS CI job also builds, verifies and exercises this
-bundle. The HTTP fixture covers lifecycle and chrome behaviour; it is not a real
+bundle for same-repository PRs and main pushes, without signing credentials.
+Fork PRs still run the unpackaged smoke. The HTTP fixture covers lifecycle and chrome behaviour; it is not a real
 Next.js or agent integration test.
 
 ## Manual checks before wider testing
