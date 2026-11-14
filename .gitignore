@@ -100,3 +100,6 @@ auis-states-matrix.pdf
 
 # Review Bridge packages: built only to publish (kit/scripts/build.mjs)
 /kit/*/dist/
+
+# impeccable design detector: keep its config, not its per-session cache
+.impeccable/hook.cache.json
