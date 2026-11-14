@@ -95,12 +95,27 @@ jobs:
         run: npm ci
       - name: Run the built Electron app
         run: npm run smoke
+      - name: Package the signed Mac app
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          # Same-repository code only, with identity "-" and no signing secrets.
+          # electron-builder otherwise skips even ad-hoc signing in PR builds.
+          CSC_FOR_PULL_REQUEST: "true"
+        run: npm run pack:mac
+      - name: Verify the signed bundle
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: npm run verify:mac
+      - name: Run the packaged Electron app
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: npm run smoke:packaged
       - name: Keep smoke evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-smoke
-          path: packages/desktop/output/smoke
+          path: |
+            packages/desktop/output/smoke
+            packages/desktop/output/smoke-packaged
           retention-days: 7
 
   # The CLI is what runs on other people's machines, and packages/auis declares

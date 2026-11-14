@@ -9,7 +9,9 @@ import { _electron } from "playwright";
 import electronPath from "electron";
 
 const packageRoot = fileURLToPath(new URL("../..", import.meta.url));
-const output = path.join(packageRoot, "output/smoke");
+// The same gate can exercise the signed app.asar bundle, without rebuilding it.
+const packagedExecutable = process.env.AUIS_DESKTOP_EXECUTABLE;
+const output = path.join(packageRoot, packagedExecutable ? "output/smoke-packaged" : "output/smoke");
 fs.mkdirSync(output, { recursive: true });
 const alive = (pid) => {
   try {
@@ -134,9 +136,9 @@ function fixture(
     evidence,
     async launch(direct = false) {
       app = await _electron.launch({
-        executablePath: electronPath,
+        executablePath: packagedExecutable ?? electronPath,
         args: [
-          packageRoot,
+          ...(packagedExecutable ? [] : [packageRoot]),
           ...(direct ? [project] : []),
           `--user-data-dir=${root}/profile`,
         ],
