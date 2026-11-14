@@ -1,0 +1,49 @@
+name: Desktop smoke
+
+# The Mac app, started for real and driven through its windows (see
+# packages/desktop/scripts/smoke.mjs). It needs a Mac and the Electron binary,
+# so it is its own workflow and runs only when the app changes. The unit tests
+# and the build run on every pull request, in ci.yml's `desktop` job.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/desktop/**"
+      - ".github/workflows/desktop-smoke.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/desktop/**"
+      - ".github/workflows/desktop-smoke.yml"
+
+jobs:
+  smoke:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/desktop/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Smoke
+        run: npm run smoke
+
+      # What the windows looked like when a step failed.
+      - name: Keep the failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-smoke-failure
+          path: packages/desktop/dist/smoke-failure
+          if-no-files-found: ignore
