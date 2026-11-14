@@ -97,6 +97,11 @@ export const navigation: NavSection[] = [
         href: "/auis/styleguide/components/au-dropzone",
         aliases: ["upload", "drop", "attach", "file picker"],
       },
+      {
+        name: "Workflow canvas",
+        href: "/auis/styleguide/components/au-workflow-canvas",
+        aliases: ["canvas", "node editor", "flow builder", "react flow", "graph", "automation"],
+      },
     ],
   },
   {
