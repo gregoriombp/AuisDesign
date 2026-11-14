@@ -126,10 +126,12 @@ export function ComposerRecording({
   stream,
   onDiscard,
   onStop,
+  labels,
 }: {
   stream: MediaStream | null
   onDiscard: () => void
   onStop: () => void
+  labels?: { group: string; discard: string; stop: string }
 }) {
   const [seconds, setSeconds] = React.useState(0)
   React.useEffect(() => {
@@ -145,7 +147,7 @@ export function ComposerRecording({
   return (
     <div
       role="group"
-      aria-label="Recording dictation"
+      aria-label={labels?.group ?? "Recording dictation"}
       className="flex flex-1 min-w-0 items-center gap-2 -ml-2.5"
     >
       <Button
@@ -154,8 +156,8 @@ export function ComposerRecording({
         size="sm"
         iconOnly="close"
         iconSize={20}
-        aria-label="Discard recording"
-        title="Discard recording"
+        aria-label={labels?.discard ?? "Discard recording"}
+        title={labels?.discard ?? "Discard recording"}
         onClick={onDiscard}
         className="shrink-0 bg-transparent! text-(--auis-fg-secondary)! hover:bg-(--auis-bg-hover)!"
       />
@@ -176,8 +178,8 @@ export function ComposerRecording({
         iconOnly="stop"
         iconSize={20}
         iconFill={1}
-        aria-label="Stop recording"
-        title="Stop recording"
+        aria-label={labels?.stop ?? "Stop recording"}
+        title={labels?.stop ?? "Stop recording"}
         onClick={onStop}
         className="shrink-0 rounded-full!"
       />
