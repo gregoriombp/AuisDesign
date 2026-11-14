@@ -159,8 +159,9 @@ function App() {
   }
   const capturing = active && mode !== "cursor" && !pending && !sheet && !busy
   // The composer follows the marker as it is now (after a scroll, a resize or locate()),
-  // not where it was when the screenshot was taken.
-  const pin = (pending && (positioned.find(p => p.note.id === pending.id) || markerPoint(pending))) || pending?.shot?.pin || { x: innerWidth / 2, y: innerHeight / 2 }
+  // not where it was when the screenshot was taken. It reads the open note's own anchor:
+  // a repositioned note keeps its id, so the saved copy would still point at the old spot.
+  const pin = (pending && markerPoint(pending)) || pending?.shot?.pin || { x: innerWidth / 2, y: innerHeight / 2 }
   if (!active) return <Button className="ar-collapsed" variant="inverse" size="sm" iconLeft="chat_bubble_outline" onClick={() => setActive(true)}>AuisRewiew</Button>
   return <>
     <canvas ref={canvas} className="ar-canvas" aria-label={capturing ? "Área de anotação" : undefined} style={{ pointerEvents: capturing ? "auto" : "none", cursor: mode === "draw" ? "crosshair" : "default" }}
@@ -170,8 +171,12 @@ function App() {
       onPointerCancel={() => { drawing.current = null; setStroke([]) }}
       onPointerUp={e => { e.stopPropagation(); const pts = drawing.current; drawing.current = null; if (pts && pts.length > 2) void annotate({ x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length }, pts); else setStroke([]) }} />
     {hover && mode === "magic" && !pending && !busy && <div className="ar-highlight" style={{ left: hover.rect.x, top: hover.rect.y, width: hover.rect.width, height: hover.rect.height }}><span>{hover.label}</span></div>}
-    {/* While a comment is open, the other pins wait: switching would drop its unsaved text, attachments or recording. */}
-    {positioned.map(p => <Button key={p.note.id} size="sm" className="ar-pin" variant="primary" aria-label={`Abrir comentário ${p.number}`} style={{ left: p.x, top: p.y }} disabled={busy || (!!pending && pending.id !== p.note.id)} title={pending && pending.id !== p.note.id ? "Salve ou cancele o comentário aberto primeiro." : undefined} onClick={() => setPending(p.note)}>{p.number}</Button>)}
+    {/* While a comment is open, the other pins wait: switching would drop its unsaved text, attachments or recording.
+        aria-disabled, not disabled: a disabled button stops taking pointer events, and the click would reach the page below. */}
+    {positioned.map(p => {
+      const waiting = busy || (!!pending && pending.id !== p.note.id)
+      return <Button key={p.note.id} size="sm" className="ar-pin" variant="primary" aria-label={`Abrir comentário ${p.number}`} style={{ left: p.x, top: p.y }} aria-disabled={waiting || undefined} title={pending && pending.id !== p.note.id ? "Salve ou cancele o comentário aberto primeiro." : undefined} onClick={e => { e.preventDefault(); e.stopPropagation(); if (!waiting) setPending(p.note) }}>{p.number}</Button>
+    })}
     <div className="ar-toolbar" role="toolbar" aria-label="AuisRewiew"><img className="ar-toolbar-logo" src={chrome.runtime.getURL("icon48.png")} alt="AuisRewiew" /><span className="ar-divider" />
       {([{ id: "cursor", icon: "arrow_selector_tool", label: "Navegar" }, { id: "draw", icon: "draw", label: "Desenhar" }, { id: "pin", icon: "location_on", label: "Adicionar pin" }, { id: "magic", icon: "auto_awesome", label: "Selecionar elemento" }] as const).map(tool => <Button key={tool.id} size="sm" className={mode === "magic" && tool.id === "magic" ? "ar-magic-active" : undefined} variant={mode === tool.id ? "inverse" : "ghost"} iconOnly={tool.icon} iconSize={16} iconWeight="auto" iconFill={mode === tool.id && tool.id === "magic" ? 1 : 0} title={tool.label} aria-label={tool.label} aria-pressed={mode === tool.id} disabled={!!pending || busy} onClick={() => { setMode(tool.id); setHover(null) }} />)}
       <span className="ar-divider" /><Button size="sm" variant={sheet ? "inverse" : "ghost"} iconLeft="forum" iconSize={16} disabled={!!pending || busy} aria-label={`Comentários (${pageNotes.length})`} onClick={() => { setSheet(true); setMode("cursor") }}>{pageNotes.length || null}</Button>
