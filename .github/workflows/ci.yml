@@ -77,6 +77,32 @@ jobs:
       - name: Build
         run: npm run build
 
+  # W3 exercises the native Mac app with an isolated profile and offline fixture.
+  desktop-smoke:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/desktop/package-lock.json
+      - name: Install desktop and Playwright
+        run: npm ci
+      - name: Run the built Electron app
+        run: npm run smoke
+      - name: Keep smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-smoke
+          path: packages/desktop/output/smoke
+          retention-days: 7
+
   # The CLI is what runs on other people's machines, and packages/auis declares
   # engines.node ">=20". This job holds that floor: no type stripping here, so
   # it is the same Node someone on the minimum would use.

@@ -134,10 +134,17 @@ function Logs({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     let live = true;
-    void desktop.project.logs().then((all) => live && setLines(all));
-    const off = desktop.project.onLog((fresh) => {
-      setLines((current) => [...current, ...fresh].slice(-MAX_LINES));
-    });
+    let revision = 0;
+    // A queued batch can already be in the initial snapshot. Refresh the
+    // bounded history instead of appending those same lines a second time.
+    const refresh = () => {
+      const request = ++revision;
+      void desktop.project.logs().then((all) => {
+        if (live && request === revision) setLines(all.slice(-MAX_LINES));
+      });
+    };
+    const off = desktop.project.onLog(refresh);
+    refresh();
     return () => {
       live = false;
       off();

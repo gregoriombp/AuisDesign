@@ -424,3 +424,16 @@ test("a missing package manager or Node is named, before anything is run", async
 
   assert.equal(fixturePid(root), null, "the dev script was never run");
 });
+
+test("stop during restart awaits pending cleanup and cancels the replacement", async () => {
+  const root = project("stubborn");
+  const server = serverFor(root, { ...FAST, stopGraceMs: 200 });
+  await server.start();
+  const pid = fixturePid(root);
+  const restart = server.restart();
+  await server.stop();
+  assert.equal(pidAlive(pid!), false, "stop must await the earlier stop's process group");
+  await restart;
+  assert.equal(server.state().status, "idle");
+  assert.equal(fixturePid(root), pid, "no replacement process should be started");
+});
