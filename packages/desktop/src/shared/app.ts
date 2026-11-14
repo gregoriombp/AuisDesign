@@ -3,5 +3,5 @@
 // to the bundle id. Changing either later orphans every installed copy's project
 // list and breaks its updates.
 
-export const PRODUCT_NAME = "Auis";
+export const PRODUCT_NAME = "Auis Design";
 export const APP_ID = "design.auis.desktop";

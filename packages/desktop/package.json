@@ -1,6 +1,6 @@
 {
   "name": "@auis/desktop",
-  "productName": "Auis",
+  "productName": "Auis Design",
   "version": "0.1.0",
   "private": true,
   "description": "Auis for Mac: opens a project, runs its dev server and shows the product with Auis on top.",

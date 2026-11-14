@@ -56,7 +56,8 @@ Technical:
 - **electron-builder** (26) for W5: ad-hoc signing is a documented switch
   (`mac.identity: "-"`), and Developer ID, notarization and `electron-updater` with
   GitHub Releases are later changes to the same config.
-- **The app's identity is frozen:** product name `Auis`, bundle id
+- **The app's identity is frozen:** product name `Auis Design` (the owner's pick,
+  2026-11-14 — it is what the newest hub calls the product), bundle id
   `design.auis.desktop` (`src/shared/app.ts`). The userData folder and update
   continuity hang on them.
 - **English UI**, like the hub and the review chrome.
@@ -173,7 +174,7 @@ Electron-flavoured goes into `kit/ui` (`kit/__tests__/boundaries.test.ts`).
 | W2 | `npm --prefix packages/desktop test` → `# fail 0`; the `desktop` job is green in CI |
 | W3 | `npm --prefix packages/desktop run smoke` passes: open a fixture, Starting → Running, navigate from the toolbar, an external link leaves the view alone, no `require` in the page, logs show, kill → Crashed → Restart, quit leaves no process and no lock |
 | W4 | New project ends on `/auis/welcome` |
-| W5 | `npm --prefix packages/desktop run dist` → `release/Auis-0.1.0-arm64.dmg`; `codesign -dv` shows `Signature=adhoc`; `codesign --verify --deep --strict` exits 0; the manual list passes from a Finder launch |
+| W5 | `npm --prefix packages/desktop run dist` → `release/Auis-Design-0.1.0-arm64.dmg`; `codesign -dv` shows `Signature=adhoc`; `codesign --verify --deep --strict` exits 0; the manual list passes from a Finder launch |
 
 W0's `--capture=<dir>` and `--quit-after=<ms>` exist only so that gate can run
 unattended. The W3 smoke replaces them; remove them there.
