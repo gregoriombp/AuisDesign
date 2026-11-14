@@ -41,6 +41,15 @@ const getServerPortalRoot = () => null
 
 const PortalContext = React.createContext<HTMLElement | null>(null)
 
+/** An isolated host (for example a browser extension) owns its portal surface.
+ * Keeps Radix menus/dialogs inside that host instead of escaping into body. */
+export function ChromePortalProvider({ container, children }: {
+  container: HTMLElement
+  children: React.ReactNode
+}) {
+  return <PortalContext.Provider value={container}>{children}</PortalContext.Provider>
+}
+
 /** Where a chrome overlay mounts. Undefined outside a scope (Radix then falls
  *  back to <body>, where the chrome's styles do not reach). */
 export function useChromePortal(): HTMLElement | undefined {

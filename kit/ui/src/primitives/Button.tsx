@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "./cn"
-import { Icon } from "./Icon"
+import { Icon, type IconWeight } from "./Icon"
 
 export type ButtonVariant =
   | "primary"
@@ -28,6 +28,7 @@ export type ButtonProps = Omit<
   /** Glyph size in px; defaults to the size's own (22 for an `sm` icon button). */
   iconSize?: number
   /** Filled glyph (1) for an active or "stop" state. */
+  iconWeight?: IconWeight | "auto"
   iconFill?: 0 | 1
   loading?: boolean
   block?: boolean
@@ -44,6 +45,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       iconOnly,
       iconSize: iconSizeProp,
       iconFill = 0,
+      iconWeight = 300,
       loading,
       block,
       disabled,
@@ -87,12 +89,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         child,
         {},
         iconOnly ? (
-          <Icon name={iconOnly} size={iconSize} weight={300} fill={iconFill} />
+          <Icon name={iconOnly} size={iconSize} weight={iconWeight === "auto" ? undefined : iconWeight} fill={iconFill} />
         ) : (
           <>
-            {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}
+            {iconLeft && <Icon name={iconLeft} size={iconSize} weight={iconWeight === "auto" ? undefined : iconWeight} />}
             <span className="auis-btn__label">{childLabel}</span>
-            {iconRight && <Icon name={iconRight} size={iconSize} weight={300} />}
+            {iconRight && <Icon name={iconRight} size={iconSize} weight={iconWeight === "auto" ? undefined : iconWeight} />}
             {loading && <span aria-hidden="true" className="auis-btn__spinner" />}
           </>
         ),
@@ -118,12 +120,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...rest}
       >
         {iconOnly ? (
-          <Icon name={iconOnly} size={iconSize} weight={300} fill={iconFill} />
+          <Icon name={iconOnly} size={iconSize} weight={iconWeight === "auto" ? undefined : iconWeight} fill={iconFill} />
         ) : (
           <>
-            {iconLeft && <Icon name={iconLeft} size={iconSize} weight={300} />}
+            {iconLeft && <Icon name={iconLeft} size={iconSize} weight={iconWeight === "auto" ? undefined : iconWeight} />}
             <span className="auis-btn__label">{children}</span>
-            {iconRight && <Icon name={iconRight} size={iconSize} weight={300} />}
+            {iconRight && <Icon name={iconRight} size={iconSize} weight={iconWeight === "auto" ? undefined : iconWeight} />}
           </>
         )}
         {loading && <span aria-hidden="true" className="auis-btn__spinner" />}
