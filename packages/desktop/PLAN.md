@@ -24,9 +24,12 @@ anything that is deployed: everything that works in a browser today keeps workin
 | W2 | Core hardening: unit tests for the main-process modules; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; the navigation rules; a CI job | **done** (2026-11-14) |
 | W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | **done** (2026-11-14) |
 | W4 | New project from the app (`npx @auis/cli`) | next |
-| W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | not started |
+| W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | packaged and installed locally (2026-11-14); real-project manual checks pending |
 
 Update this table in the same PR that moves a wave forward.
+
+The owner requested installation before W4 on 2026-11-14. The current app is
+therefore packaged for opening existing projects; new-project creation remains next.
 
 ## Decisions
 
@@ -297,6 +300,21 @@ install is under way cancels it.
 The HTTP fixture deliberately does not prove Next compatibility, HMR, Finder
 environment lookup, agent mentions or microphone permission. Those real-project
 and packaged-app checks remain in W5's manual gate.
+
+### W5 local installation
+
+- `electron-builder.config.mjs` produces an Apple Silicon DMG and an ad-hoc signed
+  app, with the existing Auis icon and the frozen `design.auis.desktop` identity.
+  Only the bundled app and package metadata are included; dev dependencies and
+  source maps stay out. `dist` never publishes anything.
+- `verify:mac` checks metadata, arm64 architecture and `codesign --verify --deep
+  --strict`. `smoke:packaged` runs all four Electron scenarios against the signed
+  archive. These gates passed locally, as did `hdiutil verify` for the DMG.
+- Installed `/Applications/Auis Design.app` and opened it through Launch Services.
+  The launcher rendered and found the user's Node, npm, Git, Claude Code and Codex.
+- The [tester README](README.md) records the install/build commands and remaining
+  checks. Real-project HMR, agent mentions and microphone interaction are still
+  unverified. W5's full manual gate is therefore not marked complete.
 
 ## After v1
 
