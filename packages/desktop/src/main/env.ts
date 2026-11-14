@@ -69,22 +69,35 @@ function askShell(
     const script = `cd -- "$1" 2>/dev/null; printf '%s' "$2"; /usr/bin/env -0; printf '%s' "$2"`;
     let stdout = "";
     let settled = false;
-    const finish = (env: Env | null) => {
-      if (settled) return;
-      settled = true;
-      resolve(env);
-    };
 
     const child = spawn(shell, [flags, script, "auis-env", cwd, MARKER], {
       // No stdin: a startup file that prompts must fail, not wait forever.
       stdio: ["ignore", "pipe", "ignore"],
       // oh-my-zsh checks for updates in interactive shells and asks a question.
       env: { ...base, DISABLE_AUTO_UPDATE: "true" },
-      timeout: timeoutMs,
     });
+
+    const finish = (env: Env | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      // Let go of the pipe and the shell. A startup file can leave something
+      // running in the background that keeps the pipe open long after the
+      // answer is in; waiting for the pipe to close would wait for that.
+      child.stdout?.destroy();
+      child.kill("SIGKILL");
+      resolve(env);
+    };
+    const timer = setTimeout(() => finish(parseEnvOutput(stdout)), timeoutMs);
+
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {
       stdout += chunk;
+      // Both markers are in: that is the whole answer, whatever the shell does next.
+      const first = stdout.indexOf(MARKER);
+      if (first !== -1 && stdout.indexOf(MARKER, first + MARKER.length) !== -1) {
+        finish(parseEnvOutput(stdout));
+      }
     });
     child.on("error", () => finish(null));
     child.on("close", () => finish(parseEnvOutput(stdout)));
@@ -157,6 +170,15 @@ function versionOf(file: string, env: Env): Promise<string | null> {
   });
 }
 
+/** Where a tool is in this environment and which version it reports, or null when it is not there. */
+export async function locateTool(
+  name: string,
+  env: Env,
+): Promise<{ path: string; version: string | null } | null> {
+  const file = findOnPath(name, env);
+  return file ? { path: file, version: await versionOf(file, env) } : null;
+}
+
 /**
  * What the project's processes will find in this environment. A tool that is
  * on the PATH but does not answer `--version` still counts as present, with
@@ -165,9 +187,8 @@ function versionOf(file: string, env: Env): Promise<string | null> {
 export async function probeTools(env: Env): Promise<ToolInfo[]> {
   return Promise.all(
     TOOLS.map(async (name): Promise<ToolInfo> => {
-      const file = findOnPath(name, env);
-      if (!file) return { name, version: null };
-      return { name, version: (await versionOf(file, env)) ?? "found" };
+      const found = await locateTool(name, env);
+      return { name, version: found ? (found.version ?? "found") : null };
     }),
   );
 }
