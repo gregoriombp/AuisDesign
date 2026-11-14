@@ -53,6 +53,7 @@ npm install --prefix packages/desktop
 npm --prefix packages/desktop start -- /path/to/a/project
 npm --prefix packages/desktop run typecheck
 npm --prefix packages/desktop test      # unit tests; they start real processes and take a few seconds
+npm --prefix packages/desktop run smoke # the built app, driven through its windows (opens and closes it; ~30s)
 ```
 
 The living plan — waves, status, gates and what comes after v1 — is [`packages/desktop/PLAN.md`](packages/desktop/PLAN.md). Read its status table before continuing the work.

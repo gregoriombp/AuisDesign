@@ -22,8 +22,8 @@ anything that is deployed: everything that works in a browser today keeps workin
 | W0 | Skeleton: one project from the command line — start or attach, show, stop on quit | **done** (2026-11-14) |
 | W1 | The look: the app's own chrome (launcher, project toolbar, log strip) as a real renderer, in the current Auis Design direction | **done** (2026-11-14) |
 | W2 | Core hardening: unit tests for the main-process modules; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; the navigation rules; a CI job | **done** (2026-11-14) |
-| W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | next |
-| W4 | New project from the app (`npx @auis/cli`) | not started |
+| W3 | The smoke test (the built app, driven through its windows); the gate flags are gone; the app's own menu bar | **done** (2026-11-14) |
+| W4 | New project from the app (`npx @auis/cli`) | next |
 | W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | not started |
 
 Update this table in the same PR that moves a wave forward.
@@ -181,12 +181,49 @@ content-security policy allows nothing from the network.
 - **The port notice is a layout region** under the toolbar, like the log strip: the
   main process moves the project view down by its height.
 
+## What W3 established
+
+- **The menu's page commands act on the project's page, never on the app's chrome.**
+  Electron's stock roles for reload, zoom and developer tools act on whichever page
+  has focus, and that can be the toolbar: zooming it would break a layout whose
+  heights the main process counts on. So those items are plain ones, wired to the
+  project view. A test refuses those roles.
+- **The menu takes no shortcut the page uses.** Auis's modes live in the page on
+  ⇧⌘Y, ⇧⌘K, ⇧⌘E and ⇧⌘S, and a menu accelerator would swallow the key before the
+  page saw it. The list is `RESERVED_FOR_THE_PAGE` in `menu.ts`; a test holds the
+  menu to it. Add to that list when the builder gains a shortcut.
+- **The menu follows the window in front**, tracked from focus events, and is rebuilt
+  only when what it shows changed: a project reports a change on every page load,
+  and replacing the menu while it is open would close it.
+- **The smoke test replaces two things before they can happen:** the native folder
+  picker (it returns the fixture) and handing a link to the user's browser (it is
+  recorded). It refuses to go on if it could not replace them.
+- **A navigation the app prevents never finishes for Playwright**, and every later
+  action on that page then waits for it. Anything the app is expected to stop is
+  run in the page from the main process (`executeJavaScript`) instead.
+- **The main process acts first; the window redraws a moment later.** A text read
+  straight after an action can still be the old one. The first version of the smoke
+  passed once and failed on the second run for exactly that; every text in the
+  chrome is now waited for, and the gate is several runs in a row.
+- **A link with a scheme that is not the web's** does reach the app's guard
+  (`will-navigate`) and is stopped there, without being handed to the system.
+- **The smoke has teeth.** With the navigation guard switched off on purpose, it
+  fails at the step about links that leave.
+- **Open: two early exits in about 45 runs, not reproduced.** Both times the app was
+  told to quit a second or two after launch, cleanly, and not by the test; the 16
+  runs after that all passed. The smoke's windows appear on the screen of whoever
+  runs it, and someone closing one would look exactly like this, but that is a
+  guess. So each way out of the app now says which it was in the terminal
+  (`quitting`, `the last window closed`, `received SIGHUP`), and the smoke prints
+  the app's own output when it fails: the next one names its cause.
+
 ## Architecture
 
 ```
 packages/desktop/
   scripts/build.mjs        esbuild: main and preload (node, cjs), renderer (browser), the two pages
-  src/shared/app.ts        product name and bundle id
+  scripts/smoke.mjs        the smoke test: the built app, driven with Playwright's Electron support
+  src/shared/app.ts        product name, bundle id, where Help points
   src/shared/ipc.ts        channel names, payload types, the layout both sides agree on
   src/shared/workspace.ts  where a project's view may go: allowed origins, web links, in-app routes
   src/main/env.ts          the user's shell environment for a folder; which tools it has
@@ -194,17 +231,18 @@ packages/desktop/
   src/main/detect.ts       what a folder is: kind, package manager, dev script, dependencies, Node range
   src/main/server.ts       one project's dev server: attach or start, install, state, log, stop
   src/main/projects.ts     the persisted project list
+  src/main/menu.ts         the menu bar as a description: what is in it, what is enabled
   src/main/cli.ts          (W4) arguments for `npx @auis/cli`
   src/main/security.ts     app:// protocol, who may call IPC, navigation and permission guards
   src/main/windows/        project.ts (the launcher window is small enough to live in index.ts)
-  src/main/index.ts        lifecycle, the launcher, the IPC router
+  src/main/index.ts        lifecycle, the launcher, the IPC router, the menu's actions
   src/preload/chrome.ts    contextBridge → window.auisDesktop
   src/renderer/            one bundle, two pages: launcher.html, project.html
   test/                    node --test, one file per module; fixtures/ holds the stand-in dev server
 ```
 
-`env`, `nextLock`, `detect`, `server`, `projects` and `shared/workspace` do not import
-`electron`, so they run under `node --test`. Nothing Node- or Electron-flavoured goes
+`env`, `nextLock`, `detect`, `server`, `projects`, `menu` and `shared/workspace` do not
+import `electron` (`menu` only borrows its types), so they run under `node --test`. Nothing Node- or Electron-flavoured goes
 into `kit/ui` (`kit/__tests__/boundaries.test.ts`).
 
 A project is one of four kinds, named by what the app acts on (`detect.ts`): `auis`
@@ -261,12 +299,13 @@ install is under way cancels it.
 | W0 | `npm --prefix packages/desktop start -- <project>` shows the project; after quit no process from that folder remains and `<project>/.next/dev/lock` is gone; root `npm run typecheck` and `npm run lint` exit 0 |
 | W1 | Driven in the built app, light and dark, from `app://auis/`: the launcher empty and with a list (featured, recent, a missing folder); a project starting, running, failing and with the log open; quit leaves no process and no lock |
 | W2 | `npm --prefix packages/desktop test` → `fail 0`, and the run exits by itself with no process left; the `desktop` job is green in CI; in the built app, a project with no `node_modules` installs and starts from the button, and an Auis project off port 3000 shows the notice, copies its command and moves the page back up when dismissed |
-| W3 | `npm --prefix packages/desktop run smoke` passes: open a fixture, Starting → Running, navigate from the toolbar, an external link leaves the view alone, no `require` in the page, logs show, kill → Stopped → Start again, quit leaves no process and no lock |
+| W3 | `npm --prefix packages/desktop run smoke` → `smoke ok`, several runs in a row, with no process left: an empty launcher, opening a folder, the sandbox of both pages, the port notice, toolbar and menu navigation, links that stay and links that leave, the log strip, a server that dies and starts again, a clean quit, the list on the next launch, a project that fails to start. The `Desktop smoke` workflow runs it on a Mac when the app changes |
 | W4 | New project ends on `/auis/welcome` |
 | W5 | `npm --prefix packages/desktop run dist` → `release/Auis-Design-0.1.0-arm64.dmg`; `codesign -dv` shows `Signature=adhoc`; `codesign --verify --deep --strict` exits 0; the manual list passes from a Finder launch |
 
-W0's `--capture=<dir>` and `--quit-after=<ms>` exist only so that gate can run
-unattended. The W3 smoke replaces them; remove them there.
+The app takes one argument, a project folder, and Chromium's own
+`--user-data-dir=<dir>`. The flags W0 and W1 used to run their gates unattended are
+gone: the smoke test drives the app from outside instead.
 
 ## After v1
 
