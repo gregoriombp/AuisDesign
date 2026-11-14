@@ -5,3 +5,6 @@
 
 export const PRODUCT_NAME = "Auis Design";
 export const APP_ID = "design.auis.desktop";
+
+/** Where Help sends people: the project's public repository. */
+export const HELP_URL = "https://github.com/gregoriombp/AuisDesign";

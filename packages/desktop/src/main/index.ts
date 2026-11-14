@@ -5,11 +5,20 @@
 // window. Given a folder on the command line, it opens that project directly.
 // On quit, every dev server the app started is stopped before the app exits.
 
-import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type IpcMainInvokeEvent } from "electron";
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  Menu,
+  nativeTheme,
+  shell,
+  type IpcMainInvokeEvent,
+} from "electron";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { PRODUCT_NAME } from "../shared/app.ts";
+import { HELP_URL, PRODUCT_NAME } from "../shared/app.ts";
 import {
   CHANNELS,
   type LauncherState,
@@ -17,11 +26,12 @@ import {
   type ProjectSummary,
   type ToolInfo,
 } from "../shared/ipc.ts";
+import { whyNotRunnable } from "./detect.ts";
 import { probeTools, resolveShellEnv } from "./env.ts";
+import { menuTemplate, type MenuActions, type MenuContext } from "./menu.ts";
 import { liveDevServer } from "./nextLock.ts";
 import { createProjectStore, displayPath, type Project, type ProjectStore } from "./projects.ts";
 import { APP_ORIGIN, isChrome, registerAppScheme, serveApp, trustChrome } from "./security.ts";
-import { whyNotRunnable } from "./detect.ts";
 import { openProjectWindow, type ProjectWindow } from "./windows/project.ts";
 
 const PRELOAD = path.join(__dirname, "../preload/chrome.cjs");
@@ -30,38 +40,28 @@ const RENDERER = path.join(__dirname, "../renderer");
 const projectWindows = new Map<string, ProjectWindow>();
 let store: ProjectStore;
 let launcher: BrowserWindow | null = null;
+/** The app window in front: the last one to take focus that is still open. */
+let front: BrowserWindow | null = null;
 let tools: ToolInfo[] | null = null;
 let quitting = false;
 let finished = false;
 
 const log = (message: string) => console.log(`[auis-desktop] ${message}`);
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-interface Options {
-  root: string | null;
-  /** Gate only: a folder to write captures of the windows into. The W3 smoke replaces it. */
-  capture: string | null;
-  /** Gate only: quit by itself after this long. The W3 smoke replaces it. */
-  quitAfterMs: number | null;
-}
 
 /**
- * `argv` without the executable. Unpackaged, the first positional is the app's
- * own folder (`electron .`), and it is not always argv[1]: a test runner puts
- * its switches in front of it. So it is recognised by what it points at.
+ * The project folder named on the command line, if any. Unpackaged, the first
+ * positional is the app's own folder (`electron .`), and it is not always
+ * argv[1]: a test runner puts its switches in front of it. So it is recognised
+ * by what it points at.
  */
-function parseArgs(argv: string[], appPath: string | null): Options {
-  const options: Options = { root: null, capture: null, quitAfterMs: null };
+function folderArgument(argv: string[], appPath: string | null): string | null {
   let skippedApp = appPath === null;
   for (const arg of argv) {
-    if (arg.startsWith("--capture=")) options.capture = arg.slice("--capture=".length);
-    else if (arg.startsWith("--quit-after=")) {
-      options.quitAfterMs = Number(arg.slice("--quit-after=".length)) || null;
-    } else if (arg.startsWith("-")) continue;
-    else if (!skippedApp && path.resolve(arg) === appPath) skippedApp = true;
-    else if (options.root === null) options.root = arg;
+    if (arg.startsWith("-")) continue;
+    if (!skippedApp && path.resolve(arg) === appPath) skippedApp = true;
+    else return arg;
   }
-  return options;
+  return null;
 }
 
 // ── Launcher ──────────────────────────────────────────────────────────────
@@ -81,10 +81,27 @@ function summarize(project: Project): ProjectSummary {
 
 const launcherState = (): LauncherState => ({ projects: store.list().map(summarize), tools });
 
-function pushLauncher() {
+/** Something the launcher or the menu shows has changed. */
+function changed() {
   if (launcher && !launcher.isDestroyed()) {
     launcher.webContents.send(CHANNELS.launcherChanged, launcherState());
   }
+  refreshMenu();
+}
+
+/** Every app window goes through here, so the menu always knows which one is in front. */
+function track(win: BrowserWindow) {
+  // A new window opens in front.
+  front = win;
+  win.on("focus", () => {
+    front = win;
+    // A server may have been started or stopped in a terminal while we were away.
+    changed();
+  });
+  win.on("closed", () => {
+    if (front === win) front = null;
+    refreshMenu();
+  });
 }
 
 function openLauncher(): BrowserWindow {
@@ -104,13 +121,13 @@ function openLauncher(): BrowserWindow {
     webPreferences: { preload: PRELOAD, contextIsolation: true, sandbox: true, nodeIntegration: false },
   });
   trustChrome(win.webContents);
-  // A server may have been started or stopped in a terminal while we were away.
-  win.on("focus", pushLauncher);
+  track(win);
   win.on("closed", () => {
     launcher = null;
   });
   void win.loadURL(`${APP_ORIGIN}/launcher.html`);
   launcher = win;
+  refreshMenu();
   return win;
 }
 
@@ -119,7 +136,7 @@ async function readTools() {
   const { env, source } = await resolveShellEnv({ cwd: os.homedir() });
   log(`environment from the ${source} shell`);
   tools = await probeTools(env);
-  pushLauncher();
+  changed();
 }
 
 // ── Projects ──────────────────────────────────────────────────────────────
@@ -132,15 +149,22 @@ function openProject(project: Project): ProjectWindow {
   }
   const opened = openProjectWindow(project, {
     preload: PRELOAD,
-    onChanged: pushLauncher,
+    onChanged: changed,
     onClosed: () => {
       projectWindows.delete(project.id);
-      pushLauncher();
+      changed();
     },
   });
   projectWindows.set(project.id, opened);
-  pushLauncher();
+  track(opened.window);
+  changed();
   return opened;
+}
+
+/** Opens a project the app already knows, if its folder is still there. */
+function openKnownProject(id: unknown) {
+  const project = typeof id === "string" ? store.get(id) : null;
+  if (project && fs.existsSync(project.path)) openProject(store.open(project.path));
 }
 
 async function pickFolder(parent: BrowserWindow | null) {
@@ -159,6 +183,70 @@ async function pickFolder(parent: BrowserWindow | null) {
     return;
   }
   openProject(store.open(folder));
+}
+
+// ── Menu ──────────────────────────────────────────────────────────────────
+
+/** The project window in front, or null when the launcher is, or nothing is. */
+function frontProject(): ProjectWindow | null {
+  for (const opened of projectWindows.values()) {
+    if (opened.window === front) return opened;
+  }
+  return null;
+}
+
+function menuContext(): MenuContext {
+  const state = frontProject()?.state() ?? null;
+  return {
+    development: !app.isPackaged,
+    recent: store.list().map((project) => ({
+      id: project.id,
+      name: project.name,
+      displayPath: displayPath(project.path),
+      missing: !fs.existsSync(project.path),
+    })),
+    project: state && {
+      running: state.server.status === "running",
+      busy: state.server.status === "starting" || state.server.status === "installing",
+      canGoBack: state.canGoBack,
+      canGoForward: state.canGoForward,
+      logsOpen: state.logsOpen,
+    },
+  };
+}
+
+const menuActions: MenuActions = {
+  openFolder: () => void pickFolder(front && !front.isDestroyed() ? front : null),
+  openProject: openKnownProject,
+  showLauncher: () => void openLauncher(),
+  navigate: (type) => frontProject()?.navigate({ type }),
+  zoom: (direction) => frontProject()?.zoom(direction),
+  toggleLog: () => {
+    const project = frontProject();
+    project?.setLogsOpen(!project.state().logsOpen);
+  },
+  inspectPage: () => frontProject()?.inspectPage(),
+  inspectChrome: () => front?.webContents.openDevTools({ mode: "detach" }),
+  restart: () => void frontProject()?.restart(),
+  openInBrowser: () => frontProject()?.openInBrowser(),
+  revealInFinder: () => frontProject()?.revealInFinder(),
+  openHelp: () => void shell.openExternal(HELP_URL),
+};
+
+let menuShown = "";
+
+/**
+ * Rebuilds the menu bar, but only when what it shows has changed. A project
+ * reports a change on every page load, and replacing the menu while someone
+ * has it open would close it under their pointer.
+ */
+function refreshMenu() {
+  if (!store) return;
+  const context = menuContext();
+  const key = JSON.stringify(context);
+  if (key === menuShown) return;
+  menuShown = key;
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate(context, menuActions)));
 }
 
 // ── IPC ───────────────────────────────────────────────────────────────────
@@ -194,14 +282,11 @@ function registerIpc() {
   handle(CHANNELS.launcherOpenFolder, (event) =>
     pickFolder(BrowserWindow.fromWebContents(event.sender)),
   );
-  handle(CHANNELS.launcherOpenProject, (_event, id: unknown) => {
-    const project = typeof id === "string" ? store.get(id) : null;
-    if (project && fs.existsSync(project.path)) openProject(store.open(project.path));
-  });
+  handle(CHANNELS.launcherOpenProject, (_event, id: unknown) => openKnownProject(id));
   handle(CHANNELS.launcherRemoveProject, (_event, id: unknown) => {
     // Forgetting a project that is open would orphan its window's entry.
     if (typeof id === "string" && !projectWindows.has(id)) store.remove(id);
-    pushLauncher();
+    changed();
   });
 
   handle(CHANNELS.projectState, (event) => senderProject(event)?.state() ?? null);
@@ -219,25 +304,6 @@ function registerIpc() {
   handle(CHANNELS.projectDismissNotice, (event) => senderProject(event)?.dismissNotice());
 }
 
-// ── Gate affordance ───────────────────────────────────────────────────────
-
-async function capture(dir: string) {
-  await sleep(3500);
-  fs.mkdirSync(dir, { recursive: true });
-  const save = async (name: string, contents: Electron.WebContents) => {
-    const image = await contents.capturePage();
-    fs.writeFileSync(path.join(dir, `${name}.png`), image.toPNG());
-  };
-  if (launcher && !launcher.isDestroyed()) await save("launcher", launcher.webContents);
-  for (const opened of projectWindows.values()) {
-    await save("chrome", opened.window.webContents);
-    const view = opened.view();
-    if (view) await save("view", view.webContents);
-    log(`captured ${opened.state().route} · window ${opened.window.getMediaSourceId()}`);
-  }
-  if (launcher && !launcher.isDestroyed()) log(`captured launcher · window ${launcher.getMediaSourceId()}`);
-}
-
 // ── Lifecycle ─────────────────────────────────────────────────────────────
 
 app.setName(PRODUCT_NAME);
@@ -248,45 +314,49 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   // Quit is asynchronous on purpose: the app must not disappear while a
   // server it started is still running.
+  // Each way out says which it was: when the app goes away unexpectedly, the
+  // terminal that started it holds the answer.
   app.on("before-quit", (event) => {
     if (finished) return;
     event.preventDefault();
     if (quitting) return;
     quitting = true;
     const stops = [...projectWindows.values()].map((opened) => opened.stop());
+    log(`quitting, stopping ${stops.length} dev server${stops.length === 1 ? "" : "s"}`);
     void Promise.allSettled(stops).finally(() => {
       finished = true;
       app.exit(0);
     });
   });
-  app.on("window-all-closed", () => app.quit());
+  app.on("window-all-closed", () => {
+    log("the last window closed");
+    app.quit();
+  });
   app.on("second-instance", () => openLauncher());
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
-    process.on(signal, () => app.quit());
+    process.on(signal, () => {
+      log(`received ${signal}`);
+      app.quit();
+    });
   }
 
-  void app.whenReady().then(async () => {
-    const options = parseArgs(process.argv.slice(1), app.isPackaged ? null : app.getAppPath());
+  void app.whenReady().then(() => {
     store = createProjectStore(path.join(app.getPath("userData"), "projects.json"));
+    app.setAboutPanelOptions({ applicationName: PRODUCT_NAME, applicationVersion: app.getVersion() });
     serveApp(RENDERER);
     registerIpc();
+    refreshMenu();
 
-    if (options.root) {
-      // Under `npm --prefix`, cwd is this package; INIT_CWD is where the user stood.
-      const folder = path.resolve(process.env.INIT_CWD ?? process.cwd(), options.root);
-      const problem = whyNotRunnable(folder);
-      if (problem) {
-        log(`cannot open ${folder}: ${problem}`);
-        openLauncher();
-      } else {
-        openProject(store.open(folder));
-      }
+    const requested = folderArgument(process.argv.slice(1), app.isPackaged ? null : app.getAppPath());
+    // Under `npm --prefix`, cwd is this package; INIT_CWD is where the user stood.
+    const folder = requested && path.resolve(process.env.INIT_CWD ?? process.cwd(), requested);
+    const problem = folder ? whyNotRunnable(folder) : null;
+    if (folder && !problem) {
+      openProject(store.open(folder));
     } else {
+      if (folder) log(`cannot open ${folder}: ${problem}`);
       openLauncher();
     }
     void readTools();
-
-    if (options.capture) await capture(options.capture);
-    if (options.quitAfterMs !== null) setTimeout(() => app.quit(), options.quitAfterMs);
   });
 }

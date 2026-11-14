@@ -5,7 +5,7 @@
 // the window's own page), so nothing here overlaps: the view is resized to
 // leave the toolbar, the port notice and the log strip uncovered.
 
-import { BrowserWindow, WebContentsView, clipboard, nativeTheme } from "electron";
+import { BrowserWindow, WebContentsView, clipboard, nativeTheme, shell } from "electron";
 import {
   CHANNELS,
   DEFAULT_BRIDGE_PORT,
@@ -18,6 +18,7 @@ import {
 } from "../../shared/ipc.ts";
 import { resolveRoute } from "../../shared/workspace.ts";
 import { detectProject } from "../detect.ts";
+import type { ZoomDirection } from "../menu.ts";
 import { displayPath, type Project } from "../projects.ts";
 import { APP_ORIGIN, guardProject, openExternally, trustChrome } from "../security.ts";
 import { createProjectServer } from "../server.ts";
@@ -35,8 +36,11 @@ export interface ProjectWindow {
   openInBrowser(): void;
   copyNoticeCommand(): Promise<void>;
   dismissNotice(): void;
-  /** The project's page, when the server is up. For the gate's capture only. */
-  view(): WebContentsView | null;
+  /** Zooms the project's page. The app's own chrome is never zoomed: its layout is fixed. */
+  zoom(direction: ZoomDirection): void;
+  /** Opens the developer tools for the project's page, in their own window. */
+  inspectPage(): void;
+  revealInFinder(): void;
   /** Ends the server if this window started it. Safe to call more than once. */
   stop(): Promise<void>;
 }
@@ -206,8 +210,22 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
     contentsId,
     state,
     logs: () => server.logs(),
-    view: () => view,
     stop,
+    zoom(direction) {
+      const contents = view?.webContents;
+      if (!contents) return;
+      // A zoom level is a power of 1.2, and 0 is actual size: half a level is about 10% a step.
+      const level = direction === "reset" ? 0 : contents.getZoomLevel() + (direction === "in" ? 0.5 : -0.5);
+      contents.setZoomLevel(Math.max(-3, Math.min(4, level)));
+    },
+    inspectPage() {
+      // Detached: docked, the tools would take their space from a page that is
+      // already laid out between the toolbar and the log.
+      view?.webContents.openDevTools({ mode: "detach" });
+    },
+    revealInFinder() {
+      shell.showItemInFolder(project.path);
+    },
     navigate(action) {
       const contents = view?.webContents;
       if (!contents) return;
