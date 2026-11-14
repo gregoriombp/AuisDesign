@@ -1,0 +1,874 @@
+/*
+ * The look of the app's own chrome: the launcher and the project toolbar.
+ *
+ * It follows the current Auis Design direction (see ../../PLAN.md, "The look"):
+ * a quiet neutral canvas, white cards with a generous radius, one serif display
+ * line, Geist for everything else, filled rounded icons, and dark as the only
+ * emphasis. These tokens belong to this app. They are not the product's design
+ * system and not the review chrome's `--auis-*` set; nothing outside this
+ * renderer reads them.
+ */
+
+@import "@fontsource-variable/geist/wght.css";
+@import "@fontsource-variable/geist-mono/wght.css";
+@import "@fontsource/instrument-serif/400.css";
+@import "material-symbols/rounded.css";
+
+:root {
+  color-scheme: light dark;
+
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+
+  --bg-app: #f1f2f4;
+  --bg-surface: #fcfdfe;
+  --bg-raised: #ffffff;
+  --bg-fill: #f8f9fb;
+  --bg-hover: #f8f9fb;
+  --bg-hover-app: #e3e5e8;
+  --bg-press: #e3e5e8;
+  --bg-inverse: #0d1015;
+  --bg-inverse-hover: #262a31;
+
+  --fg-primary: #0d1015;
+  --fg-secondary: #5a5e66;
+  --fg-tertiary: #71757c;
+  --fg-muted: #b5b8bd;
+  --fg-on-inverse: #ffffff;
+  --fg-danger: #a82222;
+
+  --border-subtle: #f1f2f4;
+  --border-default: #e3e5e8;
+  --border-strong: #b5b8bd;
+  --grid-line: #f1f2f4;
+  --ring: #71757c;
+
+  --dot-success: #22a871;
+  --dot-idle: #b5b8bd;
+  --dot-danger: #df5b5b;
+
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-card: 24px;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 16px -4px rgba(0, 0, 0, 0.08);
+
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 280ms;
+
+  --toolbar-height: 52px;
+  --logs-height: 260px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-app: #030507;
+    --bg-surface: #0d1015;
+    --bg-raised: #0d1015;
+    --bg-fill: #13171d;
+    --bg-hover: #13171d;
+    --bg-hover-app: #13171d;
+    --bg-press: #262a31;
+    --bg-inverse: #ffffff;
+    --bg-inverse-hover: #e3e5e8;
+
+    --fg-primary: #ffffff;
+    --fg-secondary: #b5b8bd;
+    --fg-tertiary: #95999f;
+    --fg-muted: #5a5e66;
+    --fg-on-inverse: #030507;
+    --fg-danger: #df5b5b;
+
+    --border-subtle: #13171d;
+    --border-default: #262a31;
+    --border-strong: #5a5e66;
+    --grid-line: #13171d;
+    --ring: #e3e5e8;
+
+    --dot-success: #5bdf9e;
+    --dot-idle: #5a5e66;
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font: 400 14px/1.5 var(--font-sans);
+  color: var(--fg-primary);
+  background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  /* This is an app's chrome, not a document: text is not selectable by default. */
+  user-select: none;
+  cursor: default;
+  overflow: hidden;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--fg-primary) 18%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: default;
+  text-align: inherit;
+}
+
+button,
+[role="button"] {
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ── Icons: Material Symbols Rounded, always filled ───────────────────── */
+
+.icon {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  direction: ltr;
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  overflow: hidden;
+  font-feature-settings: "liga";
+  /* Small glyphs get a firmer weight and grade so they stay legible. */
+  font-variation-settings: "FILL" 1, "wght" 290, "GRAD" 0, "opsz" 20;
+}
+
+.icon-14 {
+  font-size: 14px;
+  font-variation-settings: "FILL" 1, "wght" 310, "GRAD" 200, "opsz" 20;
+}
+
+.icon-16 {
+  font-size: 16px;
+  font-variation-settings: "FILL" 1, "wght" 300, "GRAD" 200, "opsz" 20;
+}
+
+.icon-32 {
+  font-size: 32px;
+  font-variation-settings: "FILL" 1, "wght" 240, "GRAD" 0, "opsz" 32;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex: none;
+}
+
+.btn:active {
+  transform: translateY(0.5px);
+}
+
+.btn-primary {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+}
+
+.btn-primary:hover {
+  background: var(--bg-inverse-hover);
+}
+
+.btn-secondary {
+  background: var(--bg-fill);
+  color: var(--fg-primary);
+  box-shadow: inset 0 0 0 1px var(--border-default);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-press);
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  color: var(--fg-secondary);
+  flex: none;
+}
+
+.icon-btn:hover {
+  background: var(--bg-hover-app);
+  color: var(--fg-primary);
+}
+
+.icon-btn:disabled {
+  color: var(--fg-muted);
+  background: none;
+}
+
+.icon-btn[aria-pressed="true"] {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+}
+
+/* ── Status ───────────────────────────────────────────────────────────── */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  white-space: nowrap;
+}
+
+.status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dot-idle);
+  flex: none;
+}
+
+.status[data-tone="success"]::before {
+  background: var(--dot-success);
+}
+
+.status[data-tone="danger"]::before {
+  background: var(--dot-danger);
+}
+
+.status[data-tone="busy"]::before {
+  animation: pulse 1.2s var(--ease-out) infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Project window: toolbar ──────────────────────────────────────────── */
+
+.toolbar {
+  height: var(--toolbar-height);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* The left gap is the traffic lights. */
+  padding: 0 12px 0 88px;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border-default);
+  -webkit-app-region: drag;
+}
+
+.toolbar button,
+.toolbar .address {
+  -webkit-app-region: no-drag;
+}
+
+.toolbar-gap {
+  flex: 1 1 12px;
+  min-width: 12px;
+  align-self: stretch;
+}
+
+.address {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  flex: 0 1 380px;
+  min-width: 120px;
+  margin-left: 8px;
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.address-name {
+  font-weight: 500;
+  flex: none;
+}
+
+.address-route {
+  color: var(--fg-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.surfaces {
+  display: flex;
+  gap: 2px;
+  margin-left: 8px;
+  flex: none;
+}
+
+.surface {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+}
+
+.surface:hover {
+  background: var(--bg-hover-app);
+  color: var(--fg-primary);
+}
+
+/* Selection goes dark: the one emphasis this system has. */
+.surface[aria-current="page"] {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+}
+
+.toolbar .status {
+  padding: 0 10px;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Project window: what shows while there is no page to show ────────── */
+
+.stage-state {
+  position: fixed;
+  inset: var(--toolbar-height) 0 0 0;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+}
+
+.stage-state[data-logs="true"] {
+  bottom: var(--logs-height);
+}
+
+.state {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  max-width: 440px;
+  text-align: center;
+}
+
+.state-mark {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  color: var(--fg-secondary);
+}
+
+.state h2 {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.state p {
+  color: var(--fg-secondary);
+  text-wrap: pretty;
+  user-select: text;
+  cursor: text;
+}
+
+.state .btn {
+  margin-top: 16px;
+}
+
+/* ── Project window: dev-server log ───────────────────────────────────── */
+
+.logs {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: var(--logs-height);
+  display: grid;
+  grid-template-rows: 36px minmax(0, 1fr);
+  background: var(--bg-raised);
+  border-top: 1px solid var(--border-default);
+}
+
+.logs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.logs-body {
+  margin: 0;
+  padding: 10px 16px 14px;
+  font: 400 12px/1.6 var(--font-mono);
+  color: var(--fg-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  cursor: text;
+}
+
+.logs-empty {
+  font-family: var(--font-sans);
+  color: var(--fg-tertiary);
+}
+
+/* ── Launcher ─────────────────────────────────────────────────────────── */
+
+.launcher {
+  height: 100%;
+}
+
+.titlebar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--toolbar-height);
+  -webkit-app-region: drag;
+  z-index: 1;
+}
+
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--toolbar-height) 40px 56px;
+}
+
+.hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 20px 0 36px;
+}
+
+.hero h1 {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font: 400 4rem/1.05 var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+.hero p {
+  max-width: 380px;
+  padding-bottom: 10px;
+  font-size: 16px;
+  color: var(--fg-secondary);
+  text-wrap: pretty;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.stack {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.card {
+  display: block;
+  width: 100%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  /* The one authored moment: the cards settle in, once, when the app opens. */
+  animation: settle var(--dur-slow) var(--ease-fluid) both;
+  animation-delay: calc(var(--order, 0) * 50ms);
+}
+
+button.card:hover {
+  box-shadow: var(--shadow-raised);
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* A sheet of graph paper for the drawn previews. */
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 240px;
+  overflow: hidden;
+  background-color: var(--bg-surface);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center top;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.stage-short {
+  height: 148px;
+}
+
+.card-foot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px 18px 24px;
+}
+
+.card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.card-title > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-support {
+  display: block;
+  margin-top: 2px;
+  color: var(--fg-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.go {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-fill);
+  color: var(--fg-secondary);
+  flex: none;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+button.card:hover .go {
+  background: var(--bg-inverse);
+  color: var(--fg-on-inverse);
+}
+
+.card-head {
+  padding: 20px 24px 6px;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  padding-right: 8px;
+  border-radius: var(--radius-lg);
+}
+
+.row-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 8px 0 16px;
+  border-radius: var(--radius-lg);
+}
+
+.row-main:disabled {
+  color: var(--fg-tertiary);
+}
+
+.row:hover,
+.row:focus-within {
+  background: var(--bg-hover);
+}
+
+.row-name {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.row-detail {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--fg-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row .icon-btn {
+  opacity: 0;
+}
+
+.row:hover .icon-btn,
+.row:focus-within .icon-btn {
+  opacity: 1;
+}
+
+.row .icon-btn:hover {
+  background: var(--bg-press);
+}
+
+.env-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+.env-row + .env-row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.env-name {
+  font-weight: 500;
+}
+
+.card-note {
+  padding: 0 24px 20px;
+  font-size: 13px;
+  color: var(--fg-secondary);
+  text-wrap: pretty;
+}
+
+/* ── Drawn previews ───────────────────────────────────────────────────── */
+
+.mini {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  width: min(78%, 460px);
+  height: 196px;
+  margin-top: 44px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-bottom: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.mini-side {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 16px 14px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.mini-main {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px 18px 0;
+}
+
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border-default);
+}
+
+.bar-strong {
+  background: var(--fg-primary);
+}
+
+.mini-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mini-tile {
+  display: grid;
+  align-content: center;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.mini-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.mini-chart i {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: var(--bg-fill);
+  border: 1px solid var(--border-subtle);
+  border-bottom: 0;
+}
+
+.mini-chart i:last-child {
+  background: var(--fg-primary);
+  border-color: var(--fg-primary);
+}
+
+/* Before the first project: the same window, as an outline waiting to be filled. */
+.mini[data-empty="true"] {
+  background: none;
+  border-style: dashed;
+  border-color: var(--border-strong);
+  box-shadow: none;
+}
+
+.mini[data-empty="true"] .mini-side {
+  border-right-style: dashed;
+  border-color: var(--border-default);
+}
+
+.folder {
+  display: block;
+  position: relative;
+  width: 104px;
+  height: 72px;
+  margin-top: 14px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 4px var(--radius-md) var(--radius-md) var(--radius-md);
+  transition: transform var(--dur-base) var(--ease-fluid);
+}
+
+.folder::before {
+  content: "";
+  position: absolute;
+  left: -1.5px;
+  top: -13px;
+  width: 44px;
+  height: 13px;
+  border: 1.5px dashed var(--border-strong);
+  border-bottom: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+button.card:hover .folder {
+  transform: translateY(-3px);
+}
