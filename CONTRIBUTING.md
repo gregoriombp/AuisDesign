@@ -44,6 +44,18 @@ node packages/auis/bin/auis.mjs /tmp/probe --no-install   # end-to-end, ~1s
 
 If your change alters what a fresh project should contain, update `PRUNE` in `packages/auis/src/create.mjs`. Releasing is documented in [`docs/RELEASING.md`](docs/RELEASING.md).
 
+## The desktop app (`packages/desktop`)
+
+[`packages/desktop`](packages/desktop) is Auis for Mac: an Electron app that opens a project folder, runs that project's own dev server and shows the product with Auis on top. It is not part of the Next.js app and never ships in a scaffold (`packages/` is pruned). It has its own `package.json` and lockfile, so the root install never downloads Electron.
+
+```bash
+npm install --prefix packages/desktop
+npm --prefix packages/desktop start -- /path/to/a/project
+npm --prefix packages/desktop run typecheck
+```
+
+The living plan — waves, status, gates and what comes after v1 — is [`packages/desktop/PLAN.md`](packages/desktop/PLAN.md). Read its status table before continuing the work.
+
 ## Commit style
 
 Small, atomic commits grouped by logical subject. Conventional prefixes are welcome (`feat:`, `fix:`, `docs:`, `chore:`).
