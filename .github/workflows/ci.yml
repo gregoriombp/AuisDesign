@@ -44,6 +44,39 @@ jobs:
         run: npm run ds:check
         continue-on-error: true # informational: reports hardcode debt
 
+  # The Mac app (packages/desktop). It is its own package with its own lockfile,
+  # so nothing here needs the root install. The Electron binary is not
+  # downloaded: the tests cover the modules that do not import electron, and the
+  # types and the bundle need the package, not the app. Linux is enough for
+  # that; what only a Mac can show is checked by hand (see its PLAN.md).
+  desktop:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/desktop
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: packages/desktop/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
   # The CLI is what runs on other people's machines, and packages/auis declares
   # engines.node ">=20". This job holds that floor: no type stripping here, so
   # it is the same Node someone on the minimum would use.
