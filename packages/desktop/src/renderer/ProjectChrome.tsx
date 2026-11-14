@@ -151,9 +151,10 @@ function Logs({ onClose }: { onClose: () => void }) {
   }, [lines]);
 
   return (
-    <section className="logs" aria-label="Dev server log">
+    <section className="logs" aria-label="Log">
       <div className="logs-head">
-        Dev server
+        {/* Not "Dev server": an install prints here too. */}
+        Log
         <IconButton icon="close" label="Hide the log" onClick={onClose} />
       </div>
       <pre
@@ -242,7 +243,7 @@ export function ProjectChrome() {
         </Status>
         <IconButton
           icon="terminal"
-          label={state.logsOpen ? "Hide the dev server log" : "Show the dev server log"}
+          label={state.logsOpen ? "Hide the log" : "Show the log"}
           pressed={state.logsOpen}
           onClick={() => setLogs(!state.logsOpen)}
         />
