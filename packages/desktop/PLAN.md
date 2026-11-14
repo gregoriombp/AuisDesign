@@ -22,8 +22,8 @@ anything that is deployed: everything that works in a browser today keeps workin
 | W0 | Skeleton: one project from the command line — start or attach, show, stop on quit | **done** (2026-11-14) |
 | W1 | The look: the app's own chrome (launcher, project toolbar, log strip) as a real renderer, in the current Auis Design direction | **done** (2026-11-14) |
 | W2 | Core hardening: unit tests for the main-process modules; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; the navigation rules; a CI job | **done** (2026-11-14) |
-| W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | implemented; local gate passed, CI pending (2026-11-14) |
-| W4 | New project from the app (`npx @auis/cli`) | not started |
+| W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | **done** (2026-11-14) |
+| W4 | New project from the app (`npx @auis/cli`) | next |
 | W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | not started |
 
 Update this table in the same PR that moves a wave forward.
@@ -286,7 +286,8 @@ install is under way cancels it.
   event may overlap; the renderer refreshes the bounded history on each batch.
 - **Local verification:** 71 desktop unit tests, all four Electron smoke scenarios,
   173 root tests, both typechecks, desktop build and root lint passed. The lint
-  result retains the same 33 existing warnings.
+  result retains the same 33 existing warnings. All four CI jobs, including the
+  macOS Electron gate, passed in [run 43584854381](https://github.com/gregoriombp/AuisDesign/actions/runs/43584854381).
 - **The old capture/quit flags are gone.** Screenshots, accessibility snapshots,
   main-process logs and Playwright traces live in ignored `output/smoke/` under
   this package. CI retains them for seven days in the `desktop-smoke` artifact.
