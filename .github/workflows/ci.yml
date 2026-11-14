@@ -95,12 +95,20 @@ jobs:
         run: npm ci
       - name: Run the built Electron app
         run: npm run smoke
+      - name: Package the signed Mac app
+        run: npm run pack:mac
+      - name: Verify the signed bundle
+        run: npm run verify:mac
+      - name: Run the packaged Electron app
+        run: npm run smoke:packaged
       - name: Keep smoke evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: desktop-smoke
-          path: packages/desktop/output/smoke
+          path: |
+            packages/desktop/output/smoke
+            packages/desktop/output/smoke-packaged
           retention-days: 7
 
   # The CLI is what runs on other people's machines, and packages/auis declares
