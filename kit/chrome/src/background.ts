@@ -50,7 +50,9 @@ function capture(sender: chrome.runtime.MessageSender, url: string): Promise<str
     const wait = Math.max(0, 600 - (Date.now() - lastCapture))
     if (wait) await new Promise(r => setTimeout(r, wait))
     const current = await chrome.tabs.get(tab.id)
-    if (!current.active || current.url !== tab.url) throw new Error("Volte à aba da revisão para capturar a imagem.")
+    if (!current.active) throw new Error("Volte à aba da revisão para capturar a imagem.")
+    // Same rule as the first check: tracking parameters and query order do not make a new page.
+    if (!current.url || pageKey(current.url) !== pageKey(tab.url)) throw new Error("A página mudou. Selecione o elemento novamente.")
     lastCapture = Date.now()
     return chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" })
   })
