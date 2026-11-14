@@ -27,6 +27,11 @@ const eslintConfig = [
       "flow-bridge/**",
       "storage/**",
       "kit/*/dist/**",
+      // The desktop app's build output and packaged releases. Its source is
+      // linted here; its types are checked by its own tsconfig (the root one
+      // excludes it, because `electron` is not a root dependency).
+      "packages/desktop/dist/**",
+      "packages/desktop/release/**",
       "public/**",
       "next-env.d.ts",
     ],
