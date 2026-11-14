@@ -52,6 +52,7 @@ If your change alters what a fresh project should contain, update `PRUNE` in `pa
 npm install --prefix packages/desktop
 npm --prefix packages/desktop start -- /path/to/a/project
 npm --prefix packages/desktop run typecheck
+npm --prefix packages/desktop test      # unit tests; they start real processes and take a few seconds
 ```
 
 The living plan — waves, status, gates and what comes after v1 — is [`packages/desktop/PLAN.md`](packages/desktop/PLAN.md). Read its status table before continuing the work.
