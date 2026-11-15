@@ -282,6 +282,15 @@ install is under way cancels it.
   navigates/reloads the focused project, toggles its log, restarts its server or
   opens its current page in the browser. Edit and Window use native roles. Project
   commands disable in the launcher and follow server/history state.
+- **Page tools, added after the gate.** Replacing Electron's stock menu had taken
+  zoom and the developer tools away. View now has Actual Size, Zoom In and Zoom Out
+  and Inspect Page, all for the focused project's page and never for the app's own
+  chrome, whose layout is fixed. Zoom is kept per address by Chromium, so one set
+  before a page's first load is lost; the smoke waits for the page before zooming.
+- **The menu must not take a shortcut the page uses.** An accelerator wins over the
+  page, which never sees the key. Auis's modes live in the page on ⇧⌘Y, ⇧⌘K
+  (Review), ⇧⌘E (Edit) and ⇧⌘S (States); the smoke fails if any menu item, stock
+  roles included, takes one of them. Add to that list when the builder gains one.
 - **Close and Quit both await cleanup.** Closing during a restart cancels its
   queued replacement and waits for the earlier stop too. On Mac, closing the last
   window leaves the app available in the Dock; activating it opens the launcher.
