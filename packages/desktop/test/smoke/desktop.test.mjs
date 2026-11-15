@@ -216,6 +216,51 @@ async function clickMenu(app, id, page) {
     item.click(item, BrowserWindow.getFocusedWindow(), {});
   }, id);
 }
+/**
+ * The shortcuts Auis's own modes use inside the page: ⇧⌘Y and ⇧⌘K (Review, in
+ * kit/ui/src/review/ReviewModeProvider.tsx), ⇧⌘E (Edit) and ⇧⌘S (States). A
+ * menu accelerator on the same keys would win, and the mode would stop
+ * answering inside the app with nothing to show for it.
+ */
+const PAGE_SHORTCUTS = ["Cmd+Shift+Y", "Cmd+Shift+K", "Cmd+Shift+E", "Cmd+Shift+S"];
+/** One spelling per key combination, whatever order or alias it was written in. */
+const combo = (accelerator) =>
+  accelerator
+    .toLowerCase()
+    .split("+")
+    .map((part) => (/^(cmd|command|cmdorctrl|commandorcontrol)$/.test(part) ? "cmd" : part))
+    .sort()
+    .join("+");
+/** Every accelerator in the menu bar, the stock roles' included. */
+async function menuAccelerators(app) {
+  return app.evaluate(({ Menu }) => {
+    const found = [];
+    const walk = (menu) => {
+      for (const item of menu.items) {
+        if (item.accelerator) found.push({ label: item.label, accelerator: item.accelerator });
+        if (item.submenu) walk(item.submenu);
+      }
+    };
+    walk(Menu.getApplicationMenu());
+    return found;
+  });
+}
+/** The zoom of the project's page and of the app's own chrome, and whether the page is being inspected. */
+async function pageTools(app) {
+  return app.evaluate(({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows().find((candidate) =>
+      candidate.webContents.getURL().endsWith("/project.html"),
+    );
+    const page = win.contentView.children[0]?.webContents;
+    return {
+      url: page?.getURL() ?? "",
+      loading: page?.isLoading() ?? true,
+      page: page?.getZoomLevel() ?? null,
+      chrome: win.webContents.getZoomLevel(),
+      inspecting: page?.isDevToolsOpened() ?? false,
+    };
+  });
+}
 async function quit(app, evidence) {
   await app.context().tracing.stop({ path: path.join(evidence, "trace.zip") });
   await app.close();
@@ -236,6 +281,15 @@ test("launcher → install → running: toolbar, native commands, boundaries, lo
     .waitFor();
   await snapshot(launcher, f.evidence, "launcher");
   assert.equal((await menuItem(app, "project-reload")).enabled, false);
+  const reserved = new Set(PAGE_SHORTCUTS.map(combo));
+  const accelerators = await menuAccelerators(app);
+  assert.ok(accelerators.length > 0, "the menu bar has accelerators to check");
+  for (const { label, accelerator } of accelerators) {
+    assert.ok(
+      !reserved.has(combo(accelerator)),
+      `"${label}" takes ${accelerator}, which a mode of Auis uses inside the page`,
+    );
+  }
   const opening = app.waitForEvent("window");
   await launcher
     .getByRole("button", { name: "Open folder", exact: true })
@@ -391,8 +445,37 @@ test("launcher → install → running: toolbar, native commands, boundaries, lo
   await chrome
     .getByRole("button", { name: "Start again", exact: true })
     .click();
-  await projectState(chrome, "running");
+  const restarted = await projectState(chrome, "running");
   assert.notEqual(f.lock().pid, firstPid);
+
+  // Page tools act on the project's page, and never on the app's own chrome.
+  // Chromium keeps zoom per address, so the new page has to be there first: a
+  // zoom set before its first load belongs to no address and is lost.
+  const loaded = await until("restarted project page loaded", async () => {
+    const tools = await pageTools(app);
+    return tools.url.startsWith(restarted.server.url) && !tools.loading && tools;
+  });
+  assert.equal(loaded.page, 0);
+  assert.equal(loaded.inspecting, false);
+  await clickMenu(app, "project-zoom-in", chrome);
+  await until("page zoomed in", async () => (await pageTools(app)).page === 0.5);
+  await clickMenu(app, "project-zoom-in-unshifted");
+  await until("page zoomed in again", async () => (await pageTools(app)).page === 1);
+  await clickMenu(app, "project-zoom-out");
+  await until("page zoomed out", async () => (await pageTools(app)).page === 0.5);
+  assert.equal((await pageTools(app)).chrome, 0, "the chrome must keep its own size");
+  await clickMenu(app, "project-zoom-reset");
+  await until("page at actual size", async () => (await pageTools(app)).page === 0);
+  // Last: the developer tools open in a window of their own, which takes the focus.
+  await clickMenu(app, "project-inspect");
+  await until("page inspected", async () => (await pageTools(app)).inspecting);
+  await app.evaluate(({ BrowserWindow }) => {
+    const win = BrowserWindow.getAllWindows().find((candidate) =>
+      candidate.webContents.getURL().endsWith("/project.html"),
+    );
+    win.contentView.children[0].webContents.closeDevTools();
+  });
+  await until("inspector closed", async () => !(await pageTools(app)).inspecting);
   await quit(app, f.evidence);
   await clean(f);
 });

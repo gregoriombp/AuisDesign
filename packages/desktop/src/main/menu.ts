@@ -1,5 +1,15 @@
 // Native app commands. Project actions target the focused window's view, never
 // reload the app:// chrome or accidentally operate on another project.
+//
+// Two rules for whoever adds an item:
+//
+// - Page commands (reload, zoom, developer tools) are plain items wired to the
+//   project's view, never Electron's stock roles. Those roles act on whichever
+//   page has focus, which can be the toolbar, and zooming or reloading the
+//   toolbar breaks a window whose layout the main process counts on.
+// - An accelerator here wins over the page: the page never sees the key. Auis's
+//   own modes live in the page on ⇧⌘Y, ⇧⌘K (Review), ⇧⌘E (Edit) and ⇧⌘S
+//   (States), so those four are off limits. The smoke test holds the menu to it.
 import { app, Menu, type MenuItemConstructorOptions } from "electron";
 import { PRODUCT_NAME } from "../shared/app.ts";
 import type { ProjectWindow } from "./windows/project.ts";
@@ -60,6 +70,34 @@ export function installApplicationMenu(actions: MenuActions): () => void {
         },
         { type: "separator" },
         {
+          id: "project-zoom-reset",
+          label: "Actual Size",
+          accelerator: "CmdOrCtrl+0",
+          click: () => project()?.zoom("reset"),
+        },
+        {
+          id: "project-zoom-in",
+          label: "Zoom In",
+          accelerator: "CmdOrCtrl+Plus",
+          click: () => project()?.zoom("in"),
+        },
+        {
+          // ⌘= is how most people zoom in: the same key, without Shift.
+          id: "project-zoom-in-unshifted",
+          label: "Zoom In",
+          accelerator: "CmdOrCtrl+=",
+          visible: false,
+          acceleratorWorksWhenHidden: true,
+          click: () => project()?.zoom("in"),
+        },
+        {
+          id: "project-zoom-out",
+          label: "Zoom Out",
+          accelerator: "CmdOrCtrl+-",
+          click: () => project()?.zoom("out"),
+        },
+        { type: "separator" },
+        {
           id: "project-log",
           label: "Show Log",
           type: "checkbox",
@@ -83,6 +121,12 @@ export function installApplicationMenu(actions: MenuActions): () => void {
           accelerator: "CmdOrCtrl+Shift+B",
           click: () => project()?.openInBrowser(),
         },
+        {
+          id: "project-inspect",
+          label: "Inspect Page",
+          accelerator: "Alt+CmdOrCtrl+I",
+          click: () => project()?.inspectPage(),
+        },
         { type: "separator" },
         { role: "togglefullscreen" },
       ],
@@ -102,6 +146,11 @@ export function installApplicationMenu(actions: MenuActions): () => void {
       "project-back": !!state?.canGoBack && running,
       "project-forward": !!state?.canGoForward && running,
       "project-reload": running,
+      "project-zoom-reset": running,
+      "project-zoom-in": running,
+      "project-zoom-in-unshifted": running,
+      "project-zoom-out": running,
+      "project-inspect": running,
       "project-log": !!state,
       "project-restart":
         !!state &&

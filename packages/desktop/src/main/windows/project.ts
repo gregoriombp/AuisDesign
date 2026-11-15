@@ -35,9 +35,15 @@ export interface ProjectWindow {
   openInBrowser(): void;
   copyNoticeCommand(): Promise<void>;
   dismissNotice(): void;
+  /** Zooms the project's page. The app's own chrome is never zoomed: its layout is fixed. */
+  zoom(direction: ZoomDirection): void;
+  /** Opens the developer tools for the project's page, in their own window. */
+  inspectPage(): void;
   /** Ends the server if this window started it. Safe to call more than once. */
   stop(): Promise<void>;
 }
+
+export type ZoomDirection = "in" | "out" | "reset";
 
 interface Options {
   preload: string;
@@ -262,6 +268,18 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
       const running = server.state();
       if (running.status === "running") dismissedPort = running.port;
       push();
+    },
+    zoom(direction) {
+      const contents = view?.webContents;
+      if (!contents) return;
+      // A zoom level is a power of 1.2, and 0 is actual size: half a level is about 10% a step.
+      const level = direction === "reset" ? 0 : contents.getZoomLevel() + (direction === "in" ? 0.5 : -0.5);
+      contents.setZoomLevel(Math.max(-3, Math.min(4, level)));
+    },
+    inspectPage() {
+      // Detached: docked, the tools would take their space from a page that is
+      // already laid out between the toolbar and the log.
+      view?.webContents.openDevTools({ mode: "detach" });
     },
   };
 }
