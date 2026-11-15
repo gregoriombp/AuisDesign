@@ -72,6 +72,11 @@ try {
   await waitingPin.click({ force: true })
   assert.equal(await q.getByRole("textbox", { name: "Comentário", exact: true }).inputValue(), "Alinhar estes dois blocos.", "a waiting pin keeps the unsaved text")
   assert.equal(await q.evaluate(() => window.__pageClicks), 0, "a waiting pin absorbs the click instead of passing it to the page")
+  // Held down, a pin stays on its point (the button's press nudge must not replace its centring).
+  const restBox = await waitingPin.boundingBox()
+  await q.mouse.move(restBox.x + restBox.width / 2, restBox.y + restBox.height / 2); await q.mouse.down(); await new Promise(r => setTimeout(r, 300))
+  const pressedBox = await waitingPin.boundingBox(); await q.mouse.up()
+  assert.ok(Math.abs(pressedBox.x - restBox.x) < 1 && Math.abs(pressedBox.y - restBox.y) < 1, `a pressed pin stays on its point (moved ${Math.round(pressedBox.x - restBox.x)},${Math.round(pressedBox.y - restBox.y)})`)
   await q.getByRole("button", { name: "Salvar comentário", exact: true }).click()
   await q.getByRole("textbox", { name: "Comentário", exact: true }).waitFor({ state: "hidden" })
   saved = await notes(); assert.ok(saved.some(n => n.anchor.kind === "draw" && n.shot.points.length > 2))
@@ -191,8 +196,8 @@ try {
   }, nestedPng.toString("base64"))
   assert.ok(lowerContent > 100, "last inner section is actually rendered, not just an empty tall image")
   assert.deepEqual(errors, [])
-  await fs.writeFile(path.join(artifacts, "result.json"), JSON.stringify({ passed: true, checks: ["real activeTab activation", "element capture", "same-tab microphone", "full-page PNG", "clickable PDF links", "export grouping", "inner scroll capture", "scroll restoration", "freehand drawing", "SPA URL isolation", "native dialog", "recording survives transcription failure", "PDF", "PNG", "ZIP and audio", "backup deduplication", "browser restart persistence", "reposition preserves IDs", "narrow window", "no page errors", "pins wait while a comment is open", "waiting pins absorb the click", "composer follows the live marker", "composer opens at a repositioned marker"] }, null, 2))
-  console.log(`24 browser checks passed. Artifacts: ${artifacts}`)
+  await fs.writeFile(path.join(artifacts, "result.json"), JSON.stringify({ passed: true, checks: ["real activeTab activation", "element capture", "same-tab microphone", "full-page PNG", "clickable PDF links", "export grouping", "inner scroll capture", "scroll restoration", "freehand drawing", "SPA URL isolation", "native dialog", "recording survives transcription failure", "PDF", "PNG", "ZIP and audio", "backup deduplication", "browser restart persistence", "reposition preserves IDs", "narrow window", "no page errors", "pins wait while a comment is open", "waiting pins absorb the click", "pressed pins stay on their point", "composer follows the live marker", "composer opens at a repositioned marker"] }, null, 2))
+  console.log(`25 browser checks passed. Artifacts: ${artifacts}`)
 } catch (error) {
   await q?.screenshot({ path: path.join(artifacts, "failure.png") }).catch(() => {})
   await fs.writeFile(path.join(artifacts, "failure.txt"), await q?.locator("html").ariaSnapshot().catch(() => "No page"))
