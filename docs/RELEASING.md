@@ -162,3 +162,8 @@ Keep it that way.
   Checked from a clean directory against the registry after the publish:
   `npx @auis/cli@latest` scaffolds without `.gitattributes` or
   `.github/readme`, and `doctor` on the result writes nothing.
+- `0.5.1` — the package README counts 38 agent skills (it said 32). No code
+  change: the six new skills (`auis-distill`, `auis-bolder`, `auis-animate`,
+  `auis-affordance-audit`, `auis-foundation-health`, `prose-sweep`) reached
+  `npx @auis/cli@latest` the moment they landed on `main`, because the CLI
+  downloads the template at run time.
