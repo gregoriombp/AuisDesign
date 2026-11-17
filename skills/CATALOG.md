@@ -1,20 +1,25 @@
 # Auis Skills — Catalog
 
-> Generated from `skills/registry.json` (`npm run skills:catalog`). **32 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
+> Generated from `skills/registry.json` (`npm run skills:catalog`). **38 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
 **Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
 
-## Design System (12)
+## Design System (17)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
+| `auis-affordance-audit` | 🟣🟠 | repo | — | Walks one route as a first-time user, hovering everything, and files a Review Mode pin for each static element that should explain or act: jargon with |
+| `auis-animate` | 🟣🟠 | repo | — | Adds motion to one route or component only where it explains feedback, a state change, continuity, or one earned moment, using the existing duration a |
 | `auis-audit` | 🟣🟠🌐 | cowork | ⭐ | Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app compon |
+| `auis-bolder` | 🟣🟠 | repo | — | Raises one named section of a screen to the conviction the rest of the product already has, using only the existing recipes, tokens and Au* components |
 | `auis-brand` | 🟣🟠 | repo | ⭐ | Establishes a product's brand identity: app name, logo or mark, and one-line positioning. Reads the /auis/welcome intake or interviews for missing fac |
 | `auis-component` | 🟣🟠🌐 | cowork | ⭐ | Adds a new component to a Auis design system project (Next.js + shadcn/ui) and registers it under /auis/styleguide with a showcase route. Always check |
 | `auis-critique` | 🟣🟠 | repo | — | Design-quality critique of one route, delivered as Review Mode pins instead of a throwaway report. Reads AGENTS.md, PRODUCT_CONTEXT.md and the route ( |
 | `auis-design-system-audit` | 🟣🟠 | repo | — | Audit the Auis design system for internal consistency across tokens, components, showcases, navigation, and page usage. |
 | `auis-design-system-foundation` | 🟣🟠 | repo | — | Bootstrap or update the Auis design system foundation from a visual reference. This is the only skill allowed to create or change tokens. |
+| `auis-distill` | 🟣🟠 | repo | — | Strips one route or section down to its essence: redundant elements, repeated information, decorative noise, boxes nested in boxes, competing actions. |
 | `auis-foundation` | 🟣🟠🌐 | cowork | ⭐ | Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Be |
+| `auis-foundation-health` | 🟣🟠 | repo | — | Read-only health check of the design-system foundation in app/globals.css. Reports incomplete color scales, channels out of sync, semantic aliases tha |
 | `auis-foundation-update` | 🟣🟠 | repo | — | INCREMENTALLY updates the foundation tokens of the Auis design system in app/globals.css (color, typography, spacing, radius, shadow, motion) — additi |
 | `auis-new-component` | 🟣🟠 | repo | — | Add or update an Auis design system component using existing tokens, shadcn primitives where appropriate, a showcase page, and navigation. |
 | `auis-new-page` | 🟣🟠 | repo | — | Build or rework a product page in this Next.js app using the Auis design system, existing components and existing tokens. |
@@ -54,13 +59,14 @@
 | `auis-ux-writing` | 🟣🟠 | repo | ⭐ ◐ | Runs a fine-tooth-comb IN-PRODUCT UX writing pass over a route, several routes, or pasted links — reads the real strings from the page's files, audits |
 | `auis-voice` | 🟣🟠 | repo | ⭐ | Bootstraps a product's voice by filling in PRODUCT_CONTEXT.md — the file every Auis writing skill reads. Derives the copy language and locale, the sit |
 
-## Support (7)
+## Support (8)
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
 | `design-system-new-component` | 🟣🟠 | repo | ◐ legacy | [INACTIVE in this repo — do not trigger.] Generic, Au-blind version of "new component", kept only as a record of the Auis initial setup. To add or edi |
 | `design-system-new-page` | 🟣🟠 | repo | ◐ legacy | '[INACTIVE in this repo — do not trigger.] Generic, Au-blind version |
 | `figma-code-library-import` | 🟣🟠 | repo | — | Use when implementing or updating product UI from Figma in code through Claude or Cursor, especially when the project has its own component library an |
+| `prose-sweep` | 🟣🟠 | repo | — | Audits, or on request cuts, source comments and JSDoc that only restate the code, so agents keep invariants instead of stale prose. Ranks candidate fi |
 | `setup-design-system-from-cla-design` | 🟣🟠 | repo | ◐ legacy | [INACTIVE in this repo — do not trigger.] Initial design-system bootstrap from a Claude Design handoff. This repo is already set up — do not re-bootst |
 | `setup-design-system-from-reference` | 🟣🟠 | repo | ◐ legacy | [INACTIVE in this repo — do not trigger.] Initial design-system bootstrap from a reference image. This repo is already set up — do not re-bootstrap. T |
 | `shadcn` | 🟣🟠 | repo | — | Support skill for consulting the shadcn/ui registry, docs, and CLI when adding or wrapping primitives. Use when looking up a shadcn component, its API |
@@ -86,4 +92,4 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 
 ## Platforms
 
-Of the 32: 31 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 8 have their own Codex variant (◐).
+Of the 38: 37 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 8 have their own Codex variant (◐).

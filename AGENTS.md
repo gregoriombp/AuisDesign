@@ -184,8 +184,14 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 | `auis-new-page` | Build a full page from a screenshot/Figma/brief, reusing DS components. |
 | `auis-design-system-audit` | Audit consistency (tokens/components/showcases/nav); optionally sync against a reference. |
 | `auis-critique` | Design-quality and accessibility critique of one route (hierarchy, primary task, DS consistency, states, contrast, labels, headings, target size). Files each P0–P2 finding as an open Review Mode pin through `/api/review-bridge/*`; never edits code. Fix them afterwards with `auis-review-bridge-solve`. |
+| `auis-affordance-audit` | Walks one route as a first-time user, hovering everything, and pins each static element that should explain or act: jargon with no explanation, a status you cannot change or learn why, an entity name with no link, something that looks clickable and does nothing. Read-only; reuses `auis-critique`'s probe and poster. Proposes no control the code does not already back. |
+| `auis-distill` | Strips one route or section to its essence (redundant elements, repeated information, nested boxes, competing actions). Writes a cut plan, then applies it with existing `Au*` and tokens in every State Mode state. |
+| `auis-bolder` | Raises one named section to the conviction the rest of the product has, with existing recipes, tokens and `Au*` only. Touches nothing outside the target. |
+| `auis-animate` | Adds motion only where it explains feedback, state, continuity or one earned moment, with the `--dur-*`/`--ease-*` tokens, the `Au*` overlays that already animate, and a reduced-motion path for each animation. |
+| `auis-foundation-health` | Read-only health check of `globals.css`: incomplete scales, channels out of sync, parallel alias ramps, loose hex, contrast of the existing fg/bg pairs (WCAG + APCA, light and dark), typography drift, font contract. Edits nothing; approved fixes go to `auis-foundation-update`. |
 | `auis-update-states` | Register a screen's states in State Mode (`lib/auis-states/registry.ts`): axes (`?state=`, `?plan=`…), `?ge=` interactions, `previewPath`. Run after adding/removing a page state, modal, redirect or whole screen so `/auis/states` stays honest. Rules: `AUIS.md` → "State Mode" (the URL is the source of truth). |
 | `shadcn` | Consult shadcn docs/registry/CLI for primitives. It is a support skill only: all repo rules above still win (`Au*` wrapper, existing tokens, Material Symbols by default). |
+| `prose-sweep` | Audits, or on request cuts, comments and JSDoc that only restate the code, so agents keep invariants instead of stale prose. Support skill; reports unless asked to apply. |
 
 **UX Flows** (`/auis/ux-flow` — hub + one page per flow at `app/auis/ux-flow/<slug>/page.tsx`, registered in `_data/flow-meta.ts`)
 | Skill | When to use |
@@ -218,6 +224,7 @@ The DS skills are **generic and Au-prefix-blind** — they emit `components/Cust
 | Audit consistency | `auis-design-system-audit` | — |
 | Critique design quality / accessibility of a route | `auis-critique` | `design:design-critique`, `design:accessibility-review` (they return a report; this files pins) |
 | Revise in-product copy / microcopy | `auis-ux-writing` | `ux-copy` (generic, EN), `auis-brand-voice` (marketing voice) |
+| Simplify, amplify or animate a screen | `auis-distill`, `auis-bolder`, `auis-animate` | Generic `distill`, `bolder`, `animate` skills installed globally (they do not know the `Au*` components, the tokens or State Mode) |
 
 **Setup-only / neutralized skills (kept as a record, do NOT trigger).** Four generic
 Au-blind skills survive on disk from the Auis initial setup, but their
