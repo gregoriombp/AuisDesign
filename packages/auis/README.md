@@ -37,7 +37,7 @@ codebase, and AI agents build against them under enforced rules:
 - **Edit Mode** — non-destructive visual edits that agents materialize into code.
 - **UX Flows as code** (`/auis/ux-flow`) — navigable flow diagrams that are React pages.
 - **State Mode** (`/auis/states`) — every registered screen in every state, side by side.
-- **32 agent skills** — execution contracts for Claude Code, Codex and Cursor.
+- **38 agent skills** — execution contracts for Claude Code, Codex and Cursor.
 
 ## Existing repository?
 

@@ -23,7 +23,7 @@ Instead of designing in one tool and rebuilding in another, Auis gives you:
 - **Edit Mode** — non-destructive visual edits (text, tokens, variants, icons) that agents materialize into real code.
 - **UX Flows as code** — a dedicated hub (`/auis/ux-flow`) of navigable flow diagrams that are React pages, not static pictures, with comments, structural suggestions and compiled multi-scenario views.
 - **State Mode** — every registered screen rendered in every state, side by side (`/auis/states`), driven by URL params; switch states in place on any screen with ⌘⇧S.
-- **32 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
+- **38 agent skills** — execution contracts that force any agent to reuse components, respect tokens, and register everything it builds.
 
 <p align="center">
   <a href="https://www.auis.design/features">
@@ -223,7 +223,7 @@ npm run skills:sync      # regenerate .claude/skills (Claude Code) + .agents/ski
 npm run skills:catalog   # regenerate skills/registry.json + skills/CATALOG.md
 ```
 
-32 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
+38 skills across 6 capabilities — design system (incl. State Mode), UX flows, bridges (review/flow/edit/project), build & handoff, content, support. The recommended product-agnostic core: `auis-setup`, `auis-brand`, `auis-foundation`, `auis-voice`, `auis-component`, `auis-page`, `auis-flow`, `auis-audit`, `auis-handoff`. Full matrix: [skills/CATALOG.md](skills/CATALOG.md).
 
 ## Commands
 
