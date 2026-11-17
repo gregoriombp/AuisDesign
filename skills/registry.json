@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated": "2026-10-16",
-  "count": 32,
+  "generated": "2026-11-17",
+  "count": 38,
   "skills": [
     {
       "name": "auis-edit-bridge-solve",
@@ -107,6 +107,32 @@
       "description": "Bootstraps a product's voice by filling in PRODUCT_CONTEXT.md — the file every Auis writing skill reads. Derives the copy language and locale, the site-vs-product voice, the protected vocabulary, and the canonical copy c"
     },
     {
+      "name": "auis-affordance-audit",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Walks one route as a first-time user, hovering everything, and files a Review Mode pin for each static element that should explain or act: jargon with no explanation, a status you cannot change or learn why, an entity na"
+    },
+    {
+      "name": "auis-animate",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Adds motion to one route or component only where it explains feedback, a state change, continuity, or one earned moment, using the existing duration and easing tokens, the Au* overlays that already animate, and a reduced"
+    },
+    {
       "name": "auis-audit",
       "capability": "design-system",
       "origin": "cowork",
@@ -118,6 +144,19 @@
       "legacy": false,
       "divergent": false,
       "description": "Scans a folder, file, or whole repository and reports every component that's used or implemented but missing from /auis/styleguide. Catches app components, shadcn/ui primitives, wrapped components, and page-local compone"
+    },
+    {
+      "name": "auis-bolder",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Raises one named section of a screen to the conviction the rest of the product already has, using only the existing recipes, tokens and Au* components. Applies the change and touches nothing outside the target. Use for \""
     },
     {
       "name": "auis-brand",
@@ -185,6 +224,19 @@
       "description": "Bootstrap or update the Auis design system foundation from a visual reference. This is the only skill allowed to create or change tokens."
     },
     {
+      "name": "auis-distill",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Strips one route or section down to its essence: redundant elements, repeated information, decorative noise, boxes nested in boxes, competing actions. Writes a cut plan, then applies the cuts with the existing Au* compon"
+    },
+    {
       "name": "auis-foundation",
       "capability": "design-system",
       "origin": "cowork",
@@ -196,6 +248,19 @@
       "legacy": false,
       "divergent": false,
       "description": "Sets up a complete Auis design system in a Next.js + shadcn/ui project starting from any visual reference — a screenshot, Figma URL, Dribbble shot, Behance post, or any other design inspiration. Extracts or infers tokens"
+    },
+    {
+      "name": "auis-foundation-health",
+      "capability": "design-system",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Read-only health check of the design-system foundation in app/globals.css. Reports incomplete color scales, channels out of sync, semantic aliases that collapse into a parallel ramp, loose hex values, contrast of the exi"
     },
     {
       "name": "auis-foundation-update",
@@ -300,6 +365,19 @@
       "legacy": false,
       "divergent": false,
       "description": "Use when implementing or updating product UI from Figma in code through Claude or Cursor, especially when the project has its own component library and the implementation must reuse those components instead of creating o"
+    },
+    {
+      "name": "prose-sweep",
+      "capability": "support",
+      "origin": "repo",
+      "platforms": [
+        "claude",
+        "codex"
+      ],
+      "recommended": false,
+      "legacy": false,
+      "divergent": false,
+      "description": "Audits, or on request cuts, source comments and JSDoc that only restate the code, so agents keep invariants instead of stale prose. Ranks candidate files with a bundled script, classifies each block as keep, cut, compres"
     },
     {
       "name": "setup-design-system-from-cla-design",
