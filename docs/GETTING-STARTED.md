@@ -90,6 +90,8 @@ The agent maps every visual element to your existing `Au*` components first, fal
 /auis-update-ux-flow <slug> <change>             # structural update + changelog entry
 ```
 
+The three `ux-flow` skills above are legacy: they write pages into this repo's UX Flow hub. For a new flow, use the standalone [`auis-ux-flow`](https://github.com/gregoriombp/auis-ux-flow) skill (`npx skills add gregoriombp/auis-ux-flow`), which maps several journeys on one board and works in any repository.
+
 Flows are React pages with structured nodes/edges under `app/auis/ux-flow/[slug]/page.tsx`, registered in `app/auis/ux-flow/_data/flow-meta.ts` and listed at `/auis/ux-flow`. Click a screen to preview its real route; comment on a node or suggest a structural change straight from the canvas — both land in the Review Bridge.
 
 ## 7. Review loop

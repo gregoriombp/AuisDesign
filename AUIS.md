@@ -105,9 +105,15 @@ When the screen has more than one state, register them with `auis-update-states`
 
 ### New UX Flow
 
-Use `auis-create-ux-flow` (single journey) or `auis-create-ux-flow-golden-eye`
+For a new flow, prefer the standalone
+[`auis-ux-flow`](https://github.com/gregoriombp/auis-ux-flow) skill: several
+journeys on one board, written as data files (`ux-flows/<slug>.flow.js`) with a
+single-file viewer, in any repository.
+
+The hub skills are legacy and still work for flow pages that live here: use
+`auis-create-ux-flow` (single journey) or `auis-create-ux-flow-golden-eye`
 (compiled view of several journeys), depending on the flow source. Structural
-updates go through `auis-update-ux-flow`.
+updates to those pages go through `auis-update-ux-flow`.
 
 The editable file lives at:
 

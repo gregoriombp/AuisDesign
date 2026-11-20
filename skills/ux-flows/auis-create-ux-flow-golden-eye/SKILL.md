@@ -1,6 +1,9 @@
 ---
 name: auis-create-ux-flow-golden-eye
 description: >
+  Legacy: superseded by the standalone auis-ux-flow skill
+  (github.com/gregoriombp/auis-ux-flow); use this one only for compiled views
+  inside this repo's UX Flow hub.
   Creates a compiled, multi-scenario "golden eye" UX flow page in the Auis UX
   Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>):
   several journeys overlaid on one self-contained ReactFlow board, shared
@@ -14,6 +17,13 @@ description: >
 ---
 
 # Auis — UX Flow · Golden Eye (compiled multi-scenario view)
+
+> **Legacy.** Superseded by the standalone
+> [`auis-ux-flow`](https://github.com/gregoriombp/auis-ux-flow) skill, which
+> builds the same compiled view from data files and a single-file viewer, in any
+> repository. Keep using this skill only for compiled views that live in this
+> repo's UX Flow hub (`/auis/ux-flow`), where a card can use `?state=` and
+> `?ge=` deep links and comments go to the Review Bridge.
 
 Build a **compiled** UX flow page under `app/auis/ux-flow/[slug]/page.tsx`
 that fuses **several product journeys (scenarios)** into one diagram. Where a
