@@ -194,11 +194,14 @@ the gitignored `app/auis/_data/brand.runtime.json` (default lives in
 | `prose-sweep` | Audits, or on request cuts, comments and JSDoc that only restate the code, so agents keep invariants instead of stale prose. Support skill; reports unless asked to apply. |
 
 **UX Flows** (`/auis/ux-flow` — hub + one page per flow at `app/auis/ux-flow/<slug>/page.tsx`, registered in `_data/flow-meta.ts`)
+
+> **These three are legacy.** New flows go to the standalone [`auis-ux-flow`](https://github.com/gregoriombp/auis-ux-flow) skill: several journeys on one board, written as data files with a single-file viewer, in any repository (`npx skills add gregoriombp/auis-ux-flow`). The skills below still work, and are the way to maintain the flow pages that already live in this repo's hub.
+
 | Skill | When to use |
 |---|---|
-| `auis-create-ux-flow` | Create a NEW single-journey flow from a description / step list. |
-| `auis-create-ux-flow-golden-eye` | Create a COMPILED, multi-scenario "golden eye" view — several journeys merged into one deduped graph with per-scenario focus lenses, as a self-contained page (template: `app/auis/ux-flow/example-golden-eye/page.tsx`). Use when the value is overlaying scenarios + toggling between them, not one linear path. |
-| `auis-update-ux-flow` | Register a structural update to an existing flow (+ changelog entry). |
+| `auis-create-ux-flow` | Legacy. Create a NEW single-journey flow from a description / step list. |
+| `auis-create-ux-flow-golden-eye` | Legacy (superseded by `auis-ux-flow`). Create a COMPILED, multi-scenario "golden eye" view — several journeys merged into one deduped graph with per-scenario focus lenses, as a self-contained page (template: `app/auis/ux-flow/example-golden-eye/page.tsx`). Use when the value is overlaying scenarios + toggling between them, not one linear path. |
+| `auis-update-ux-flow` | Legacy. Register a structural update to an existing hub flow (+ changelog entry). |
 
 **Content / UX Writing**
 | Skill | When to use |

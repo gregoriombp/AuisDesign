@@ -1,6 +1,9 @@
 ---
 name: auis-update-ux-flow
 description: >
+  Legacy: updates flow pages in this repo's UX Flow hub only; a flow made with
+  the standalone auis-ux-flow skill (ux-flows/<slug>.flow.js) is updated by
+  that skill.
   Registers a structural update to an existing UX flow page in the Auis UX
   Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>).
   Applies the requested change to the ReactFlow diagram (new screen, new
@@ -16,6 +19,11 @@ description: >
 ---
 
 # Auis — UX Flow Update Logger
+
+> **Legacy.** This updates flow pages in this repo's UX Flow hub
+> (`/auis/ux-flow`). A flow made with the standalone
+> [`auis-ux-flow`](https://github.com/gregoriombp/auis-ux-flow) skill
+> (`ux-flows/<slug>.flow.js`) is updated by that skill, not this one.
 
 Apply a **structural** change to an existing UX flow page and record it in
 the page's `updates` array so the hub visibly keeps a history of meaningful

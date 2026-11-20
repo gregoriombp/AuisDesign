@@ -2,7 +2,7 @@
 
 > Generated from `skills/registry.json` (`npm run skills:catalog`). **38 skills.** Single source of truth in `skills/<capability>/<name>/`. The auto-discovery trees `.claude/skills/` (Claude Code) and `.agents/skills/` (Codex/Cursor) are **generated** by `npm run skills:sync`.
 
-**Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized.
+**Legend:** 🟣 Claude · 🟠 Codex/Cursor · 🌐 Cowork (generic / zeroed) · ⭐ recommended set · ◐ has a `SKILL.codex.md` variant · _legacy_ neutralized · _superseded_ still works here, new work goes to its successor (listed at the end).
 
 ## Design System (17)
 
@@ -30,11 +30,11 @@
 
 | Skill | Platform | Origin | Tags | What it does |
 |---|---|---|---|---|
-| `auis-create-ux-flow` | 🟣🟠 | repo | — | Creates a new single-journey UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>) from a written br |
-| `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | — | Creates a compiled, multi-scenario "golden eye" UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug> |
+| `auis-create-ux-flow` | 🟣🟠 | repo | superseded | Legacy: for a new flow prefer the standalone auis-ux-flow skill (github.com/gregoriombp/auis-ux-flow); use this one for single-journey pages inside th |
+| `auis-create-ux-flow-golden-eye` | 🟣🟠 | repo | superseded | Legacy: superseded by the standalone auis-ux-flow skill (github.com/gregoriombp/auis-ux-flow); use this one only for compiled views inside this repo's |
 | `auis-flow` | 🟣🟠🌐 | cowork | ⭐ | Designs a feature's user flow as a FigJam board using the Auis convention: every screen becomes a card with name + route + file path + status; every t |
 | `auis-import-figma-flow` | 🟣🟠 | repo | ◐ | Imports a Figma flow as a screen-by-screen navigable PROJECT under `/auis/projects` — enumerates the frames via the Figma MCP, renders each screen as  |
-| `auis-update-ux-flow` | 🟣🟠 | repo | ◐ | Registers a structural update to an existing UX flow page in the Auis UX Flow hub (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>).  |
+| `auis-update-ux-flow` | 🟣🟠 | repo | ◐ superseded | Legacy: updates flow pages in this repo's UX Flow hub only; a flow made with the standalone auis-ux-flow skill (ux-flows/<slug>.flow.js) is updated by |
 
 ## Bridges (review / flow / edit / project) (3)
 
@@ -93,3 +93,13 @@ The 🌐 ones (origin `cowork`) are the **published generic** versions — prefe
 ## Platforms
 
 Of the 38: 37 on Claude+Codex, 1 Claude-only (`auis-edit-bridge-solve`). 8 have their own Codex variant (◐).
+
+## Superseded
+
+These still work for what already lives in this repo. Start new work with the successor.
+
+| Skill | Successor |
+|---|---|
+| `auis-create-ux-flow` | auis-ux-flow (https://github.com/gregoriombp/auis-ux-flow) |
+| `auis-create-ux-flow-golden-eye` | auis-ux-flow (https://github.com/gregoriombp/auis-ux-flow) |
+| `auis-update-ux-flow` | auis-ux-flow (https://github.com/gregoriombp/auis-ux-flow) |

@@ -1,6 +1,9 @@
 ---
 name: auis-create-ux-flow
 description: >
+  Legacy: for a new flow prefer the standalone auis-ux-flow skill
+  (github.com/gregoriombp/auis-ux-flow); use this one for single-journey pages
+  inside this repo's UX Flow hub.
   Creates a new single-journey UX flow page in the Auis UX Flow hub
   (app/auis/ux-flow/<slug>/page.tsx, served at /auis/ux-flow/<slug>) from a
   written brief, a step list, or a meeting decision. Maps every screen,
@@ -16,6 +19,12 @@ description: >
 ---
 
 # Auis — UX Flow
+
+> **Legacy.** For a new flow, prefer the standalone
+> [`auis-ux-flow`](https://github.com/gregoriombp/auis-ux-flow) skill: it maps
+> several journeys on one board, works in any repository and needs nothing from
+> this one. Keep using this skill for single-journey pages that live in this
+> repo's UX Flow hub (`/auis/ux-flow`).
 
 Build a UX flow diagram page under `app/auis/ux-flow/[flow-slug]/page.tsx`
 from a written description of the flow. The page is served at
