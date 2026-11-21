@@ -22,11 +22,11 @@ import type { ServerState, StartAction } from "../shared/ipc.ts";
 import { detectProject, nodeSatisfies, whyNotRunnable, type PackageManager } from "./detect.ts";
 import { locateTool, resolveShellEnv, type Env } from "./env.ts";
 import { liveDevServer, pidAlive, readDevLock, type DevServerInfo } from "./nextLock.ts";
+import { endGroup as endProcessGroup, outputLines, stripAnsi } from "./processes.ts";
 
 const MAX_LOG_LINES = 2000;
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-const stripAnsi = (text: string) => text.replace(/\u001b\[[0-9;?]*[A-Za-z]/g, "");
 
 /** A reason the project cannot start, with what the person can do about it. */
 class Problem extends Error {
@@ -34,23 +34,6 @@ class Problem extends Error {
   constructor(message: string, action: StartAction = "retry") {
     super(message);
     this.action = action;
-  }
-}
-
-function groupAlive(pgid: number): boolean {
-  try {
-    process.kill(-pgid, 0);
-    return true;
-  } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM";
-  }
-}
-
-function signalGroup(pgid: number, signal: NodeJS.Signals) {
-  try {
-    process.kill(-pgid, signal);
-  } catch {
-    /* already gone */
   }
 }
 
@@ -109,10 +92,7 @@ export function createProjectServer(root: string, options: ProjectServerOptions 
   };
 
   const log = (text: string) => {
-    const fresh = stripAnsi(text)
-      .split("\n")
-      .map((line) => line.trimEnd())
-      .filter((line) => line.trim().length > 0);
+    const fresh = outputLines(text);
     if (fresh.length === 0) return;
     lines = [...lines, ...fresh].slice(-MAX_LOG_LINES);
     for (const listener of logListeners) listener(fresh);
@@ -123,16 +103,7 @@ export function createProjectServer(root: string, options: ProjectServerOptions 
     watcher = null;
   };
 
-  /** Ask first, so Next removes its lock, then insist. */
-  const endGroup = async (pgid: number | undefined) => {
-    if (!pgid || !groupAlive(pgid)) return;
-    signalGroup(pgid, "SIGTERM");
-    const deadline = Date.now() + stopGraceMs;
-    while (groupAlive(pgid) && Date.now() < deadline) await sleep(50);
-    if (!groupAlive(pgid)) return;
-    signalGroup(pgid, "SIGKILL");
-    while (groupAlive(pgid) && Date.now() < deadline + 2000) await sleep(25);
-  };
+  const endGroup = (pgid: number | undefined) => endProcessGroup(pgid, stopGraceMs);
 
   /** An attached server has no exit event for us: watch its pid instead. */
   const watchAttached = (info: DevServerInfo, id: number) => {

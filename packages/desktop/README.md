@@ -1,8 +1,10 @@
 # Auis Design for Mac — local test build
 
 Version 0.1.0 opens existing project folders, runs or attaches to their dev server,
-and shows the product in a Mac window. New-project creation is still W4 in
-[the plan](PLAN.md).
+and shows the product in a Mac window. **New project** makes one from the Auis
+template with the published `@auis/cli` (it needs a connection to npm and GitHub),
+installs it and opens it on its welcome screen. Copies installed before 21 November
+2026 predate New project; rebuild with the commands below.
 
 ## Install and open
 
@@ -14,7 +16,8 @@ it does not bundle Node, Git, Claude Code or Codex.
 1. Open `release/Auis-Design-0.1.0-arm64.dmg`.
 2. Drag **Auis Design** into **Applications**.
 3. Open **Auis Design** from Applications or Spotlight.
-4. Choose **Open folder** and select an existing project with a `dev` script.
+4. Choose **New project** and pick a name and a place, or choose **Open folder**
+   and select an existing project with a `dev` script.
 
 The app is ad-hoc signed for local testing. It is not notarised and has no
 automatic updater. Developer ID signing and public distribution remain a later

@@ -7,6 +7,9 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { _electron } from "playwright";
 import electronPath from "electron";
+import { writeProject } from "../fixtures/smoke-project.mjs";
+
+const PROJECT_FIXTURE = new URL("../fixtures/smoke-project.mjs", import.meta.url).href;
 
 const packageRoot = fileURLToPath(new URL("../..", import.meta.url));
 // The same gate can exercise the signed app.asar bundle, without rebuilding it.
@@ -33,36 +36,59 @@ async function until(label, check, timeout = 20000) {
   throw new Error(`Timed out: ${label}`);
 }
 
+/**
+ * A stand-in for `npx`, first on the PATH: it records its arguments and, for
+ * `@auis/cli`, writes the fixture project where the CLI would. While
+ * `<root>/npx-offline` exists it fails once, as a template download does with
+ * no network, and removes the flag.
+ */
+function writeNpx(root) {
+  const bin = path.join(root, "bin");
+  fs.mkdirSync(bin);
+  const npx = path.join(bin, "npx");
+  fs.writeFileSync(
+    npx,
+    // CommonJS on purpose: a file with no extension is read as CommonJS by
+    // every Node the gate may run on.
+    `#!/usr/bin/env node
+const fs = require("node:fs");
+const root = ${JSON.stringify(root)};
+const args = process.argv.slice(2);
+fs.writeFileSync(root + "/npx-args.json", JSON.stringify(args));
+console.log("\\n  auis  0.5.1\\n  code-native design builder\\n");
+console.log("  … Fetching the Auis template (main)…");
+if (fs.existsSync(root + "/npx-offline")) {
+  fs.rmSync(root + "/npx-offline");
+  console.error('\\n  ✗ could not download the template for ref "main".\\n    fetch failed\\n');
+  process.exit(1);
+}
+import(${JSON.stringify(PROJECT_FIXTURE)}).then(({ writeProject }) => {
+  writeProject(args[2]);
+  console.log("  ✓ Template  main · tarball");
+  console.log("  ✓ Project   " + args[2]);
+  console.log("\\n  Ready.\\n");
+});
+`,
+  );
+  fs.chmodSync(npx, 0o755);
+  return bin;
+}
+
 function fixture(
   t,
   label,
-  { installed = true, startDelay = 250, stopDelay = 0 } = {},
+  { installed = true, startDelay = 250, stopDelay = 0, create = false } = {},
 ) {
   const root = fs.realpathSync(
     fs.mkdtempSync(path.join(os.tmpdir(), `auis-smoke-${label}-`)),
   );
-  const project = path.join(root, "project");
-  fs.mkdirSync(path.join(project, "app/auis"), { recursive: true });
   fs.mkdirSync(path.join(root, "home"));
-  fs.mkdirSync(path.join(project, "fixture-dependency"));
-  fs.writeFileSync(
-    path.join(project, "fixture-dependency/package.json"),
-    JSON.stringify({ name: "fixture-dependency", version: "1.0.0" }),
-  );
-  fs.writeFileSync(
-    path.join(project, "package.json"),
-    JSON.stringify({
-      private: true,
-      scripts: { dev: `node smoke-server.mjs ${startDelay} ${stopDelay}` },
-      dependencies: { "fixture-dependency": "file:./fixture-dependency" },
-    }),
-  );
-  fs.writeFileSync(path.join(project, ".npmrc"), "audit=false\nfund=false\n");
-  fs.copyFileSync(
-    new URL("../fixtures/smoke-server.mjs", import.meta.url),
-    path.join(project, "smoke-server.mjs"),
-  );
-  if (installed) fs.mkdirSync(path.join(project, "node_modules"));
+  // A new project goes where the app suggests: the home folder, when the list is empty.
+  const project = create ? path.join(root, "home/auis-app") : path.join(root, "project");
+  if (!create) {
+    writeProject(project, { startDelay, stopDelay });
+    if (installed) fs.mkdirSync(path.join(project, "node_modules"));
+  }
   const evidence = path.join(output, label);
   fs.rmSync(evidence, { recursive: true, force: true });
   fs.mkdirSync(evidence, { recursive: true });
@@ -72,6 +98,14 @@ function fixture(
     SHELL: "/bin/sh",
     PATH: `${path.dirname(process.execPath)}:${process.env.PATH}`,
   };
+  if (create) {
+    // A login shell would put the system's own npx first (macOS's path_helper
+    // reorders PATH). A shell that is not there makes the app use what it was
+    // launched with, in this order, so the stand-in is the npx it finds.
+    env.SHELL = path.join(root, "no-shell");
+    env.PATH = `${writeNpx(root)}:${env.PATH}`;
+    fs.writeFileSync(path.join(root, "npx-offline"), "");
+  }
   delete env.ELECTRON_RUN_AS_NODE;
   const lockFile = path.join(project, ".next/dev/lock");
   const lock = () => {
@@ -165,6 +199,13 @@ function fixture(
           canceled: false,
           filePaths: [folder],
         });
+        // New project: the person accepts the name and place the app suggests.
+        globalThis.__saveDialogs = [];
+        dialog.showSaveDialog = async (...args) => {
+          const options = args.at(-1);
+          globalThis.__saveDialogs.push(options);
+          return { canceled: false, filePath: options.defaultPath };
+        };
         globalThis.__externalLinks = [];
         shell.openExternal = async (url) => {
           globalThis.__externalLinks.push(url);
@@ -556,4 +597,80 @@ test("Close while Restart is pending never starts a replacement server", async (
   );
   await clean(f);
   await quit(app, f.evidence);
+});
+
+test("New project: the CLI runs, a failure can be tried again, and the project installs and opens on its welcome screen", async (t) => {
+  const f = fixture(t, "new-project", { create: true });
+  const app = await f.launch();
+  const launcher = await app.firstWindow();
+  await launcher.getByRole("button", { name: "New project", exact: true }).waitFor();
+  await snapshot(launcher, f.evidence, "empty");
+  await launcher.screenshot({ path: path.join(f.evidence, "empty.png"), animations: "disabled" });
+  assert.equal((await menuItem(app, "new-project")).accelerator, "CmdOrCtrl+N");
+
+  // The first run fails the way a template download does with no network.
+  await launcher.getByRole("button", { name: "New project", exact: true }).click();
+  const card = launcher.getByRole("region", { name: "New project auis-app", exact: true });
+  await card.getByText("Auis could not reach npm or GitHub. Check your connection, then try again.").waitFor();
+  const [dialogOptions] = await app.evaluate(() => globalThis.__saveDialogs);
+  assert.equal(dialogOptions.defaultPath, f.project, "the suggested folder is auis-app in the home folder");
+  assert.equal(dialogOptions.buttonLabel, "Create");
+  assert.match(await card.getByLabel("Auis CLI output", { exact: true }).innerText(), /could not download the template/);
+  await snapshot(launcher, f.evidence, "failed");
+  for (const colorScheme of ["light", "dark"]) {
+    await launcher.emulateMedia({ colorScheme });
+    await launcher.screenshot({
+      path: path.join(f.evidence, `failed-${colorScheme}.png`),
+      animations: "disabled",
+    });
+  }
+  await launcher.emulateMedia({ colorScheme: "light" });
+
+  // Nothing was written, so the same folder can be tried again.
+  const opening = app.waitForEvent("window");
+  await card.getByRole("button", { name: "Try again", exact: true }).click();
+  const chrome = await opening;
+  await chrome.waitForURL("app://auis/project.html");
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(f.root, "npx-args.json"), "utf8")), [
+    "--yes",
+    "@auis/cli@latest",
+    f.project,
+    "--yes",
+    "--pm",
+    "npm",
+    "--no-install",
+  ]);
+
+  // A project just made has no dependencies: the window installs them first, without being asked.
+  const state = await projectState(chrome, "running");
+  assert.ok((await chrome.evaluate(() => window.__serverStates)).includes("installing"));
+  assert.ok(fs.existsSync(path.join(f.project, "node_modules")));
+  const view = await until("project view", () =>
+    app.windows().find((page) => page.url().startsWith(state.server.url)),
+  );
+  await view.getByRole("heading", { name: "Fixture welcome" }).waitFor();
+  assert.equal(view.url(), `${state.server.url}/auis/welcome`);
+  await snapshot(chrome, f.evidence, "welcome");
+  await chrome.screenshot({ path: path.join(f.evidence, "welcome.png"), animations: "disabled" });
+
+  // It is now a project like any other in the list, and nothing is left of the run.
+  const listed = await launcher.evaluate(() => window.auisDesktop.launcher.state());
+  assert.equal(listed.creating, null);
+  assert.equal(listed.projects[0].name, "auis-app");
+  assert.equal(listed.projects[0].status, "open");
+  await launcher.getByRole("button", { name: /^New project/ }).waitFor();
+  await snapshot(launcher, f.evidence, "launcher-with-project");
+  await launcher.screenshot({ path: path.join(f.evidence, "launcher-with-project.png"), animations: "disabled" });
+
+  // The welcome screen is for the first start only. A restart goes back to the hub.
+  const firstPid = f.lock().pid;
+  await clickMenu(app, "project-restart", chrome);
+  await until("a new dev server", () => f.lock() && f.lock().pid !== firstPid);
+  const restarted = await projectState(chrome, "running");
+  const hub = await until("restarted project view", () =>
+    app.windows().find((page) => page.url().startsWith(restarted.server.url)),
+  );
+  await hub.getByRole("heading", { name: "Fixture hub" }).waitFor();
+  await quit(app, f.evidence);
+  await clean(f);
 });

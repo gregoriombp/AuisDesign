@@ -23,10 +23,27 @@ export interface ProjectSummary {
   port: number | null;
 }
 
+/**
+ * A new project the Auis CLI is making, or failed to make. Once it is made it
+ * is a project like any other, and this goes back to null.
+ */
+export type CreateState =
+  | { status: "creating"; name: string; displayPath: string; lines: string[] }
+  | {
+      status: "error";
+      name: string;
+      displayPath: string;
+      lines: string[];
+      message: string;
+      /** False when the folder is no longer empty, so running the CLI again would only be refused. */
+      canRetry: boolean;
+    };
+
 export interface LauncherState {
   projects: ProjectSummary[];
   /** Null while the environment is still being read. */
   tools: ToolInfo[] | null;
+  creating: CreateState | null;
 }
 
 /** What the person can do about a start that failed: try again, or install the dependencies first. */
@@ -79,6 +96,10 @@ export interface DesktopBridge {
     state(): Promise<LauncherState>;
     onState(listener: (state: LauncherState) => void): () => void;
     openFolder(): Promise<void>;
+    /** Asks where, runs the Auis CLI there, then opens the project on its welcome screen. */
+    newProject(): Promise<void>;
+    retryNewProject(): Promise<void>;
+    dismissNewProject(): Promise<void>;
     openProject(id: string): Promise<void>;
     removeProject(id: string): Promise<void>;
   };
@@ -103,6 +124,9 @@ export const CHANNELS = {
   launcherState: "launcher:state",
   launcherChanged: "launcher:changed",
   launcherOpenFolder: "launcher:open-folder",
+  launcherNewProject: "launcher:new-project",
+  launcherRetryNewProject: "launcher:retry-new-project",
+  launcherDismissNewProject: "launcher:dismiss-new-project",
   launcherOpenProject: "launcher:open-project",
   launcherRemoveProject: "launcher:remove-project",
   projectState: "project:state",

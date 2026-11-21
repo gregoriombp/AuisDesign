@@ -1,9 +1,10 @@
 // Auis Design for Mac — lifecycle (see ../../PLAN.md).
 //
 // The app opens on the launcher: the projects it knows, a way to open a
-// folder, and what it found in the user's shell. Each project gets its own
-// window. Given a folder on the command line, it opens that project directly.
-// On quit, every dev server the app started is stopped before the app exits.
+// folder or make a new project, and what it found in the user's shell. Each
+// project gets its own window. Given a folder on the command line, it opens
+// that project directly. On quit, every dev server the app started, and a new
+// project still being made, is stopped before the app exits.
 
 import { app, BrowserWindow, dialog, ipcMain, nativeTheme, type IpcMainInvokeEvent } from "electron";
 import fs from "node:fs";
@@ -22,6 +23,7 @@ import { liveDevServer } from "./nextLock.ts";
 import { createProjectStore, displayPath, type Project, type ProjectStore } from "./projects.ts";
 import { APP_ORIGIN, isChrome, registerAppScheme, serveApp, trustChrome } from "./security.ts";
 import { whyNotRunnable } from "./detect.ts";
+import { createCreator, suggestTarget, WELCOME_ROUTE, whyNotTarget } from "./cli.ts";
 import { openProjectWindow, type ProjectWindow } from "./windows/project.ts";
 import { installApplicationMenu } from "./menu.ts";
 
@@ -73,7 +75,16 @@ function summarize(project: Project): ProjectSummary {
   return { ...base, status: running ? "running" : "stopped", port: running?.port ?? null };
 }
 
-const launcherState = (): LauncherState => ({ projects: store.list().map(summarize), tools });
+const creator = createCreator({
+  onChange: () => pushLauncher(),
+  resolveEnv: async (cwd) => (await resolveShellEnv({ cwd })).env,
+});
+
+const launcherState = (): LauncherState => ({
+  projects: store.list().map(summarize),
+  tools,
+  creating: creator.state(),
+});
 
 function pushLauncher() {
   refreshMenu();
@@ -119,7 +130,7 @@ async function readTools() {
 
 // ── Projects ──────────────────────────────────────────────────────────────
 
-function openProject(project: Project): ProjectWindow {
+function openProject(project: Project, first: { firstRoute?: string; install?: boolean } = {}): ProjectWindow {
   const existing = projectWindows.get(project.id);
   if (existing) {
     existing.window.focus();
@@ -127,6 +138,7 @@ function openProject(project: Project): ProjectWindow {
   }
   const opened = openProjectWindow(project, {
     preload: PRELOAD,
+    ...first,
     onChanged: pushLauncher,
     onClosed: () => {
       projectWindows.delete(project.id);
@@ -138,6 +150,12 @@ function openProject(project: Project): ProjectWindow {
   return opened;
 }
 
+async function tell(parent: BrowserWindow | null, message: string, detail: string) {
+  const box = { type: "info" as const, message, detail };
+  if (parent) await dialog.showMessageBox(parent, box);
+  else await dialog.showMessageBox(box);
+}
+
 async function pickFolder(parent: BrowserWindow | null) {
   const options = { properties: ["openDirectory" as const], message: "Choose a project folder" };
   const result = parent
@@ -147,13 +165,51 @@ async function pickFolder(parent: BrowserWindow | null) {
   if (result.canceled || !folder) return;
 
   const problem = whyNotRunnable(folder);
-  if (problem) {
-    const box = { type: "info" as const, message: "This folder is not a project", detail: problem };
-    if (parent) await dialog.showMessageBox(parent, box);
-    else await dialog.showMessageBox(box);
+  if (problem) return tell(parent, "This folder is not a project", problem);
+  openProject(store.open(folder));
+}
+
+/** Projects usually live together: the new one goes beside the last one opened, else in the home folder. */
+function defaultParent(): string {
+  for (const project of store.list()) {
+    const parent = path.dirname(project.path);
+    if (fs.existsSync(parent)) return parent;
+  }
+  return os.homedir();
+}
+
+/** Once the CLI has made the project: install it and open it on the welcome screen. */
+async function openCreated(made: Promise<string | null>) {
+  const folder = await made;
+  if (folder) openProject(store.open(folder), { firstRoute: WELCOME_ROUTE, install: true });
+}
+
+async function newProject(parent: BrowserWindow | null) {
+  // One at a time. Asking again shows the one under way.
+  if (creator.busy()) {
+    openLauncher();
     return;
   }
-  openProject(store.open(folder));
+  const options = {
+    title: "New Project",
+    message: "Choose a name and a place for the new project.",
+    buttonLabel: "Create",
+    nameFieldLabel: "Name",
+    defaultPath: suggestTarget(defaultParent()),
+    showsTagField: false,
+    properties: ["createDirectory" as const],
+  };
+  const result = parent
+    ? await dialog.showSaveDialog(parent, options)
+    : await dialog.showSaveDialog(options);
+  const target = result.filePath;
+  if (result.canceled || !target) return;
+
+  const problem = whyNotTarget(target);
+  if (problem) return tell(parent, "A new project cannot go there", problem);
+  // The launcher is where the CLI's progress shows, whichever window asked.
+  openLauncher();
+  await openCreated(creator.create(target));
 }
 
 // ── IPC ───────────────────────────────────────────────────────────────────
@@ -189,6 +245,11 @@ function registerIpc() {
   handle(CHANNELS.launcherOpenFolder, (event) =>
     pickFolder(BrowserWindow.fromWebContents(event.sender)),
   );
+  handle(CHANNELS.launcherNewProject, (event) =>
+    newProject(BrowserWindow.fromWebContents(event.sender)),
+  );
+  handle(CHANNELS.launcherRetryNewProject, () => openCreated(creator.retry()));
+  handle(CHANNELS.launcherDismissNewProject, () => creator.dismiss());
   handle(CHANNELS.launcherOpenProject, (_event, id: unknown) => {
     const project = typeof id === "string" ? store.get(id) : null;
     if (project && fs.existsSync(project.path)) openProject(store.open(project.path));
@@ -230,6 +291,7 @@ if (!app.requestSingleInstanceLock()) {
     if (quitting) return;
     quitting = true;
     const stops = [...projectWindows.values()].map((opened) => opened.stop());
+    stops.push(creator.cancel());
     void Promise.allSettled(stops).finally(() => {
       finished = true;
       app.exit(0);
@@ -252,6 +314,9 @@ if (!app.requestSingleInstanceLock()) {
     serveApp(RENDERER);
     registerIpc();
     refreshMenu = installApplicationMenu({
+      newProject: () => {
+        void newProject(BrowserWindow.getFocusedWindow());
+      },
       openFolder: () => {
         void pickFolder(BrowserWindow.getFocusedWindow());
       },

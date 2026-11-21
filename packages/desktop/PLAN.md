@@ -23,13 +23,14 @@ anything that is deployed: everything that works in a browser today keeps workin
 | W1 | The look: the app's own chrome (launcher, project toolbar, log strip) as a real renderer, in the current Auis Design direction | **done** (2026-11-14) |
 | W2 | Core hardening: unit tests for the main-process modules; `detect` (project kind, Node version, an Install action for missing dependencies); the port notice; the navigation rules; a CI job | **done** (2026-11-14) |
 | W3 | Playwright-Electron smoke; the gate flags go away; a proper app menu | **done** (2026-11-14) |
-| W4 | New project from the app (`npx @auis/cli`) | next |
+| W4 | New project from the app (`npx @auis/cli`) | **done** (2026-11-21) |
 | W5 | Packaging: ad-hoc signed arm64 `.dmg`, tester README | packaged and installed locally (2026-11-14); real-project manual checks pending |
 
 Update this table in the same PR that moves a wave forward.
 
-The owner requested installation before W4 on 2026-11-14. The current app is
-therefore packaged for opening existing projects; new-project creation remains next.
+The owner asked for installation before W4 on 2026-11-14, so W5 was packaged
+first. The installed copy predates W4: rebuild it (`npm run dist`) to get New
+project.
 
 ## Decisions
 
@@ -198,7 +199,8 @@ packages/desktop/
   src/main/detect.ts       what a folder is: kind, package manager, dev script, dependencies, Node range
   src/main/server.ts       one project's dev server: attach or start, install, state, log, stop
   src/main/projects.ts     the persisted project list
-  src/main/cli.ts          (W4) arguments for `npx @auis/cli`
+  src/main/cli.ts          New project: runs `npx @auis/cli` into an empty folder, reports what it prints
+  src/main/processes.ts    process groups and printed output, for every process the app starts
   src/main/security.ts     app:// protocol, who may call IPC, navigation and permission guards
   src/main/windows/        project.ts (the launcher window is small enough to live in index.ts)
   src/main/index.ts        lifecycle, the launcher, the IPC router
@@ -267,7 +269,7 @@ install is under way cancels it.
 | W1 | Driven in the built app, light and dark, from `app://auis/`: the launcher empty and with a list (featured, recent, a missing folder); a project starting, running, failing and with the log open; quit leaves no process and no lock |
 | W2 | `npm --prefix packages/desktop test` → `fail 0`, and the run exits by itself with no process left; the `desktop` job is green in CI; in the built app, a project with no `node_modules` installs and starts from the button, and an Auis project off port 3000 shows the notice, copies its command and moves the page back up when dismissed |
 | W3 | `npm --prefix packages/desktop run smoke` passes: open a fixture, Starting → Running, navigate from the toolbar, an external link leaves the view alone, no `require` in the page, logs show, kill → Stopped → Start again, quit leaves no process and no lock |
-| W4 | New project ends on `/auis/welcome` |
+| W4 | New project ends on `/auis/welcome`: the smoke's New project scenario passes (stand-in CLI, offline), and the built app, run against the published `@auis/cli`, makes a project, installs it and shows `/auis/welcome` |
 | W5 | `npm --prefix packages/desktop run dist` → `release/Auis-Design-0.1.0-arm64.dmg`; `codesign -dv` shows `Signature=adhoc`; `codesign --verify --deep --strict` exits 0; the manual list passes from a Finder launch |
 
 ### What W3 established
@@ -309,6 +311,55 @@ install is under way cancels it.
 The HTTP fixture deliberately does not prove Next compatibility, HMR, Finder
 environment lookup, agent mentions or microphone permission. Those real-project
 and packaged-app checks remain in W5's manual gate.
+
+### What W4 established
+
+- **New project runs the published CLI.** From the launcher, or File › New
+  Project… (⌘N), the save panel suggests `auis-app` beside the last project
+  opened (the home folder when the list is empty). The app then runs
+  `npx --yes @auis/cli@latest <folder> --yes --pm npm --no-install` with the
+  user's shell environment, asked from the parent folder. Every answer is
+  passed up front because nothing can see a question the CLI asks. `--pm` is
+  explicit because the CLI reads the package manager from `npm_config_user_agent`,
+  which the app strips. `--force` is never passed.
+- **A folder is refused before the CLI runs, by the CLI's own rule.** The list of
+  entries that do not count (`.git`, `README.md`, `.DS_Store`…) is a copy of the
+  CLI's `IGNORABLE`, so the app neither refuses a folder the CLI would take nor
+  sends it one it would refuse with advice to pass `--force`.
+- **The project window installs, not the CLI.** With `--no-install` the CLI takes
+  about 3 s. The install then runs where it already had a place: the project
+  window opens installing, with the output in the log and a stop that ends it.
+  When the install is done, the first page is `/auis/welcome`. Later starts go
+  back to the hub.
+- **The launcher shows the run.** A card holds the CLI's output while it runs.
+  When the run fails, the card keeps that output and says why (no network is told
+  apart), with Try again while the folder is still empty and Dismiss. Quitting
+  during a run ends the CLI's process group. The process-group code that
+  `server.ts` had is now `processes.ts`, shared by both.
+- **The stand-in CLI needs the fallback environment.** In a login shell, macOS's
+  `path_helper` puts the system folders first, so a fake `npx` first on the
+  PATH loses to the real one. The smoke's New project scenario therefore
+  launches the app with a `SHELL` that does not exist. The app falls back to the
+  environment it was launched with, with the PATH in the order the test gave.
+- **For real, 2026-11-21:** the built app, with its own profile and a target in a
+  temporary folder, ran against the published `@auis/cli` 0.5.1 (template
+  `main`). The CLI took 3 s and `npm install` 34 s. The page was running at 38 s
+  on `/auis/welcome` ("Set up your brand"). Port 3000 was taken, so the project
+  went to 3001 and showed the port notice. Quitting left no process and no lock.
+- **What a fresh project starts with is not the app's doing.** Right after the
+  scaffold commit, two files are modified:
+  - `AGENTS.md`: Next 16.4's `agentRules`, the question still open since W0.
+  - `package-lock.json`: the CLI renames `package.json` and leaves the lockfile
+    alone, so the first install rewrites its name and version. npm 11 also adds
+    `peer` flags.
+
+  The lockfile is a CLI fix: rename the lockfile's root too. A terminal user gets
+  the same two changes.
+- **The install log stays quiet.** npm prints nothing to a pipe until it ends, so
+  for about 30 s the log shows only `$ npm install`. W2's Install button behaves
+  the same way.
+- **Local verification:** 83 desktop unit tests and all five Electron smoke
+  scenarios pass, and both typechecks are clean.
 
 ### W5 local installation
 

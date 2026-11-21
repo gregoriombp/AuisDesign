@@ -1,10 +1,11 @@
 // The launcher: the app's home. One job — get into a project — so the most
 // recent project carries the screen's only primary button, and everything else
-// is a quieter way to the same place.
+// is a quieter way to the same place. Before there is a project, the primary
+// button makes one.
 
-import { useEffect, useState, type CSSProperties } from "react";
-import type { LauncherState, ProjectSummary, ToolInfo, ToolName } from "../shared/ipc.ts";
-import { FolderPreview, ProjectPreview } from "./previews.tsx";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import type { CreateState, LauncherState, ProjectSummary, ToolInfo, ToolName } from "../shared/ipc.ts";
+import { FolderPreview, NewProjectPreview, ProjectPreview } from "./previews.tsx";
 import { desktop, Icon, IconButton, Status, type Tone } from "./ui.tsx";
 
 const TOOL_LABEL: Record<ToolName, string> = {
@@ -40,12 +41,17 @@ function Featured({ project }: { project: ProjectSummary | null }) {
             <h2 className="card-title">
               <span>No project yet</span>
             </h2>
-            <p className="card-support">Open a folder that has a dev script. Auis starts it here.</p>
+            <p className="card-support">Start one from the Auis template, or open a folder.</p>
           </div>
-          <button type="button" className="btn btn-primary" onClick={() => void desktop.launcher.openFolder()}>
-            Open folder
-            <Icon name="arrow_forward" size={16} />
-          </button>
+          <div className="card-actions">
+            <button type="button" className="btn btn-secondary" onClick={() => void desktop.launcher.openFolder()}>
+              Open folder
+            </button>
+            <button type="button" className="btn btn-primary" onClick={() => void desktop.launcher.newProject()}>
+              New project
+              <Icon name="arrow_forward" size={16} />
+            </button>
+          </div>
         </div>
       </section>
     );
@@ -85,6 +91,50 @@ function Featured({ project }: { project: ProjectSummary | null }) {
           </button>
         )}
       </div>
+    </section>
+  );
+}
+
+/** A project the Auis CLI is making: what it prints, and what to do when it fails. */
+function Creating({ creating }: { creating: CreateState }) {
+  const log = useRef<HTMLPreElement>(null);
+  const failed = creating.status === "error";
+
+  // The newest line is the one to read.
+  useEffect(() => {
+    log.current?.scrollTo({ top: log.current.scrollHeight });
+  }, [creating.lines.length]);
+
+  return (
+    <section className="card" style={order(0)} aria-label={`New project ${creating.name}`}>
+      <div className="card-foot">
+        <div className="card-text">
+          <h2 className="card-title">
+            <span>{creating.name}</span>
+            <Status tone={failed ? "danger" : "busy"}>{failed ? "Not created" : "Creating"}</Status>
+          </h2>
+          {failed ? (
+            <p className="card-message">{creating.message}</p>
+          ) : (
+            <p className="card-support">{creating.displayPath}</p>
+          )}
+        </div>
+        {failed && (
+          <div className="card-actions">
+            <button type="button" className="btn btn-secondary" onClick={() => void desktop.launcher.dismissNewProject()}>
+              Dismiss
+            </button>
+            {creating.canRetry && (
+              <button type="button" className="btn btn-secondary" onClick={() => void desktop.launcher.retryNewProject()}>
+                Try again
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+      <pre className="create-log" ref={log} aria-label="Auis CLI output">
+        {creating.lines.length > 0 ? creating.lines.join("\n") : "Starting the Auis CLI"}
+      </pre>
     </section>
   );
 }
@@ -170,6 +220,8 @@ export function Launcher() {
   if (!state) return <div className="launcher" />;
 
   const [featured, ...rest] = state.projects;
+  const creating = state.creating;
+  const busy = creating?.status === "creating";
   return (
     <div className="launcher scroll">
       <div className="titlebar" />
@@ -184,7 +236,9 @@ export function Launcher() {
 
         <div className="grid">
           <div className="stack">
-            <Featured project={featured ?? null} />
+            {creating && <Creating creating={creating} />}
+            {/* Before the first project, the card being made takes the empty card's place. */}
+            {(featured || !creating) && <Featured project={featured ?? null} />}
             {rest.length > 0 && <Recent projects={rest} />}
           </div>
           <div className="stack">
@@ -193,6 +247,30 @@ export function Launcher() {
                 type="button"
                 className="card"
                 style={order(1)}
+                disabled={busy}
+                onClick={() => void desktop.launcher.newProject()}
+              >
+                <span className="stage stage-short">
+                  <NewProjectPreview />
+                </span>
+                <span className="card-foot">
+                  <span className="card-text">
+                    <span className="card-title">
+                      <span>New project</span>
+                    </span>
+                    <span className="card-support">From the Auis template</span>
+                  </span>
+                  <span className="go">
+                    <Icon name="arrow_outward" size={16} />
+                  </span>
+                </span>
+              </button>
+            )}
+            {featured && (
+              <button
+                type="button"
+                className="card"
+                style={order(2)}
                 onClick={() => void desktop.launcher.openFolder()}
               >
                 {/* Spans, not blocks: a button may only hold phrasing content. */}

@@ -15,6 +15,7 @@ import { PRODUCT_NAME } from "../shared/app.ts";
 import type { ProjectWindow } from "./windows/project.ts";
 
 interface MenuActions {
+  newProject(): void;
   openFolder(): void;
   openLauncher(): void;
   focusedProject(): ProjectWindow | null;
@@ -29,6 +30,12 @@ export function installApplicationMenu(actions: MenuActions): () => void {
     {
       label: "File",
       submenu: [
+        {
+          id: "new-project",
+          label: "New Project…",
+          accelerator: "CmdOrCtrl+N",
+          click: actions.newProject,
+        },
         {
           id: "open-folder",
           label: "Open Folder…",

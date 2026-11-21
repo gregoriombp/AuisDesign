@@ -50,6 +50,10 @@ interface Options {
   /** Called on every state change, so the launcher can reflect it. */
   onChanged(): void;
   onClosed(): void;
+  /** The route the first page opens on, instead of the hub or the home page. Later starts go back to those. */
+  firstRoute?: string;
+  /** Install the dependencies before the first start: a project that was just made has none. */
+  install?: boolean;
 }
 
 export function openProjectWindow(project: Project, options: Options): ProjectWindow {
@@ -62,6 +66,7 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
   let view: WebContentsView | null = null;
   let logsOpen = false;
   let route = "/";
+  let firstRoute = options.firstRoute ?? null;
   /** The port whose notice was dismissed. A restart on another port shows it again. */
   let dismissedPort: number | null = null;
   let pending: string[] = [];
@@ -164,7 +169,9 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
     win.contentView.addChildView(view);
     layout();
     // A project with the Auis surfaces opens on its hub; any other on its own home.
-    void contents.loadURL(origin + (hasAuis ? "/auis" : "/")).catch(() => {
+    const opening = (firstRoute && resolveRoute(origin, firstRoute)) || origin + (hasAuis ? "/auis" : "/");
+    firstRoute = null;
+    void contents.loadURL(opening).catch(() => {
       /* a failed first load shows in the view itself; the toolbar's reload retries it */
     });
   };
@@ -215,7 +222,7 @@ export function openProjectWindow(project: Project, options: Options): ProjectWi
   });
 
   void win.loadURL(`${APP_ORIGIN}/project.html`);
-  void server.start();
+  void (options.install ? server.install() : server.start());
 
   return {
     project,

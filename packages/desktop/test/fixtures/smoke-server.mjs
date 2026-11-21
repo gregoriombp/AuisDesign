@@ -11,6 +11,7 @@ let requests = 0;
 const names = {
   "/auis": "Fixture hub",
   "/auis/styleguide": "Fixture styleguide",
+  "/auis/welcome": "Fixture welcome",
   "/": "Fixture home",
 };
 const server = http.createServer((req, res) => {
