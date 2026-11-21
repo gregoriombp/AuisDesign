@@ -2,10 +2,16 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { after, before, describe, it } from "node:test";
+import { after, afterEach, before, describe, it } from "node:test";
 
 import { parseArgs, version } from "../src/cli.mjs";
-import { PRUNE, conflictsIn, detectPackageManager, toPackageName } from "../src/create.mjs";
+import {
+  PRUNE,
+  conflictsIn,
+  detectPackageManager,
+  personalize,
+  toPackageName,
+} from "../src/create.mjs";
 import { DEFAULT_REF, tarballUrls } from "../src/template.mjs";
 
 describe("parseArgs", () => {
@@ -135,6 +141,87 @@ describe("conflictsIn", () => {
   it("reports real content", async () => {
     await fs.writeFile(path.join(dir, "index.js"), "");
     assert.deepEqual(await conflictsIn(dir), ["index.js"]);
+  });
+});
+
+describe("personalize", () => {
+  let dir;
+  const options = { name: "my-product", ref: "main", cliVersion: "0.0.0-test" };
+
+  // The shape of the template's own files: a package.json and the lockfile
+  // npm wrote for it, both still carrying the template's identity.
+  const templatePackage = {
+    name: "auis-design",
+    version: "1.0.0",
+    private: true,
+    description: "Auis",
+    author: "Auis",
+    license: "MIT",
+    dependencies: { next: "16.0.0" },
+  };
+  const templateLock = {
+    name: "auis-design",
+    version: "1.0.0",
+    lockfileVersion: 3,
+    requires: true,
+    packages: {
+      "": {
+        name: "auis-design",
+        version: "1.0.0",
+        hasInstallScript: true,
+        license: "MIT",
+        dependencies: { next: "16.0.0" },
+      },
+      "node_modules/next": { version: "16.0.0", license: "MIT" },
+    },
+  };
+
+  const seed = async (lock) => {
+    dir = await fs.mkdtemp(path.join(os.tmpdir(), "auis-personalize-"));
+    await fs.writeFile(
+      path.join(dir, "package.json"),
+      `${JSON.stringify(templatePackage, null, 2)}\n`,
+    );
+    if (lock !== undefined) await fs.writeFile(path.join(dir, "package-lock.json"), lock);
+  };
+  const readJson = async (file) => JSON.parse(await fs.readFile(path.join(dir, file), "utf8"));
+
+  afterEach(async () => {
+    await fs.rm(dir, { recursive: true, force: true });
+  });
+
+  it("gives the lockfile the project's name and version, so npm install leaves it clean", async () => {
+    await seed(`${JSON.stringify(templateLock, null, 2)}\n`);
+    await personalize(dir, options);
+
+    const pkg = await readJson("package.json");
+    const raw = await fs.readFile(path.join(dir, "package-lock.json"), "utf8");
+    const lock = JSON.parse(raw);
+
+    assert.equal(pkg.name, "my-product");
+    assert.equal(lock.name, pkg.name);
+    assert.equal(lock.version, pkg.version);
+    assert.equal(lock.packages[""].name, pkg.name);
+    assert.equal(lock.packages[""].version, pkg.version);
+
+    assert.deepEqual(Object.keys(lock), Object.keys(templateLock));
+    assert.deepEqual(Object.keys(lock.packages[""]), Object.keys(templateLock.packages[""]));
+    assert.deepEqual(lock.packages["node_modules/next"], templateLock.packages["node_modules/next"]);
+    assert.ok(raw.endsWith("}\n"), "keeps npm's trailing newline");
+    assert.ok(!raw.endsWith("\n\n"));
+  });
+
+  it("does not create a lockfile the template did not ship", async () => {
+    await seed(undefined);
+    await personalize(dir, options);
+    await assert.rejects(fs.access(path.join(dir, "package-lock.json")), { code: "ENOENT" });
+  });
+
+  it("leaves a lockfile it cannot parse exactly as it was", async () => {
+    const broken = '{ "name": "auis-design", ';
+    await seed(broken);
+    await personalize(dir, options);
+    assert.equal(await fs.readFile(path.join(dir, "package-lock.json"), "utf8"), broken);
   });
 });
 

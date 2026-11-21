@@ -167,3 +167,9 @@ Keep it that way.
   `auis-affordance-audit`, `auis-foundation-health`, `prose-sweep`) reached
   `npx @auis/cli@latest` the moment they landed on `main`, because the CLI
   downloads the template at run time.
+- `0.5.2` — the scaffold renames the root of `package-lock.json` along with
+  `package.json` (top-level and `packages[""]` `name`/`version`). It used to
+  rename only `package.json`, so the first `npm install` rewrote those four
+  fields and every new project started with a modified lockfile right after the
+  CLI's own first commit. A lockfile that is missing or does not parse is left
+  as it is.
