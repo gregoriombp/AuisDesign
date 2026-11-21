@@ -39,3 +39,8 @@ export function ProjectPreview({ empty = false }: { empty?: boolean }) {
 export function FolderPreview() {
   return <span className="folder" aria-hidden="true" />;
 }
+
+/** A blank sheet with a plus: a project that is not there yet. */
+export function NewProjectPreview() {
+  return <span className="sheet" aria-hidden="true" />;
+}

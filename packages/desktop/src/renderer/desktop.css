@@ -635,6 +635,12 @@ button.card:hover {
   box-shadow: var(--shadow-raised);
 }
 
+/* New project while one is already being made: still there, not answering. */
+button.card:disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 @keyframes settle {
   from {
     opacity: 0;
@@ -697,6 +703,35 @@ button.card:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+/* What went wrong reads in full: it is the sentence that says what to do. */
+.card-message {
+  margin-top: 2px;
+  color: var(--fg-secondary);
+  text-wrap: pretty;
+}
+
+/* What the Auis CLI printed, while it makes a project. */
+.create-log {
+  margin: 0;
+  max-height: 220px;
+  overflow: auto;
+  padding: 14px 24px 18px;
+  font: 400 12px/1.6 var(--font-mono);
+  color: var(--fg-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  user-select: text;
+  cursor: text;
 }
 
 .go {
@@ -924,5 +959,37 @@ button.card:hover .go {
 }
 
 button.card:hover .folder {
+  transform: translateY(-3px);
+}
+
+.sheet {
+  display: block;
+  position: relative;
+  width: 104px;
+  height: 72px;
+  margin-top: 14px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: transform var(--dur-base) var(--ease-fluid);
+}
+
+/* The plus, drawn: two bars crossing in the middle of the sheet. */
+.sheet::before,
+.sheet::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 20px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--fg-tertiary);
+  transform: translate(-50%, -50%);
+}
+
+.sheet::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+button.card:hover .sheet {
   transform: translateY(-3px);
 }
