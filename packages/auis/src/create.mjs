@@ -80,7 +80,7 @@ export async function conflictsIn(dir) {
   return entries.filter((entry) => !IGNORABLE.has(entry));
 }
 
-async function personalize(root, { name, ref, cliVersion }) {
+export async function personalize(root, { name, ref, cliVersion }) {
   const pkgPath = path.join(root, "package.json");
   const pkg = JSON.parse(await fs.readFile(pkgPath, "utf8"));
 
@@ -97,8 +97,33 @@ async function personalize(root, { name, ref, cliVersion }) {
   next.auis = { template: `${REPO_URL}#${ref}`, createdWith: `auis@${cliVersion}` };
 
   await fs.writeFile(pkgPath, `${JSON.stringify(next, null, 2)}\n`);
+  await syncLockfile(root, next);
 
   await fs.writeFile(path.join(root, "README.md"), projectReadme(name));
+}
+
+/**
+ * npm records the root package's name and version in the lockfile too, so a
+ * renamed package.json alone leaves the first `npm install` rewriting them and
+ * the project dirty right after its first commit. Missing or unparseable: left
+ * as it is, and never a reason to fail the scaffold.
+ */
+async function syncLockfile(root, { name, version }) {
+  const lockPath = path.join(root, "package-lock.json");
+  try {
+    const raw = await fs.readFile(lockPath, "utf8");
+    const lock = JSON.parse(raw);
+    lock.name = name;
+    lock.version = version;
+    const rootEntry = lock.packages?.[""];
+    if (rootEntry) {
+      rootEntry.name = name;
+      rootEntry.version = version;
+    }
+    await fs.writeFile(lockPath, `${JSON.stringify(lock, null, 2)}${raw.endsWith("\n") ? "\n" : ""}`);
+  } catch {
+    /* no lockfile, or not one we can read — npm will write its own */
+  }
 }
 
 /**
